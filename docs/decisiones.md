@@ -467,6 +467,37 @@ La regla 8 de `CLAUDE.md` pide justificar cada dependencia. Son dos:
 Ninguna de las dos entra al paquete que descarga el visitante: las dos corren en
 el build.
 
+#### El `overrides` de `package.json`, y por qué existe
+
+No es una dependencia nueva: es un parche a una transitiva rota.
+
+`@napi-rs/wasm-runtime@1.2.0` declara como peer `@emnapi/core` y `@emnapi/runtime`
+en `^2.0.0-alpha.3`, **una versión que no está publicada**. Como el rango no se
+puede satisfacer, cada versión de npm improvisa distinto: npm 11 escribe un
+lockfile sin esas dos entradas, y npm 10 —el que usa el builder de Cloudflare—
+lo rechaza con `Missing: @emnapi/core@1.10.0 from lock file`.
+
+El síntoma es feo de diagnosticar porque **el build falla solo en Cloudflare**:
+en la máquina de desarrollo `npm ci` pasa, y el paquete culpable no aparece por
+ningún lado en el código. Llega por `eslint-config-next` → `unrs-resolver`, y
+solo se usa en el binding WASM de reserva, que en x64 no se ejecuta nunca.
+
+El `overrides` fija los peers a un rango que sí existe, y con eso las dos
+versiones de npm producen el mismo árbol. Verificado corriendo `npm ci` con las
+dos.
+
+**Se puede sacar** cuando `@napi-rs/wasm-runtime` declare un peer publicado. La
+forma de comprobarlo es sacarlo y correr:
+
+```
+npx npm@10.9.2 ci --dry-run
+```
+
+**La lección que conviene no perder:** el lockfile lo consume una versión de npm
+distinta de la que lo genera. Si algún día el build de Cloudflare falla en la
+instalación de dependencias y en local no, mirar esa diferencia antes que
+cualquier otra cosa.
+
 #### Lo que no se conserva de Vercel
 
 - **Vercel Analytics** → Cloudflare Web Analytics (decisión 17)

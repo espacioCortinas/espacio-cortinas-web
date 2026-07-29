@@ -255,6 +255,18 @@ Cloudflare **Workers Builds**, conectado al repositorio de GitHub. Cada push a
 la decisión 23 quede sin objeto: ya no hace falta commitear con la identidad de
 la empresa para que el sitio despliegue.
 
+**El builder instala con `npm ci`, y con su propio npm.** Hoy son Node 22.16.0
+(`.nvmrc`) y npm 10.9.2, que el builder trae aparte del Node. La máquina de
+desarrollo puede tener otro npm, y eso ya rompió un build una vez: si la
+instalación de dependencias falla en Cloudflare y en local no, empezar por ahí.
+Está explicado en la decisión 24, sección del `overrides`.
+
+Para reproducir el build de Cloudflare sin desplegar:
+
+```bash
+npx npm@10.9.2 ci --dry-run
+```
+
 ### Variables de entorno
 
 Van **dos veces**, en dos listas distintas del mismo Worker. Es el error de
