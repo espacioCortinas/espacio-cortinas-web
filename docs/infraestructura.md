@@ -46,16 +46,37 @@ Activa y verificada.
 
 Todo se administra en Cloudflare.
 
-| Tipo | Nombre              | Contenido                                                 | Para qué                 |
-| ---- | ------------------- | --------------------------------------------------------- | ------------------------ |
-| MX   | `@`                 | `smtp.google.com` (prio 1)                                | correo de Workspace      |
-| TXT  | `@`                 | `google-site-verification=…`                              | verificación del dominio |
-| TXT  | `@`                 | `v=spf1 include:_spf.google.com ~all`                     | SPF                      |
-| TXT  | `google._domainkey` | `v=DKIM1; k=rsa; p=…`                                     | DKIM                     |
-| TXT  | `_dmarc`            | `v=DMARC1; p=none; rua=mailto:ventas@conceptoespacio.com` | DMARC                    |
+| Tipo  | Nombre              | Contenido                                                 | Para qué                 |
+| ----- | ------------------- | --------------------------------------------------------- | ------------------------ |
+| MX    | `@`                 | `smtp.google.com` (prio 1)                                | correo de Workspace      |
+| TXT   | `@`                 | `google-site-verification=…`                              | verificación del dominio |
+| TXT   | `@`                 | `v=spf1 include:_spf.google.com ~all`                     | SPF                      |
+| TXT   | `google._domainkey` | `v=DKIM1; k=rsa; p=…`                                     | DKIM                     |
+| TXT   | `_dmarc`            | `v=DMARC1; p=none; rua=mailto:ventas@conceptoespacio.com` | DMARC                    |
+| A     | `@`                 | `216.198.79.1`                                            | sitio en Vercel          |
+| CNAME | `www`               | `18643b45bdd17525.vercel-dns-017.com`                     | redirección al apex      |
 
-Pendiente de agregar en Fase 1: el registro que apunta a Vercel. **Va en modo
-"DNS only" (nube gris), no proxeado** — decisión 15.
+Los dos registros de Vercel están **en modo "DNS only" (nube gris), no
+proxeados** — decisión 15. Se agregaron en la Fase 1 y están verificados: el
+apex resuelve a una IP de Vercel, no a una de Cloudflare, que es cómo se
+comprueba que el proxy está apagado.
+
+El destino del `CNAME` es propio de este proyecto de Vercel. No es un valor
+genérico: si alguna vez se recrea el proyecto, cambia.
+
+## Dominio principal
+
+`espaciocortinas.com.ar`, sin `www`. `www` existe solo para redirigir al apex con
+un 308 — decisión 22.
+
+Vercel lo configura al revés por defecto, así que hay que invertirlo a mano en
+Settings → Domains. Verificado:
+
+```
+http://espaciocortinas.com.ar       → 308 → https://espaciocortinas.com.ar/
+https://www.espaciocortinas.com.ar  → 308 → https://espaciocortinas.com.ar/
+https://espaciocortinas.com.ar      → 200
+```
 
 ### Notas para diagnosticar
 
@@ -129,9 +150,7 @@ Vercel avisa que `NEXT_PUBLIC_SUPABASE_ANON_KEY` no es segura de exponer. En
 este caso el aviso no aplica: esa clave es pública por diseño y lo que se puede
 hacer con ella lo decide RLS. Ver `docs/seguridad.md`.
 
-El despliegue se conecta al repositorio de GitHub en Fase 1. El registro DNS que
-apunta a Vercel va en Cloudflare **en modo "DNS only", no proxeado** —
-decisión 15.
+Conectado al repositorio de GitHub desde la Fase 1: cada push a `main` despliega.
 
 Si alguna vez hubiera que mudarse, la arquitectura es portable: el flujo de
 subida de imágenes esquiva los límites de funciones serverless por diseño, así

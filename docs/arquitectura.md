@@ -161,7 +161,7 @@ agrega fricción y hay poco volumen.
 
 ## Dominio y DNS
 
-`espaciocortinas.com.ar`, registrado en NIC Argentina, hoy sin delegar.
+`espaciocortinas.com.ar`, registrado en NIC Argentina y delegado a Cloudflare.
 
 ```
 NIC Argentina  →  nameservers de Cloudflare  →  registros
