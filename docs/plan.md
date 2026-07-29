@@ -37,7 +37,8 @@ Solo estructura. Nada de páginas.
 - Clientes de Supabase: servidor, navegador y `admin` con `server-only`
 - Variables de entorno y su validación al arrancar
 - Linter, formateo y `tsc --noEmit` en verde
-- Despliegue en Vercel con el dominio apuntando
+- Despliegue con el dominio apuntando (se hizo en Vercel y se mudó a Cloudflare
+  Workers al terminar la fase — decisión 24)
 
 **Terminado cuando:** el sitio despliega en el dominio real, muestra una página
 vacía y el build pasa limpio.
@@ -76,14 +77,20 @@ falta contenido real para diseñarlo, y el contenido se carga desde acá.
 - Activar / desactivar, destacar / quitar destacado
 - Galería: subir, eliminar, reordenar, elegir portada
 - Compresión y limpieza de EXIF en el navegador
+- **Generación de las cuatro medidas al subir** (480/960/1600/2560, WebP) y
+  registro de cuáles existen — decisión 25
 - Subida por URL firmada
 - Confirmación antes de eliminar
 - Revalidación de las rutas afectadas al guardar
+- **Caché incremental compartido del adaptador de Cloudflare** (Workers KV o R2)
+  en `open-next.config.ts`: sin eso, revalidar desde el panel toca una sola
+  instancia del Worker y el resto sigue sirviendo lo viejo
 
 **Terminado cuando:**
 
 - Se sube una foto de 8 MB desde un celular y funciona
-- La foto publicada, descargada, no tiene GPS ni EXIF
+- La foto publicada, descargada, no tiene GPS ni EXIF, en las cuatro medidas
+- Guardar en el panel se ve reflejado en el sitio público sin esperar
 - Se cargan dos productos y dos proyectos completos de punta a punta
 - El panel se usa cómodo desde un teléfono
 
@@ -124,7 +131,7 @@ anticipar.
 - `sitemap.ts` y `robots.ts`
 - URLs canónicas
 - Datos estructurados de negocio local
-- Vercel Analytics activado, con evento propio para los clics a WhatsApp
+- Cloudflare Web Analytics activado, con evento propio para los clics a WhatsApp
 - Revisión de Core Web Vitals en móvil
 - Alta en Google Search Console
 - **Alta del Perfil de Empresa de Google** — para búsquedas locales pesa más que

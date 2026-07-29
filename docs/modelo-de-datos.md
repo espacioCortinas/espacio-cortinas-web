@@ -62,17 +62,51 @@ nombres. Si en el futuro hace falta una foto por variante, se agrega entonces.
 
 Dos tablas separadas, con la misma forma:
 
-| Columna                       | Tipo          | Notas                                           |
-| ----------------------------- | ------------- | ----------------------------------------------- |
-| `id`                          | `uuid`        | PK                                              |
-| `producto_id` / `proyecto_id` | `uuid`        | FK, `ON DELETE CASCADE`                         |
-| `ruta`                        | `text`        | ruta dentro del bucket de Storage               |
-| `ancho`                       | `integer`     | necesario para reservar espacio y evitar saltos |
-| `alto`                        | `integer`     |                                                 |
-| `alt`                         | `text`        | ver más abajo                                   |
-| `orden`                       | `integer`     | posición en la galería                          |
-| `es_portada`                  | `boolean`     |                                                 |
-| `creado_en`                   | `timestamptz` |                                                 |
+| Columna                       | Tipo          | Notas                                         |
+| ----------------------------- | ------------- | --------------------------------------------- |
+| `id`                          | `uuid`        | PK                                            |
+| `producto_id` / `proyecto_id` | `uuid`        | FK, `ON DELETE CASCADE`                       |
+| `ruta`                        | `text`        | carpeta dentro del bucket — no un archivo     |
+| `medidas`                     | `integer[]`   | qué anchos existen. Ej. `{480,960,1600,2560}` |
+| `ancho`                       | `integer`     | de la medida más grande                       |
+| `alto`                        | `integer`     | de la medida más grande                       |
+| `alt`                         | `text`        | ver más abajo                                 |
+| `orden`                       | `integer`     | posición en la galería                        |
+| `es_portada`                  | `boolean`     |                                               |
+| `creado_en`                   | `timestamptz` |                                               |
+
+### `medidas` y `ruta`
+
+Cada imagen no es un archivo: son **cuatro WebP del mismo original**, generados en
+el navegador al subir (480, 960, 1600 y 2560 px de lado mayor) y servidos con
+`srcset`. En Cloudflare no hay optimización de imágenes al servir — decisión 25.
+
+Por eso `ruta` guarda la **carpeta**, no el archivo, y el nombre de cada archivo
+es su ancho:
+
+```
+productos/{producto_id}/{uuid}/480.webp
+productos/{producto_id}/{uuid}/960.webp
+productos/{producto_id}/{uuid}/1600.webp
+productos/{producto_id}/{uuid}/2560.webp
+```
+
+**`medidas` existe para no tener que adivinar.** Dos motivos concretos:
+
+- Una foto original de 900 px no genera la medida de 1600 ni la de 2560:
+  agrandarla no agrega detalle, solo bytes. Esa fila tiene `{480,960}` y el
+  `srcset` sale con dos entradas.
+- Si algún día hace falta un corte nuevo (1200 px, o AVIF), se puede agregar
+  **fila por fila**, sin tener que regenerar las 300 fotos de una vez para que el
+  sitio no se rompa a la mitad.
+
+Armar el `srcset` a partir de una constante en el código, en vez de leer esta
+columna, funcionaría hoy y fallaría con la primera foto chica: el navegador
+pediría un archivo que no existe.
+
+**`ancho` y `alto` son los de la medida más grande.** Todas comparten la misma
+relación de aspecto, así que con ese par alcanza para reservar el espacio y para
+saber la orientación.
 
 **Por qué dos tablas y no una tabla polimórfica** (`entidad` + `entidad_id`): una
 tabla polimórfica no puede tener clave foránea real, así que Postgres deja de
@@ -123,21 +157,26 @@ reordenar sin tener que desmarcar primero.
 
 ## Storage
 
-Un bucket **privado**, `imagenes`:
+Un bucket **privado**, `imagenes`. Una carpeta por imagen, y dentro las medidas:
 
 ```
 imagenes/
-├── productos/{producto_id}/{uuid}.webp
-└── proyectos/{proyecto_id}/{uuid}.webp
+├── productos/{producto_id}/{uuid}/{ancho}.webp
+└── proyectos/{proyecto_id}/{uuid}/{ancho}.webp
 ```
 
-Nombres de archivo con UUID, no con el nombre original: los nombres que vienen del
-teléfono son inútiles y pueden filtrar información.
+Carpetas con UUID, no con el nombre original: los nombres que vienen del teléfono
+son inútiles y pueden filtrar información.
+
+**Por qué una carpeta por imagen y no `{uuid}-480.webp` suelto:** borrar una
+imagen es borrar un prefijo, no armar cuatro nombres a mano y esperar acertar con
+todos. Con la lista de medidas cambiando entre filas, esa diferencia evita
+archivos huérfanos.
 
 El bucket es privado y el sitio público sirve las imágenes a través de URLs
 firmadas o de una política de lectura acotada. Al eliminar un producto o proyecto,
 la cascada borra las filas: **borrar los archivos de Storage es responsabilidad de
-la Server Action**, no de la base.
+la Server Action**, no de la base — y ahora son cuatro archivos por fila.
 
 ## Datos iniciales
 

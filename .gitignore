@@ -8,6 +8,10 @@ build/
 *.tsbuildinfo
 next-env.d.ts
 
+# Salida del adaptador de Cloudflare (la regenera `opennextjs-cloudflare build`)
+.open-next/
+.wrangler/
+
 # Cachés y registros de las herramientas
 .eslintcache
 npm-debug.log*
@@ -18,9 +22,9 @@ npm-debug.log*
 .env*.local
 .env.local
 
-
-# Vercel
-.vercel
+# Variables del runtime de Cloudflare al correr el Worker en local
+.dev.vars
+.dev.vars.*
 
 # Configuración local de Claude Code (personal, no compartir)
 .claude/settings.local.json

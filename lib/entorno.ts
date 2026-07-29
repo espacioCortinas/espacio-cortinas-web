@@ -24,8 +24,9 @@ function exigir(nombre: string): string {
   if (!valor) {
     throw new Error(
       `Falta la variable de entorno ${nombre}. ` +
-        `Completala en .env.local (local) o en Vercel → Settings → ` +
-        `Environment Variables (producción).`,
+        `Completala en .env.local (local) o en Cloudflare → el Worker → ` +
+        `Settings (producción). Va en las dos listas: «Build variables and ` +
+        `secrets» y «Variables and Secrets».`,
     );
   }
   return valor;

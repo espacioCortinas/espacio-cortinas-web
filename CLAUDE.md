@@ -26,7 +26,10 @@ arquitectura. Varias cosas que parecen mejorables fueron descartadas a propósit
 ## Stack
 
 Next.js (App Router) · TypeScript · Tailwind CSS · Supabase (Postgres, Auth,
-Storage) · Vercel · Cloudflare DNS · Resend
+Storage) · Cloudflare (Workers, DNS) · Resend
+
+El sitio corre en Cloudflare Workers con el adaptador `@opennextjs/cloudflare`.
+Se mudó desde Vercel en julio de 2026 — decisión 24 de `docs/decisiones.md`.
 
 ## Reglas duras
 
@@ -67,3 +70,6 @@ Storage) · Vercel · Cloudflare DNS · Resend
   "ver código fuente", no con el inspector).
 - Cada página pública tiene `title`, `description` y Open Graph propios.
 - `npm run build` y `npx tsc --noEmit` pasan sin errores.
+- Si el cambio toca código de servidor, además pasa por `npm run preview`, que
+  lo corre en el mismo runtime que producción. `npm run dev` corre sobre Node y
+  no detecta un uso de API que Cloudflare Workers no soporte.

@@ -79,6 +79,20 @@ emite el servidor tras verificar identidad. Sigue estando autorizado por el
 servidor. Además la subida desde un celular es mucho más rápida y no se consume
 cuota de transformación de imágenes de Vercel.
 
+**Actualización (julio de 2026, mudanza a Cloudflare — decisión 24).** El límite
+de 4.5 MB era de Vercel y ya no aplica: en Cloudflare Workers el cuerpo de la
+petición admite bastante más. La decisión igual se mantiene, y ahora por razones
+más fuertes:
+
+- **`sharp` no corre en Workers.** Es un módulo nativo sobre libvips; el runtime
+  de Workers no ejecuta binarios nativos. La alternativa que se había evaluado
+  hoy directamente no existe.
+- **El plan gratuito da 10 ms de CPU por invocación.** Redimensionar una foto de
+  8 MB está órdenes de magnitud por encima de eso.
+
+O sea que la mudanza no obligó a rehacer el flujo de subida: lo confirmó. Lo que
+sí cambia es **cuántos** archivos genera el navegador — ver la decisión 25.
+
 ---
 
 ### 6. Se borra el EXIF de toda imagen
@@ -180,11 +194,25 @@ bien dentro de la galería. Ver `docs/fotografia.md`.
 
 ---
 
-### 15. Cloudflare en modo solo DNS
+### 15. Cloudflare en modo solo DNS ~~— SUPERADA por la decisión 24~~
 
-Sin proxy. Proxyear Vercel detrás de Cloudflare sin configurarlo con cuidado
-produce bucles de redirección y comportamientos de caché difíciles de diagnosticar.
-El beneficio no justifica el riesgo en un sitio de este tamaño.
+**Decía:** sin proxy. Proxyear Vercel detrás de Cloudflare sin configurarlo con
+cuidado produce bucles de redirección y comportamientos de caché difíciles de
+diagnosticar. El beneficio no justifica el riesgo en un sitio de este tamaño.
+
+**Por qué ya no aplica:** el riesgo era el de encadenar dos CDN, una sobre la
+otra. Desde la mudanza el sitio **corre dentro de Cloudflare**, así que no hay
+nada detrás que proxyear: el registro del apex apunta al Worker y es
+necesariamente naranja (proxeado). Un Custom Domain de Workers no admite el modo
+"solo DNS" — no sería alcanzable.
+
+**Lo que sí se conserva de la idea original:** no hay dos capas de caché ni dos
+lugares donde se decidan redirecciones. Las redirecciones viven en un solo sitio
+(Redirect Rules de Cloudflare) y están escritas en `docs/infraestructura.md`.
+
+**El correo no se ve afectado.** El proxy de Cloudflare solo existe para
+registros de tráfico HTTP (`A`, `AAAA`, `CNAME`); `MX` y `TXT` no son proxeables
+ni por error. Encender el proxy del apex no toca el correo.
 
 ---
 
@@ -196,18 +224,32 @@ del dominio nuevo se resuelve con alias (decisión 13), sin tocar el otro.
 
 ---
 
-### 17. Analítica: Vercel Analytics
+### 17. Analítica: sin cookies, provista por el hosting
 
 **Alternativas evaluadas:** Google Analytics 4, Plausible.
 
-**Por qué:** viene incluido con el hosting, se activa con una línea y **no requiere
-cartel de cookies**, porque no sigue individuos. GA4 es más completo pero obliga
-legalmente al banner de consentimiento, que es fricción en la primera pantalla a
-cambio de un detalle que este negocio no necesita. Plausible cubre lo mismo que
-Vercel Analytics pero es pago.
+**Por qué:** viene incluida con el hosting, se activa con una línea y **no
+requiere cartel de cookies**, porque no sigue individuos. GA4 es más completo
+pero obliga legalmente al banner de consentimiento, que es fricción en la primera
+pantalla a cambio de un detalle que este negocio no necesita. Plausible cubre lo
+mismo pero es pago.
 
 Mide lo que importa: visitas, páginas más vistas y clics a WhatsApp como evento.
 Si algún día hace falta más profundidad, GA4 se puede sumar encima.
+
+**Actualización (mudanza a Cloudflare — decisión 24):** el producto concreto pasa
+a ser **Cloudflare Web Analytics** en lugar de Vercel Analytics. Vercel Analytics
+solo recoge datos de sitios alojados en Vercel; fuera de ahí el paquete se
+instala pero no mide nada.
+
+El criterio que originó esta decisión no cambia: Cloudflare Web Analytics es
+gratuito, no usa cookies ni huella digital, y **por eso tampoco necesita cartel
+de consentimiento**. Nunca se llegó a activar Vercel Analytics, así que no hay
+histórico que migrar ni dependencia que sacar.
+
+Diferencia práctica: se instrumenta con una etiqueta `<script>` en el layout
+raíz, no con el componente `<Analytics />` de `@vercel/analytics`. Se activa en
+la Fase 5, junto con Search Console.
 
 ---
 
@@ -273,8 +315,10 @@ esquemas (Zod o similar) para las variables de entorno. Son cuatro variables y u
 
 **Corre dos veces:**
 
-- En `next.config.ts`, que Next evalúa antes que nada: falla el **build**. En
-  Vercel eso significa que un despliegue mal configurado no llega a publicarse.
+- En `next.config.ts`, que Next evalúa antes que nada: falla el **build**. Con
+  el despliegue automático eso significa que una configuración incompleta no
+  llega a publicarse: el build de Cloudflare corta y la versión anterior sigue
+  sirviendo.
 - En `instrumentation.ts`, que Next ejecuta al levantar el servidor: falla al
   **arrancar**, por si las variables cambiaron después del build.
 
@@ -305,16 +349,29 @@ escrito ahí mismo cuál le toca a cada una.
 ### 22. El dominio principal es el apex, y `www` redirige
 
 `espaciocortinas.com.ar` es la dirección canónica. `www.espaciocortinas.com.ar`
-se agrega igual en Vercel, pero solo para redirigir al apex.
+existe igual, pero solo para redirigir al apex con un 308.
 
 **Por qué el apex y no `www`:** es lo que dice toda la documentación del proyecto
 y es lo que se va a escribir en las tarjetas, en Instagram y en el Perfil de
 Empresa de Google. Un dominio `.com.ar` ya es largo; sumarle cuatro caracteres no
 ayuda.
 
-Vercel suele recomendar `www` como principal porque el apex no admite CNAME y
-obliga a una IP fija. Acá no es un problema: el DNS está en Cloudflare en modo
-solo DNS (decisión 15) y el registro A apunta directo a Vercel.
+La objeción clásica al apex es que no admite `CNAME` y obliga a una IP fija. Acá
+nunca fue un problema, y desde la mudanza menos: el DNS y el hosting son el mismo
+proveedor, y Cloudflare resuelve el apex con aplanado de CNAME sin que haya que
+anotar ninguna IP.
+
+**Cómo se implementa desde la mudanza** (antes lo resolvía Vercel solo):
+
+- el apex es un Custom Domain del Worker;
+- `www` **no** es un Custom Domain — es un registro proxeado que no sirve
+  contenido, y una Redirect Rule lo manda al apex con 308;
+- la misma regla sube de `http` a `https` con 308.
+
+Las tres respuestas están escritas en `docs/infraestructura.md` y se verifican
+con `curl`. Que `www` no sirva contenido es a propósito: si la regla se rompiera,
+`www` falla de forma visible en vez de publicar el sitio duplicado en dos
+direcciones, que es lo que castiga el buscador.
 
 **Consecuencia práctica:** `NEXT_PUBLIC_SITE_URL` en producción es
 `https://espaciocortinas.com.ar`, sin `www` y sin barra final. De ahí salen las
@@ -323,32 +380,176 @@ invierte, hay que cambiar la variable en el mismo movimiento.
 
 ---
 
-### 23. Los commits se firman con la cuenta de la empresa
+### 23. Los commits se firman con la cuenta de la empresa ~~— SUPERADA por la decisión 24~~
 
-Todos los commits van a nombre de `espacioCortinas`
+**Decía:** todos los commits van a nombre de `espacioCortinas`
 (`310341945+espacioCortinas@users.noreply.github.com`), con la autoría real en
-`Co-Authored-By`. Está configurado en el `.git/config` del repositorio, no en la
-configuración global de la máquina, así que no afecta a otros proyectos.
+`Co-Authored-By`, configurado en el `.git/config` del repositorio.
 
-**Por qué:** el plan Hobby de Vercel no admite colaboradores. Cuando el autor de
-un commit no es el dueño de la cuenta, Vercel **bloquea el despliegue** con
-"the commit author does not have contributing access". No es una advertencia: no
-despliega.
+**Por qué existía:** el plan Hobby de Vercel no admite colaboradores. Cuando el
+autor de un commit no era el dueño de la cuenta, Vercel **bloqueaba el
+despliegue** con "the commit author does not have contributing access". No era
+una advertencia: no desplegaba. Las alternativas eran pagar Vercel Pro (USD 20
+por mes) o mover el proyecto a la cuenta personal del desarrollador, que
+contradice la regla de titularidad de `docs/infraestructura.md`.
 
-**Alternativas evaluadas:** pasar Vercel a Pro (USD 20 por mes, la única que
-permite dos identidades) o mover el proyecto de Vercel a la cuenta personal del
-desarrollador. La primera es cara para lo que resuelve; la segunda contradice la
-regla de titularidad de `docs/infraestructura.md`, que existe para que la empresa
-no dependa de quién programa.
+**Por qué ya no aplica:** era una restricción de facturación de Vercel, no una
+política del proyecto. **Cloudflare Workers Builds no mira el autor del commit**:
+despliega lo que llegue a la rama configurada, venga de quien venga. El plan
+gratuito de Cloudflare tampoco tiene el concepto de "colaborador que bloquea el
+build".
 
-**Lo que hay que recordar:** si alguna vez el sitio deja de desplegarse después
-de un push y el error habla de _contributing access_, es que se commiteó con otra
-identidad. Se arregla con:
+**Qué cambia en la práctica:** la autoría de los commits vuelve a la normal —
+cada quien commitea con su propia identidad. Se puede revertir la configuración
+local del repositorio con:
 
 ```
-git config user.name "espacioCortinas"
-git config user.email "310341945+espacioCortinas@users.noreply.github.com"
+git config --unset user.name
+git config --unset user.email
 ```
+
+**Lo que no cambia:** la titularidad de las cuentas de servicios sigue siendo de
+la empresa (`docs/infraestructura.md`). Esa regla nunca dependió de la firma de
+los commits, y sigue vigente.
+
+**El histórico no se reescribe.** Los commits de la Fase 1 quedan como están: son
+públicos en el repositorio y reescribirlos para "arreglar" la autoría cambiaría
+todos los hashes a cambio de nada.
+
+---
+
+### 24. El sitio se muda de Vercel a Cloudflare Workers
+
+**Fecha:** julio de 2026, con la Fase 1 recién terminada.
+
+**Por qué se muda:** los términos del plan Hobby de Vercel lo reservan para uso
+personal y no comercial. Este es el sitio institucional de una empresa que vende:
+está fuera de lo que ese plan admite. La alternativa dentro de Vercel es el plan
+Pro, USD 20 por mes. El plan gratuito de Cloudflare **sí admite uso comercial**,
+así que la mudanza resuelve un problema de encuadre, no de precio.
+
+**Por qué ahora y no después:** hoy el repositorio tiene una página vacía, cero
+tablas y cero imágenes. La mudanza es cambiar cuatro archivos de configuración y
+mover siete registros DNS. En la Fase 4, con panel, subidas y revalidación
+andando, sería un día de trabajo y con riesgo de romper algo que funcionaba.
+**El momento más barato para mudarse es antes de tener algo que mudar.**
+
+**Beneficio secundario:** el DNS del dominio ya estaba en Cloudflare desde la
+Fase 0. Ahora DNS, CDN, certificado, redirecciones y hosting son un solo panel y
+un solo proveedor. Se elimina toda una categoría de problemas — la de dos
+proveedores que se contradicen — que era justamente lo que motivaba la decisión 15.
+
+#### El adaptador: `@opennextjs/cloudflare`
+
+Este ecosistema cambió varias veces y hay guías viejas circulando. Estado
+verificado contra la documentación de Cloudflare en julio de 2026:
+
+| Camino                      | Estado                                                                                  |
+| --------------------------- | --------------------------------------------------------------------------------------- |
+| `@opennextjs/cloudflare`    | **el vigente.** Adaptador oficial. Corre Next sobre el runtime de Node de Workers       |
+| `@cloudflare/next-on-pages` | anterior, sobre Cloudflare Pages. Solo soportaba el runtime "edge" de Next. **No usar** |
+| `next export` estático      | no sirve: el panel necesita ejecución en servidor (regla 3 de `CLAUDE.md`)              |
+
+La diferencia que importa: `next-on-pages` obligaba a marcar cada ruta con
+`export const runtime = "edge"`, un subconjunto recortado de APIs. Con
+`@opennextjs/cloudflare` el código es Next normal sobre Node. **Nada de la
+arquitectura tuvo que cambiar para mudarse.**
+
+#### Las dependencias que agrega, una por una
+
+La regla 8 de `CLAUDE.md` pide justificar cada dependencia. Son dos:
+
+| Paquete                  | Por qué                                                                                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@opennextjs/cloudflare` | el adaptador. Sin él no hay forma de correr Next con App Router en Workers. No hay alternativa que no sea escribirlo a mano                                  |
+| `wrangler`               | la CLI oficial de Cloudflare. Valida `wrangler.jsonc`, levanta el Worker en local (`npm run preview`) y despliega. Solo de desarrollo: no llega al navegador |
+
+Ninguna de las dos entra al paquete que descarga el visitante: las dos corren en
+el build.
+
+#### Lo que no se conserva de Vercel
+
+- **Vercel Analytics** → Cloudflare Web Analytics (decisión 17)
+- **El bloqueo por autor del commit** → deja de existir (decisión 23)
+- **HSTS automático** → en Cloudflare se activa a mano, y el tope de `max-age`
+  es de 12 meses en vez de los 24 que servía Vercel. Es una diferencia real,
+  aunque menor: 12 meses ya es el valor que pide la lista de precarga de HSTS
+- **`www` y `http` redirigidos por el hosting** → pasan a ser una Redirect Rule
+  de Cloudflare (decisión 22)
+- **Una sola casilla para las variables de entorno** → en Cloudflare van dos
+  veces: las del **build** y las del **runtime** son listas separadas. Ver
+  `docs/infraestructura.md`, que explica cuál va en cuál y por qué
+
+#### Lo que sí se conserva
+
+App Router, Server Actions, Supabase, el flujo de subida de imágenes, el
+despliegue automático desde `main` y las cuatro variables de entorno. La
+arquitectura resultó portable, que era lo que `docs/infraestructura.md` anticipaba.
+
+---
+
+### 25. Las medidas de cada imagen se generan al subir, no al servir
+
+**Fecha:** julio de 2026, junto con la decisión 24.
+
+**El planteo anterior era:** el navegador sube **un** WebP de 2560 px y
+`next/image` genera al vuelo el tamaño que corresponde a cada pantalla.
+
+**Por qué deja de funcionar:** eso lo hacía el optimizador de imágenes de Vercel.
+En Cloudflare el equivalente son las Transformations, y en el plan gratuito
+vienen con un tope de **5.000 transformaciones únicas por mes**. Pasado el tope
+no se degrada: devuelve error 9422 y la imagen no carga.
+
+Ese tope, para este sitio, es bajo. Cada foto multiplicada por los cortes de
+`srcset` da varias transformaciones únicas, y el catálogo previsto ronda las 300
+fotos. Con cuatro medidas ya son 1.200 solo para mostrar todo el sitio una vez,
+sin contar cada vez que se sube una foto nueva. Un sitio que puede dejar de
+mostrar fotos el día 20 de cada mes no sirve para lo único que este sitio hace.
+
+**La estrategia nueva:**
+
+```
+1. La administradora elige una foto
+        ↓
+2. NAVEGADOR: normaliza orientación EXIF, borra metadatos, y genera
+   CUATRO WebP — 480, 960, 1600 y 2560 px de lado mayor
+        ↓
+3. Se suben los cuatro a Supabase Storage, bajo el mismo identificador
+        ↓
+4. La fila de la tabla de imágenes registra QUÉ medidas existen
+        ↓
+5. El sitio público sirve un <img> con srcset y sizes
+```
+
+**Por qué esto es mejor de lo que parece:**
+
+- **El trabajo se hace una vez, no en cada visita.** Redimensionar al servir
+  repite el mismo cómputo para cada visitante nuevo; hacerlo al subir lo hace
+  una sola vez, en la máquina de quien sube, que además está ociosa
+- **No hay cuota que agotar.** Supabase Storage cobra por bytes guardados, y las
+  cuatro medidas de una foto pesan menos que el original sin comprimir. El plan
+  gratuito da 1 GB; 300 fotos en cuatro medidas rondan los 250 MB
+- **Ya se comprimía en el navegador.** Generar cuatro tamaños en vez de uno es
+  el mismo código con un bucle. No hay tecnología nueva
+- **`srcset` es HTML estándar.** No depende del hosting. Si el sitio se muda otra
+  vez, esto sigue funcionando sin tocar nada
+
+**Lo que cuesta:**
+
+- La subida tarda más: cuatro archivos en vez de uno. Desde un celular, con las
+  medidas chicas pesando poco, es aceptable
+- **Las medidas quedan congeladas.** Si en dos años hace falta un corte de 1200
+  px, hay que regenerarlo para las fotos ya cargadas. Por eso la tabla registra
+  qué medidas existen por fila y no se asume que todas tienen todas: permite
+  agregar una medida nueva de forma incremental
+- No hay AVIF. WebP lo entienden todos los navegadores en uso; AVIF comprime
+  mejor pero generarlo en el navegador es lento y el beneficio es marginal
+
+**Consecuencias concretas:** `next/image` pasa a usarse con `unoptimized`, o
+directamente `<img>`. Ver `docs/arquitectura.md` (sección «Subida de imágenes») y
+`docs/modelo-de-datos.md` (columna `medidas`).
+
+**Esto es documentación, no implementación.** El código es de la Fase 3.
 
 ---
 

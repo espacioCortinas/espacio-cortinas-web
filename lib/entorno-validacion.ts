@@ -3,8 +3,8 @@
  *
  * Corre en dos momentos, a propósito:
  *
- *   - `next.config.ts`      → falla el **build**. En Vercel eso significa que
- *                             un despliegue mal configurado no llega a
+ *   - `next.config.ts`      → falla el **build**. En Cloudflare eso significa
+ *                             que un despliegue mal configurado no llega a
  *                             publicarse.
  *   - `instrumentation.ts`  → falla al **arrancar el servidor**, por si las
  *                             variables cambiaron después del build.
@@ -52,7 +52,9 @@ export function validarEntorno(): void {
       ...sinCargar.map((nombre) => `  ✗ ${nombre}`),
       "",
       "  En local:      copiá .env.example a .env.local y completalo.",
-      "  En producción: Vercel → Settings → Environment Variables.",
+      "  En producción: Cloudflare → el Worker → Settings.",
+      "                 Las del build en «Build variables and secrets»,",
+      "                 las del runtime en «Variables and Secrets».",
       "",
       "  La lista completa y para qué sirve cada una está en",
       "  docs/arquitectura.md, sección «Variables de entorno».",

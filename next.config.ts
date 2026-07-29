@@ -16,10 +16,13 @@ const nextConfig: NextConfig = {
   },
 
   // Queda afuera de la Fase 1 a propósito:
-  // - Cabeceras de seguridad (CSP, HSTS, nosniff, Referrer-Policy) → Fase 5,
-  //   junto con el resto del checklist de docs/seguridad.md.
-  // - `images.remotePatterns` para Supabase Storage → Fase 3, cuando exista el
-  //   bucket y se conozca su host.
+  // - Cabeceras de seguridad (CSP, nosniff, Referrer-Policy) → Fase 5, junto
+  //   con el resto del checklist de docs/seguridad.md. HSTS no va acá: lo
+  //   agrega Cloudflare en el borde, para que también cubra las respuestas de
+  //   los redireccionamientos, que nunca llegan a este código.
+  // - `images.unoptimized` → Fase 3. En Cloudflare no se usa el optimizador de
+  //   `next/image`: los tamaños se generan al subir y se sirven con `srcset`.
+  //   Ver la decisión 25 de docs/decisiones.md.
 };
 
 export default nextConfig;

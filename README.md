@@ -19,18 +19,29 @@ cuál falta. Las claves están en el gestor de contraseñas de la empresa.
 
 ## Comandos
 
-| Comando             | Para qué               |
-| ------------------- | ---------------------- |
-| `npm run dev`       | servidor de desarrollo |
-| `npm run build`     | build de producción    |
-| `npm run lint`      | ESLint                 |
-| `npm run format`    | formatear con Prettier |
-| `npm run typecheck` | `tsc --noEmit`         |
+| Comando             | Para qué                                          |
+| ------------------- | ------------------------------------------------- |
+| `npm run dev`       | servidor de desarrollo                            |
+| `npm run build`     | build de producción                               |
+| `npm run preview`   | el sitio en el runtime real de Cloudflare Workers |
+| `npm run deploy`    | despliegue a mano (normalmente no hace falta)     |
+| `npm run lint`      | ESLint                                            |
+| `npm run format`    | formatear con Prettier                            |
+| `npm run typecheck` | `tsc --noEmit`                                    |
 
 Antes de dar algo por terminado tienen que pasar `npm run build` y
-`npm run typecheck`.
+`npm run typecheck`. Si el cambio toca código de servidor, además `npm run
+preview`: es el único que lo ejecuta en el mismo runtime que producción.
+
+## Dónde vive
+
+El sitio corre en **Cloudflare Workers** con el adaptador
+`@opennextjs/cloudflare`. Cada push a `main` despliega solo. Detalle en
+[`docs/arquitectura.md`](docs/arquitectura.md) y
+[`docs/infraestructura.md`](docs/infraestructura.md).
 
 ## Estado
 
-Fase 1 (cimientos) terminada. El sitio público y el panel todavía no existen.
-Ver [`docs/plan.md`](docs/plan.md).
+Fase 1 (cimientos) terminada, y mudanza de Vercel a Cloudflare hecha
+([decisión 24](docs/decisiones.md)). El sitio público y el panel todavía no
+existen. Ver [`docs/plan.md`](docs/plan.md).

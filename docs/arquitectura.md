@@ -2,22 +2,28 @@
 
 ## Stack
 
-| Capa           | Elección                  |
-| -------------- | ------------------------- |
-| Framework      | Next.js, App Router       |
-| Lenguaje       | TypeScript, modo estricto |
-| Estilos        | Tailwind CSS              |
-| Base de datos  | PostgreSQL (Supabase)     |
-| Autenticación  | Supabase Auth             |
-| Archivos       | Supabase Storage          |
-| Envío de email | Resend                    |
-| Analítica      | Vercel Analytics          |
-| Hosting        | Vercel                    |
-| DNS            | Cloudflare                |
-| Repositorio    | GitHub                    |
+| Capa                | Elección                                |
+| ------------------- | --------------------------------------- |
+| Framework           | Next.js, App Router                     |
+| Lenguaje            | TypeScript, modo estricto               |
+| Estilos             | Tailwind CSS                            |
+| Base de datos       | PostgreSQL (Supabase)                   |
+| Autenticación       | Supabase Auth                           |
+| Archivos            | Supabase Storage                        |
+| Envío de email      | Resend                                  |
+| Analítica           | Cloudflare Web Analytics                |
+| **Hosting**         | **Cloudflare Workers**                  |
+| Adaptador           | `@opennextjs/cloudflare`                |
+| CDN, DNS y TLS      | Cloudflare                              |
+| Despliegue continuo | Cloudflare Workers Builds, desde `main` |
+| Repositorio         | GitHub                                  |
 
 La versión de Next se fija en `package.json` sin rango abierto y se actualiza a
 propósito, no por arrastre.
+
+El sitio estuvo en Vercel durante la Fase 1 y se mudó a Cloudflare en julio de
+2026 — decisión 24. El motivo es de encuadre, no técnico: el plan Hobby de Vercel
+es para uso personal y no comercial.
 
 ## Por qué Next y no un SPA
 
@@ -87,36 +93,121 @@ docs/
 supabase/
 └── migraciones/
 instrumentation.ts               validación de entorno al arrancar
+next.config.ts                   configuración de Next
+open-next.config.ts              configuración del adaptador de Cloudflare
+wrangler.jsonc                   configuración del Worker
+.nvmrc                           versión de Node del build
 ```
 
 Los componentes del panel y los del sitio público comparten `components/ui/` pero
 no se mezclan: el panel prioriza densidad y claridad, el público prioriza
 composición.
 
+## Despliegue
+
+El sitio corre como un **Cloudflare Worker**. Next no sabe nada de Cloudflare: el
+adaptador `@opennextjs/cloudflare` toma la salida de `next build` y la envuelve
+en un Worker.
+
+```
+next build                    →  .next/          (Next, sin cambios)
+opennextjs-cloudflare build   →  .open-next/
+                                 ├── worker.js   el servidor
+                                 └── assets/     estáticos, servidos sin
+                                                 ejecutar el Worker
+opennextjs-cloudflare deploy  →  Cloudflare
+```
+
+Ni `.open-next/` ni `.wrangler/` se versionan: los regenera el build.
+
+### Los tres archivos de configuración
+
+| Archivo               | Qué define                                                                                    |
+| --------------------- | --------------------------------------------------------------------------------------------- |
+| `next.config.ts`      | Next. No tiene nada específico de Cloudflare                                                  |
+| `open-next.config.ts` | cómo el adaptador traduce Next a Worker. Hoy va vacío a propósito — ver más abajo             |
+| `wrangler.jsonc`      | el Worker: nombre, punto de entrada, fecha de compatibilidad, banderas y carpeta de estáticos |
+
+Dos cosas de `wrangler.jsonc` no son opcionales:
+
+- **`nodejs_compat`**, sin la cual el servidor de Next no arranca. Es lo que hace
+  que Workers exponga las APIs de Node.
+- **`compatibility_date`**, que congela el comportamiento del runtime. Se sube a
+  propósito, igual que la versión de Next.
+
+### Por qué `open-next.config.ts` está vacío
+
+El adaptador permite enchufar un **caché incremental compartido** (R2, Workers KV
+o D1) para que las páginas revalidadas y `revalidatePath()` se propaguen entre
+instancias del Worker. Hoy no hace falta: la única página es estática y no hay
+base todavía.
+
+**Se resuelve en la Fase 3**, cuando el contenido venga de Supabase y el panel
+revalide rutas al guardar. Sin esa pieza, una revalidación disparada desde el
+panel toca una sola instancia y el resto sigue sirviendo lo viejo. **No es un
+detalle que se pueda dejar pasar: es la condición para que "guardar en el panel
+se vea enseguida" siga siendo cierto.**
+
+### Comandos
+
+| Comando            | Qué hace                                                    |
+| ------------------ | ----------------------------------------------------------- |
+| `npm run dev`      | Next en local. Es el de todos los días                      |
+| `npm run build`    | solo `next build`. Es el que verifica que el código compila |
+| `npm run build:cf` | además arma el Worker. Lo que corre el despliegue           |
+| `npm run preview`  | levanta el Worker real en local, sobre `workerd`            |
+| `npm run deploy`   | despliega a mano. Normalmente no se usa: despliega `main`   |
+
+`npm run preview` es lo que hay que correr antes de dar por buena cualquier cosa
+que dependa del servidor: es el único que ejecuta el código en el mismo runtime
+que producción. `npm run dev` corre sobre Node y **no** detecta un uso de API que
+Workers no soporte.
+
+Lee las variables de `.env.local` gracias a `NEXTJS_ENV=development` en
+`.dev.vars`, que no se versiona.
+
+### Despliegue automático
+
+Cloudflare Workers Builds está conectado al repositorio de GitHub. Cada push a
+`main` construye y publica. La rama, los comandos y las variables están en
+`docs/infraestructura.md`.
+
+La versión de Node del build se fija en `.nvmrc`. Si falta, Cloudflare usa la
+suya por defecto, y este proyecto prefiere que eso no cambie sin que nos
+enteremos.
+
 ## Subida de imágenes
 
 Este es el punto que más restricciones tiene y hay que respetarlo tal cual.
 
-**El problema:** en Vercel el cuerpo de una petición a una función serverless tope
-en ~4.5 MB, y las Server Actions de Next vienen limitadas a 1 MB por defecto. Una
-foto de celular pesa entre 3 y 8 MB. Mandar el archivo a través de una Server
-Action falla con la primera foto real.
+**Todo el trabajo sobre la imagen ocurre en el navegador de quien sube, una sola
+vez.** Ni el servidor procesa fotos ni se transforma nada al servir. Las dos
+razones, que son independientes:
+
+1. **No se puede procesar en el servidor.** `sharp` es un módulo nativo y el
+   runtime de Workers no ejecuta binarios nativos. Además el plan gratuito da
+   10 ms de CPU por invocación, muy por debajo de lo que cuesta redimensionar una
+   foto de 8 MB (decisión 5).
+2. **No se puede transformar al servir.** Las Transformations de Cloudflare, en
+   el plan gratuito, topan en 5.000 transformaciones únicas por mes y pasado el
+   tope devuelven error en vez de degradarse. Para un sitio de 300 fotos con
+   cuatro cortes cada una, ese techo se toca (decisión 25).
 
 **El flujo correcto:**
 
 ```
 1. La administradora elige fotos
         ↓
-2. NAVEGADOR: normaliza orientación EXIF, redimensiona a 2560px de lado
-   mayor, convierte a WebP, borra todo el EXIF
+2. NAVEGADOR: normaliza la orientación EXIF, borra todo el EXIF, y genera
+   CUATRO WebP del mismo original — 480, 960, 1600 y 2560 px de lado mayor
         ↓
 3. SERVER ACTION: verifica identidad, valida tipo y tamaño,
-   devuelve una URL firmada de subida
+   devuelve las URLs firmadas de subida
         ↓
-4. NAVEGADOR: sube el archivo directo a Supabase Storage con esa URL
+4. NAVEGADOR: sube los cuatro archivos directo a Supabase Storage
         ↓
 5. SERVER ACTION: guarda la fila en la tabla de imágenes
-   (ruta, ancho, alto, orden)
+   (ruta, ancho, alto, orden, y QUÉ MEDIDAS existen)
         ↓
 6. Se revalidan las rutas afectadas
 ```
@@ -124,24 +215,51 @@ Action falla con la primera foto real.
 Sigue estando autorizado por el servidor: el navegador no puede subir nada sin una
 URL firmada que el servidor emitió después de verificar quién es.
 
-**Por qué se comprime en el navegador y no en el servidor:**
-
-- Esquiva el límite de 4.5 MB
-- La subida desde un celular es mucho más rápida
-- No consume cuota de transformación de imágenes de Vercel, que en el plan
-  gratuito es limitada y este sitio es intensivo en fotos
-- Cumple el requisito de "optimización automática" sin infraestructura extra
-
 **Se borra el EXIF siempre.** Las fotos son de casas de clientes y traen
 coordenadas GPS. Publicarlas con metadatos expondría la dirección del domicilio.
 La recompresión a WebP en canvas ya descarta el EXIF; hay que verificarlo, no
-darlo por hecho.
+darlo por hecho — en las cuatro medidas, no solo en la grande.
 
 **Hay que normalizar la orientación antes de recomprimir.** Si no, las fotos
 sacadas con el teléfono girado aparecen rotadas.
 
-En el sitio público, `next/image` sirve el tamaño que corresponde a cada pantalla
-a partir del archivo ya optimizado.
+### Cómo se sirven
+
+Con `srcset` y `sizes`, apuntando a las medidas que ya existen en Storage:
+
+```html
+<img
+  src="…/1600.webp"
+  srcset="
+    …/480.webp   480w,
+    …/960.webp   960w,
+    …/1600.webp 1600w,
+    …/2560.webp 2560w
+  "
+  sizes="(max-width: 768px) 100vw, 50vw"
+  width="1600"
+  height="2000"
+  alt="…"
+/>
+```
+
+`width` y `height` salen de las columnas `ancho` y `alto`, y no son decorativos:
+sin ellos el navegador no puede reservar el espacio y la página salta mientras
+carga.
+
+**El optimizador de `next/image` no se usa.** Si se usa el componente, va con
+`unoptimized`; si no, `<img>` directo. Lo que **no** hay que hacer es dejar el
+optimizador activo: en Cloudflare gasta la cuota de Transformations por cada
+tamaño de cada foto, que es exactamente lo que la decisión 25 evita.
+
+`srcset` es HTML estándar y no depende del hosting. Si el sitio se mudara otra
+vez, esta parte no se toca.
+
+**Qué medidas existen se lee de la base, no se asume.** La columna `medidas` de
+la tabla de imágenes dice cuáles se generaron para esa fila. Ver
+`docs/modelo-de-datos.md`.
+
+Implementación: Fase 3.
 
 ## Formulario de contacto
 
@@ -165,17 +283,27 @@ agrega fricción y hay poco volumen.
 
 ```
 NIC Argentina  →  nameservers de Cloudflare  →  registros
-                                                 ├── A / CNAME → Vercel
-                                                 ├── MX → Google Workspace
+                                                 ├── @   → el Worker  (proxeado)
+                                                 ├── www → placeholder (proxeado,
+                                                 │         solo para redirigir)
+                                                 ├── MX  → Google Workspace
                                                  ├── TXT → SPF, DKIM, verificación
                                                  └── TXT → verificación de Resend
 ```
 
-**Cloudflare en modo "solo DNS", sin proxy.** Proxyear Vercel detrás de Cloudflare
-sin configurarlo bien produce bucles de redirección.
+**El tráfico HTTP va proxeado por Cloudflare**, que es la única forma posible:
+el sitio _es_ un Worker de Cloudflare. La decisión 15 pedía lo contrario, pero
+existía para no encadenar dos CDN; con un solo proveedor esa razón desapareció.
+
+**El correo no se ve afectado por el proxy.** Solo se proxean registros de
+tráfico HTTP (`A`, `AAAA`, `CNAME`); `MX` y `TXT` no son proxeables. Los
+registros de Workspace no se tocan nunca.
+
+Los valores exactos, y qué se verifica de cada uno, están en
+`docs/infraestructura.md`.
 
 **No se toca el DNS de `conceptoespacio.com` en ningún momento.** Todo el trabajo
-es sobre el dominio nuevo, que está vacío.
+es sobre el dominio nuevo.
 
 ## Variables de entorno
 
@@ -194,7 +322,24 @@ Cualquier variable con `NEXT_PUBLIC_` termina en el navegador. Antes de agregar
 una, verificar que sea información pública.
 
 La plantilla versionada es `.env.example`; los valores reales van en `.env.local`,
-que no se versiona, y en Vercel.
+que no se versiona, y en Cloudflare.
+
+**En Cloudflare van dos veces.** Es la diferencia de operación más fácil de pasar
+por alto al venir de Vercel, donde había una sola lista:
+
+| Dónde                                              | Cuándo se usa    | Qué necesita                                                           |
+| -------------------------------------------------- | ---------------- | ---------------------------------------------------------------------- |
+| Settings → Build → **Build variables and secrets** | durante el build | todas. `NEXT_PUBLIC_*` se incrustan acá, y `next.config.ts` valida acá |
+| Settings → **Variables and Secrets**               | en cada petición | las que el servidor lee en tiempo de ejecución                         |
+
+Cargarlas en un solo lado falla de dos formas distintas y las dos son confusas:
+si faltan en el build, el despliegue corta con la lista de faltantes (que es lo
+que se busca); si faltan en el runtime, el sitio se publica y falla en la primera
+petición que toque el servidor.
+
+**Las secretas se cargan como Secret, nunca como Text**, en las dos listas. Un
+Secret no se puede volver a leer desde el panel ni desde la CLI: si se pierde, se
+rota en Supabase y se vuelve a cargar. Eso es lo correcto, no un inconveniente.
 
 **No todas son obligatorias al mismo tiempo.** Solo se exigen las que la fase en
 curso ya usa; la lista vive en `lib/entorno-validacion.ts` y cada fase suma la

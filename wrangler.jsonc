@@ -1,0 +1,39 @@
+// Configuración del Worker de Cloudflare que sirve el sitio.
+//
+// El build no lo genera Next directamente: `opennextjs-cloudflare build` toma
+// la salida de `next build` y arma `.open-next/`, con el servidor en
+// `worker.js` y los archivos estáticos en `assets/`.
+//
+// Ver docs/arquitectura.md y la decisión 24 de docs/decisiones.md.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+
+  // Tiene que coincidir con el nombre del Worker en el panel de Cloudflare.
+  "name": "espacio-cortinas-web",
+  "main": ".open-next/worker.js",
+
+  // Fija el comportamiento del runtime a esta fecha: subir la versión de
+  // `workerd` no cambia la semántica de lo ya desplegado. Se actualiza a
+  // propósito, igual que la versión de Next.
+  "compatibility_date": "2026-07-29",
+
+  // `nodejs_compat` es obligatorio: el adaptador corre el servidor de Next
+  // sobre las APIs de Node que provee Workers. Sin esto no arranca.
+  //
+  // `global_fetch_strictly_public` hace que un `fetch()` a nuestro propio
+  // dominio salga a internet en vez de volver al mismo Worker. Sin esto, una
+  // petición del servidor a una URL del sitio se resuelve en bucle.
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+
+  // Los estáticos los sirve Cloudflare directamente, sin ejecutar el Worker.
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+
+  // Registros del Worker. Incluido en el plan gratuito y es la única forma de
+  // ver por qué falló una petición en producción.
+  "observability": {
+    "enabled": true,
+  },
+}
