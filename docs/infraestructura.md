@@ -126,12 +126,22 @@ salto** hasta `https://espaciocortinas.com.ar`, sin pasar por `https://www`.
 **No usar "Always Use HTTPS"** para la parte de `http`: responde 301, no 308, y
 se pisaría con esta regla.
 
-Verificado:
+Verificado el 29/07/2026, ya sobre Cloudflare:
 
 ```
-http://espaciocortinas.com.ar       → 308 → https://espaciocortinas.com.ar/
-https://www.espaciocortinas.com.ar  → 308 → https://espaciocortinas.com.ar/
-https://espaciocortinas.com.ar      → 200
+https://espaciocortinas.com.ar       → 200   (x-opennext: 1, server: cloudflare)
+https://www.espaciocortinas.com.ar   → 308 → https://espaciocortinas.com.ar/
+http://espaciocortinas.com.ar        → 308 → https://espaciocortinas.com.ar/
+http://www.espaciocortinas.com.ar    → 308 → https://espaciocortinas.com.ar/
+```
+
+El último caso es el que conviene no perder de vista: `http://www` llega al apex
+en **un solo salto**, sin escalar por `https://www`. La ruta y la query se
+conservan, que es lo que evita romper enlaces ya compartidos:
+
+```
+https://www.espaciocortinas.com.ar/proyectos/x?utm=wsp
+  → https://espaciocortinas.com.ar/proyectos/x?utm=wsp
 ```
 
 ## HSTS
@@ -162,6 +172,19 @@ el `max-age`.
 
 Va en Cloudflare y no en `next.config.ts` porque acá cubre también las respuestas
 de la Redirect Rule, que nunca llegan a ejecutar código nuestro.
+
+Verificado el 29/07/2026:
+
+```
+https://espaciocortinas.com.ar       → Strict-Transport-Security: max-age=31536000
+https://www.espaciocortinas.com.ar   → Strict-Transport-Security: max-age=31536000
+http://espaciocortinas.com.ar        → sin la cabecera
+```
+
+Que **no** aparezca en la respuesta por HTTP es correcto, no un faltante: la
+especificación dice que HSTS solo vale sobre una conexión cifrada, y los
+navegadores ignoran la cabecera si llega por HTTP. Cloudflare la omite ahí a
+propósito.
 
 ### Notas para diagnosticar
 
@@ -232,12 +255,21 @@ decisión 24. **El motivo es de encuadre:** el plan Hobby de Vercel es para uso
 personal y no comercial, y este es el sitio institucional de una empresa. El plan
 gratuito de Cloudflare sí admite uso comercial.
 
-| Concepto       | Valor                    |
-| -------------- | ------------------------ |
-| Worker         | `espacio-cortinas-web`   |
-| Adaptador      | `@opennextjs/cloudflare` |
-| Custom Domain  | `espaciocortinas.com.ar` |
-| Node del build | fijada en `.nvmrc`       |
+| Concepto       | Valor                                         |
+| -------------- | --------------------------------------------- |
+| Worker         | `espacio-cortinas-web`                        |
+| Adaptador      | `@opennextjs/cloudflare`                      |
+| Custom Domain  | `espaciocortinas.com.ar`                      |
+| URL directa    | `espacio-cortinas-web.ventas-ccf.workers.dev` |
+| Node del build | fijada en `.nvmrc`                            |
+
+La **URL directa** no es para dar a nadie: es la del Worker sin pasar por el
+dominio. Sirve para diagnosticar, porque saltea el DNS, la Redirect Rule y el
+certificado. Si el dominio falla y esta anda, el problema es del borde, no de la
+aplicación.
+
+**El subdominio de la cuenta es `ventas-ccf.workers.dev`.** Solo, sin el nombre
+del Worker adelante, no resuelve: no es una dirección, es el espacio de nombres.
 
 ### Despliegue automático
 
@@ -305,6 +337,25 @@ faltantes.** Es el comportamiento buscado.
 `NEXT_PUBLIC_SUPABASE_ANON_KEY` es pública por diseño y lo que se puede hacer con
 ella lo decide RLS. Ver `docs/seguridad.md`.
 
+### Cloudflare Pages no, Workers sí
+
+Durante la mudanza se intentó primero por **Pages**, y no funciona. Queda
+anotado porque el error no lo dice de frente:
+
+```
+A Wrangler configuration file was found but it does not appear to be valid.
+Did you mean to use wrangler.toml to configure Pages? If so, then make sure
+the file is valid and contains the `pages_build_output_dir` property.
+```
+
+`pages_build_output_dir` solo existe en Pages. Son dos productos distintos y este
+proyecto necesita Workers: en Pages el camino era `@cloudflare/next-on-pages`, el
+adaptador viejo que obliga al runtime _edge_ y que se descartó por eso mismo
+(decisión 24).
+
+Además usan **GitHub Apps distintas**: tener conectado Pages no alcanza para
+Workers Builds.
+
 ### Portabilidad
 
 La arquitectura resultó portable, que es lo que este documento anticipaba antes
@@ -314,6 +365,35 @@ producto cambió por mudarse de proveedor.**
 
 Lo único que sí era propio de Vercel y hubo que reemplazar está listado en la
 decisión 24.
+
+## Vercel — qué queda por desconectar
+
+Al 29/07/2026 Cloudflare sirve el dominio y está verificado. Vercel ya no recibe
+tráfico, pero el proyecto sigue existiendo. **Se desconecta a mano, en este
+orden**, dejando pasar unos días por si hay que volver atrás:
+
+1. **Quitar los dominios del proyecto** — Vercel → el proyecto → Settings →
+   Domains: sacar `espaciocortinas.com.ar` y `www.espaciocortinas.com.ar`. Es lo
+   primero porque mientras estén, Vercel sigue intentando renovar certificados
+   para un dominio que ya no controla, y manda avisos de verificación fallida.
+2. **Desconectar el repositorio** — Settings → Git → Disconnect. Con esto dejan
+   de aparecer los checks rojos en cada commit de GitHub. Es lo que hoy pone en
+   rojo el repositorio: `Git author … must have access to the project`.
+3. **Borrar las variables de entorno** — Settings → Environment Variables. Hay
+   una `SUPABASE_SERVICE_ROLE_KEY` guardada ahí; es una clave viva.
+4. **Borrar el proyecto.**
+5. **Cerrar la cuenta**, si no se usa para nada más.
+
+**Lo que NO hay que tocar:** nada del DNS —ya está migrado— ni nada de Supabase,
+Google Workspace o el registro del dominio en NIC. La cuenta de Vercel no toca
+ninguno de esos.
+
+**Sobre rotar la clave:** la `service_role key` estuvo cargada en un proveedor
+que ya no se usa. Borrarla del panel alcanza para el caso normal. Rotarla en
+Supabase es lo prolijo y cuesta cinco minutos, así que conviene hacerlo al cerrar
+la cuenta — con la ventaja de que hoy la base está vacía y rotarla no puede
+romper nada. Después de rotar hay que actualizarla en `.env.local` y en las **dos**
+listas del Worker.
 
 ## Pendiente de dar de alta
 
