@@ -86,15 +86,17 @@ DMARC está en `p=none` a propósito: monitorea sin bloquear. Se puede endurecer
 
 ## Repositorio
 
-`github.com/espacioCortinas/espacio-cortinas-web`
+`github.com/espacioCortinas/espacio-cortinas-web` — privado.
 
-**Hoy es público.** Se pasó a público para destrabar el primer push de la Fase 1.
-El plan original era mantenerlo privado y conviene volver a eso: el código no
-tiene secretos, pero `docs/infraestructura.md` publica la fecha de vencimiento
-del dominio, quién es el titular registral y cómo se accede a NIC. Nada de eso
-tiene por qué estar indexado.
+`espacioCortinas` es una cuenta personal de GitHub, no una organización. El repo
+es suyo, y quien desarrolla entra como **colaborador con permiso de escritura**
+(hoy `faculuna1097`). Es lo mismo que persigue la regla de titularidad: si cambia
+el desarrollador, se le quita el acceso y la empresa no pierde nada.
 
-Pendiente: volver a privado una vez conectado Vercel.
+**Por qué conviene que siga privado:** el código no tiene secretos, pero este
+mismo documento publica el vencimiento del dominio, quién es el titular registral
+y que el acceso a NIC es por Clave Fiscal. Nada de eso tiene por qué estar
+indexado.
 
 ## Base de datos y archivos
 
