@@ -323,6 +323,35 @@ invierte, hay que cambiar la variable en el mismo movimiento.
 
 ---
 
+### 23. Los commits se firman con la cuenta de la empresa
+
+Todos los commits van a nombre de `espacioCortinas`
+(`310341945+espacioCortinas@users.noreply.github.com`), con la autoría real en
+`Co-Authored-By`. Está configurado en el `.git/config` del repositorio, no en la
+configuración global de la máquina, así que no afecta a otros proyectos.
+
+**Por qué:** el plan Hobby de Vercel no admite colaboradores. Cuando el autor de
+un commit no es el dueño de la cuenta, Vercel **bloquea el despliegue** con
+"the commit author does not have contributing access". No es una advertencia: no
+despliega.
+
+**Alternativas evaluadas:** pasar Vercel a Pro (USD 20 por mes, la única que
+permite dos identidades) o mover el proyecto de Vercel a la cuenta personal del
+desarrollador. La primera es cara para lo que resuelve; la segunda contradice la
+regla de titularidad de `docs/infraestructura.md`, que existe para que la empresa
+no dependa de quién programa.
+
+**Lo que hay que recordar:** si alguna vez el sitio deja de desplegarse después
+de un push y el error habla de _contributing access_, es que se commiteó con otra
+identidad. Se arregla con:
+
+```
+git config user.name "espacioCortinas"
+git config user.email "310341945+espacioCortinas@users.noreply.github.com"
+```
+
+---
+
 ## Decisiones abiertas
 
 Ninguna en este momento.

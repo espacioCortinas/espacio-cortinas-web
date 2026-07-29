@@ -108,11 +108,26 @@ Supabase, plan gratuito, organización Espacio Cortinas, región São Paulo.
 
 ## Hosting
 
-Vercel, cuenta activa.
+Vercel, **plan Hobby**, conectado a la cuenta de GitHub `espacioCortinas`.
 
 El alta estuvo retenida un tiempo por el sistema antifraude —le pasa a cuentas
 nuevas asociadas a una cuenta de GitHub también recién creada— y se destrabó por
 el formulario de recuperación.
+
+**El plan Hobby no admite colaboradores.** Vercel solo despliega commits cuyo
+autor sea el dueño de la cuenta: si el autor es otro, corta con "the commit
+author does not have contributing access". Por eso todos los commits se firman
+con la identidad de la empresa — decisión 23.
+
+**Las variables de entorno hay que cargarlas en Vercel además de en
+`.env.local`.** Si falta alguna, el build falla a propósito con la lista
+completa. Son cuatro en la Fase 1 y van marcadas para Production, Preview y
+Development. `NEXT_PUBLIC_SITE_URL` es la única que difiere del archivo local:
+en Vercel va `https://espaciocortinas.com.ar`.
+
+Vercel avisa que `NEXT_PUBLIC_SUPABASE_ANON_KEY` no es segura de exponer. En
+este caso el aviso no aplica: esa clave es pública por diseño y lo que se puede
+hacer con ella lo decide RLS. Ver `docs/seguridad.md`.
 
 El despliegue se conecta al repositorio de GitHub en Fase 1. El registro DNS que
 apunta a Vercel va en Cloudflare **en modo "DNS only", no proxeado** —
