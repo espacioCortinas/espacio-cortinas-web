@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+/*
+  Tokens del sistema de diseño.
+
+  Acá va la ESTRUCTURA, no los valores. El color, la tipografía y la escala se
+  deciden en la Fase 4.1, con las fotos reales del negocio a la vista
+  (ver docs/plan.md y docs/diseno.md). Elegirlos ahora sería decidir a ciegas.
+
+  Hasta entonces rigen los valores por defecto de Tailwind: no son una
+  propuesta visual, son un lugar reservado.
+
+  Fase 4.1 completa este bloque:
+    --color-*    paleta
+    --font-*     familias tipográficas
+    --text-*     escala tipográfica
+    --spacing    unidad de espaciado
+    --radius-*   radios
+*/
+@theme {
+  /* Sin tokens propios todavía — Fase 4.1. */
+}

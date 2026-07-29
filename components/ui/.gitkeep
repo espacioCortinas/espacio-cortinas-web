@@ -1,0 +1,4 @@
+# Componentes base compartidos entre el panel y el sitio público:
+# botón, chip, campo, diálogo. Se construyen en la Fase 4.2.
+#
+# Carpeta creada vacía para fijar la estructura de docs/arquitectura.md.

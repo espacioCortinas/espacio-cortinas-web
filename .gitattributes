@@ -1,0 +1,15 @@
+# Todo el repositorio usa saltos de línea LF, también en Windows.
+#
+# Sin esto, `core.autocrlf=true` —el valor por defecto de Git en Windows—
+# convierte los archivos a CRLF al clonar, y `npm run format:check` falla en
+# una máquina recién configurada aunque nadie haya tocado nada.
+* text=auto eol=lf
+
+# Binarios: que Git no intente convertir nada.
+*.ico binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.pdf binary

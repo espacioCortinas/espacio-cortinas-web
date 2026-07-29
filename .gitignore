@@ -1,0 +1,28 @@
+# Dependencias
+node_modules/
+
+# Build
+.next/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# Cachés y registros de las herramientas
+.eslintcache
+npm-debug.log*
+*.log
+
+# Variables de entorno (claves de Supabase y Resend)
+.env
+.env*.local
+
+# Vercel
+.vercel
+
+# Configuración local de Claude Code (personal, no compartir)
+.claude/settings.local.json
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
