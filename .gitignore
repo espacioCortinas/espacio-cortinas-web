@@ -16,6 +16,8 @@ npm-debug.log*
 # Variables de entorno (claves de Supabase y Resend)
 .env
 .env*.local
+.env.local
+
 
 # Vercel
 .vercel

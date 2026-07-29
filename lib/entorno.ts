@@ -38,15 +38,19 @@ function exigir(nombre: string): string {
  * la hace `lib/entorno-validacion.ts` en el build y al arrancar.
  */
 export const entornoPublico = {
+  /**
+   * Sin barra final: el panel de Supabase la copia con barra y así quedan URLs
+   * con doble barra al armar las rutas de la API.
+   */
   get supabaseUrl(): string {
-    return exigir("NEXT_PUBLIC_SUPABASE_URL");
+    return exigir("NEXT_PUBLIC_SUPABASE_URL").replace(/\/+$/, "");
   },
   get supabaseAnonKey(): string {
     return exigir("NEXT_PUBLIC_SUPABASE_ANON_KEY");
   },
   /** Base para canonical, sitemap y Open Graph. Sin barra final. */
   get urlSitio(): string {
-    return exigir("NEXT_PUBLIC_SITE_URL").replace(/\/$/, "");
+    return exigir("NEXT_PUBLIC_SITE_URL").replace(/\/+$/, "");
   },
   /** Número en formato internacional. `null` hasta la Fase 4.6. */
   get whatsapp(): string | null {
