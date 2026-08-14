@@ -323,12 +323,12 @@ operación más fácil de cometer al venir de Vercel, donde había una sola.
 Las cinco en uso hoy van en las dos listas — las cuatro de la Fase 1 más
 `ADMIN_USER_ID`, que se sumó en la Fase 2:
 
-| Variable                        | Tipo en runtime | Valor en producción              |
-| ------------------------------- | --------------- | -------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | **Secret**      | igual que en `.env.local`        |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | **Secret**      | igual que en `.env.local`        |
-| `NEXT_PUBLIC_SITE_URL`          | **Secret**      | `https://espaciocortinas.com.ar` |
-| `SUPABASE_SERVICE_ROLE_KEY`     | **Secret**      | igual que en `.env.local`        |
+| Variable                        | Tipo en runtime | Valor en producción               |
+| ------------------------------- | --------------- | --------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | **Secret**      | igual que en `.env.local`         |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | **Secret**      | igual que en `.env.local`         |
+| `NEXT_PUBLIC_SITE_URL`          | **Secret**      | `https://espaciocortinas.com.ar`  |
+| `SUPABASE_SERVICE_ROLE_KEY`     | **Secret**      | igual que en `.env.local`         |
 | `ADMIN_USER_ID`                 | **Secret**      | el `user.id` de la administradora |
 
 En la lista de **build** el tipo es indistinto (ahí wrangler no borra nada); lo
@@ -405,7 +405,7 @@ esa lista es una bomba de tiempo: funciona hasta el próximo despliegue.
 En la lista de **build** la distinción no aplica: esa lista no la toca wrangler.
 
 Por qué esto no se había visto: en la Fase 1 las variables se cargaron a mano
-*después* del último despliegue, así que nada volvió a pisarlas. El primer push
+_después_ del último despliegue, así que nada volvió a pisarlas. El primer push
 posterior era el que iba a romperlo, y fue el de la Fase 2.
 
 **Cómo verificar que quedó bien**, después de cualquier despliegue:
@@ -422,6 +422,44 @@ lee `process.env[nombre]` con acceso dinámico, que Next no puede reemplazar en
 el build. Eso es deliberado y correcto —es lo que hace que la comprobación sirva
 en runtime— pero implica que esas variables tienen que existir de verdad en el
 Worker, no alcanza con que hayan existido durante el build.
+
+### El otro error del 14/08 — `NEXT_PUBLIC_SUPABASE_URL` con `/rest/v1`
+
+Ya con el sitio en pie apareció un segundo problema, independiente del anterior.
+La variable estaba cargada en la lista de **build** así:
+
+```
+https://irqqimwcoevkvuyexlhg.supabase.co/rest/v1     ← estaba
+https://irqqimwcoevkvuyexlhg.supabase.co             ← va
+```
+
+El panel de Supabase muestra varias URLs para copiar y esa es una de ellas.
+
+**El síntoma no se parecía a la causa.** El sitio respondía 200, `/admin`
+redirigía bien, y el build salía verde. Pero `getUser()` pedía
+`…/rest/v1/auth/v1/user`, que no existe, y el gateway de Supabase devolvía:
+
+```
+AuthApiError: Invalid path specified in request URL
+```
+
+Como el código trataba cualquier fallo de `getUser()` como «no hay sesión», el
+panel mandaba al login **a todo el mundo, incluida la administradora**. O sea:
+el login estaba roto para todos, y desde afuera se veía como si la contraseña
+estuviera mal.
+
+Dos arreglos salieron de acá, los dos en el código:
+
+- `lib/auth.ts` **registra** el error de `getUser()` con el host contra el que
+  llamó. Sin eso, «no hay sesión» y «la URL de Supabase está mal» son
+  indistinguibles desde afuera.
+- `lib/entorno-validacion.ts` valida la **forma** de la variable, no solo que
+  exista: tiene que ser el origen pelado y por `https`. Un valor con ruta corta
+  el build.
+
+**La lección general de la Fase 2**, que se aplicó tres veces en el mismo día:
+un build en verde no dice nada sobre si producción funciona. `proxy.ts`, las
+variables de tipo Text y esta URL pasaron el build las tres veces.
 
 **Cómo se diagnosticó, que sirve para la próxima:**
 

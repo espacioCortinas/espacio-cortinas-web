@@ -227,9 +227,36 @@ emite la aplicación. Las dos, porque cada una cubre un hueco de la otra: la reg
 protege aunque la aplicación se equivoque, y las cabeceras protegen si algún día
 se cambia de proveedor.
 
-Cómo se verifica: pedir una página del panel con sesión y mirar la cabecera
-`cf-cache-status` de la respuesta. Tiene que decir `BYPASS` o `DYNAMIC`. Si dice
-`HIT`, está mal.
+Cómo se verifica — **y acá el criterio original no se puede aplicar tal cual**.
+
+La idea era mirar `cf-cache-status` y exigir `BYPASS` o `DYNAMIC`. Al probarlo en
+producción apareció que **las rutas servidas por el Worker no llevan esa
+cabecera**, ni `/admin` ni la página pública. Solo la llevan los archivos
+estáticos, que los sirve el binding de assets:
+
+```
+/admin/login                    → (sin cf-cache-status)
+/                               → (sin cf-cache-status)
+/_next/static/chunks/….css      → CF-Cache-Status: MISS
+```
+
+Tiene sentido: en un Custom Domain de Workers la petición va directo al Worker,
+que es a la vez borde y origen, así que no pasa por el pipeline de caché que
+reporta esa cabecera. **Que esté ausente es más fuerte que `BYPASS`**, no más
+débil: no hay caché de por medio.
+
+Lo que sí se verifica, que es lo que la cabecera intentaba aproximar:
+
+1. La respuesta del panel sale con `Cache-Control: private, no-store`.
+2. `cf-cache-status` **nunca** es `HIT`.
+3. **La prueba que de verdad importa:** pedir `/admin/login` dos veces, una con
+   sesión y otra sin, y confirmar que devuelven cosas distintas — y en
+   particular que el correo de la sesión **no** aparece en la respuesta que
+   recibe un anónimo. Si hubiera una caché compartida sirviendo respuestas
+   autenticadas, eso se ve enseguida.
+
+El punto 3 es el que hay que correr; los otros dos son necesarios pero no
+suficientes.
 
 ## Checklist antes de publicar
 
@@ -240,7 +267,10 @@ Cómo se verifica: pedir una página del panel con sesión y mirar la cabecera
 - [ ] Toda Server Action del panel llama a `verificarAdmin()`
 - [ ] `/admin` inaccesible sin sesión
 - [ ] `/admin` inaccesible con una sesión que no sea la del administrador
-- [ ] `/admin` responde con `cf-cache-status: BYPASS` o `DYNAMIC`, nunca `HIT`
+- [ ] `/admin` sale con `Cache-Control: private, no-store` y `cf-cache-status`
+      nunca es `HIT` (en rutas del Worker la cabecera directamente no aparece)
+- [ ] `/admin/login` devuelve contenido distinto con sesión y sin ella, y el
+      correo de una sesión no aparece en la respuesta a un anónimo
 - [ ] Una foto publicada, descargada, no conserva GPS ni EXIF
 - [ ] El bucket no es público
 - [ ] El formulario resiste un envío automatizado básico
