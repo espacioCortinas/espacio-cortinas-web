@@ -320,22 +320,30 @@ operación más fácil de cometer al venir de Vercel, donde había una sola.
 | Settings → Build → **Build variables and secrets** | el build. Acá se incrustan las `NEXT_PUBLIC_*` y acá valida `next.config.ts` |
 | Settings → **Variables and Secrets**               | el runtime, en cada petición que toque el servidor                           |
 
-Las cuatro de la Fase 1 van en las dos listas:
+Las cinco en uso hoy van en las dos listas — las cuatro de la Fase 1 más
+`ADMIN_USER_ID`, que se sumó en la Fase 2:
 
-| Variable                        | Tipo       | Valor en producción              |
-| ------------------------------- | ---------- | -------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Text       | igual que en `.env.local`        |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Text       | igual que en `.env.local`        |
-| `NEXT_PUBLIC_SITE_URL`          | Text       | `https://espaciocortinas.com.ar` |
-| `SUPABASE_SERVICE_ROLE_KEY`     | **Secret** | igual que en `.env.local`        |
+| Variable                        | Tipo en runtime | Valor en producción              |
+| ------------------------------- | --------------- | -------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | **Secret**      | igual que en `.env.local`        |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | **Secret**      | igual que en `.env.local`        |
+| `NEXT_PUBLIC_SITE_URL`          | **Secret**      | `https://espaciocortinas.com.ar` |
+| `SUPABASE_SERVICE_ROLE_KEY`     | **Secret**      | igual que en `.env.local`        |
+| `ADMIN_USER_ID`                 | **Secret**      | el `user.id` de la administradora |
+
+En la lista de **build** el tipo es indistinto (ahí wrangler no borra nada); lo
+que importa es que estén. En la de **runtime** van todas como Secret, por la
+razón del incidente del 14/08.
 
 `NEXT_PUBLIC_SITE_URL` es la única que difiere del archivo local, sin `www` y sin
 barra final — decisión 22.
 
-**`SUPABASE_SERVICE_ROLE_KEY` se carga como Secret, nunca como Text, en las dos
-listas.** Un Secret queda cifrado y no se puede volver a leer desde el panel ni
-desde la CLI. Si se pierde, se rota en Supabase y se carga de nuevo; eso es el
-comportamiento correcto, no un problema.
+**En la lista de runtime, TODAS se cargan como Secret, no solo
+`SUPABASE_SERVICE_ROLE_KEY`.** No es por confidencialidad: es porque las
+variables de texto de esa lista **las borra el siguiente `wrangler deploy`**.
+Ver el incidente del 14/08 más abajo. Un Secret queda cifrado y no se puede
+volver a leer desde el panel ni desde la CLI; si se pierde, se rota y se vuelve
+a cargar.
 
 Que una clave secreta haga falta también en el build no es un descuido: es
 consecuencia de que `next.config.ts` valide el entorno antes de construir
@@ -363,6 +371,57 @@ Nada en el build avisó. Un despliegue verde puede dejar producción caída.
 
 **Regla que sale de esto: las dos listas se actualizan juntas, siempre.** Agregar
 una variable a una sola es una operación incompleta, no un paso intermedio.
+
+### Repetición del 14/08/2026, y la causa raíz de verdad
+
+El mismo 500 volvió a aparecer en el primer despliegue de la Fase 2, con las
+variables **ya cargadas en las dos listas**. O sea que la explicación de arriba
+era incompleta.
+
+**La causa real: `wrangler deploy` borra las variables de texto.** Wrangler trata
+a `wrangler.jsonc` como la fuente de verdad del bloque `vars`; como este proyecto
+no tiene ese bloque, cada despliegue deja el Worker **sin ninguna variable de
+texto**, incluidas las que se acababan de cargar a mano en el panel.
+
+**Los secretos no se borran.** Se administran por fuera del archivo de
+configuración y sobreviven a cualquier despliegue.
+
+La evidencia fue limpia: después del despliegue, de las cinco variables de
+runtime sobrevivió exactamente una, `SUPABASE_SERVICE_ROLE_KEY` — la única que
+este documento mandaba cargar como Secret. Las otras cuatro, cargadas como Text,
+habían desaparecido:
+
+```
+npx wrangler secret list
+[ { "name": "SUPABASE_SERVICE_ROLE_KEY", "type": "secret_text" } ]
+```
+
+**La regla que reemplaza a la anterior: en la lista de runtime, TODAS las
+variables se cargan como Secret, no solo las secretas.** No es por
+confidencialidad —`NEXT_PUBLIC_SITE_URL` no tiene nada que ocultar— sino porque
+es el único tipo que sobrevive a un `wrangler deploy`. Una variable de texto en
+esa lista es una bomba de tiempo: funciona hasta el próximo despliegue.
+
+En la lista de **build** la distinción no aplica: esa lista no la toca wrangler.
+
+Por qué esto no se había visto: en la Fase 1 las variables se cargaron a mano
+*después* del último despliegue, así que nada volvió a pisarlas. El primer push
+posterior era el que iba a romperlo, y fue el de la Fase 2.
+
+**Cómo verificar que quedó bien**, después de cualquier despliegue:
+
+```
+npx wrangler secret list
+```
+
+Tienen que estar **las cinco**. Si falta alguna, se recarga con
+`npx wrangler secret put NOMBRE`.
+
+**Por qué la validación de entorno no lo evita:** `lib/entorno-validacion.ts`
+lee `process.env[nombre]` con acceso dinámico, que Next no puede reemplazar en
+el build. Eso es deliberado y correcto —es lo que hace que la comprobación sirva
+en runtime— pero implica que esas variables tienen que existir de verdad en el
+Worker, no alcanza con que hayan existido durante el build.
 
 **Cómo se diagnosticó, que sirve para la próxima:**
 

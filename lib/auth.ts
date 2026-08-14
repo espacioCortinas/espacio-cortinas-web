@@ -2,6 +2,7 @@ import "server-only";
 
 import type { User } from "@supabase/supabase-js";
 
+import { entornoPublico } from "@/lib/entorno";
 import { entornoServidor } from "@/lib/entorno-servidor";
 import { crearClienteServidor } from "@/lib/supabase/servidor";
 
@@ -54,10 +55,13 @@ export async function estadoDeSesion(): Promise<EstadoDeSesion> {
   // `AuthSessionMissingError` es el caso normal de un visitante sin sesión y no
   // se registra: sería ruido en cada petición anónima.
   if (error && error.name !== "AuthSessionMissingError") {
+    // Se registra contra QUÉ host se llamó: un error de autenticación y una URL
+    // de Supabase mal armada se ven igual desde afuera, y son problemas
+    // distintos. Es el host, nunca la clave.
     console.error(
       `[auth] getUser() falló: ${error.name}: ${error.message}. ` +
-        `Se trata como «sin sesión». Si esto aparece en producción, el Worker ` +
-        `no está pudiendo hablar con Supabase.`,
+        `Host de Supabase: ${entornoPublico.supabaseUrl}. ` +
+        `Se trata como «sin sesión».`,
     );
   }
 
