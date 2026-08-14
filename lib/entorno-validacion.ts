@@ -43,20 +43,75 @@ export function faltantes(): string[] {
   return OBLIGATORIAS.filter((nombre) => !process.env[nombre]?.trim());
 }
 
-/** Lanza un error con la lista completa de faltantes. No imprime valores. */
+/**
+ * Variables que además de existir tienen que tener la forma correcta.
+ *
+ * Existe por un caso real: `NEXT_PUBLIC_SUPABASE_URL` se cargó una vez con el
+ * endpoint REST pegado —`https://xxx.supabase.co/rest/v1`— porque es uno de los
+ * valores que el panel de Supabase muestra para copiar. El build pasó, el sitio
+ * se publicó, y todo lo del servidor que hablaba con Supabase falló con un
+ * error del gateway que no dice nada:
+ *
+ *     AuthApiError: Invalid path specified in request URL
+ *
+ * Estar presente no alcanza: tiene que ser el origen pelado, sin ruta.
+ */
+function malFormadas(): string[] {
+  const problemas: string[] = [];
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  if (url) {
+    let analizada: URL | null = null;
+    try {
+      analizada = new URL(url);
+    } catch {
+      problemas.push(`NEXT_PUBLIC_SUPABASE_URL no es una URL válida: «${url}»`);
+    }
+    if (analizada) {
+      // Se admite la barra final sola: `entornoPublico` la limpia.
+      if (analizada.pathname !== "/" && analizada.pathname !== "") {
+        problemas.push(
+          `NEXT_PUBLIC_SUPABASE_URL tiene una ruta de más («${analizada.pathname}»). ` +
+            `Va el origen pelado: ${analizada.origin} — sin /rest/v1, sin /auth/v1.`,
+        );
+      }
+      if (analizada.protocol !== "https:") {
+        problemas.push(
+          `NEXT_PUBLIC_SUPABASE_URL tiene que ser https, y es «${analizada.protocol}».`,
+        );
+      }
+    }
+  }
+
+  return problemas;
+}
+
+/**
+ * Lanza un error con todo lo que está mal: lo que falta y lo que está mal
+ * escrito. No imprime el valor de ninguna clave.
+ */
 export function validarEntorno(): void {
   const sinCargar = faltantes();
-  if (sinCargar.length === 0) return;
+  const conFormatoMalo = malFormadas();
+  if (sinCargar.length === 0 && conFormatoMalo.length === 0) return;
 
   throw new Error(
     [
       "",
       "───────────────────────────────────────────────────────────",
-      "  FALTAN VARIABLES DE ENTORNO OBLIGATORIAS",
+      "  PROBLEMAS CON LAS VARIABLES DE ENTORNO",
       "───────────────────────────────────────────────────────────",
       "",
-      ...sinCargar.map((nombre) => `  ✗ ${nombre}`),
-      "",
+      ...(sinCargar.length > 0
+        ? [
+            "  Faltan o están vacías:",
+            ...sinCargar.map((n) => `    ✗ ${n}`),
+            "",
+          ]
+        : []),
+      ...(conFormatoMalo.length > 0
+        ? ["  Mal escritas:", ...conFormatoMalo.map((p) => `    ✗ ${p}`), ""]
+        : []),
       "  En local:      copiá .env.example a .env.local y completalo.",
       "  En producción: Cloudflare → el Worker → Settings.",
       "                 Las del build en «Build variables and secrets»,",
