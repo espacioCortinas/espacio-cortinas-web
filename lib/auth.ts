@@ -43,7 +43,23 @@ export async function estadoDeSesion(): Promise<EstadoDeSesion> {
 
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
+
+  // `getUser()` no lanza: devuelve el error en el objeto. Sin esto, «no hay
+  // sesión» y «no se pudo hablar con Supabase» son indistinguibles, y el panel
+  // manda al login sin decir por qué. Falla cerrado igual —abajo se devuelve
+  // `sin-sesion`—, pero queda registrado.
+  //
+  // `AuthSessionMissingError` es el caso normal de un visitante sin sesión y no
+  // se registra: sería ruido en cada petición anónima.
+  if (error && error.name !== "AuthSessionMissingError") {
+    console.error(
+      `[auth] getUser() falló: ${error.name}: ${error.message}. ` +
+        `Se trata como «sin sesión». Si esto aparece en producción, el Worker ` +
+        `no está pudiendo hablar con Supabase.`,
+    );
+  }
 
   if (!user) return { estado: "sin-sesion" };
 
