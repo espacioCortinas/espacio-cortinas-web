@@ -26,8 +26,18 @@ Cada capa cubre algo distinto. Ninguna alcanza sola.
 
 ## El middleware no autoriza
 
+El archivo es `middleware.ts` en la raíz. Next 16 pide renombrarlo a `proxy.ts`
+en cada build y **no hay que hacerlo**: `proxy.ts` obliga al runtime de Node y
+el adaptador de Cloudflare solo admite middleware de edge. Se probó y se
+revirtió — decisión 26.
+
 El middleware solo mejora la experiencia: si alguien entra a `/admin` sin sesión,
 lo manda al login. **No se puede confiar en él como control de acceso.**
+
+Está escrito para que se note: `middleware.ts` ni siquiera lee `ADMIN_USER_ID`.
+Comprueba si hay sesión y nada más. Si el archivo se borrara entero, el panel
+seguiría siendo inaccesible para cualquiera que no sea la administradora — solo
+se perdería la redirección amable.
 
 En 2025 se publicó CVE-2025-29927: una cabecera HTTP permitía saltear por completo
 el middleware de Next.js. Cualquier autorización que viviera únicamente ahí quedaba
@@ -85,21 +95,50 @@ Las escrituras del panel pasan por el servidor con la `service_role key`, que
 Las políticas que hacen falta:
 
 ```sql
--- anon solo ve contenido activo
+-- solo contenido activo, y solo select
 create policy "lectura publica de productos activos"
-  on productos for select to anon using (activo = true);
+  on productos for select to anon, authenticated using (activo = true);
 
 create policy "lectura publica de proyectos activos"
-  on proyectos for select to anon using (activo = true);
+  on proyectos for select to anon, authenticated using (activo = true);
 ```
 
-Y las imágenes de entidades activas, en la misma línea.
+Las variantes y las imágenes van en la misma línea, heredando la condición del
+padre con un `exists`: si el producto no está activo, sus imágenes tampoco se
+ven.
+
+**Por qué también `authenticated` y no solo `anon`:** el sitio público se
+renderiza con la clave anónima más las cookies de la petición. Si la
+administradora navega el sitio público con la sesión abierta, su rol en Postgres
+es `authenticated`, y con `to anon` a secas vería el sitio vacío. Es lectura de
+contenido que ya es público, así que no agranda nada — decisión 27.
 
 **Ninguna política de `insert`, `update` o `delete` para `anon` ni para
 `authenticated`.** Nadie escribe desde el navegador.
 
+Y una segunda capa sobre lo mismo, porque Supabase concede esos permisos por
+defecto:
+
+```sql
+revoke insert, update, delete, truncate on <las cinco tablas>
+from anon, authenticated;
+```
+
+Sin políticas, RLS ya rechaza toda escritura. El `revoke` la rechaza un paso
+antes, a nivel de permisos, y **sigue rechazándola aunque alguien agregue una
+política permisiva por error**. No afecta al panel: `service_role` es otro rol y
+conserva sus permisos.
+
 RLS activado en todas las tablas. Una tabla sin RLS en Supabase queda expuesta a
 través de la API automática.
+
+### Storage
+
+`storage.objects` viene con RLS activado de fábrica y **no se le crea ninguna
+política**. Con eso, ni `anon` ni `authenticated` pueden listar, leer, subir ni
+borrar nada. Todo el acceso a las fotos pasa por el servidor con `service_role`:
+URLs firmadas para subir (después de `verificarAdmin()`) y URLs firmadas para
+servir.
 
 ## Claves
 
@@ -166,6 +205,32 @@ En `next.config`:
 - `X-Content-Type-Options: nosniff`
 - `Referrer-Policy: strict-origin-when-cross-origin`
 
+## El panel no se cachea en el borde
+
+Desde la mudanza a Cloudflare, **el proxy es obligatorio**: un Custom Domain de
+Workers no funciona en modo "solo DNS". Esto derogó la decisión 15 y trajo una
+consecuencia de seguridad que no existía en la etapa anterior.
+
+Ahora hay una caché compartida delante de la aplicación. Si una respuesta
+autenticada de `/admin` quedara guardada ahí, Cloudflare podría servírsela a otra
+persona. No es un riesgo teórico: es el modo clásico de filtrar una sesión.
+
+Obligatorio antes de que exista el panel:
+
+- Una regla explícita de **bypass de caché para `/admin/*`**, incluidas las
+  Server Actions y cualquier Route Handler del panel
+- Las respuestas del panel salen con `Cache-Control: private, no-store`
+- El sitio público **sí** se cachea: ahí la caché es deseable
+
+La regla va en Cloudflare (Caching → Cache Rules) **y** en las cabeceras que
+emite la aplicación. Las dos, porque cada una cubre un hueco de la otra: la regla
+protege aunque la aplicación se equivoque, y las cabeceras protegen si algún día
+se cambia de proveedor.
+
+Cómo se verifica: pedir una página del panel con sesión y mirar la cabecera
+`cf-cache-status` de la respuesta. Tiene que decir `BYPASS` o `DYNAMIC`. Si dice
+`HIT`, está mal.
+
 ## Checklist antes de publicar
 
 - [ ] Registro público desactivado en Supabase Auth
@@ -175,6 +240,7 @@ En `next.config`:
 - [ ] Toda Server Action del panel llama a `verificarAdmin()`
 - [ ] `/admin` inaccesible sin sesión
 - [ ] `/admin` inaccesible con una sesión que no sea la del administrador
+- [ ] `/admin` responde con `cf-cache-status: BYPASS` o `DYNAMIC`, nunca `HIT`
 - [ ] Una foto publicada, descargada, no conserva GPS ni EXIF
 - [ ] El bucket no es público
 - [ ] El formulario resiste un envío automatizado básico

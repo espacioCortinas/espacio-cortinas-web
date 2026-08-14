@@ -16,12 +16,13 @@
  */
 
 /**
- * Obligatorias hoy, en la Fase 1.
+ * Obligatorias hoy, en la Fase 2.
  *
  * Las demás variables de `.env.example` existen pero todavía no se usan, así
  * que exigirlas ahora sería pedir datos que no existen. Cada fase suma la
  * suya a esta lista:
  *
+ *   Fase 1   → las cuatro de Supabase y del sitio
  *   Fase 2   → ADMIN_USER_ID
  *   Fase 4.6 → NEXT_PUBLIC_WHATSAPP, RESEND_API_KEY, EMAIL_CONTACTO
  */
@@ -30,6 +31,11 @@ const OBLIGATORIAS = [
   "NEXT_PUBLIC_SUPABASE_ANON_KEY",
   "NEXT_PUBLIC_SITE_URL",
   "SUPABASE_SERVICE_ROLE_KEY",
+
+  // Fase 2. Es el `user.id` del único administrador, creado a mano en la
+  // consola de Supabase. Sin esto `verificarAdmin()` no puede comparar contra
+  // nada, y "¿hay sesión?" no es autorización — ver docs/seguridad.md.
+  "ADMIN_USER_ID",
 ] as const;
 
 /** Nombres de las variables obligatorias que faltan o están vacías. */

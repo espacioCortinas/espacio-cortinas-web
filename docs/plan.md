@@ -57,13 +57,31 @@ vacía y el build pasa limpio.
 - Usuario administrador creado a mano
 - `verificarAdmin()` y el middleware de redirección
 - Login y logout funcionando
+- **Regla de bypass de caché para `/admin/*`** en Cloudflare, más
+  `Cache-Control: private, no-store` en las respuestas del panel. Con el proxy
+  obligatorio hay una caché compartida delante de la aplicación, y una respuesta
+  autenticada cacheada se le puede servir a otra persona — ver `docs/seguridad.md`
+
+Arrastrado de la Fase 1:
+
+- Completar `.dev.vars` con las mismas variables que `.env.local`. Hoy solo tiene
+  `NEXTJS_ENV`, y alcanzaba porque nada leía Supabase en runtime; con el login
+  deja de alcanzar y `npm run preview` va a fallar en local
+- Agregar `ADMIN_USER_ID` a las obligatorias, y cargarla en `.env.local` y en las
+  **dos** listas del Worker
+- Confirmar en la consola de Supabase que el registro público está desactivado.
+  `docs/infraestructura.md` lo da por hecho pero nunca se verificó
+- Con el primer componente cliente, comprobar que la `anon key` sí entra al
+  bundle y que la `service_role` sigue afuera
 
 **Terminado cuando:**
 
 - `/admin` redirige al login sin sesión
 - `/admin` rechaza una sesión que no sea la del administrador
+- `/admin` responde con `cf-cache-status: BYPASS` o `DYNAMIC`, nunca `HIT`
 - Consultar las tablas con la clave anónima solo devuelve contenido activo
 - Escribir con la clave anónima falla
+- El bucket de imágenes no es accesible públicamente
 
 ---
 

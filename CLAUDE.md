@@ -40,7 +40,10 @@ Se mudó desde Vercel en julio de 2026 — decisión 24 de `docs/decisiones.md`.
 3. **Toda mutación pasa por el servidor.** Server Actions o Route Handlers, con
    verificación de identidad propia. El navegador nunca escribe en la base.
 4. **El middleware no autoriza.** Solo redirige al login. Toda Server Action
-   revalida por su cuenta. Ver `docs/seguridad.md`.
+   revalida por su cuenta. Ver `docs/seguridad.md`. El archivo se llama
+   `middleware.ts` y **no se renombra a `proxy.ts`** aunque Next lo pida en cada
+   build: `proxy.ts` obliga al runtime de Node y el adaptador de Cloudflare solo
+   admite edge — decisión 26.
 5. **La `service_role key` nunca sale del servidor.** Ni en un componente cliente,
    ni en una variable `NEXT_PUBLIC_*`.
 6. **Se borra el EXIF de toda imagen antes de publicarla.** Las fotos son de

@@ -14,7 +14,7 @@ import { entornoPublico } from "@/lib/entorno";
  * público y con el que se pregunta quién está logueado.
  *
  * No autoriza nada por sí solo: la autorización del panel la hace
- * `verificarAdmin()` (Fase 2). Ver docs/seguridad.md.
+ * `verificarAdmin()` (`lib/auth.ts`). Ver docs/seguridad.md.
  */
 export async function crearClienteServidor() {
   const almacenDeCookies = await cookies();

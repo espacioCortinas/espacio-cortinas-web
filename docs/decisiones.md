@@ -584,6 +584,119 @@ directamente `<img>`. Ver `docs/arquitectura.md` (sección «Subida de imágenes
 
 ---
 
+### 26. El archivo se queda como `middleware.ts`, NO se renombra a `proxy.ts`
+
+**Fecha:** agosto de 2026, durante la Fase 2.
+
+Next 16 deprecó la convención `middleware.ts` en favor de `proxy.ts`, y lo avisa
+en **cada build**:
+
+```
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+```
+
+**Se hizo el rename y se revirtió.** Queda anotado con detalle justamente
+porque el aviso invita a rehacerlo.
+
+**Por qué no se puede:** `proxy.ts` **siempre corre en el runtime de Node**, y
+Next no permite cambiárselo. No es que el valor por defecto sea Node: declarar
+cualquier `runtime` en un archivo `proxy` es un error de build.
+
+```
+Route segment config is not allowed in Proxy file.
+Proxy always runs on Node.js runtime.
+```
+
+Y `@opennextjs/cloudflare` **solo admite middleware de _edge_**. Con `proxy.ts`
+el build del adaptador corta:
+
+```
+ERROR Node.js middleware is not currently supported.
+      Consider switching to Edge Middleware.
+```
+
+Las dos condiciones son incompatibles y ninguna de las dos es configurable. No
+hay forma de usar `proxy.ts` en este proyecto mientras el hosting sea Cloudflare
+Workers con este adaptador.
+
+`middleware.ts`, en cambio, sigue compilándose como middleware de edge y el
+adaptador lo acepta sin objeciones.
+
+**Cómo se detectó, que es la parte que importa:** `npm run build` pasa **verde**
+con `proxy.ts`. El que falla es `npm run build:cf`, o sea `npm run preview`.
+Es exactamente el caso que anticipa `docs/arquitectura.md` cuando dice que
+`npm run dev` y `npm run build` no detectan un uso de API que Workers no
+soporta. Si esto se hubiera pusheado sin correr `preview`, el build de
+Cloudflare habría cortado — sin tirar el sitio, porque la versión anterior
+sigue sirviendo, pero con un fallo confuso de diagnosticar.
+
+**Cuándo revisarlo:** cuando `@opennextjs/cloudflare` soporte middleware de
+Node, o cuando Next 17 elimine `middleware.ts`. Lo que pase primero. Hasta
+entonces el aviso de deprecación se convive a propósito, y hay un comentario
+al principio de `middleware.ts` que lo explica para que nadie lo "arregle".
+
+**Lo que nunca estuvo en discusión:** el archivo no autoriza. La regla 4 de
+`CLAUDE.md` y lo que `docs/seguridad.md` dice sobre CVE-2025-29927 valen igual
+con cualquier nombre — el riesgo nunca fue cómo se llama, sino confiar en que
+corrió.
+
+---
+
+### 27. Las políticas de lectura son para `anon` **y** `authenticated`
+
+**Fecha:** agosto de 2026, durante la Fase 2.
+
+`docs/seguridad.md` escribía las políticas como `to anon` a secas. Al
+implementarlas apareció un caso que ese texto no contemplaba.
+
+**El problema:** el sitio público se renderiza en el servidor con la clave
+anónima **más las cookies de la petición**. Para un visitante cualquiera no hay
+cookies y el rol en Postgres es `anon`, así que `to anon` alcanza. Pero si la
+administradora navega el sitio público con la sesión del panel abierta, su rol
+es `authenticated`, no `anon` — y con `to anon` vería un sitio completamente
+vacío.
+
+Eso no se manifiesta como un error: se manifiesta como un catálogo sin
+productos, y en la Fase 4 se habría diagnosticado como un bug de las consultas.
+
+**Decisión:** las políticas de `select` van `to anon, authenticated`, siempre
+con `using (activo = true)`.
+
+**Lo que no se toca:** sigue sin haber **ninguna** política de `insert`,
+`update` ni `delete` para ninguno de los dos roles. Lo que se agranda es solo
+la lectura de contenido que ya es público. Un `authenticated` no ve nada que no
+vea un anónimo.
+
+---
+
+### 28. Las migraciones son archivos `.sql` que se aplican a mano
+
+**Fecha:** agosto de 2026, durante la Fase 2.
+
+**Alternativa evaluada:** sumar la CLI de Supabase como dependencia de
+desarrollo, renombrar `supabase/migraciones` a `supabase/migrations` y aplicar
+con `supabase db push`.
+
+**Por qué se descartó:** la regla 8 de `CLAUDE.md` pide justificar cada
+dependencia, y acá el beneficio es automatizar un paso que en toda la V1 se va
+a ejecutar un puñado de veces. Además `supabase link` pide un access token
+personal y la contraseña de la base, o sea dos credenciales más para
+administrar, en un proyecto cuyo criterio de titularidad es explícito
+(`docs/infraestructura.md`).
+
+**Cómo funciona entonces:** los `.sql` viven numerados en
+`supabase/migraciones/` y se pegan en el SQL Editor de Supabase. Están escritos
+para ser **idempotentes**: se pueden volver a correr enteros sin romper nada.
+
+**Lo que se conserva, que es lo que importa:** el repositorio sigue siendo la
+fuente de verdad del esquema. Nunca se cambia la base desde el panel de
+Supabase sin que el cambio quede en un archivo acá.
+
+**Se revisará** si en algún momento hay que sincronizar varios entornos, que es
+donde la CLI empieza a pagar lo que cuesta. Hoy hay uno solo.
+
+---
+
 ## Decisiones abiertas
 
 Ninguna en este momento.

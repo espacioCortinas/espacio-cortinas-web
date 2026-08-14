@@ -237,6 +237,17 @@ mismo documento publica el vencimiento del dominio, quién es el titular registr
 y que el acceso a NIC es por Clave Fiscal. Nada de eso tiene por qué estar
 indexado.
 
+**Ya se volvió público una vez** entre la Fase 1 y la mudanza, sin que nadie lo
+notara hasta que apareció en un reporte. No es un estado que se pueda dar por
+sentado. Se verifica sin autenticar, que es la única comprobación que vale:
+
+```powershell
+Invoke-RestMethod -Uri 'https://api.github.com/repos/espacioCortinas/espacio-cortinas-web' -Headers @{'User-Agent'='check'}
+```
+
+Si responde con datos, es público. Si devuelve 404, es privado. Mirar la página
+en el navegador no sirve: la sesión propia la muestra igual en los dos casos.
+
 ## Base de datos y archivos
 
 Supabase, plan gratuito, organización Espacio Cortinas, región São Paulo.
@@ -331,8 +342,64 @@ consecuencia de que `next.config.ts` valide el entorno antes de construir
 (decisión 21). Un despliegue al que le falte una variable corta el build y la
 versión anterior sigue sirviendo.
 
-**Si falta alguna, el build falla a propósito con la lista completa de
-faltantes.** Es el comportamiento buscado.
+**Si falta alguna en la lista de _build_, el build falla a propósito con la lista
+completa de faltantes.** Es el comportamiento buscado.
+
+**Pero la lista de _runtime_ no la protege nadie**, y esa asimetría ya tumbó el
+sitio una vez. Ver el incidente más abajo.
+
+### Incidente del 29/07/2026 — el sitio caído tras la mudanza
+
+Qué pasó: las variables se cargaron en **Build variables and secrets** pero no en
+**Variables and Secrets**. El build pasó limpio, el Worker se publicó, y al
+arrancar la validación de entorno del runtime no encontró nada y lanzó. Resultado:
+
+```
+https://espaciocortinas.com.ar → 500
+{ "message": "Server failed to respond.", "details": {} }
+```
+
+Nada en el build avisó. Un despliegue verde puede dejar producción caída.
+
+**Regla que sale de esto: las dos listas se actualizan juntas, siempre.** Agregar
+una variable a una sola es una operación incompleta, no un paso intermedio.
+
+**Cómo se diagnosticó, que sirve para la próxima:**
+
+1. `npm run preview` sobre el mismo commit. Ejecuta el runtime real de Workers en
+   local. Si responde 200, el código está bien y el problema es del entorno
+   desplegado. Descarta la mitad del espacio de búsqueda en dos minutos.
+2. Volver al despliegue anterior desde el panel (Worker → Deployments) para
+   restaurar el servicio **antes** de investigar. El rollback arregla el
+   despliegue activo, no el repositorio: el próximo push vuelve a romper.
+3. Para capturar la excepción real sin volver a romper producción:
+
+   ```bash
+   npx wrangler versions upload   # publica una versión con URL propia
+   npx wrangler tail              # en otra terminal, mientras se la visita
+   ```
+
+**`wrangler tail` solo muestra algo si el Worker que está sirviendo es el que
+falla.** Correrlo después de un rollback no devuelve nada, y parece que no
+hubiera error.
+
+### `.dev.vars` y el preview local
+
+`.dev.vars` alimenta el runtime cuando se corre `npm run preview`. Durante la
+Fase 1 tenía solo `NEXTJS_ENV=development` y alcanzaba, porque ningún código
+leía Supabase en tiempo de ejecución.
+
+**Con el login de la Fase 2 dejó de alcanzar**, y el preview local fallaría por
+la misma razón por la que falló producción el 29/07. Desde la Fase 2 `.dev.vars`
+tiene **las mismas variables que `.env.local`**, más `NEXTJS_ENV`.
+
+Como `.dev.vars` no se versiona, se regenera copiando `.env.local` y agregando
+esa línea. Si se agrega una variable al proyecto, son **tres** lugares en local
+—`.env.local`, `.dev.vars` y `.env.example`— además de las dos listas del
+Worker.
+
+`NEXTJS_ENV` vale `development` en local y **`production` en el Worker**. Es el
+único valor que difiere a propósito entre los dos entornos.
 
 `NEXT_PUBLIC_SUPABASE_ANON_KEY` es pública por diseño y lo que se puede hacer con
 ella lo decide RLS. Ver `docs/seguridad.md`.

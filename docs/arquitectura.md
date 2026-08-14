@@ -67,10 +67,14 @@ app/
 │   ├── contacto/page.tsx
 │   └── layout.tsx               navegación y pie públicos
 ├── admin/
-│   ├── login/page.tsx
-│   ├── productos/
-│   ├── proyectos/
-│   └── layout.tsx               verifica sesión e identidad
+│   ├── login/
+│   │   ├── page.tsx             decide qué mostrar según la sesión
+│   │   └── formulario-login.tsx componente CLIENTE
+│   └── (panel)/                 grupo: no agrega segmento a la URL
+│       ├── layout.tsx           verifica sesión E IDENTIDAD
+│       ├── page.tsx             /admin
+│       ├── productos/
+│       └── proyectos/
 ├── sitemap.ts
 ├── robots.ts
 └── layout.tsx
@@ -91,13 +95,20 @@ lib/
 acciones/                        Server Actions, una por entidad
 docs/
 supabase/
-└── migraciones/
+└── migraciones/                 .sql numerados, se aplican a mano (decisión 28)
+middleware.ts                    solo redirige. NO renombrar a proxy.ts (dec. 26)
 instrumentation.ts               validación de entorno al arrancar
 next.config.ts                   configuración de Next
 open-next.config.ts              configuración del adaptador de Cloudflare
 wrangler.jsonc                   configuración del Worker
 .nvmrc                           versión de Node del build
 ```
+
+**Por qué el grupo `(panel)`:** el layout que verifica identidad no puede
+envolver al login, o redirigiría al login desde el propio login y sería un
+bucle. Un grupo de rutas resuelve eso sin ensuciar las URLs: los paréntesis no
+agregan segmento, así que `app/admin/(panel)/page.tsx` sigue sirviendo `/admin`
+y `/admin/login` queda deliberadamente afuera de la verificación — es la puerta.
 
 Los componentes del panel y los del sitio público comparten `components/ui/` pero
 no se mezclan: el panel prioriza densidad y claridad, el público prioriza
