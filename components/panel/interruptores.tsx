@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 
 import type { Resultado } from "@/acciones/resultado";
 import { Aviso } from "@/components/ui/aviso";
+import { Cargando } from "@/components/ui/boton";
 import { useEstadoDelServidor } from "@/lib/estado-del-servidor";
 
 /**
@@ -96,8 +97,9 @@ export function Interruptores({
         </Aviso>
       )}
 
+      {enCurso && <Cargando>Guardando…</Cargando>}
       {fallo && <Aviso tono="error">{fallo}</Aviso>}
-      {guardado && !fallo && <Aviso tono="exito">Guardado.</Aviso>}
+      {guardado && !fallo && !enCurso && <Aviso tono="exito">Guardado.</Aviso>}
     </div>
   );
 }

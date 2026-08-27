@@ -49,6 +49,11 @@ export function Galeria({
   const [orden, setOrden] = useEstadoDelServidor(imagenes);
   const [fallo, setFallo] = useState<string | null>(null);
   const [enCurso, iniciar] = useTransition();
+  // Qué se está haciendo exactamente, para poner la rueda en el botón que se
+  // tocó y no en todos a la vez. Con «algo está cargando» no alcanza: en una
+  // galería de doce fotos hay veinticinco botones, y encenderlos todos no dice
+  // nada sobre qué se está guardando.
+  const [tocado, setTocado] = useState<string | null>(null);
 
   function mover(desde: number, hacia: number) {
     if (hacia < 0 || hacia >= orden.length) return;
@@ -57,6 +62,7 @@ export function Galeria({
     [nuevo[desde], nuevo[hacia]] = [nuevo[hacia], nuevo[desde]];
     setOrden(nuevo);
     setFallo(null);
+    setTocado(`mover:${orden[desde].id}`);
 
     iniciar(async () => {
       const r = await reordenarImagenes(
@@ -68,15 +74,18 @@ export function Galeria({
         setFallo(r.mensaje);
         router.refresh();
       }
+      setTocado(null);
     });
   }
 
   function usarDePortada(id: string) {
     setFallo(null);
+    setTocado(`portada:${id}`);
     iniciar(async () => {
       const r = await marcarPortada(entidad, id);
       if (!r.ok) setFallo(r.mensaje);
       router.refresh();
+      setTocado(null);
     });
   }
 
@@ -137,19 +146,25 @@ export function Galeria({
                     type="button"
                     aria-label={`Subir la foto ${i + 1}`}
                     disabled={i === 0 || enCurso}
+                    cargando={tocado === `mover:${imagen.id}`}
                     onClick={() => mover(i, i - 1)}
                     className="min-h-12 w-12 px-0"
                   >
-                    <span aria-hidden>↑</span>
+                    {tocado !== `mover:${imagen.id}` && (
+                      <span aria-hidden>↑</span>
+                    )}
                   </Boton>
                   <Boton
                     type="button"
                     aria-label={`Bajar la foto ${i + 1}`}
                     disabled={i === orden.length - 1 || enCurso}
+                    cargando={tocado === `mover:${imagen.id}`}
                     onClick={() => mover(i, i + 1)}
                     className="min-h-12 w-12 px-0"
                   >
-                    <span aria-hidden>↓</span>
+                    {tocado !== `mover:${imagen.id}` && (
+                      <span aria-hidden>↓</span>
+                    )}
                   </Boton>
                 </div>
               </div>
@@ -173,10 +188,13 @@ export function Galeria({
                     <Boton
                       type="button"
                       disabled={enCurso}
+                      cargando={tocado === `portada:${imagen.id}`}
                       onClick={() => usarDePortada(imagen.id)}
                       className="self-start"
                     >
-                      Usar de portada
+                      {tocado === `portada:${imagen.id}`
+                        ? "Poniendo de portada…"
+                        : "Usar de portada"}
                     </Boton>
                   ) : (
                     <p className="text-sm text-neutral-600">
@@ -259,7 +277,8 @@ function TextoAlternativo({
         <div className="flex items-center gap-3">
           <Boton
             type="button"
-            disabled={enCurso || texto === valor}
+            disabled={texto === valor}
+            cargando={enCurso}
             onClick={() =>
               iniciar(async () => {
                 await guardarAlt(entidad, imagenId, texto);

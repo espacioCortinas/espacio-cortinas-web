@@ -122,7 +122,10 @@ export async function guardarProyecto(
   }
 
   revalidarProyectos(slug, antes.slug);
-  return listo;
+
+  // Igual que en productos: se vuelve al listado, que es la confirmación que
+  // no hay que buscar en la pantalla.
+  redirect(`/admin/proyectos?guardado=${encodeURIComponent(titulo)}`);
 }
 
 // ── Interruptores ──────────────────────────────────────────────────────────
@@ -196,11 +199,12 @@ export async function eliminarProyecto(id: string): Promise<Resultado> {
 
   const { data: proyecto } = await supabase
     .from("proyectos")
-    .select("slug")
+    .select("slug, titulo")
     .eq("id", id)
     .maybeSingle();
 
   if (!proyecto) return error("Este proyecto ya no existe.");
+  const titulo = proyecto.titulo;
 
   const rutas = await rutasDeImagenes("proyecto", id);
 
@@ -222,5 +226,5 @@ export async function eliminarProyecto(id: string): Promise<Resultado> {
     );
   }
 
-  redirect("/admin/proyectos");
+  redirect(`/admin/proyectos?eliminado=${encodeURIComponent(titulo)}`);
 }

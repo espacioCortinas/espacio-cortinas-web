@@ -138,16 +138,16 @@ export function FormularioProducto({
       </fieldset>
 
       <div className="flex items-center gap-3">
-        <Boton type="submit" variante="primario" disabled={pendiente}>
+        <Boton type="submit" variante="primario" cargando={pendiente}>
           {pendiente ? "Guardando…" : "Guardar cambios"}
         </Boton>
       </div>
 
+      {/* No hay aviso de «guardado» acá: al guardar bien, la acción lleva
+          al listado y el aviso se muestra allá. Lo único que queda en esta
+          pantalla es lo que hay que corregir sin moverse. */}
       {estado && !estado.ok && !estado.campo && (
         <Aviso tono="error">{estado.mensaje}</Aviso>
-      )}
-      {estado?.ok && (
-        <Aviso tono="exito">Guardado. Ya se ve así en el sitio.</Aviso>
       )}
     </form>
   );

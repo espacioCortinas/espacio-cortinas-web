@@ -50,7 +50,7 @@ export function FormularioNuevo({
       <Boton
         type="submit"
         variante="primario"
-        disabled={pendiente}
+        cargando={pendiente}
         className="self-start"
       >
         {pendiente ? "Creando…" : boton}

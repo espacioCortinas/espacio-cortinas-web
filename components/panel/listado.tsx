@@ -39,6 +39,8 @@ export function Listado({
   const [orden, setOrden] = useEstadoDelServidor(filas);
   const [fallo, setFallo] = useState<string | null>(null);
   const [enCurso, iniciar] = useTransition();
+  // Cuál se está moviendo, para que la rueda salga en ese y no en todos.
+  const [tocado, setTocado] = useState<string | null>(null);
 
   function mover(desde: number, hacia: number) {
     if (hacia < 0 || hacia >= orden.length) return;
@@ -47,6 +49,7 @@ export function Listado({
     [nuevo[desde], nuevo[hacia]] = [nuevo[hacia], nuevo[desde]];
     setOrden(nuevo);
     setFallo(null);
+    setTocado(orden[desde].id);
 
     iniciar(async () => {
       const r = await reordenar(nuevo.map((f) => f.id));
@@ -54,6 +57,7 @@ export function Listado({
         setFallo(r.mensaje);
         router.refresh();
       }
+      setTocado(null);
     });
   }
 
@@ -120,19 +124,21 @@ export function Listado({
                 type="button"
                 aria-label={`Subir ${fila.titulo}`}
                 disabled={i === 0 || enCurso}
+                cargando={tocado === fila.id}
                 onClick={() => mover(i, i - 1)}
                 className="min-h-12 w-12 px-0"
               >
-                <span aria-hidden>↑</span>
+                {tocado !== fila.id && <span aria-hidden>↑</span>}
               </Boton>
               <Boton
                 type="button"
                 aria-label={`Bajar ${fila.titulo}`}
                 disabled={i === orden.length - 1 || enCurso}
+                cargando={tocado === fila.id}
                 onClick={() => mover(i, i + 1)}
                 className="min-h-12 w-12 px-0"
               >
-                <span aria-hidden>↓</span>
+                {tocado !== fila.id && <span aria-hidden>↓</span>}
               </Boton>
             </div>
           </li>

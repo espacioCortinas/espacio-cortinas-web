@@ -33,16 +33,87 @@ const BASE =
   "font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 " +
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900";
 
+/**
+ * La rueda que gira mientras algo está en curso.
+ *
+ * **Por qué hace falta:** varias acciones del panel tardan de verdad —subir una
+ * foto son cuatro archivos, guardar revalida el sitio— y un botón que se apaga
+ * y no hace nada más se lee como una página tildada. El texto también cambia
+ * («Guardando…»), pero el texto hay que leerlo; el movimiento se ve de reojo.
+ *
+ * `aria-hidden` porque no aporta nada a un lector de pantalla: para eso están
+ * el texto del botón y `aria-busy`, que sí se anuncian.
+ *
+ * `motion-reduce:animate-none` respeta a quien pidió menos movimiento en el
+ * sistema. Ahí la rueda queda quieta y el que informa es el texto, que es
+ * justamente por qué el texto cambia y no alcanza con la animación sola.
+ */
+export function Rueda() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 24 24"
+      className="size-4 shrink-0 animate-spin motion-reduce:animate-none"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="9"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        opacity="0.25"
+      />
+      <path
+        d="M21 12a9 9 0 0 0-9-9"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/**
+ * «Guardando…» con la rueda al lado, para lo que no es un botón.
+ *
+ * Los interruptores de publicado y destacado se guardan al tocarlos, sin botón
+ * que se pueda apagar, así que sin esto no hay ninguna señal entre el toque y
+ * el cartel de «Guardado».
+ */
+export function Cargando({ children }: { children: React.ReactNode }) {
+  return (
+    <span
+      role="status"
+      className="flex items-center gap-2 text-sm text-neutral-600"
+    >
+      <Rueda />
+      {children}
+    </span>
+  );
+}
+
 export function Boton({
   variante = "secundario",
+  cargando = false,
+  disabled,
   className = "",
+  children,
   ...resto
-}: ComponentProps<"button"> & { variante?: Variante }) {
+}: ComponentProps<"button"> & { variante?: Variante; cargando?: boolean }) {
   return (
     <button
       {...resto}
+      // Un botón que está trabajando no se puede volver a tocar: dos envíos
+      // del mismo formulario crearían dos productos.
+      disabled={disabled || cargando}
+      aria-busy={cargando || undefined}
       className={`${BASE} ${ESTILOS[variante]} ${className}`.trim()}
-    />
+    >
+      {cargando && <Rueda />}
+      {children}
+    </button>
   );
 }
 

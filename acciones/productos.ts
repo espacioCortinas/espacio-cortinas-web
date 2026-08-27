@@ -133,7 +133,12 @@ export async function guardarProducto(
   if (problema) return problema;
 
   revalidarProductos(slug, antes.slug);
-  return listo;
+
+  // Vuelve al listado en vez de quedarse en el formulario. Quedarse obliga a
+  // mirar si apareció el cartelito de «Guardado» para saber si se guardó, y
+  // desde un teléfono ese cartel queda fuera de la pantalla la mitad de las
+  // veces. Cambiar de pantalla es una confirmación que no hay que buscar.
+  redirect(`/admin/productos?guardado=${encodeURIComponent(nombre)}`);
 }
 
 /**
@@ -279,11 +284,12 @@ export async function eliminarProducto(id: string): Promise<Resultado> {
 
   const { data: producto } = await supabase
     .from("productos")
-    .select("slug")
+    .select("slug, nombre")
     .eq("id", id)
     .maybeSingle();
 
   if (!producto) return error("Este producto ya no existe.");
+  const nombre = producto.nombre;
 
   const rutas = await rutasDeImagenes("producto", id);
 
@@ -305,5 +311,5 @@ export async function eliminarProducto(id: string): Promise<Resultado> {
     );
   }
 
-  redirect("/admin/productos");
+  redirect(`/admin/productos?eliminado=${encodeURIComponent(nombre)}`);
 }

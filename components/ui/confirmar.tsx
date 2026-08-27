@@ -94,7 +94,7 @@ export function BotonConConfirmacion({
               type="button"
               variante="peligro"
               onClick={ejecutar}
-              disabled={enCurso}
+              cargando={enCurso}
             >
               {enCurso ? "Eliminando…" : confirmar}
             </Boton>
