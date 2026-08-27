@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { cerrarSesion } from "@/acciones/sesion";
 import { estadoDeSesion } from "@/lib/auth";
+import { RUTA_PANEL, rutaInternaDelPanel } from "@/lib/rutas";
 
 import { FormularioLogin } from "./formulario-login";
 
@@ -24,11 +25,22 @@ export const metadata: Metadata = {
  */
 export const dynamic = "force-dynamic";
 
-export default async function PaginaLogin() {
+export default async function PaginaLogin({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const sesion = await estadoDeSesion();
 
+  // El `?redirigir=` lo escribe el middleware, pero cualquiera puede
+  // escribirlo a mano: se valida acá, que es donde se usa. Si no es una ruta
+  // del panel, se descarta en silencio y se va al índice.
+  const crudo = (await searchParams).redirigir;
+  const destino =
+    rutaInternaDelPanel(Array.isArray(crudo) ? crudo[0] : crudo) ?? RUTA_PANEL;
+
   // Ya está adentro: no tiene sentido volver a pedirle la contraseña.
-  if (sesion.estado === "administradora") redirect("/admin");
+  if (sesion.estado === "administradora") redirect(destino);
 
   // Hay sesión válida, pero de otra persona. Este es el caso que el criterio
   // de terminado pide probar con un segundo usuario. Se le dice que no tiene
@@ -54,7 +66,7 @@ export default async function PaginaLogin() {
 
   return (
     <main>
-      <FormularioLogin />
+      <FormularioLogin destino={destino} />
     </main>
   );
 }

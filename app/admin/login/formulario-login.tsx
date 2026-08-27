@@ -24,8 +24,13 @@ import { crearClienteNavegador } from "@/lib/supabase/navegador";
  * base acá. Y no debilita la autorización: quien inicie sesión con una cuenta
  * que no sea la de la administradora obtiene una sesión válida y aun así no
  * entra — `verificarAdmin()` compara el `user.id`.
+ *
+ * `destino` es a dónde ir después de entrar. Llega ya validado desde la
+ * página: acá no se lo vuelve a mirar porque este componente no puede
+ * validarlo de forma confiable —es código del navegador— y porque quien tiene
+ * que hacerlo es el servidor que lo lee del parámetro.
  */
-export function FormularioLogin() {
+export function FormularioLogin({ destino }: { destino: string }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -52,7 +57,7 @@ export function FormularioLogin() {
     // `refresh()` antes de navegar: el layout del panel se renderiza en el
     // servidor y tiene que ver la cookie de sesión recién escrita.
     router.refresh();
-    router.replace("/admin");
+    router.replace(destino);
   }
 
   return (

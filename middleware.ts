@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { entornoPublico } from "@/lib/entorno";
+import { RUTA_LOGIN, rutaInternaDelPanel } from "@/lib/rutas";
 
 /**
  * ESTO NO AUTORIZA.
@@ -39,9 +40,6 @@ import { entornoPublico } from "@/lib/entorno";
  * entero, el panel seguiría siendo inaccesible para cualquiera que no sea la
  * administradora. Solo se perdería la redirección amable.
  */
-
-/** El login queda afuera de la redirección, o sería un bucle contra sí mismo. */
-const RUTA_LOGIN = "/admin/login";
 
 /**
  * El panel no se cachea. Desde la mudanza a Cloudflare el proxy de Cloudflare
@@ -92,11 +90,23 @@ export async function middleware(peticion: NextRequest) {
   if (!user && !estaEnElLogin) {
     const destino = peticion.nextUrl.clone();
     destino.pathname = RUTA_LOGIN;
-    // Sin `?redirigir=`: la única página del panel hoy es la raíz, y un
-    // parámetro con una URL adentro es una redirección abierta esperando a que
-    // alguien se olvide de validarla. Se agrega en la Fase 3 si hace falta,
-    // aceptando solo rutas internas.
     destino.search = "";
+
+    // `?redirigir=` para volver a donde se quería ir. Hasta la Fase 2 no
+    // existía: la única página del panel era la raíz y no había nada que
+    // recordar. Con varias secciones sí importa — si la sesión vence mientras
+    // se edita un producto, mandar al índice del panel obliga a volver a
+    // buscarlo a mano.
+    //
+    // El valor pasa por `rutaInternaDelPanel()` en los dos extremos: acá al
+    // escribirlo y en el login al usarlo. Un `?redirigir=` sin validar es una
+    // redirección abierta, y el que la valida tiene que ser el que la
+    // consume — validar solo al escribir no sirve, porque cualquiera puede
+    // escribir el parámetro a mano.
+    const volverA = rutaInternaDelPanel(
+      peticion.nextUrl.pathname + peticion.nextUrl.search,
+    );
+    if (volverA) destino.searchParams.set("redirigir", volverA);
 
     const redireccion = NextResponse.redirect(destino);
     redireccion.headers.set("Cache-Control", SIN_CACHE);
