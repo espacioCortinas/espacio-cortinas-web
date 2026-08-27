@@ -13,7 +13,9 @@
     "lint:fix": "eslint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "esquema": "node scripts/verificar-esquema.mjs",
+    "esquema:actualizar": "node scripts/verificar-esquema.mjs --actualizar"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.20.2",

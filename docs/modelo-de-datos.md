@@ -178,6 +178,20 @@ firmadas o de una política de lectura acotada. Al eliminar un producto o proyec
 la cascada borra las filas: **borrar los archivos de Storage es responsabilidad de
 la Server Action**, no de la base — y ahora son cuatro archivos por fila.
 
+## Cómo se comprueba que esto es cierto
+
+Las migraciones se aplican a mano (decisión 28), así que este documento y la
+base pueden separarse sin que nada avise. La comprobación es un comando:
+
+```
+npm run esquema
+```
+
+Compara el esquema real contra la foto versionada en `supabase/esquema.txt` y
+muestra qué sobra y qué falta. Después de aplicar una migración se corre
+`npm run esquema:actualizar` y se commitea el diff junto con el `.sql`.
+Decisión 31.
+
 ## Datos iniciales
 
 **Ninguno.** Las tablas arrancan vacías. Todo el contenido se carga desde el panel

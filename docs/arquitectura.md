@@ -94,8 +94,11 @@ lib/
 └── constantes.ts
 acciones/                        Server Actions, una por entidad
 docs/
+scripts/
+└── verificar-esquema.mjs        compara la base real con supabase/esquema.txt
 supabase/
-└── migraciones/                 .sql numerados, se aplican a mano (decisión 28)
+├── migraciones/                 .sql numerados, se aplican a mano (decisión 28)
+└── esquema.txt                  foto del esquema real, versionada (decisión 31)
 middleware.ts                    solo redirige. NO renombrar a proxy.ts (dec. 26)
 instrumentation.ts               validación de entorno al arrancar
 next.config.ts                   configuración de Next

@@ -695,6 +695,9 @@ Supabase sin que el cambio quede en un archivo acá.
 **Se revisará** si en algún momento hay que sincronizar varios entornos, que es
 donde la CLI empieza a pagar lo que cuesta. Hoy hay uno solo.
 
+**Lo que a esta decisión le faltaba** —cómo comprobar que la base real se parece
+a lo que dicen los archivos— está en la decisión 31.
+
 ---
 
 ### 29. El caché incremental es Workers KV, y el de etiquetas es D1
@@ -863,6 +866,89 @@ despliegue en vez de borrarlas.
 Secret viejo con el mismo nombre que una `var`, y hay dos valores para el mismo
 nombre. Las otras tres se leen con `npx wrangler deploy --dry-run`, que lista
 los bindings con su valor sin desplegar nada.
+
+---
+
+### 31. Cómo se verifica que las migraciones coinciden con la base
+
+**Fecha:** agosto de 2026, al empezar la Fase 3. Completa la decisión 28.
+
+La decisión 28 dejó las migraciones como archivos `.sql` que se pegan a mano en
+el SQL Editor, y se sostiene: la CLI de Supabase pedía dos credenciales más para
+automatizar un paso que en toda la V1 se corre un puñado de veces.
+
+**Lo que le faltaba:** con una sola tanda de migraciones, «el repositorio es la
+fuente de verdad del esquema» era cierto por inspección. Con más migraciones deja
+de serlo. Una migración que se aplicó a medias, un `alter table` hecho desde el
+panel de Supabase para salir del paso, un `revoke` que quedó sin correr — nada de
+eso deja huella en el repositorio, y el día que aparezca un problema se va a
+buscar en el lugar equivocado.
+
+**Lo que se hace:** el repositorio guarda una **foto** del esquema real, y hay un
+comando que la compara contra la base.
+
+```
+npm run esquema              compara la base con supabase/esquema.txt
+npm run esquema:actualizar   guarda la foto nueva, para commitear el diff
+```
+
+Tres piezas:
+
+| Pieza                           | Qué es                                                              |
+| ------------------------------- | ------------------------------------------------------------------- |
+| `public.verificar_esquema()`    | función SQL que devuelve el estado real, línea por línea y ordenado |
+| `supabase/esquema.txt`          | la foto, versionada. Es lo que el repositorio afirma sobre la base  |
+| `scripts/verificar-esquema.mjs` | compara las dos y muestra qué sobra y qué falta                     |
+
+**El procedimiento al aplicar una migración**, que es todo el punto:
+
+1. Se pega el `.sql` nuevo en el SQL Editor.
+2. Se corre `npm run esquema:actualizar`.
+3. **Se lee el diff de `supabase/esquema.txt`.** Tiene que contener exactamente
+   lo que la migración pedía y nada más.
+4. Se commitea junto con la migración.
+
+El paso 3 es el que hace el trabajo. Si el diff trae algo que la migración no
+pedía, eso es un cambio que alguien hizo por fuera — y aparece ahí, en una
+revisión de código, en vez de descubrirse meses después.
+
+#### Por qué una foto y no una lista de comprobaciones
+
+La alternativa obvia era escribir asserts: «la tabla `productos` tiene que tener
+la columna `slug`», «RLS tiene que estar activado en las cinco tablas». Se
+descartó porque **una lista solo encuentra lo que alguien se acordó de
+escribir.** Los problemas que este mecanismo tiene que atrapar son justamente los
+que nadie previó: la columna de más, la política que quedó de una prueba, el
+permiso que Supabase concede por defecto y que el `revoke` de la migración no
+alcanzó a sacar.
+
+La foto incluye tablas y columnas con tipo y default, restricciones con el
+`on delete` de cada clave foránea, índices con su definición completa —ahí se ve
+el `where es_portada` del índice parcial, que si se perdiera dejaría el índice
+con el mismo nombre haciendo otra cosa—, disparadores, el estado de RLS tabla por
+tabla, las políticas con su condición entera, los permisos de `anon` y
+`authenticated`, los permisos de ejecución de cada función, la configuración del
+bucket y las políticas de `storage.objects`, que tienen que ser cero.
+
+#### Por qué no la CLI de Supabase, otra vez
+
+`supabase db diff` hace algo parecido y mejor. Sigue costando lo mismo que en la
+decisión 28: una dependencia de desarrollo, un `supabase link`, un access token
+personal y la contraseña de la base. Esto son 150 líneas de SQL, un script sin
+ninguna dependencia nueva y ninguna credencial que no exista ya.
+
+**Se revisará junto con la decisión 28**, cuando haya más de un entorno que
+sincronizar.
+
+#### Lo que este mecanismo no hace
+
+No aplica migraciones ni las ordena: sigue habiendo que pegarlas a mano. Tampoco
+detecta un cambio en los **datos**. Detecta una sola cosa —que la forma de la
+base dejó de coincidir con lo que el repositorio dice— y esa es la que hacía
+falta.
+
+La función se expone por la API automática de Supabase, así que se le revoca
+`execute` a `anon` y a `authenticated` y solo la puede llamar `service_role`.
 
 ---
 
