@@ -311,36 +311,49 @@ el Deploy command del builder **tiene que seguir siendo
 `npx opennextjs-cloudflare deploy`** y no `wrangler deploy` pelado: con este
 último el caché queda sin inicializar y la revalidación falla en silencio.
 
-#### `populateCache` desde Windows escribe en el caché LOCAL, y dice que anduvo
+#### Sin `--remote`, wrangler mira el KV SIMULADO y no el de producción
 
-Encontrado durante la Fase 3, con `@opennextjs/cloudflare` 1.20.2 y wrangler
-4.115. Correr a mano desde la máquina de desarrollo:
-
-```
-npx opennextjs-cloudflare populateCache remote
-```
-
-imprime `Successfully populated cache with 4 entries` y **no escribe nada en el
-KV real**: los archivos aparecen en `.wrangler/state/v3/kv/`, que es el KV
-simulado de miniflare. Por dentro llama a `wrangler kv bulk put` sin `--remote`,
-y esta versión de wrangler toma local por defecto.
-
-Cómo se detectó, que es lo que sirve para la próxima:
+Es la trampa más cara de la Fase 3 y llevó a una conclusión equivocada durante
+un buen rato: **`wrangler kv key list`, `key get` y `key put` operan por defecto
+sobre el namespace local de miniflare** (`.wrangler/state/v3/kv/`), no sobre el
+de Cloudflare. Con wrangler 4.115:
 
 ```
-npx wrangler kv key list --namespace-id <id>     # devolvía []
-npx wrangler kv key put --namespace-id <id> prueba hola   # esto sí funcionaba
+npx wrangler kv key list --namespace-id <id>            # []           ← el local
+npx wrangler kv key list --namespace-id <id> --remote   # 19 claves    ← el real
 ```
 
-O sea que KV andaba y el que no escribía era el adaptador.
+Lo insidioso es que las tres operaciones son coherentes entre sí: se escribe una
+clave, se lee, se lista y aparece. Todo funciona — sobre el KV equivocado. Desde
+afuera se ve exactamente como «el caché no está guardando nada», que es la
+conclusión a la que se llegó antes de mirar el flag.
 
-**Consecuencia práctica: ninguna, mientras el despliegue lo haga Cloudflare.**
-El builder corre en Linux y ahí el paso funciona. Lo que no hay que hacer es
-correr `populateCache remote` a mano desde Windows y creerle: se ve verde y no
-hizo nada.
+**Regla: para preguntarle algo a un recurso de producción, `--remote`.** Vale
+para `kv`, y `d1 execute` tiene el mismo comportamiento.
 
-Si alguna vez hace falta poblar el caché a mano, hay que comprobar el resultado
-con `wrangler kv key list` en vez de confiar en el mensaje.
+Los comandos del adaptador (`opennextjs-cloudflare populateCache remote`,
+`deploy`, `upload`) ya pasan `--remote` por su cuenta: ahí no hay nada que
+recordar.
+
+#### Cómo se comprobó que el caché compartido funciona de verdad
+
+Un `x-nextjs-cache: HIT` no alcanza como prueba, porque Next mantiene además su
+propia caché en memoria dentro de cada instancia del Worker: dos peticiones
+seguidas dan HIT aunque nada se haya guardado afuera.
+
+La prueba que sí distingue las dos cosas es **subir una versión nueva del mismo
+build y pedir una ruta que ya se había renderizado en la anterior**. La versión
+nueva arranca con la memoria vacía, así que si responde con el contenido viejo,
+ese contenido solo pudo venir del almacén compartido:
+
+```
+npx wrangler versions upload          # instancia nueva, mismo BUILD_ID
+curl -sI <url-nueva>/ruta-ya-vista    # x-nextjs-cache: STALE, no MISS
+```
+
+Que el `BUILD_ID` sea el mismo es lo que hace válida la comparación: la clave de
+caché lo incluye, así que un build distinto no encontraría nada y daría MISS por
+motivos que no tienen que ver con lo que se quiere probar.
 
 ### Despliegue automático
 
