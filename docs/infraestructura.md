@@ -530,11 +530,24 @@ producto cambió por mudarse de proveedor.**
 Lo único que sí era propio de Vercel y hubo que reemplazar está listado en la
 decisión 24.
 
-## Vercel — qué queda por desconectar
+## Vercel — desconectado
 
-Al 29/07/2026 Cloudflare sirve el dominio y está verificado. Vercel ya no recibe
-tráfico, pero el proyecto sigue existiendo. **Se desconecta a mano, en este
-orden**, dejando pasar unos días por si hay que volver atrás:
+**Hecho el 14/08/2026.** El proyecto de Vercel ya no existe: dominios quitados,
+repositorio desconectado, variables de entorno borradas y proyecto eliminado. Con
+eso, la `service_role key` dejó de estar guardada en un proveedor sin uso, que era
+la condición para no rotarla.
+
+**Cloudflare Pages, borrado el mismo día.** Era el resto del intento fallido de la
+mudanza y construía en cada push sin servir para nada. Se eliminó el proyecto
+entero, no solo su conexión con el repositorio. Al borrarlo hay que mirar la
+columna de tipo en `Workers & Pages`, no el nombre: el Worker
+`espacio-cortinas-web` es el que sirve el sitio y borrarlo lo tira abajo.
+
+Verificado después de la limpieza: `/` responde 200, `/admin` redirige con 307,
+las canónicas siguen en 308 y el MX sigue intacto.
+
+Queda como registro el orden en que se hizo, por si alguna vez hay que repetirlo
+con otro proveedor:
 
 1. **Quitar los dominios del proyecto** — Vercel → el proyecto → Settings →
    Domains: sacar `espaciocortinas.com.ar` y `www.espaciocortinas.com.ar`. Es lo
@@ -552,12 +565,24 @@ orden**, dejando pasar unos días por si hay que volver atrás:
 Google Workspace o el registro del dominio en NIC. La cuenta de Vercel no toca
 ninguno de esos.
 
-**Sobre rotar la clave:** la `service_role key` estuvo cargada en un proveedor
-que ya no se usa. Borrarla del panel alcanza para el caso normal. Rotarla en
-Supabase es lo prolijo y cuesta cinco minutos, así que conviene hacerlo al cerrar
-la cuenta — con la ventaja de que hoy la base está vacía y rotarla no puede
-romper nada. Después de rotar hay que actualizarla en `.env.local` y en las **dos**
-listas del Worker.
+### Sobre rotar la `service_role key` — decidido que no
+
+Se evaluó rotarla y **se decidió no hacerlo**. La exposición real es acotada:
+
+- `.env.local` está en `.gitignore` desde antes del primer commit, así que la
+  clave **nunca estuvo en el repositorio**. Que el repo haya sido público un
+  tiempo expuso documentos y código, no credenciales
+- Hoy vive en tres lugares: la máquina de desarrollo, los Secrets del Worker y
+  las variables de entorno del proyecto de Vercel
+
+Los dos primeros son lugares legítimos. **El tercero es el que hay que cerrar**, y
+por eso el punto 3 de la limpieza —borrar las variables de Vercel— deja de ser
+prolijidad y pasa a ser obligatorio. Sin rotación, es lo único que saca la clave
+de un lugar donde no corresponde que siga.
+
+Si en algún momento aparece evidencia de que la clave se filtró, la decisión se
+revierte: se rota en Supabase y se actualiza en `.env.local`, en `.dev.vars` y en
+la lista de runtime del Worker, como Secret.
 
 ## Pendiente de dar de alta
 
