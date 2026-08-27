@@ -196,10 +196,22 @@ Dice qué metadatos tiene cada archivo, imprime las coordenadas si las hay, y
 devuelve 1 si alguna imagen las conserva. **Se corre sobre las cuatro medidas,
 no solo sobre la más grande.**
 
-Verificado en la Fase 3 con una foto de cámara con GPS real, de 3024 × 4032 y
-6 MB: las cuatro salidas quedaron sin EXIF, sin XMP y sin GPS. Lo único que
-sobrevive es el perfil de color ICC (456 bytes), que describe el espacio de
-color y no dice nada del lugar ni del equipo.
+Verificado en la Fase 3 con dos fotos, y la segunda es la que importa: **una
+foto sacada con el teléfono de la empresa, en la casa de un cliente, con la
+ubicación activada.** Traía EXIF de iPhone, IPTC y las coordenadas del
+domicilio, con precisión de metros. Las tres medidas que generó el panel
+salieron sin EXIF, sin XMP y sin GPS, y una búsqueda cruda sobre los bytes no
+encuentra ni «Exif», ni «GPS», ni «Apple».
+
+Lo único que sobrevive es el perfil de color ICC (456 bytes), que describe el
+espacio de color y no dice nada del lugar, del equipo ni de la fecha. Se
+conserva a propósito: sin él los colores de las telas se ven distintos según el
+navegador.
+
+**Esa foto es el argumento entero de esta sección**, y conviene tenerlo
+presente en vez de leerlo como un requisito abstracto: publicada sin limpiar,
+cualquiera que la descargara del sitio abría la dirección exacta de la casa de
+un cliente en un mapa.
 
 Aparte de esto: no publicar fotos donde se vean personas, documentos, correspondencia
 con direcciones, o el frente de la casa con el número. Es una regla de contenido, no
