@@ -282,6 +282,35 @@ aplicación.
 **El subdominio de la cuenta es `ventas-ccf.workers.dev`.** Solo, sin el nombre
 del Worker adelante, no resuelve: no es una dirección, es el espacio de nombres.
 
+### Recursos de caché — Fase 3
+
+Dos recursos de Cloudflare, los dos en plan gratuito, creados el 27/08/2026.
+Existen para que `revalidatePath()` desde el panel se propague a todas las
+instancias del Worker; sin ellos, guardar un cambio se ve o no según qué
+instancia atienda la recarga. Decisión 29.
+
+| Recurso | Nombre                       | Binding             | Qué guarda                       |
+| ------- | ---------------------------- | ------------------- | -------------------------------- |
+| KV      | `cache-incremental`          | `NEXT_INC_CACHE_KV` | las páginas ya renderizadas      |
+| D1      | `espacio-cortinas-etiquetas` | `NEXT_TAG_CACHE_D1` | cuándo se revalidó cada etiqueta |
+
+Los dos nombres de binding los fija `@opennextjs/cloudflare` y **no se eligen**:
+el adaptador los busca por ese nombre exacto. Los identificadores están en
+`wrangler.jsonc`.
+
+La D1 quedó en la región `ENAM`. No es una elección: D1 no ofrece región en
+Sudamérica, y de las disponibles es la más cercana. Se mide en la Fase 4, cuando
+haya páginas públicas cacheadas de verdad — cada visita a una página guardada
+consulta las etiquetas, así que esa latencia se suma al TTFB. Si molesta, el
+reemplazo es `doShardedTagCache` sobre Durable Objects, que se ubican cerca de
+quien las crea.
+
+**La tabla `revalidations` de D1 no se crea a mano.** La crea el paso
+`populateCache` de `opennextjs-cloudflare deploy`, en cada despliegue. Por eso
+el Deploy command del builder **tiene que seguir siendo
+`npx opennextjs-cloudflare deploy`** y no `wrangler deploy` pelado: con este
+último el caché queda sin inicializar y la revalidación falla en silencio.
+
 ### Despliegue automático
 
 Cloudflare **Workers Builds**, conectado al repositorio de GitHub. Cada push a
@@ -320,41 +349,50 @@ operación más fácil de cometer al venir de Vercel, donde había una sola.
 | Settings → Build → **Build variables and secrets** | el build. Acá se incrustan las `NEXT_PUBLIC_*` y acá valida `next.config.ts` |
 | Settings → **Variables and Secrets**               | el runtime, en cada petición que toque el servidor                           |
 
-Las cinco en uso hoy van en las dos listas — las cuatro de la Fase 1 más
-`ADMIN_USER_ID`, que se sumó en la Fase 2:
+Las cinco en uso hoy son las cuatro de la Fase 1 más `ADMIN_USER_ID`, que se
+sumó en la Fase 2. **Desde la Fase 3 no se administran todas igual**, y esa es
+la parte que hay que leer con atención:
 
-| Variable                        | Tipo en runtime | Valor en producción               |
-| ------------------------------- | --------------- | --------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | **Secret**      | igual que en `.env.local`         |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | **Secret**      | igual que en `.env.local`         |
-| `NEXT_PUBLIC_SITE_URL`          | **Secret**      | `https://espaciocortinas.com.ar`  |
-| `SUPABASE_SERVICE_ROLE_KEY`     | **Secret**      | igual que en `.env.local`         |
-| `ADMIN_USER_ID`                 | **Secret**      | el `user.id` de la administradora |
-
-En la lista de **build** el tipo es indistinto (ahí wrangler no borra nada); lo
-que importa es que estén. En la de **runtime** van todas como Secret, por la
-razón del incidente del 14/08.
+| Variable                        | Dónde vive el valor de runtime | Valor en producción               |
+| ------------------------------- | ------------------------------ | --------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | `wrangler.jsonc` → `vars`      | el origen pelado del proyecto     |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `wrangler.jsonc` → `vars`      | igual que en `.env.local`         |
+| `NEXT_PUBLIC_SITE_URL`          | `wrangler.jsonc` → `vars`      | `https://espaciocortinas.com.ar`  |
+| `SUPABASE_SERVICE_ROLE_KEY`     | **Secret** del Worker          | igual que en `.env.local`         |
+| `ADMIN_USER_ID`                 | **Secret** del Worker          | el `user.id` de la administradora |
 
 `NEXT_PUBLIC_SITE_URL` es la única que difiere del archivo local, sin `www` y sin
 barra final — decisión 22.
 
-**En la lista de runtime, TODAS se cargan como Secret, no solo
-`SUPABASE_SERVICE_ROLE_KEY`.** No es por confidencialidad: es porque las
-variables de texto de esa lista **las borra el siguiente `wrangler deploy`**.
-Ver el incidente del 14/08 más abajo. Un Secret queda cifrado y no se puede
-volver a leer desde el panel ni desde la CLI; si se pierde, se rota y se vuelve
-a cargar.
+**Por qué las tres primeras están en el repositorio y no en el panel.** Llevan
+prefijo `NEXT_PUBLIC_`, así que Next las incrusta en el paquete que descarga el
+navegador: cualquiera que abra el sitio ya las tiene. No hay nada que proteger,
+y sí algo que ganar — hasta la Fase 2 estaban cargadas como Secret, y un Secret
+**no se puede volver a leer**. Eso dejaba la configuración de producción de
+solo escritura: cuando `NEXT_PUBLIC_SUPABASE_URL` se cargó con `/rest/v1`
+pegado y rompió el login, el valor que estaba puesto era invisible. Ahora se lee
+en un diff, con historial. Decisión 30.
 
-Que una clave secreta haga falta también en el build no es un descuido: es
-consecuencia de que `next.config.ts` valide el entorno antes de construir
-(decisión 21). Un despliegue al que le falte una variable corta el build y la
-versión anterior sigue sirviendo.
+**Por qué eso además arregla el borrado.** `wrangler deploy` trata al bloque
+`vars` de `wrangler.jsonc` como la fuente de verdad: deja el Worker con esas
+variables y borra cualquier otra de texto. Antes el archivo no tenía ese bloque,
+así que cada despliegue barría con todo lo cargado a mano —eso fue el incidente
+del 14/08— y el parche era cargarlas como Secret para que wrangler no las
+tocara. Declararlas en el archivo ataca la causa en vez del síntoma: ahora
+wrangler las escribe, no las borra.
+
+**Las dos secretas siguen siendo Secret y nunca van a `wrangler.jsonc`.** Se
+cargan con `npx wrangler secret put NOMBRE` y wrangler no las toca porque se
+administran fuera del archivo de configuración.
+
+En la lista de **build** el tipo sigue siendo indistinto (esa lista wrangler no
+la toca) y las cinco tienen que estar igual. Que una clave secreta haga falta
+también en el build no es un descuido: es consecuencia de que `next.config.ts`
+valide el entorno antes de construir (decisión 21). Un despliegue al que le
+falte una variable corta el build y la versión anterior sigue sirviendo.
 
 **Si falta alguna en la lista de _build_, el build falla a propósito con la lista
 completa de faltantes.** Es el comportamiento buscado.
-
-**Pero la lista de _runtime_ no la protege nadie**, y esa asimetría ya tumbó el
-sitio una vez. Ver el incidente más abajo.
 
 ### Incidente del 29/07/2026 — el sitio caído tras la mudanza
 
@@ -396,13 +434,20 @@ npx wrangler secret list
 [ { "name": "SUPABASE_SERVICE_ROLE_KEY", "type": "secret_text" } ]
 ```
 
-**La regla que reemplaza a la anterior: en la lista de runtime, TODAS las
-variables se cargan como Secret, no solo las secretas.** No es por
-confidencialidad —`NEXT_PUBLIC_SITE_URL` no tiene nada que ocultar— sino porque
-es el único tipo que sobrevive a un `wrangler deploy`. Una variable de texto en
-esa lista es una bomba de tiempo: funciona hasta el próximo despliegue.
+**La regla de entonces —cargar TODAS como Secret, no solo las secretas— era un
+parche al síntoma**, y funcionó: un Secret es el único tipo que sobrevive a un
+`wrangler deploy`. Pero dejaba la configuración de producción de solo
+escritura, y ese costo se cobró el mismo día con la URL de Supabase mal cargada
+(más abajo).
 
-En la lista de **build** la distinción no aplica: esa lista no la toca wrangler.
+**Desde la Fase 3 la regla es otra, y ataca la causa:** las tres variables
+públicas se declaran en el bloque `vars` de `wrangler.jsonc`. Wrangler no las
+borra porque ahora están donde él manda, y de paso el valor queda auditable en
+el repositorio. Las dos secretas siguen siendo Secret. Decisión 30.
+
+Lo que **no** cambia y sigue siendo la trampa: una variable de texto cargada a
+mano en el panel, sin declararla en `wrangler.jsonc`, la sigue borrando el
+próximo despliegue. El archivo es la fuente de verdad; el panel, no.
 
 Por qué esto no se había visto: en la Fase 1 las variables se cargaron a mano
 _después_ del último despliegue, así que nada volvió a pisarlas. El primer push
@@ -414,8 +459,28 @@ posterior era el que iba a romperlo, y fue el de la Fase 2.
 npx wrangler secret list
 ```
 
-Tienen que estar **las cinco**. Si falta alguna, se recarga con
+Tienen que estar **exactamente dos**: `SUPABASE_SERVICE_ROLE_KEY` y
+`ADMIN_USER_ID`. Si falta alguna, se recarga con
 `npx wrangler secret put NOMBRE`.
+
+Que aparezca una tercera **no es tranquilizador, es un problema**: significa que
+quedó un Secret viejo con el mismo nombre que una variable declarada en
+`wrangler.jsonc`, y entonces hay dos valores para el mismo nombre y no está
+claro cuál gana.
+
+Las otras tres se verifican leyendo el archivo, que es todo el punto:
+
+```
+npx wrangler deploy --dry-run
+```
+
+lista los bindings con su valor, incluidas las tres `vars`. Sin desplegar nada.
+
+**Ojo con `wrangler secret list` después de `wrangler versions upload`:** informa
+sobre la **última versión subida**, no sobre la que está sirviendo. Durante la
+migración de la Fase 3 las tres desaparecieron de la lista apenas se subió la
+versión nueva, con producción todavía sirviendo la anterior. No era un error;
+era la lista contestando por otra versión.
 
 **Por qué la validación de entorno no lo evita:** `lib/entorno-validacion.ts`
 lee `process.env[nombre]` con acceso dinámico, que Next no puede reemplazar en

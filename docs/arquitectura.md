@@ -133,11 +133,11 @@ Ni `.open-next/` ni `.wrangler/` se versionan: los regenera el build.
 
 ### Los tres archivos de configuración
 
-| Archivo               | Qué define                                                                                    |
-| --------------------- | --------------------------------------------------------------------------------------------- |
-| `next.config.ts`      | Next. No tiene nada específico de Cloudflare                                                  |
-| `open-next.config.ts` | cómo el adaptador traduce Next a Worker. Hoy va vacío a propósito — ver más abajo             |
-| `wrangler.jsonc`      | el Worker: nombre, punto de entrada, fecha de compatibilidad, banderas y carpeta de estáticos |
+| Archivo               | Qué define                                                                                     |
+| --------------------- | ---------------------------------------------------------------------------------------------- |
+| `next.config.ts`      | Next. No tiene nada específico de Cloudflare                                                   |
+| `open-next.config.ts` | cómo el adaptador traduce Next a Worker: el caché incremental compartido — ver más abajo       |
+| `wrangler.jsonc`      | el Worker: nombre, entrada, compatibilidad, estáticos, bindings de caché y las `vars` públicas |
 
 Dos cosas de `wrangler.jsonc` no son opcionales:
 
@@ -146,18 +146,28 @@ Dos cosas de `wrangler.jsonc` no son opcionales:
 - **`compatibility_date`**, que congela el comportamiento del runtime. Se sube a
   propósito, igual que la versión de Next.
 
-### Por qué `open-next.config.ts` está vacío
+### Qué hay en `open-next.config.ts`
 
-El adaptador permite enchufar un **caché incremental compartido** (R2, Workers KV
-o D1) para que las páginas revalidadas y `revalidatePath()` se propaguen entre
-instancias del Worker. Hoy no hace falta: la única página es estática y no hay
-base todavía.
+El caché compartido, resuelto en la Fase 3. Sin él, `revalidatePath()` desde el
+panel invalida la copia de **una** instancia del Worker y las demás siguen
+sirviendo la página vieja: la administradora guardaría un cambio y lo vería o no
+según qué instancia la atienda.
 
-**Se resuelve en la Fase 3**, cuando el contenido venga de Supabase y el panel
-revalide rutas al guardar. Sin esa pieza, una revalidación disparada desde el
-panel toca una sola instancia y el resto sigue sirviendo lo viejo. **No es un
-detalle que se pueda dejar pasar: es la condición para que "guardar en el panel
-se vea enseguida" siga siendo cierto.**
+**Son dos piezas, y la de arriba sola no alcanza:**
+
+| Pieza              | Recurso                         | Qué guarda                       |
+| ------------------ | ------------------------------- | -------------------------------- |
+| `incrementalCache` | Workers KV `cache-incremental`  | la página ya renderizada         |
+| `tagCache`         | D1 `espacio-cortinas-etiquetas` | cuándo se revalidó cada etiqueta |
+
+`revalidatePath()` no borra nada: anota en el `tagCache` que la etiqueta de esa
+ruta se revalidó recién. En la visita siguiente el adaptador compara esa marca
+contra la fecha de lo guardado y, si es más nueva, renderiza de nuevo en esa
+misma petición. Sin `tagCache` —que viene en `dummy` por defecto y no avisa—
+`revalidatePath()` no hace nada.
+
+Por qué KV y no R2, por qué D1 y no KV para las etiquetas, y por qué no hay
+`queue`: decisión 29 de `docs/decisiones.md`.
 
 ### Comandos
 
@@ -348,9 +358,16 @@ si faltan en el build, el despliegue corta con la lista de faltantes (que es lo
 que se busca); si faltan en el runtime, el sitio se publica y falla en la primera
 petición que toque el servidor.
 
-**Las secretas se cargan como Secret, nunca como Text**, en las dos listas. Un
-Secret no se puede volver a leer desde el panel ni desde la CLI: si se pierde, se
-rota en Supabase y se vuelve a cargar. Eso es lo correcto, no un inconveniente.
+**En el runtime no todas se administran igual, desde la Fase 3.** Las tres
+`NEXT_PUBLIC_*` se declaran en el bloque `vars` de `wrangler.jsonc`: terminan en
+el navegador de todos modos, así que no hay nada que proteger, y ahí el valor
+queda auditable en el repositorio en vez de ser ilegible. Las dos secretas
+—`SUPABASE_SERVICE_ROLE_KEY` y `ADMIN_USER_ID`— se cargan como Secret y **nunca**
+van al archivo. Un Secret no se puede volver a leer: si se pierde, se rota en
+Supabase y se vuelve a cargar. Decisión 30.
+
+En la lista de **build** siguen haciendo falta las cinco, y ahí el tipo es
+indistinto: esa lista no la toca wrangler.
 
 **No todas son obligatorias al mismo tiempo.** Solo se exigen las que la fase en
 curso ya usa; la lista vive en `lib/entorno-validacion.ts` y cada fase suma la

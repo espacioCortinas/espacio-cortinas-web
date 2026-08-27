@@ -697,6 +697,175 @@ donde la CLI empieza a pagar lo que cuesta. Hoy hay uno solo.
 
 ---
 
+### 29. El caché incremental es Workers KV, y el de etiquetas es D1
+
+**Fecha:** agosto de 2026, al empezar la Fase 3.
+
+`docs/arquitectura.md` dejaba esto explícitamente para esta fase: sin un caché
+compartido, `revalidatePath()` desde el panel invalida la copia de **una**
+instancia del Worker y las demás siguen sirviendo la página vieja. La
+administradora guardaría un cambio y lo vería o no según qué instancia la
+atienda. Es la condición para que «guardo y lo veo enseguida» sea cierto.
+
+**Lo primero que apareció al implementarlo: no es una pieza, son dos.**
+
+| Pieza              | Qué guarda                       | Qué pasa si falta                                     |
+| ------------------ | -------------------------------- | ----------------------------------------------------- |
+| `incrementalCache` | la página ya renderizada         | cada instancia renderiza por su cuenta; nada se rompe |
+| `tagCache`         | cuándo se revalidó cada etiqueta | **`revalidatePath()` no hace nada**                   |
+
+El enunciado de la fase hablaba solo del caché incremental. Configurar solo eso
+habría dado un sistema que parece andar —las páginas se guardan y se sirven
+rápido— y en el que el botón de guardar del panel no propaga nada. El
+`tagCache` viene en `dummy` por defecto y no avisa.
+
+Cómo funciona, que es lo que explica las dos elecciones de abajo:
+`revalidatePath()` no borra nada. Anota en el `tagCache` que la etiqueta de esa
+ruta se revalidó recién. En la siguiente visita el adaptador compara esa marca
+contra la fecha de lo guardado en el `incrementalCache`, y si la marca es más
+nueva trata la entrada como inexistente: Next renderiza en esa misma petición y
+devuelve lo nuevo. **No hay ventana de espera.**
+
+#### El caché incremental: KV, no R2
+
+**R2 es lo que recomienda la documentación de OpenNext**, y no se pudo usar:
+
+```
+npx wrangler r2 bucket list
+X [ERROR] Please enable R2 through the Cloudflare Dashboard. [code: 10042]
+```
+
+R2 hay que habilitarlo a mano y con un método de pago cargado, aunque el uso
+entre en el nivel gratuito. La cuenta es de la empresa y el proyecto entero está
+planteado sobre planes gratuitos sin datos de facturación (decisión 18 para
+Supabase, decisión 24 para Cloudflare). Habilitar un producto que pide tarjeta
+para ganar una consistencia que acá no hace falta —ver abajo— no valía el
+trámite.
+
+**La objeción a KV es que es de consistencia eventual:** una escritura puede
+tardar hasta 60 s en verse desde otra región. Acá eso **no se traduce en
+contenido viejo**, y la razón es la mecánica de arriba: quien decide si algo
+está vencido no es esta caché, es el `tagCache`. Si KV devolviera una copia
+atrasada, su fecha sería más vieja que la marca de revalidación y el adaptador
+la descartaría igual. **El peor caso es renderizar de más durante un minuto, no
+mostrar lo viejo.**
+
+Y para este sitio KV encaja mejor por lo demás: lectura por caché en niveles
+desde el borde, y un volumen ridículo —unas decenas de páginas chicas— frente al
+argumento de R2, que es ser barato con mucho volumen. El plan gratuito de KV da
+100.000 lecturas y 1.000 escrituras por día; acá una jornada intensa de carga de
+contenido son unos cientos de escrituras.
+
+#### El caché de etiquetas: D1, no KV ni Durable Objects
+
+Donde la consistencia eventual **sí** dolería es en el `tagCache`, porque es el
+que decide. Existe uno de KV (`kv-next-tag-cache`) que ahorraría un recurso, y
+el propio adaptador lo marca experimental con este aviso:
+
+> KV is eventually consistent and can take up to 60s to reflect the last write.
+> This means that revalidations can take up to 60s to apply.
+
+Eso es exactamente la promesa que esta fase tiene que cumplir, así que queda
+descartado sin más.
+
+`doShardedTagCache`, sobre Durable Objects, es el que la documentación
+recomienda para tráfico alto o revalidaciones frecuentes. Este sitio es lo
+contrario: una persona cargando contenido unas veces por mes. D1 es el que la
+documentación indica para carga baja, es fuertemente consistente y estaba
+disponible en la cuenta sin habilitar nada.
+
+**Lo que D1 cuesta y hay que medir en la Fase 4:** quedó en la región `ENAM`
+porque D1 no ofrece Sudamérica, y cada visita a una página guardada consulta las
+etiquetas. Esa latencia se suma al TTFB de todas las páginas públicas. Si
+molesta, el reemplazo es `doShardedTagCache`: los Durable Objects se ubican
+cerca de quien los crea.
+
+#### Sin `queue`, y esto hay que revisarlo en la Fase 4
+
+El `queue` del adaptador **no interviene en la revalidación bajo demanda** —la
+del panel— sino en la **revalidación por tiempo**: la de una página declarada
+con `revalidate: 60`, que al vencer se regenera de fondo. Este sitio no tiene
+ninguna: el contenido cambia solo cuando la administradora guarda, y ahí ya hay
+un `revalidatePath()` explícito. Un `queue` hoy sería un Durable Object más una
+referencia de servicio para algo que nunca se dispara.
+
+**Si en la Fase 4 alguna página pública se declara con `revalidate: N`, hay que
+agregar el `queue` en el mismo movimiento.** Sin él esa página no se regenera
+sola: el adaptador intenta encolar, falla, y lo anota en los registros del
+Worker sin que nada más se entere. Sigue sirviendo lo guardado, así que no se
+cae — se congela.
+
+#### Lo que hay que saber para operarlo
+
+La tabla `revalidations` de D1 la crea el paso `populateCache` de
+`opennextjs-cloudflare deploy`, en cada despliegue. **El Deploy command del
+builder tiene que seguir siendo `npx opennextjs-cloudflare deploy`**; con
+`wrangler deploy` pelado el caché queda sin inicializar y la revalidación falla
+en silencio.
+
+---
+
+### 30. Las variables públicas se declaran en `wrangler.jsonc`, no como Secret
+
+**Fecha:** agosto de 2026, al empezar la Fase 3. Corrige la regla que salió del
+incidente del 14/08.
+
+**La regla anterior decía:** en la lista de runtime del Worker, **todas** las
+variables se cargan como Secret, incluso las que no tienen nada que ocultar. La
+razón era buena: `wrangler deploy` borra las variables de tipo Text, y un Secret
+es el único tipo que sobrevive.
+
+**Por qué se cambia:** funcionaba, pero dejaba la configuración de producción de
+**solo escritura**. Un Secret no se puede volver a leer, ni desde el panel ni
+desde la CLI. Nadie podía auditar qué valor estaba puesto.
+
+Ese costo se cobró el mismo día que se adoptó la regla:
+`NEXT_PUBLIC_SUPABASE_URL` estaba cargada con `/rest/v1` pegado al final, el
+sitio respondía 200, el build salía verde, y el login estaba roto para todo el
+mundo. El valor equivocado era invisible.
+
+**Lo que se hace ahora:**
+
+```
+vars (en wrangler.jsonc)   NEXT_PUBLIC_SUPABASE_URL
+                           NEXT_PUBLIC_SUPABASE_ANON_KEY
+                           NEXT_PUBLIC_SITE_URL
+
+Secrets (del Worker)       SUPABASE_SERVICE_ROLE_KEY
+                           ADMIN_USER_ID
+```
+
+**Las tres primeras no exponen nada.** Llevan prefijo `NEXT_PUBLIC_`, así que
+Next las incrusta en el paquete que descarga el navegador: cualquiera que abra
+el sitio ya las tiene. Escribirlas en un archivo versionado no agrega ninguna
+exposición. Lo que se puede hacer con la clave anónima lo decide RLS —
+`docs/seguridad.md`.
+
+**Y de paso resuelve el borrado por la causa y no por el síntoma.** Wrangler
+borra las variables de texto porque trata al bloque `vars` de `wrangler.jsonc`
+como la fuente de verdad: deja el Worker con lo que dice el archivo y saca el
+resto. El problema nunca fue que las variables fueran de texto — fue que el
+archivo no las declaraba. Declaradas ahí, wrangler las escribe en cada
+despliegue en vez de borrarlas.
+
+**Lo que no cambia:**
+
+- Las dos secretas **nunca** van a `wrangler.jsonc`. Se cargan con
+  `wrangler secret put` y wrangler no las toca.
+- La lista de **build** sigue siendo otra cosa y sigue necesitando las cinco.
+  Este archivo no la toca.
+- Una variable de texto cargada a mano en el panel **sin** declararla en
+  `wrangler.jsonc` la sigue borrando el próximo despliegue. El archivo manda;
+  el panel, no.
+
+**Cómo se verifica ahora:** `npx wrangler secret list` tiene que devolver
+**exactamente dos**. Una tercera no es tranquilizadora: significa que quedó un
+Secret viejo con el mismo nombre que una `var`, y hay dos valores para el mismo
+nombre. Las otras tres se leen con `npx wrangler deploy --dry-run`, que lista
+los bindings con su valor sin desplegar nada.
+
+---
+
 ## Decisiones abiertas
 
 Ninguna en este momento.

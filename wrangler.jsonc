@@ -25,6 +25,78 @@
   // petición del servidor a una URL del sitio se resuelve en bucle.
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
 
+  // ── Variables de entorno del runtime ──────────────────────────────────────
+  //
+  // ACÁ ES DONDE MIRA WRANGLER. `wrangler deploy` trata a este bloque como la
+  // fuente de verdad: en cada despliegue deja el Worker exactamente con estas
+  // variables de texto y borra cualquier otra que se haya cargado a mano en el
+  // panel. Eso fue lo que tumbó el sitio el 14/08/2026 —cuatro variables
+  // cargadas como Text desaparecieron en el primer despliegue de la Fase 2— y
+  // el parche de entonces fue cargarlas todas como Secret, que es el único
+  // tipo que wrangler no toca.
+  //
+  // Funcionaba, pero dejaba la configuración de producción de SOLO ESCRITURA:
+  // un Secret no se puede volver a leer, así que nadie podía auditar qué valor
+  // estaba puesto. En la misma fase una URL de Supabase mal cargada rompió el
+  // login con el sitio respondiendo 200, y ese valor era invisible.
+  //
+  // Declararlas acá invierte las dos cosas: wrangler deja de borrarlas porque
+  // ahora están donde él manda, y el valor exacto de producción se lee en el
+  // repositorio, en un diff, con historial.
+  //
+  // LAS TRES SON PÚBLICAS. Llevan prefijo `NEXT_PUBLIC_`, así que Next las
+  // incrusta en el paquete que descarga el navegador: cualquiera que abra el
+  // sitio las tiene. Escribirlas acá no expone nada que no esté ya expuesto.
+  // Lo que puede hacerse con la clave anónima lo decide RLS — docs/seguridad.md.
+  //
+  // LO QUE NO VA ACÁ, nunca: `SUPABASE_SERVICE_ROLE_KEY` y `ADMIN_USER_ID`.
+  // Siguen siendo Secrets, se cargan con `wrangler secret put` y wrangler no
+  // los borra porque se administran fuera de este archivo.
+  //
+  // Ojo: esto es la lista de RUNTIME. La de build («Build variables and
+  // secrets», en el panel) es otra y este archivo no la toca — ahí es donde
+  // Next incrusta las `NEXT_PUBLIC_*` y donde valida `next.config.ts`.
+  // Ver docs/infraestructura.md.
+  "vars": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://irqqimwcoevkvuyexlhg.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlycXFpbXdjb2V2a3Z1eWV4bGhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNjYyMTksImV4cCI6MjEwMDg0MjIxOX0.csRJyF6Cg3n8pTJCdpmp7rphQg0rmuUeQmucPuqI3Ok",
+
+    // Sin `www` y sin barra final — decisión 22. Es el único valor que difiere
+    // a propósito de `.env.local`, donde en local es http://localhost:3000.
+    "NEXT_PUBLIC_SITE_URL": "https://espaciocortinas.com.ar",
+  },
+
+  // ── Caché incremental compartido ──────────────────────────────────────────
+  //
+  // Sin esto, `revalidatePath()` desde el panel toca UNA instancia del Worker
+  // y las demás siguen sirviendo lo viejo. Son dos piezas y hacen cosas
+  // distintas — decisión 29:
+  //
+  //   NEXT_INC_CACHE_KV  guarda las páginas ya renderizadas
+  //   NEXT_TAG_CACHE_D1  guarda CUÁNDO se revalidó cada etiqueta, o sea quién
+  //                      decide si lo guardado todavía sirve
+  //
+  // Los dos nombres de binding los fija `@opennextjs/cloudflare` y no se
+  // eligen: el adaptador los busca por ese nombre exacto.
+  "kv_namespaces": [
+    {
+      "binding": "NEXT_INC_CACHE_KV",
+      "id": "c7ad84b5516b4010975a468b088bb3a8",
+    },
+  ],
+
+  // La tabla `revalidations` no se crea a mano: la crea
+  // `opennextjs-cloudflare deploy` en cada despliegue (paso «populateCache»).
+  // Por eso el comando de despliegue tiene que ser ese y no `wrangler deploy`
+  // pelado — docs/infraestructura.md.
+  "d1_databases": [
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "espacio-cortinas-etiquetas",
+      "database_id": "95eaac80-5447-4987-9cfe-d3bb1c495c3e",
+    },
+  ],
+
   // Los estáticos los sirve Cloudflare directamente, sin ejecutar el Worker.
   "assets": {
     "directory": ".open-next/assets",
