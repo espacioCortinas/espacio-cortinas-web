@@ -574,13 +574,20 @@ mostrar fotos el día 20 de cada mes no sirve para lo único que este sitio hace
   qué medidas existen por fila y no se asume que todas tienen todas: permite
   agregar una medida nueva de forma incremental
 - No hay AVIF. WebP lo entienden todos los navegadores en uso; AVIF comprime
-  mejor pero generarlo en el navegador es lento y el beneficio es marginal
+  mejor pero generarlo en el navegador es lento y el beneficio es marginal.
+  **Ojo con esta frase**, que es la que falló: «lo entienden» es sobre MOSTRAR,
+  y resultó que lo que faltaba era GENERAR — decisión 35
 
 **Consecuencias concretas:** `next/image` pasa a usarse con `unoptimized`, o
 directamente `<img>`. Ver `docs/arquitectura.md` (sección «Subida de imágenes») y
 `docs/modelo-de-datos.md` (columna `medidas`).
 
 **Esto es documentación, no implementación.** El código es de la Fase 3.
+
+**Corregida por la decisión 35:** el formato no siempre es WebP. WebKit no
+sabe generarlo desde un canvas, y en iOS todos los navegadores son WebKit, así
+que las fotos cargadas desde el teléfono son JPEG. Cada fila registra cuál le
+tocó.
 
 **Corregida por la decisión 32:** donde acá dice «lado mayor» va **ancho**. La
 diferencia no es de redacción — el descriptor `w` de un `srcset` es el ancho
@@ -1072,6 +1079,96 @@ desmarcar destacados — justo lo que el modelo quería evitar.
 
 Se agregó con los mismos botones de subir y bajar de la galería, y `orden` se
 asigna solo al crear, para que lo nuevo entre al final.
+
+---
+
+### 35. El formato de subida se detecta, y cada imagen registra el suyo
+
+**Fecha:** agosto de 2026, probando el panel de la Fase 3 desde el teléfono de
+la empresa. Corrige la decisión 25.
+
+**Cómo apareció.** Al intentar subir la primera foto desde el iPhone, el panel
+respondía: «Este navegador no puede guardar las fotos en el formato que usa la
+página». Lo mismo desde Safari y desde Chrome.
+
+**Por qué desde los dos.** Porque en iOS son el mismo navegador: Apple obliga a
+que todo lo que muestre páginas use WebKit, así que Chrome y Firefox en iPhone
+son Safari con otro ícono. Probar «en otro navegador» no prueba nada ahí.
+
+**La causa: WebKit no sabe generar WebP desde un canvas.** Sabe mostrarlo desde
+2020, que es lo que la decisión 25 tuvo en cuenta —«WebP lo entienden todos los
+navegadores en uso»— pero mostrar y generar son cosas distintas, y esa decisión
+solo miró la primera. El equipo de WebKit no implementó la codificación.
+
+**Y lo peor es cómo falla.** `canvas.toBlob("image/webp")` no devuelve error ni
+`null`: por especificación, cuando el formato pedido no está soportado, el
+navegador **devuelve un PNG**. O sea que preguntar «¿podés WebP?» siempre
+contesta que sí. Sin la comprobación de `blob.type` que ya tenía el código, se
+habrían subido PNG enormes con nombre `.webp` y el problema habría aparecido
+mucho más tarde, como fotos que pesan diez veces lo previsto.
+
+#### Lo que se hace
+
+El navegador prueba, en orden, cuál de los formatos sabe generar de verdad
+—codifica un lienzo de 1×1 y mira qué tipo vuelve— y usa el primero que
+funcione:
+
+| Dónde                                | Formato |
+| ------------------------------------ | ------- |
+| Chrome, Edge, Firefox, Android       | WebP    |
+| Cualquier navegador en iPhone o iPad | JPEG    |
+| Safari en Mac                        | JPEG    |
+
+Y **cada fila de imagen registra cuál le tocó**, en una columna `formato` nueva
+(migración 0006). Es el mismo razonamiento que ya justificaba la columna
+`medidas`: no adivinar, registrar. Armar el nombre del archivo desde una
+constante del código funcionaría hasta la primera foto cargada desde el otro
+dispositivo, y ahí el navegador pediría `960.webp` de una foto que en realidad
+es `960.jpg`.
+
+El valor guardado es **la extensión**, no el tipo MIME, para que armar la ruta
+sea concatenar (`{ancho}.{formato}`) y no traducir.
+
+#### Lo que cuesta, medido y no estimado
+
+Sobre una foto real de la empresa, de 1206 × 2144:
+
+| ancho | WebP @0,82 | JPEG @0,75 |
+| ----- | ---------- | ---------- |
+| 480   | 61 kB      | 67 kB      |
+| 960   | 193 kB     | 226 kB     |
+| 1206  | 324 kB     | 361 kB     |
+
+**Entre 10% y 17% más**, no el 30-40% que se suele citar. La diferencia está en
+la calidad: 0,75 en JPEG se ve como 0,82 en WebP para fotografía, y comparar
+los dos al mismo número es comparar mal. A cambio, el JPEG lo genera el
+codificador nativo del sistema, que es instantáneo.
+
+#### Las dos alternativas que se descartaron
+
+**Usar JPEG para todo y no tener columna.** Más simple: un formato, un camino,
+sin detección. Se descartó porque el archivo histórico de la empresa son unas
+300 fotos que se van a cargar desde una computadora, no desde el teléfono, y
+ahí sí se puede generar WebP. Renunciar a eso para ahorrar una columna es pagar
+un 10-17% de peso en todas las fotos del sitio, para siempre, en un sitio
+mobile-first cuyo contenido es casi exclusivamente fotos.
+
+**Un codificador de WebP en WebAssembly**, para mantener WebP en todos lados.
+Es lo que hace la decisión 25 posible tal como estaba escrita, y se descartó
+por dos razones: agrega una dependencia (regla 8 de `CLAUDE.md`), y sobre todo
+**comprimir en WebAssembly en un teléfono es varias veces más lento que el
+codificador nativo**. Cada foto son tres o cuatro medidas; multiplicado por las
+300 fotos del archivo, la carga de contenido se volvería una tarea de días. El
+10-17% de bytes no vale eso.
+
+#### Lo que no cambia
+
+- Se sigue prefiriendo WebP donde se puede.
+- El EXIF se sigue borrando igual, y **se verificó también en el camino JPEG**,
+  que es el que importa comprobar: WebP no tiene dónde guardar metadatos, pero
+  un JPEG sí. Las tres medidas salieron sin EXIF, sin IPTC y sin GPS — lo único
+  que queda es el perfil de color ICC.
+- Las medidas siguen siendo las de la decisión 32.
 
 ---
 

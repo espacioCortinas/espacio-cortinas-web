@@ -1,6 +1,12 @@
 "use server";
 
-import { BUCKET, IMAGEN_LADO_MAXIMO, TIPO_SUBIDO } from "@/lib/constantes";
+import {
+  BUCKET,
+  EXTENSIONES_VALIDAS,
+  type FormatoDeImagen,
+  IMAGEN_LADO_MAXIMO,
+  TIPOS_SUBIBLES,
+} from "@/lib/constantes";
 import { verificarAdmin } from "@/lib/auth";
 import { borrarCarpetas } from "@/lib/panel/almacenamiento";
 import {
@@ -70,7 +76,10 @@ export type PedidoDeSubida = {
   medidas: number[];
   /** Peso en bytes de cada uno, en el mismo orden. */
   pesos: number[];
+  /** El tipo MIME: `image/webp` o `image/jpeg`, según qué pudo generar. */
   tipo: string;
+  /** La extensión que van a tener los archivos: `webp` o `jpg`. */
+  formato: string;
 };
 
 export type SubidaFirmada = {
@@ -100,14 +109,21 @@ export async function pedirSubida(
 > {
   await verificarAdmin();
 
-  const { entidad, padreId, medidas, pesos, tipo } = pedido;
+  const { entidad, padreId, medidas, pesos, tipo, formato } = pedido;
 
   if (!entidadValida(entidad))
     return { ok: false, mensaje: "Entidad inválida." };
   if (!UUID.test(padreId))
     return { ok: false, mensaje: "Identificador inválido." };
 
-  if (tipo !== TIPO_SUBIDO) {
+  // El navegador usa el mejor formato que sepa generar de verdad, así que acá
+  // se admiten los dos y se comprueba que el tipo y la extensión se
+  // correspondan — decisión 35. El bucket vuelve a validar el tipo, que es la
+  // capa que no se puede saltear.
+  if (
+    !TIPOS_SUBIBLES.includes(tipo) ||
+    !EXTENSIONES_VALIDAS.includes(formato)
+  ) {
     return {
       ok: false,
       mensaje: "Solo se pueden subir fotos ya convertidas por la página.",
@@ -177,7 +193,7 @@ export async function pedirSubida(
 
   const archivos: SubidaFirmada["archivos"] = [];
   for (const ancho of medidas) {
-    const path = archivoDe(ruta, ancho);
+    const path = archivoDe(ruta, ancho, formato as FormatoDeImagen);
     const { data, error: fallo } = await supabase.storage
       .from(BUCKET)
       .createSignedUploadUrl(path);
@@ -202,6 +218,7 @@ export type RegistroDeImagen = {
   padreId: string;
   ruta: string;
   medidas: number[];
+  formato: string;
   ancho: number;
   alto: number;
 };
@@ -225,7 +242,7 @@ export async function registrarImagen(
 ): Promise<Resultado> {
   await verificarAdmin();
 
-  const { entidad, padreId, ruta, medidas, ancho, alto } = registro;
+  const { entidad, padreId, ruta, medidas, formato, ancho, alto } = registro;
 
   if (!entidadValida(entidad)) return error("Entidad inválida.");
   if (!UUID.test(padreId)) return error("Identificador inválido.");
@@ -238,6 +255,9 @@ export async function registrarImagen(
     return error("La foto no se preparó bien. Probá de nuevo.");
   }
   if (!Array.isArray(medidas) || medidas.length === 0 || medidas.length > 5) {
+    return error("La foto no se preparó bien. Probá de nuevo.");
+  }
+  if (!EXTENSIONES_VALIDAS.includes(formato)) {
     return error("La foto no se preparó bien. Probá de nuevo.");
   }
 
@@ -259,7 +279,7 @@ export async function registrarImagen(
   }
 
   const presentes = new Set((subidos ?? []).map((a) => a.name));
-  const faltantes = medidas.filter((m) => !presentes.has(`${m}.webp`));
+  const faltantes = medidas.filter((m) => !presentes.has(`${m}.${formato}`));
   if (faltantes.length > 0) {
     await borrarCarpetas([ruta]);
     return error("La foto se subió a medias. Probá de nuevo, con mejor señal.");
@@ -300,6 +320,7 @@ export async function registrarImagen(
     [columna]: padreId,
     ruta,
     medidas,
+    formato,
     ancho,
     alto,
     alt: altAutomatico(nombreDelPadre, existentes.length + 1),

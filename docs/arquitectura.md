@@ -223,7 +223,8 @@ razones, que son independientes:
 1. La administradora elige fotos
         ↓
 2. NAVEGADOR: normaliza la orientación EXIF, borra todo el EXIF, y genera
-   CUATRO WebP del mismo original — de 480, 960, 1600 y 2560 px de ANCHO
+   CUATRO archivos del mismo original — de 480, 960, 1600 y 2560 px de ANCHO.
+   En WebP si el navegador sabe generarlo, en JPEG si no (decisión 35)
         ↓
 3. SERVER ACTION: verifica identidad, valida tipo y tamaño,
    devuelve las URLs firmadas de subida
@@ -279,9 +280,10 @@ tamaño de cada foto, que es exactamente lo que la decisión 25 evita.
 `srcset` es HTML estándar y no depende del hosting. Si el sitio se mudara otra
 vez, esta parte no se toca.
 
-**Qué medidas existen se lee de la base, no se asume.** La columna `medidas` de
-la tabla de imágenes dice cuáles se generaron para esa fila. Ver
-`docs/modelo-de-datos.md`.
+**Qué medidas existen, y en qué formato, se lee de la base — no se asume.** Las
+columnas `medidas` y `formato` de la tabla de imágenes dicen cuáles se generaron
+para esa fila y con qué extensión. Una foto chica no tiene las cuatro medidas, y
+una cargada desde un iPhone es JPEG y no WebP. Ver `docs/modelo-de-datos.md`.
 
 Implementación: Fase 3.
 

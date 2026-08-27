@@ -1,6 +1,6 @@
 import "server-only";
 
-import { BUCKET } from "@/lib/constantes";
+import { BUCKET, type FormatoDeImagen } from "@/lib/constantes";
 import { crearClienteAdmin } from "@/lib/supabase/admin";
 
 import type {
@@ -56,9 +56,19 @@ export function carpetaDe(entidad: Entidad, padreId: string, uuid: string) {
   return `${prefijoDe(entidad, padreId)}${uuid}/`;
 }
 
-/** El archivo concreto de una medida dentro de esa carpeta. */
-export function archivoDe(ruta: string, ancho: number) {
-  return `${ruta}${ancho}.webp`;
+/**
+ * El archivo concreto de una medida dentro de esa carpeta.
+ *
+ * La extensión sale de la fila, no de una constante: dos fotos del mismo
+ * proyecto pueden estar en formatos distintos según desde qué dispositivo se
+ * cargaron, porque WebKit no sabe generar WebP — decisión 35.
+ */
+export function archivoDe(
+  ruta: string,
+  ancho: number,
+  formato: FormatoDeImagen,
+) {
+  return `${ruta}${ancho}.${formato}`;
 }
 
 /**
@@ -99,14 +109,14 @@ async function firmar(rutas: string[]): Promise<Map<string, string>> {
 /** Ordena y resuelve las URL de una galería completa. */
 async function conUrls(imagenes: Imagen[]): Promise<ImagenConUrls[]> {
   const rutas = imagenes.flatMap((i) =>
-    i.medidas.map((m) => archivoDe(i.ruta, m)),
+    i.medidas.map((m) => archivoDe(i.ruta, m, i.formato)),
   );
   const firmadas = await firmar(rutas);
 
   return imagenes.map((imagen) => {
     const urls: Record<number, string> = {};
     for (const medida of imagen.medidas) {
-      const url = firmadas.get(archivoDe(imagen.ruta, medida));
+      const url = firmadas.get(archivoDe(imagen.ruta, medida, imagen.formato));
       if (url) urls[medida] = url;
     }
     const medidaChica = [...imagen.medidas].sort((a, b) => a - b)[0];
@@ -115,7 +125,7 @@ async function conUrls(imagenes: Imagen[]): Promise<ImagenConUrls[]> {
 }
 
 const CAMPOS_IMAGEN =
-  "id, ruta, medidas, ancho, alto, alt, orden, es_portada, creado_en";
+  "id, ruta, medidas, formato, ancho, alto, alt, orden, es_portada, creado_en";
 
 // ── Listados ───────────────────────────────────────────────────────────────
 
@@ -135,7 +145,7 @@ async function listar(entidad: Entidad): Promise<FilaDeListado[]> {
     .from(esProducto ? "productos" : "proyectos")
     .select(
       `id, ${esProducto ? "nombre" : "titulo"}, slug, activo, destacado, orden,
-       ${tablaDeImagenes(entidad)} (id, ruta, medidas, ancho, alto, es_portada, orden)`,
+       ${tablaDeImagenes(entidad)} (id, ruta, medidas, formato, ancho, alto, es_portada, orden)`,
     )
     .order("orden", { ascending: true })
     .order("creado_en", { ascending: true });
@@ -159,7 +169,7 @@ async function listar(entidad: Entidad): Promise<FilaDeListado[]> {
 
   const rutas = portadas
     .filter((p): p is Imagen => p !== null)
-    .map((p) => archivoDe(p.ruta, Math.min(...p.medidas)));
+    .map((p) => archivoDe(p.ruta, Math.min(...p.medidas), p.formato));
   const firmadas = await firmar(rutas);
 
   return filas.map((fila, i) => {
@@ -176,7 +186,11 @@ async function listar(entidad: Entidad): Promise<FilaDeListado[]> {
       tienePortada: portada !== null,
       urlPortada: portada
         ? (firmadas.get(
-            archivoDe(portada.ruta, Math.min(...portada.medidas)),
+            archivoDe(
+              portada.ruta,
+              Math.min(...portada.medidas),
+              portada.formato,
+            ),
           ) ?? null)
         : null,
     };

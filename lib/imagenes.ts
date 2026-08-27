@@ -18,17 +18,17 @@
  *
  * Y acá es donde se borra el EXIF, que es el riesgo más concreto del proyecto:
  * las fotos son de casas de clientes y las de celular traen coordenadas GPS.
- * Ver `aWebp()`.
+ * Ver `comprimir()`.
  */
 
 import {
-  IMAGEN_CALIDAD_WEBP,
+  FORMATOS_DE_SUBIDA,
+  type FormatoDeImagen,
   IMAGEN_LADO_MAXIMO,
   IMAGEN_PESO_MAXIMO_MB,
   MEDIDAS_IMAGEN,
   PORTADA_RELACION,
   TIPOS_DE_IMAGEN_ACEPTADOS,
-  TIPO_SUBIDO,
 } from "@/lib/constantes";
 
 /** Un archivo listo para subir: el ancho que le toca y el WebP ya generado. */
@@ -40,6 +40,10 @@ export type MedidaGenerada = {
 export type ImagenPreparada = {
   /** Los anchos que existen de verdad. Va tal cual a la columna `medidas`. */
   medidas: number[];
+  /** En qué formato quedaron. Va tal cual a la columna `formato`. */
+  formato: FormatoDeImagen;
+  /** El tipo MIME correspondiente, para declararlo al subir. */
+  tipo: string;
   /** Del archivo más grande generado, no del original. */
   ancho: number;
   alto: number;
@@ -168,7 +172,48 @@ export function medidasPara(anchoOriginal: number): number[] {
 }
 
 /**
- * Dibuja `fuente` en un canvas del tamaño pedido y devuelve un WebP.
+ * Qué formato sabe generar ESTE navegador, de verdad.
+ *
+ * **No se puede preguntar, hay que probar.** `canvas.toBlob()` con un formato
+ * que el navegador no soporta no falla ni devuelve `null`: por especificación
+ * devuelve un PNG. Así que preguntar da siempre que sí, y el error aparece
+ * mucho después, con un archivo llamado `.webp` que en realidad es un PNG
+ * enorme.
+ *
+ * Y no es un caso raro: **WebKit no sabe generar WebP**, y en iOS todos los
+ * navegadores son WebKit. O sea que el teléfono desde el que se cargan las
+ * fotos es justo el que no puede.
+ *
+ * La prueba es codificar un lienzo de 1×1 y mirar qué tipo tiene lo que
+ * vuelve. El resultado se guarda para no repetirlo en cada foto.
+ */
+let formatoDetectado: Promise<(typeof FORMATOS_DE_SUBIDA)[number]> | null =
+  null;
+
+export function formatoDisponible() {
+  formatoDetectado ??= (async () => {
+    const lienzo = document.createElement("canvas");
+    lienzo.width = 1;
+    lienzo.height = 1;
+
+    for (const formato of FORMATOS_DE_SUBIDA) {
+      const blob = await new Promise<Blob | null>((resolver) =>
+        lienzo.toBlob(resolver, formato.tipo, formato.calidad),
+      );
+      if (blob?.type === formato.tipo) return formato;
+    }
+
+    throw new ErrorDeImagen(
+      "Este navegador no puede preparar las fotos para subirlas. " +
+        "Probá desde Chrome en la computadora, o actualizá el navegador.",
+    );
+  })();
+
+  return formatoDetectado;
+}
+
+/**
+ * Dibuja `fuente` en un canvas del tamaño pedido y lo comprime.
  *
  * **ACÁ SE BORRA EL EXIF, y no por un paso que haya que acordarse de dar.** Un
  * canvas es un búfer de píxeles: no tiene dónde guardar metadatos. Lo que
@@ -180,12 +225,14 @@ export function medidasPara(anchoOriginal: number): number[] {
  * Que sea estructural y no un borrado explícito es lo que lo hace confiable,
  * pero **igual se verifica con una foto real** antes de dar la fase por
  * terminada: docs/seguridad.md lo pide y es el riesgo más concreto del
- * proyecto.
+ * proyecto. Verificado con una foto de la empresa sacada en la casa de un
+ * cliente, con GPS: las tres medidas salieron limpias.
  */
-async function aWebp(
+async function comprimir(
   fuente: CanvasImageSource,
   recorte: { x: number; y: number; ancho: number; alto: number },
   destino: { ancho: number; alto: number },
+  formato: (typeof FORMATOS_DE_SUBIDA)[number],
 ): Promise<{ blob: Blob; lienzo: HTMLCanvasElement }> {
   const lienzo = document.createElement("canvas");
   lienzo.width = destino.ancho;
@@ -213,7 +260,7 @@ async function aWebp(
   );
 
   const blob = await new Promise<Blob | null>((resolver) =>
-    lienzo.toBlob(resolver, TIPO_SUBIDO, IMAGEN_CALIDAD_WEBP),
+    lienzo.toBlob(resolver, formato.tipo, formato.calidad),
   );
 
   if (!blob) {
@@ -222,13 +269,14 @@ async function aWebp(
     );
   }
 
-  // Un navegador que no sabe escribir WebP no falla: devuelve un PNG con el
-  // tipo cambiado, y entonces se subiría un archivo enorme llamado `.webp`.
-  // Se comprueba en vez de confiar.
-  if (blob.type !== TIPO_SUBIDO) {
+  // El formato ya se comprobó una vez con un lienzo de 1×1, pero se vuelve a
+  // mirar acá: un lienzo grande puede fallar por límites de memoria en un
+  // teléfono, y subir un archivo con la extensión equivocada dejaría imágenes
+  // rotas en el sitio sin que nada avise.
+  if (blob.type !== formato.tipo) {
     throw new ErrorDeImagen(
-      "Este navegador no puede guardar las fotos en el formato que usa la página. " +
-        "Probá desde Chrome, o actualizá el navegador.",
+      "El navegador no pudo comprimir esta foto. Suele pasar con fotos muy " +
+        "grandes: probá con una de menos resolución.",
     );
   }
 
@@ -291,21 +339,24 @@ export async function prepararImagen(
 
     const medidas = medidasPara(recorte.ancho);
     const relacion = recorte.alto / recorte.ancho;
+    const formato = await formatoDisponible();
 
     const archivos: MedidaGenerada[] = [];
     let anterior: CanvasImageSource = fuente;
     let recorteActual = recorte;
 
     // De mayor a menor, encadenando. Lo que pasa al paso siguiente es el
-    // LIENZO, no el WebP recién generado: reusar el WebP obligaría a
+    // LIENZO, no el archivo recién comprimido: reusarlo obligaría a
     // decodificar y volver a comprimir en cada paso, y los artefactos de una
     // compresión con pérdida se irían acumulando sobre los de la anterior.
     for (const ancho of [...medidas].reverse()) {
       const alto = Math.max(1, Math.round(ancho * relacion));
-      const { blob, lienzo } = await aWebp(anterior, recorteActual, {
-        ancho,
-        alto,
-      });
+      const { blob, lienzo } = await comprimir(
+        anterior,
+        recorteActual,
+        { ancho, alto },
+        formato,
+      );
       archivos.push({ ancho, blob });
 
       anterior = lienzo;
@@ -320,6 +371,8 @@ export async function prepararImagen(
 
     return {
       medidas,
+      formato: formato.extension,
+      tipo: formato.tipo,
       ancho: laMasGrande.ancho,
       alto: Math.max(1, Math.round(laMasGrande.ancho * relacion)),
       archivos,

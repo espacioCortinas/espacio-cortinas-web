@@ -69,6 +69,7 @@ politica public.proyecto_imagenes lectura publica de imagenes de proyectos activ
 politica public.proyectos lectura publica de proyectos activos cmd=r roles=anon,authenticated using=(activo = true) check=-
 restriccion public.producto_imagenes producto_imagenes_alto_check CHECK ((alto > 0))
 restriccion public.producto_imagenes producto_imagenes_ancho_check CHECK ((ancho > 0))
+restriccion public.producto_imagenes producto_imagenes_formato_check CHECK ((formato = ANY (ARRAY['webp'::text, 'jpg'::text])))
 restriccion public.producto_imagenes producto_imagenes_medidas_check CHECK ((array_length(medidas, 1) >= 1))
 restriccion public.producto_imagenes producto_imagenes_pkey PRIMARY KEY (id)
 restriccion public.producto_imagenes producto_imagenes_producto_id_fkey FOREIGN KEY (producto_id) REFERENCES public.productos(id) ON DELETE CASCADE
@@ -83,6 +84,7 @@ restriccion public.productos productos_slug_check CHECK ((length(TRIM(BOTH FROM 
 restriccion public.productos productos_slug_key UNIQUE (slug)
 restriccion public.proyecto_imagenes proyecto_imagenes_alto_check CHECK ((alto > 0))
 restriccion public.proyecto_imagenes proyecto_imagenes_ancho_check CHECK ((ancho > 0))
+restriccion public.proyecto_imagenes proyecto_imagenes_formato_check CHECK ((formato = ANY (ARRAY['webp'::text, 'jpg'::text])))
 restriccion public.proyecto_imagenes proyecto_imagenes_medidas_check CHECK ((array_length(medidas, 1) >= 1))
 restriccion public.proyecto_imagenes proyecto_imagenes_pkey PRIMARY KEY (id)
 restriccion public.proyecto_imagenes proyecto_imagenes_proyecto_id_fkey FOREIGN KEY (proyecto_id) REFERENCES public.proyectos(id) ON DELETE CASCADE
@@ -102,6 +104,7 @@ tabla public.producto_imagenes alto integer not-null
 tabla public.producto_imagenes ancho integer not-null
 tabla public.producto_imagenes creado_en timestamp with time zone not-null default=now()
 tabla public.producto_imagenes es_portada boolean not-null default=false
+tabla public.producto_imagenes formato text not-null default='webp'::text
 tabla public.producto_imagenes id uuid not-null default=gen_random_uuid()
 tabla public.producto_imagenes medidas integer[] not-null
 tabla public.producto_imagenes orden integer not-null default=0
@@ -125,6 +128,7 @@ tabla public.proyecto_imagenes alto integer not-null
 tabla public.proyecto_imagenes ancho integer not-null
 tabla public.proyecto_imagenes creado_en timestamp with time zone not-null default=now()
 tabla public.proyecto_imagenes es_portada boolean not-null default=false
+tabla public.proyecto_imagenes formato text not-null default='webp'::text
 tabla public.proyecto_imagenes id uuid not-null default=gen_random_uuid()
 tabla public.proyecto_imagenes medidas integer[] not-null
 tabla public.proyecto_imagenes orden integer not-null default=0

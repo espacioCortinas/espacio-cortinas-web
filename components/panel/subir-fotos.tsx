@@ -6,7 +6,7 @@ import { useId, useRef, useState } from "react";
 import { pedirSubida, registrarImagen } from "@/acciones/imagenes";
 import { Aviso } from "@/components/ui/aviso";
 import { Boton } from "@/components/ui/boton";
-import { BUCKET, TIPO_SUBIDO } from "@/lib/constantes";
+import { BUCKET } from "@/lib/constantes";
 import { ErrorDeImagen, prepararImagen } from "@/lib/imagenes";
 import type { Entidad } from "@/lib/panel/tipos";
 import { crearClienteNavegador } from "@/lib/supabase/navegador";
@@ -95,7 +95,8 @@ export function SubirFotos({
       padreId,
       medidas: preparada.medidas,
       pesos: preparada.archivos.map((a) => a.blob.size),
-      tipo: TIPO_SUBIDO,
+      tipo: preparada.tipo,
+      formato: preparada.formato,
     });
 
     if (!firma.ok) throw new ErrorDeImagen(firma.mensaje);
@@ -110,7 +111,7 @@ export function SubirFotos({
       const { error: fallo } = await supabase.storage
         .from(BUCKET)
         .uploadToSignedUrl(path, token, blob.blob, {
-          contentType: TIPO_SUBIDO,
+          contentType: preparada.tipo,
         });
 
       if (fallo) {
@@ -132,6 +133,7 @@ export function SubirFotos({
       padreId,
       ruta: firma.subida.ruta,
       medidas: preparada.medidas,
+      formato: preparada.formato,
       ancho: preparada.ancho,
       alto: preparada.alto,
     });
@@ -220,7 +222,7 @@ export function SubirFotos({
         <Boton
           type="button"
           variante="primario"
-          disabled={trabajando}
+          cargando={trabajando}
           onClick={() => entrada.current?.click()}
         >
           {trabajando ? "Subiendo fotos…" : "Elegir fotos"}

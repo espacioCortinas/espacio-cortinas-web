@@ -7,6 +7,8 @@
  * lo que lo detecta es `npm run esquema` — decisión 31.
  */
 
+import type { FormatoDeImagen } from "@/lib/constantes";
+
 /** Las dos entidades del panel. Se pasa como parámetro para compartir código. */
 export type Entidad = "producto" | "proyecto";
 
@@ -45,15 +47,17 @@ export type Proyecto = {
 /**
  * Una fila de `producto_imagenes` o `proyecto_imagenes`.
  *
- * `ruta` es la CARPETA dentro del bucket, no un archivo: adentro hay un `.webp`
- * por cada entrada de `medidas`. Borrar la imagen es borrar el prefijo, que es
- * justamente lo que evita archivos huérfanos cuando las medidas cambian entre
- * filas — docs/modelo-de-datos.md.
+ * `ruta` es la CARPETA dentro del bucket, no un archivo: adentro hay un archivo
+ * por cada entrada de `medidas`, con la extensión que diga `formato`. Borrar la
+ * imagen es borrar el prefijo, que es justamente lo que evita archivos
+ * huérfanos cuando las medidas cambian entre filas — docs/modelo-de-datos.md.
  */
 export type Imagen = {
   id: string;
   ruta: string;
   medidas: number[];
+  /** La extensión de los archivos de esta fila: `webp` o `jpg` — decisión 35. */
+  formato: FormatoDeImagen;
   ancho: number;
   alto: number;
   alt: string;

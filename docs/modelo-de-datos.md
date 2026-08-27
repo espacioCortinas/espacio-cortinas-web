@@ -68,6 +68,7 @@ Dos tablas separadas, con la misma forma:
 | `producto_id` / `proyecto_id` | `uuid`        | FK, `ON DELETE CASCADE`                       |
 | `ruta`                        | `text`        | carpeta dentro del bucket — no un archivo     |
 | `medidas`                     | `integer[]`   | qué anchos existen. Ej. `{480,960,1600,2560}` |
+| `formato`                     | `text`        | la extensión de los archivos: `webp` o `jpg`  |
 | `ancho`                       | `integer`     | de la medida más grande                       |
 | `alto`                        | `integer`     | de la medida más grande                       |
 | `alt`                         | `text`        | ver más abajo                                 |
@@ -82,7 +83,7 @@ el navegador al subir (480, 960, 1600 y 2560 px de **ancho**) y servidos con
 `srcset`. En Cloudflare no hay optimización de imágenes al servir — decisión 25.
 
 Por eso `ruta` guarda la **carpeta**, no el archivo, y el nombre de cada archivo
-es su ancho:
+es su ancho más la extensión que diga `formato`:
 
 ```
 productos/{producto_id}/{uuid}/480.webp
@@ -90,6 +91,13 @@ productos/{producto_id}/{uuid}/960.webp
 productos/{producto_id}/{uuid}/1600.webp
 productos/{producto_id}/{uuid}/2560.webp
 ```
+
+**`formato` existe por la misma razón que `medidas`: no adivinar, registrar.**
+No todas las fotos son WebP. WebKit no sabe generarlo desde un canvas, y en iOS
+todos los navegadores son WebKit, así que lo que se carga desde el teléfono
+queda en JPEG y lo que se carga desde una computadora queda en WebP — decisión 35. Dos fotos del mismo proyecto pueden tener formatos distintos, y armar el
+nombre del archivo desde una constante del código fallaría con la primera que
+no coincida.
 
 **`medidas` existe para no tener que adivinar.** Dos motivos concretos:
 
