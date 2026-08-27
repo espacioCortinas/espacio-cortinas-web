@@ -78,7 +78,7 @@ Dos tablas separadas, con la misma forma:
 ### `medidas` y `ruta`
 
 Cada imagen no es un archivo: son **cuatro WebP del mismo original**, generados en
-el navegador al subir (480, 960, 1600 y 2560 px de lado mayor) y servidos con
+el navegador al subir (480, 960, 1600 y 2560 px de **ancho**) y servidos con
 `srcset`. En Cloudflare no hay optimización de imágenes al servir — decisión 25.
 
 Por eso `ruta` guarda la **carpeta**, no el archivo, y el nombre de cada archivo
@@ -93,9 +93,10 @@ productos/{producto_id}/{uuid}/2560.webp
 
 **`medidas` existe para no tener que adivinar.** Dos motivos concretos:
 
-- Una foto original de 900 px no genera la medida de 1600 ni la de 2560:
-  agrandarla no agrega detalle, solo bytes. Esa fila tiene `{480,960}` y el
-  `srcset` sale con dos entradas.
+- Una foto original de 900 px de ancho no genera la medida de 1600 ni la de
+  2560: agrandarla no agrega detalle, solo bytes, y además mentiría en el
+  `srcset`. Esa fila tiene `{480,900}` —las medidas fijas que le entran, más
+  su propio ancho— y el `srcset` sale con dos entradas.
 - Si algún día hace falta un corte nuevo (1200 px, o AVIF), se puede agregar
   **fila por fila**, sin tener que regenerar las 300 fotos de una vez para que el
   sitio no se rompa a la mitad.

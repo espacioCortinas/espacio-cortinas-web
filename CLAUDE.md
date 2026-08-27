@@ -73,6 +73,9 @@ Se mudó desde Vercel en julio de 2026 — decisión 24 de `docs/decisiones.md`.
   "ver código fuente", no con el inspector).
 - Cada página pública tiene `title`, `description` y Open Graph propios.
 - `npm run build` y `npx tsc --noEmit` pasan sin errores.
+- Si el cambio tocó la base, `npm run esquema` da verde (decisión 31). Al
+  aplicar una migración se corre `npm run esquema:actualizar` y se commitea el
+  diff junto con el `.sql`.
 - Si el cambio toca código de servidor, además pasa por `npm run preview`, que
   lo corre en el mismo runtime que producción. `npm run dev` corre sobre Node y
   no detecta un uso de API que Cloudflare Workers no soporte.

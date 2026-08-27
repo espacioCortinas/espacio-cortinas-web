@@ -85,7 +85,7 @@ Arrastrado de la Fase 1:
 
 ---
 
-## Fase 3 — Panel de administración
+## Fase 3 — Panel de administración — HECHA
 
 Antes que el sitio público, a propósito: cuando exista el sitio público va a hacer
 falta contenido real para diseñarlo, y el contenido se carga desde acá.
@@ -104,6 +104,15 @@ falta contenido real para diseñarlo, y el contenido se carga desde acá.
   en `open-next.config.ts`: sin eso, revalidar desde el panel toca una sola
   instancia del Worker y el resto sigue sirviendo lo viejo
 
+Arrastrado de fases anteriores, resuelto en esta:
+
+- Confirmado que un push a `main` despliega de verdad. Quedaba sin comprobar
+  desde la mudanza, porque los commits posteriores solo tocaban documentos
+- Las tres variables públicas pasaron de Secret a `vars` de `wrangler.jsonc`,
+  para que el valor de producción se pueda auditar — decisión 30
+- Hay una forma de comprobar que la base coincide con las migraciones:
+  `npm run esquema` — decisión 31
+
 **Terminado cuando:**
 
 - Se sube una foto de 8 MB desde un celular y funciona
@@ -111,6 +120,13 @@ falta contenido real para diseñarlo, y el contenido se carga desde acá.
 - Guardar en el panel se ve reflejado en el sitio público sin esperar
 - Se cargan dos productos y dos proyectos completos de punta a punta
 - El panel se usa cómodo desde un teléfono
+
+**Lo que quedó pendiente de verificar con una persona:** todo lo que necesita
+una sesión iniciada en el navegador. El código está y la capa de abajo está
+probada —las funciones de la base, el borrado sin huérfanos, la limpieza de
+EXIF y la revalidación contra la infraestructura real de Cloudflare— pero la
+carga de punta a punta desde el panel, y que se use cómodo desde un teléfono,
+las tiene que hacer la administradora. La lista está en el reporte de la fase.
 
 ---
 

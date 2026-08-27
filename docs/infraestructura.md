@@ -311,6 +311,37 @@ el Deploy command del builder **tiene que seguir siendo
 `npx opennextjs-cloudflare deploy`** y no `wrangler deploy` pelado: con este
 último el caché queda sin inicializar y la revalidación falla en silencio.
 
+#### `populateCache` desde Windows escribe en el caché LOCAL, y dice que anduvo
+
+Encontrado durante la Fase 3, con `@opennextjs/cloudflare` 1.20.2 y wrangler
+4.115. Correr a mano desde la máquina de desarrollo:
+
+```
+npx opennextjs-cloudflare populateCache remote
+```
+
+imprime `Successfully populated cache with 4 entries` y **no escribe nada en el
+KV real**: los archivos aparecen en `.wrangler/state/v3/kv/`, que es el KV
+simulado de miniflare. Por dentro llama a `wrangler kv bulk put` sin `--remote`,
+y esta versión de wrangler toma local por defecto.
+
+Cómo se detectó, que es lo que sirve para la próxima:
+
+```
+npx wrangler kv key list --namespace-id <id>     # devolvía []
+npx wrangler kv key put --namespace-id <id> prueba hola   # esto sí funcionaba
+```
+
+O sea que KV andaba y el que no escribía era el adaptador.
+
+**Consecuencia práctica: ninguna, mientras el despliegue lo haga Cloudflare.**
+El builder corre en Linux y ahí el paso funciona. Lo que no hay que hacer es
+correr `populateCache remote` a mano desde Windows y creerle: se ve verde y no
+hizo nada.
+
+Si alguna vez hace falta poblar el caché a mano, hay que comprobar el resultado
+con `wrangler kv key list` en vez de confiar en el mensaje.
+
 ### Despliegue automático
 
 Cloudflare **Workers Builds**, conectado al repositorio de GitHub. Cada push a

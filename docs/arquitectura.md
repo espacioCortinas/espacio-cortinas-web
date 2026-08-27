@@ -223,7 +223,7 @@ razones, que son independientes:
 1. La administradora elige fotos
         ↓
 2. NAVEGADOR: normaliza la orientación EXIF, borra todo el EXIF, y genera
-   CUATRO WebP del mismo original — 480, 960, 1600 y 2560 px de lado mayor
+   CUATRO WebP del mismo original — de 480, 960, 1600 y 2560 px de ANCHO
         ↓
 3. SERVER ACTION: verifica identidad, valida tipo y tamaño,
    devuelve las URLs firmadas de subida

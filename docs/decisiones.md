@@ -543,7 +543,7 @@ mostrar fotos el día 20 de cada mes no sirve para lo único que este sitio hace
 1. La administradora elige una foto
         ↓
 2. NAVEGADOR: normaliza orientación EXIF, borra metadatos, y genera
-   CUATRO WebP — 480, 960, 1600 y 2560 px de lado mayor
+   CUATRO WebP — de 480, 960, 1600 y 2560 px de ANCHO
         ↓
 3. Se suben los cuatro a Supabase Storage, bajo el mismo identificador
         ↓
@@ -581,6 +581,11 @@ directamente `<img>`. Ver `docs/arquitectura.md` (sección «Subida de imágenes
 `docs/modelo-de-datos.md` (columna `medidas`).
 
 **Esto es documentación, no implementación.** El código es de la Fase 3.
+
+**Corregida por la decisión 32:** donde acá dice «lado mayor» va **ancho**. La
+diferencia no es de redacción — el descriptor `w` de un `srcset` es el ancho
+real del archivo, y con el otro criterio el navegador elegiría mal el tamaño en
+cada pantalla.
 
 ---
 
@@ -949,6 +954,124 @@ falta.
 
 La función se expone por la API automática de Supabase, así que se le revoca
 `execute` a `anon` y a `authenticated` y solo la puede llamar `service_role`.
+
+---
+
+### 32. Las medidas son ANCHOS, y la última es el ancho del original
+
+**Fecha:** agosto de 2026, durante la Fase 3. Corrige la decisión 25 y precisa
+`docs/modelo-de-datos.md`.
+
+**La contradicción, tal como estaba escrita.** La decisión 25 y
+`docs/arquitectura.md` decían «480, 960, 1600 y 2560 px de **lado mayor**».
+`docs/modelo-de-datos.md` decía dos veces lo contrario: la columna `medidas` es
+«qué **anchos** existen» y «el nombre de cada archivo es su **ancho**». Y el
+ejemplo de `srcset` de `docs/arquitectura.md`, que es la única parte que
+mostraba código, estaba escrito con el criterio del ancho:
+
+```html
+<img
+  src="…/1600.webp"
+  srcset="… …/1600.webp 1600w"
+  width="1600"
+  height="2000"
+/>
+```
+
+Ahí `1600.webp` mide 1600 de ancho y 2000 de alto: el número es el ancho, y el
+lado mayor es 2000.
+
+**Se resuelve por el ancho, y no es una preferencia.** El descriptor `w` de un
+`srcset` es, por definición, el ancho real del archivo en píxeles. Con el
+criterio del «lado mayor», una foto vertical 4:5 llamada `2560.webp` mediría
+2048 de ancho, el `srcset` la anunciaría como `2560w`, y el navegador elegiría
+mal el archivo en toda pantalla intermedia: pediría uno más chico del que
+necesita y la foto se vería blanda. Es un error silencioso —nada falla, solo se
+ve peor— que se habría manifestado recién en la Fase 4.
+
+Lo que estaba mal escrito era «lado mayor». Corregido en los tres documentos.
+
+**La segunda precisión: la última medida es el ancho del original.** La regla
+implementada es «no agrandar nunca», y de ahí sale la lista de cada foto:
+
+```
+ancho original ≥ 2560   →  {480, 960, 1600, 2560}      el caso normal
+ancho original = 900    →  {480, 900}
+ancho original = 1600   →  {480, 960, 1600}
+ancho original = 400    →  {400}
+```
+
+O sea: las medidas fijas que sean **menores** al ancho del original, más el
+ancho del original (con tope en 2560). `docs/modelo-de-datos.md` daba
+`{480,960}` para una foto de 900 px, y eso agrandaría — 960 es más que 900.
+
+**Por qué agregar el ancho del original y no cortar en 480.** Una foto vieja de
+900 px que solo tuviera la medida de 480 se vería blanda en cualquier teléfono
+moderno, que a 2x de densidad necesita unos 750 px para un ancho de 375. Sumar
+su propio ancho es gratis —el archivo se genera igual— y da la mejor versión
+que esa foto puede dar.
+
+**Esto no reabre la decisión 25.** Las cuatro medidas fijas siguen congeladas
+para la V1 y agregar un corte nuevo sigue obligando a regenerar lo ya cargado.
+Lo que cambia es solo cómo se lee el número, y qué pasa con las fotos más
+chicas que el corte más chico — que es exactamente para lo que la columna
+`medidas` era un arreglo por fila y no una constante del código.
+
+**Verificado con una foto de 3024 × 4032:** salieron `{480, 960, 1600, 2560}`,
+y la más grande mide 2560 × 1920. Con una de 640 × 480 salieron `{480, 640}`.
+
+---
+
+### 33. El panel reordena con botones, no arrastrando
+
+**Fecha:** agosto de 2026, durante la Fase 3.
+
+**Alternativa evaluada:** arrastrar y soltar para reordenar la galería y los
+listados, que es lo que hace cualquier panel moderno.
+
+**Por qué se descartó:**
+
+- **En un teléfono compite con el desplazamiento.** El gesto es el mismo —
+  apoyar y mover— así que hay que distinguirlos por tiempo de presión. Eso
+  significa que intentar desplazar la página a veces arrastra una foto, y
+  arrastrar a veces desplaza. La persona que va a usar esto no es técnica y va
+  a estar parada en la casa de un cliente.
+- **Con teclado o con un lector de pantalla no existe.** Hacerlo accesible es
+  reimplementarlo entero con `aria-grabbed` y atajos, que nadie descubre.
+- **Cuesta una dependencia.** Hacerlo bien a mano en móvil es bastante código;
+  la alternativa es una librería, y la regla 8 de `CLAUDE.md` pide justificar
+  cada una.
+
+**Lo que se hace:** dos botones de 48 px, subir y bajar, con `aria-label` que
+dice qué se mueve. El orden se aplica en pantalla al instante y se guarda de
+fondo; si el guardado falla, se avisa y se recarga desde el servidor.
+
+**Dónde se paga:** reordenar doce fotos son once toques en vez de tres
+arrastres. Para un catálogo que se ordena una vez y después casi no se toca,
+es un precio razonable.
+
+**Se revisará** si aparece la necesidad de reordenar galerías largas seguido.
+
+---
+
+### 34. El panel puede reordenar productos y proyectos, no solo fotos
+
+**Fecha:** agosto de 2026, durante la Fase 3.
+
+El alcance de la fase listaba «reordenar» solo dentro de la galería. Al
+implementarlo apareció que la columna `orden` de `productos` y `proyectos` no
+tenía ninguna forma de cambiarse desde el panel, y **eso la dejaba sin
+sentido**: todas las filas quedarían en el mismo valor y el orden del catálogo
+sería el que Postgres devuelva.
+
+Peor: `docs/modelo-de-datos.md` dice que el tope de destacados del Inicio se
+aplica **al consultar**, ordenando por `orden`, «así se puede reordenar sin
+tener que desmarcar primero». Sin una forma de reordenar, esa frase describe
+algo que no se puede hacer, y decidir qué sale en la portada obligaría a
+desmarcar destacados — justo lo que el modelo quería evitar.
+
+Se agregó con los mismos botones de subir y bajar de la galería, y `orden` se
+asigna solo al crear, para que lo nuevo entre al final.
 
 ---
 

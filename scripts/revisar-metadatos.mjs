@@ -50,7 +50,10 @@ function leerJpeg(datos) {
     const largo = datos.readUInt16BE(i + 2);
     const cuerpo = datos.subarray(i + 4, i + 2 + largo);
 
-    if (marca === 0xe1 && cuerpo.subarray(0, 6).toString("latin1") === "Exif\0\0") {
+    if (
+      marca === 0xe1 &&
+      cuerpo.subarray(0, 6).toString("latin1") === "Exif\0\0"
+    ) {
       hallazgos.push(`EXIF (APP1, ${cuerpo.length} bytes)`);
       exif = cuerpo.subarray(6);
     } else if (marca === 0xe1) {
@@ -91,7 +94,8 @@ function leerGps(tiff) {
     for (let n = 0; n < cuantas; n += 1) {
       const e = inicio + 2 + n * 12;
       if (e + 12 > tiff.length) return null;
-      if (u16(e) === etiqueta) return { tipo: u16(e + 2), cuenta: u32(e + 4), valor: e + 8 };
+      if (u16(e) === etiqueta)
+        return { tipo: u16(e + 2), cuenta: u32(e + 4), valor: e + 8 };
     }
     return null;
   };
@@ -160,7 +164,8 @@ function leerWebp(datos) {
 
     if (nombre === "EXIF") hallazgos.push(`EXIF (${largo} bytes)`);
     else if (nombre === "XMP ") hallazgos.push(`XMP (${largo} bytes)`);
-    else if (nombre === "ICCP") hallazgos.push(`Perfil de color ICC (${largo} bytes)`);
+    else if (nombre === "ICCP")
+      hallazgos.push(`Perfil de color ICC (${largo} bytes)`);
     else if (nombre === "VP8X") {
       ancho = 1 + (cuerpo[4] | (cuerpo[5] << 8) | (cuerpo[6] << 16));
       alto = 1 + (cuerpo[7] | (cuerpo[8] << 8) | (cuerpo[9] << 16));
@@ -195,7 +200,8 @@ function leerPng(datos) {
       ancho = datos.readUInt32BE(i + 8);
       alto = datos.readUInt32BE(i + 12);
     } else if (nombre === "eXIf") hallazgos.push(`EXIF (${largo} bytes)`);
-    else if (nombre === "iCCP") hallazgos.push(`Perfil de color ICC (${largo} bytes)`);
+    else if (nombre === "iCCP")
+      hallazgos.push(`Perfil de color ICC (${largo} bytes)`);
     else if (nombre === "tEXt" || nombre === "iTXt" || nombre === "zTXt") {
       hallazgos.push(`Texto ${nombre} (${largo} bytes)`);
     }
@@ -220,7 +226,10 @@ function revisar(ruta) {
   } else if (datos.subarray(0, 4).toString("latin1") === "RIFF") {
     formato = "WebP";
     resultado = leerWebp(datos);
-  } else if (datos[0] === 0x89 && datos.subarray(1, 4).toString("latin1") === "PNG") {
+  } else if (
+    datos[0] === 0x89 &&
+    datos.subarray(1, 4).toString("latin1") === "PNG"
+  ) {
     formato = "PNG";
     resultado = leerPng(datos);
   } else {

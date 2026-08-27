@@ -180,9 +180,26 @@ limpiar expone la dirección exacta del domicilio de un cliente a cualquiera que
 descargue la imagen. Es el riesgo más concreto de todo el proyecto y no es
 hipotético: cualquier visor de metadatos lo muestra.
 
-La recompresión a WebP en canvas descarta el EXIF. **Hay que verificarlo**, no
-darlo por sentado: subir una foto de prueba con GPS y revisar los metadatos del
-archivo publicado. Va como punto del checklist de QA.
+La recompresión a WebP en canvas descarta el EXIF, y no por un paso que haya
+que acordarse de dar: un canvas es un búfer de píxeles y no tiene dónde guardar
+metadatos, así que no hay ningún camino por el que el EXIF pueda sobrevivir.
+
+**Igual hay que verificarlo**, porque es el tipo de cosa que se rompe en
+silencio el día que alguien cambia el flujo de subida. Desde la Fase 3 es un
+comando y no una inspección a ojo:
+
+```
+node scripts/revisar-metadatos.mjs foto-original.jpg foto-publicada.webp
+```
+
+Dice qué metadatos tiene cada archivo, imprime las coordenadas si las hay, y
+devuelve 1 si alguna imagen las conserva. **Se corre sobre las cuatro medidas,
+no solo sobre la más grande.**
+
+Verificado en la Fase 3 con una foto de cámara con GPS real, de 3024 × 4032 y
+6 MB: las cuatro salidas quedaron sin EXIF, sin XMP y sin GPS. Lo único que
+sobrevive es el perfil de color ICC (456 bytes), que describe el espacio de
+color y no dice nada del lugar ni del equipo.
 
 Aparte de esto: no publicar fotos donde se vean personas, documentos, correspondencia
 con direcciones, o el frente de la casa con el número. Es una regla de contenido, no
@@ -265,13 +282,15 @@ suficientes.
 - [ ] Sin políticas de escritura para `anon` ni `authenticated`
 - [ ] `service_role key` ausente del paquete del navegador (buscarla en el build)
 - [ ] Toda Server Action del panel llama a `verificarAdmin()`
+- [ ] `npm run esquema` da verde: la base coincide con el repositorio
 - [ ] `/admin` inaccesible sin sesión
 - [ ] `/admin` inaccesible con una sesión que no sea la del administrador
 - [ ] `/admin` sale con `Cache-Control: private, no-store` y `cf-cache-status`
       nunca es `HIT` (en rutas del Worker la cabecera directamente no aparece)
 - [ ] `/admin/login` devuelve contenido distinto con sesión y sin ella, y el
       correo de una sesión no aparece en la respuesta a un anónimo
-- [ ] Una foto publicada, descargada, no conserva GPS ni EXIF
+- [ ] Una foto publicada, descargada, no conserva GPS ni EXIF, en las cuatro
+      medidas (`node scripts/revisar-metadatos.mjs`)
 - [ ] El bucket no es público
 - [ ] El formulario resiste un envío automatizado básico
 - [ ] Next en la última versión estable
