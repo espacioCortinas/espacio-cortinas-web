@@ -11,18 +11,18 @@ se publica con un `git push`.
 
 Antes de trabajar leé el documento que corresponda en `docs/`:
 
-| Documento                 | Cuándo leerlo                                      |
-| ------------------------- | -------------------------------------------------- |
-| `docs/producto.md`        | qué construimos, para quién, qué queda afuera      |
-| `docs/arquitectura.md`    | stack, estructura, renderizado, subida de imágenes |
-| `docs/modelo-de-datos.md` | tablas, campos, relaciones                         |
-| `docs/diseno.md`          | dirección visual y reglas de composición           |
-| `docs/fotografia.md`      | guía para la empresa sobre cómo sacar las fotos    |
-| `docs/publicar-fotos.md`  | el paso a paso para que una foto llegue al sitio   |
-| `docs/seguridad.md`       | autenticación, autorización, uploads               |
-| `docs/infraestructura.md` | estado real de dominio, DNS, correo, cuentas       |
-| `docs/decisiones.md`      | **por qué** se decidió cada cosa                   |
-| `docs/plan.md`            | fases y criterio de terminado                      |
+| Documento                 | Cuándo leerlo                                        |
+| ------------------------- | ---------------------------------------------------- |
+| `docs/producto.md`        | qué construimos, para quién, qué queda afuera        |
+| `docs/arquitectura.md`    | stack, estructura, renderizado, preparación de fotos |
+| `docs/modelo-de-datos.md` | dónde vive el contenido y qué forma tiene            |
+| `docs/diseno.md`          | dirección visual y reglas de composición             |
+| `docs/fotografia.md`      | guía para la empresa sobre cómo sacar las fotos      |
+| `docs/publicar-fotos.md`  | el paso a paso para que una foto llegue al sitio     |
+| `docs/seguridad.md`       | privacidad de las fotos, claves, formulario          |
+| `docs/infraestructura.md` | estado real de dominio, DNS, correo, cuentas         |
+| `docs/decisiones.md`      | **por qué** se decidió cada cosa                     |
+| `docs/plan.md`            | fases y criterio de terminado                        |
 
 `docs/decisiones.md` es de lectura obligatoria antes de proponer cambios de
 arquitectura. Varias cosas que parecen mejorables fueron descartadas a propósito.
