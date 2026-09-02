@@ -284,6 +284,46 @@ aplicación.
 **El subdominio de la cuenta es `ventas-ccf.workers.dev`.** Solo, sin el nombre
 del Worker adelante, no resuelve: no es una dirección, es el espacio de nombres.
 
+### Cloudflare inyecta su propio `robots.txt` delante del nuestro
+
+Descubierto al verificar el despliegue de la Fase 4.0. `app/robots.ts` genera
+esto:
+
+```
+User-Agent: *
+Allow: /
+
+Host: https://espaciocortinas.com.ar
+Sitemap: https://espaciocortinas.com.ar/sitemap.xml
+```
+
+Y lo que sirve el dominio son unas cincuenta líneas más, **antes** de las
+nuestras, entre `# BEGIN Cloudflare Managed content` y `# END`: las Content
+Signals (`search=yes,ai-train=no,use=reference`) y un `Disallow: /` para
+`GPTBot`, `ClaudeBot`, `CCBot`, `Bytespider`, `Amazonbot`,
+`Applebot-Extended`, `Google-Extended` y `meta-externalagent`.
+
+**No lo pusimos nosotros y no está en el repositorio.** Lo agrega Cloudflare en
+el borde, desde el panel de la zona.
+
+**No rompe nada de lo que importa**, y por eso se deja como está: `Googlebot` no
+está en la lista y `search=yes` declara que indexar está permitido, así que el
+buscador —que es de donde tiene que llegar el tráfico— entra igual. Lo que se
+bloquea son los rastreadores de entrenamiento de modelos, que para este negocio
+no aportan nada.
+
+**Lo que sí hay que tener presente:** `app/robots.ts` dejó de ser toda la
+verdad. El archivo servido tiene **dos** grupos `User-agent: *` —el de
+Cloudflare y el nuestro—; hoy los dos permiten todo, pero si algún día hiciera
+falta un `Disallow`, hay que mirar el archivo servido y no solo el código. Y si
+el bloque de Cloudflare cambia, cambia sin pasar por un commit.
+
+Se verifica igual que todo lo demás:
+
+```bash
+curl -s https://espaciocortinas.com.ar/robots.txt
+```
+
 ### Límites de los assets del Worker — verificado
 
 Las fotos son **assets estáticos del Worker**: `opennextjs-cloudflare build` las
