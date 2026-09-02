@@ -1172,9 +1172,132 @@ codificador nativo**. Cada foto son tres o cuatro medidas; multiplicado por las
 
 ---
 
+### 36. Se saca el panel: el contenido pasa al repositorio y Supabase se va
+
+**Fecha:** agosto de 2026, con la Fase 3 recién terminada y verificada.
+
+**Qué se revierte:** el panel de administración completo, la base de datos, la
+autenticación y el almacenamiento de archivos. Productos y proyectos pasan a ser
+archivos versionados en el repositorio, y las fotos se preparan con un script en
+la máquina de quien desarrolla.
+
+**Quién lo decide y por qué:** el desarrollador, y la razón es que el contenido
+cambia pocas veces al año y prefiere editarlo a mano antes que mantener un panel
+para eso.
+
+#### La objeción, anotada
+
+La decisión 3 eligió panel propio sobre un CMS headless, y **su factor decisivo
+no fue técnico**: «la persona que va a usarlo no es técnica. Un panel propio, en
+español, con dos secciones y ningún concepto de CMS a la vista, la hace
+autónoma».
+
+Esa razón no desaparece porque el panel se borre: se transfiere. A partir de
+acá, **cada foto nueva y cada corrección de texto pasan por el desarrollador**,
+y la empresa deja de poder publicar sola. Eso choca de frente con el criterio de
+titularidad de `docs/infraestructura.md`, que existe justamente para que la
+empresa no dependa de quien desarrolla —«si la persona que desarrolla el sitio
+deja la empresa, la empresa conserva el control»—. Hoy conserva el control de
+las cuentas, pero no de la capacidad de publicar.
+
+Se plantea y se decide seguir igual. Queda escrito para que la próxima vez que
+alguien se pregunte «¿por qué no hay panel?» la respuesta no sea «nunca se
+hizo», que sería falso: se hizo, funcionó, se probó desde un teléfono, y se
+sacó a propósito.
+
+**Cuándo revisarlo:** si la empresa pide publicar sin intermediario, o si el
+ritmo de cambios deja de ser «pocas veces al año». El código del panel queda en
+el historial de git —commits `9c5b9cc` a `e524d4c`— así que volver atrás es
+recuperar archivos, no reescribirlos.
+
+#### Lo que se gana, que es más de lo que parece
+
+No es solo borrar 4.100 líneas. **Desaparece la restricción que deformaba todo
+el diseño de imágenes.** El procesamiento ocurría en el navegador porque el
+runtime de Workers no ejecuta módulos nativos y porque quien subía las fotos no
+era técnica (decisiones 5 y 25). Con el contenido en el repositorio, las fotos
+se preparan en una máquina de desarrollo, donde `sharp` corre sin problema.
+
+De ahí salen tres simplificaciones encadenadas:
+
+- **Vuelve WebP para todas las fotos.** La rama JPEG existía porque WebKit no
+  sabe codificar WebP y el panel se usaba desde un iPhone (decisión 35). Ya no
+  comprime ningún navegador, así que esa decisión queda sin objeto y se
+  recupera el 10-17% de peso.
+- **Los datos técnicos de cada foto los calcula el script**, no una persona.
+  Anchos, alto y qué medidas existen dejan de ser columnas que alguien pueda
+  cargar mal.
+- **Se va `middleware.ts`,** y con él la molestia de la decisión 26: el aviso de
+  `proxy.ts` en cada build deja de aparecer porque deja de haber middleware.
+
+Y se van, además: el proyecto de Supabase que se pausa solo por inactividad, la
+`service_role key`, las migraciones aplicadas a mano, el caché incremental
+compartido con sus dos recursos, y cuatro de las cinco variables de entorno.
+
+#### Lo que cuesta, sin maquillar
+
+- **Publicar deja de ser inmediato.** Cambiar una palabra es editar, commitear,
+  pushear y esperar el build: medido en la Fase 3, entre 2 y 9 minutos. No se
+  puede corregir nada urgente desde un teléfono.
+- **La empresa depende del desarrollador** para todo cambio de contenido.
+- **El repositorio engorda con las fotos.** El catálogo previsto son unas 300
+  fotos por cuatro medidas, del orden de 240 MB, y git guarda todas las
+  versiones de cada archivo que se reemplace. Con las pocas fotos de hoy no
+  importa; antes de cargar el archivo histórico hay que decidir si van en git,
+  en `git-lfs`, o fuera del repositorio.
+
+#### Lo que NO cambia
+
+- **El sitio no se vuelve estático del todo.** El formulario de contacto de la
+  Fase 4.6 necesita servidor para hablar con Resend, así que el Worker y
+  `@opennextjs/cloudflare` se quedan. Lo que desaparece es la base, la
+  autenticación y el caché incremental.
+- **El EXIF se sigue borrando, y se sigue verificando.** Cambia el mecanismo
+  —`sharp` descarta metadatos salvo que se le pidan, y `.rotate()` aplica la
+  orientación antes de recomprimir— pero la regla y la comprobación son las
+  mismas. `scripts/revisar-metadatos.mjs` se queda tal cual: es el que responde
+  si una foto publicada conserva coordenadas, y ahora puede correr sobre la
+  carpeta entera de una vez.
+- Las medidas siguen siendo anchos (decisión 32) y el tope de destacados sigue
+  siendo una constante (decisión 9).
+- La titularidad de las cuentas sigue siendo de la empresa.
+
+#### Decisiones que quedan superadas
+
+| Decisión | Qué le pasa                                                       |
+| -------- | ----------------------------------------------------------------- |
+| 3        | superada: no hay panel, ni propio ni de terceros                  |
+| 4        | superada: no hay autenticación ni administrador                   |
+| 5        | superada: la compresión vuelve al servidor, pero al de desarrollo |
+| 7        | superada: no hay tablas                                           |
+| 18       | superada: no hay Supabase                                         |
+| 25       | reformulada: las medidas se generan al preparar, no al subir      |
+| 26       | sin objeto: no hay middleware                                     |
+| 27       | superada: no hay RLS                                              |
+| 28 y 31  | superadas: no hay migraciones que verificar                       |
+| 29       | superada: sin base no hay nada que revalidar                      |
+| 33 y 34  | sin objeto: no hay panel que reordene                             |
+| 35       | superada: WebP para todas, sin detección                          |
+
+De la 30 sobrevive el principio —lo que no es secreto se declara en
+`wrangler.jsonc` para poder auditarlo— aplicado ahora a la única variable que
+queda, `NEXT_PUBLIC_SITE_URL`.
+
+**La decisión 2 pierde su argumento** y aun así no se toca: Astro se había
+descartado porque «el panel de administración vive en el mismo proyecto», y eso
+deja de ser cierto. Mudarse ahora sería una migración más para ahorrar poco, y
+la razón de la decisión 1 —metadata por ruta para las previsualizaciones de
+WhatsApp— la cubren los dos igual. Queda anotado por si alguna vez se replantea.
+
+---
+
 ## Decisiones abiertas
 
-Ninguna en este momento.
+**Dónde viven las fotos cuando se cargue el archivo histórico.** Unas 300 fotos
+por cuatro medidas son del orden de 240 MB, y git guarda todas las versiones de
+cada archivo que se reemplace. Las opciones son git a secas, `git-lfs`, o
+dejarlas fuera del repositorio y subirlas en el despliegue. No bloquea nada
+hasta que haya que cargar el archivo — decisión 36.
 
 Cuando aparezca una decisión no contemplada durante la implementación: preguntar,
 decidir, y anotarla acá antes de seguir.
