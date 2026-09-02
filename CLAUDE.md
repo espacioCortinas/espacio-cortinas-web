@@ -18,6 +18,7 @@ Antes de trabajar leé el documento que corresponda en `docs/`:
 | `docs/modelo-de-datos.md` | tablas, campos, relaciones                         |
 | `docs/diseno.md`          | dirección visual y reglas de composición           |
 | `docs/fotografia.md`      | guía para la empresa sobre cómo sacar las fotos    |
+| `docs/publicar-fotos.md`  | el paso a paso para que una foto llegue al sitio   |
 | `docs/seguridad.md`       | autenticación, autorización, uploads               |
 | `docs/infraestructura.md` | estado real de dominio, DNS, correo, cuentas       |
 | `docs/decisiones.md`      | **por qué** se decidió cada cosa                   |

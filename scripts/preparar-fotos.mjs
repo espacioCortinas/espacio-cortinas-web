@@ -62,6 +62,9 @@ const ORIGINALES = process.argv[2] ?? join(RAIZ, "fotos-originales");
 const DESTINO = join(RAIZ, "public", "fotos");
 const MANIFIESTO = join(RAIZ, "contenido", "fotos.ts");
 
+// HEIC incluido: es lo que sacan los iPhone por defecto, y `sharp` lo lee.
+// Sin esto, una carpeta entera de fotos sin convertir se saltearía en silencio,
+// que es la peor forma de fallar.
 const EXTENSIONES = new Set([
   ".jpg",
   ".jpeg",
@@ -69,6 +72,8 @@ const EXTENSIONES = new Set([
   ".webp",
   ".tif",
   ".tiff",
+  ".heic",
+  ".heif",
 ]);
 
 let avisos = 0;
@@ -223,17 +228,31 @@ async function main() {
 
       for (const [i, archivo] of archivos.entries()) {
         const carpeta = `${entidad}/${slug}/${i + 1}`;
-        const datos = await prepararFoto(
-          join(raizEntidad, slug, archivo),
-          join(DESTINO, entidad, slug, String(i + 1)),
-          i === 0,
-        );
-        fotos.push({ carpeta, ...datos });
-        cuantas += 1;
-        console.log(
-          `  ${i + 1}. ${archivo.padEnd(28)} ${datos.ancho}×${datos.alto}  ` +
-            `medidas: ${datos.medidas.join(" · ")}`,
-        );
+        // Una foto que falla no corta la corrida: se avisa y se sigue con las
+        // demás. Cortar en la primera obligaría a descubrir los problemas de
+        // a uno, y una tanda de treinta fotos son treinta corridas.
+        try {
+          const datos = await prepararFoto(
+            join(raizEntidad, slug, archivo),
+            join(DESTINO, entidad, slug, String(i + 1)),
+            i === 0,
+          );
+          fotos.push({ carpeta, ...datos });
+          cuantas += 1;
+          console.log(
+            `  ${i + 1}. ${archivo.padEnd(28)} ${datos.ancho}×${datos.alto}  ` +
+              `medidas: ${datos.medidas.join(" · ")}`,
+          );
+        } catch (fallo) {
+          aviso(
+            `${archivo}: no se pudo preparar — ${fallo instanceof Error ? fallo.message : fallo}`,
+          );
+        }
+      }
+
+      if (fotos.length === 0) {
+        aviso(`${slug} quedó sin ninguna foto utilizable.`);
+        continue;
       }
 
       // Se avisa pero no se corta: puede ser que todavía no haya una vertical

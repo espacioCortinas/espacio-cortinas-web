@@ -7,4 +7,5 @@ import type { Foto } from "./tipos";
  * La clave es `<entidad>/<slug>`, y el orden del arreglo es el de la
  * galería: la primera foto es la portada.
  */
-export const fotos: Record<string, Foto[]> = {};
+export const fotos: Record<string, Foto[]> = {
+};
