@@ -30,6 +30,11 @@ npm-debug.log*
 .claude/settings.local.json
 .claude/launch.json
 
+# Los originales de las fotos NO se versionan: viven en el Drive de la empresa.
+# Lo que se publica está en public/fotos/, ya recomprimido y sin metadatos, y
+# de ahí no se recupera el original — decisión 18.
+fotos-originales/
+
 # Sistema operativo
 .DS_Store
 Thumbs.db

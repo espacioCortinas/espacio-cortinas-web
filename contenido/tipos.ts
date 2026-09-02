@@ -9,14 +9,18 @@
  * el editor autocomplete y que el build frene si falta un campo, si un booleano
  * está mal escrito o si una foto apunta a una carpeta que no existe. Con JSON
  * esos errores no aparecen hasta que alguien visita la página.
+ *
+ * **Lo escrito a mano y lo generado no se mezclan en el mismo archivo.**
+ * `productos.ts` y `proyectos.ts` se editan; `fotos.ts` lo escribe
+ * `scripts/preparar-fotos.mjs` y se pisa entero cada vez. Si estuvieran juntos,
+ * regenerar las fotos borraría los textos.
  */
 
 /**
  * Una foto, con las medidas que existen de verdad.
  *
- * **Todo esto lo escribe `scripts/preparar-fotos.mjs`, no se carga a mano.**
- * Anchos, alto y qué medidas se generaron son datos calculados, y cargarlos a
- * mano es exactamente donde aparecen las imágenes rotas.
+ * **Esto no se carga a mano.** Anchos y alto son datos calculados, y escribirlos
+ * a ojo es exactamente donde aparecen las imágenes rotas.
  */
 export type Foto = {
   /**
@@ -37,12 +41,6 @@ export type Foto = {
   /** De la medida más grande. Con `alto` alcanza para reservar el espacio. */
   ancho: number;
   alto: number;
-
-  /**
-   * Lo que se lee en voz alta para quien no ve la foto, y lo que aparece si la
-   * foto no carga.
-   */
-  alt: string;
 };
 
 /**
@@ -54,21 +52,14 @@ export type Foto = {
  */
 type Publicable = {
   /**
-   * La parte final del enlace. **No se cambia una vez publicado:** rompe los
-   * enlaces ya compartidos por WhatsApp, que es por donde se comparte este
-   * sitio (decisión 10).
+   * La parte final del enlace, y también la clave con la que se buscan las
+   * fotos en `fotos.ts`.
+   *
+   * **No se cambia una vez publicado:** rompe los enlaces ya compartidos por
+   * WhatsApp, que es por donde se comparte este sitio (decisión 10).
    */
   slug: string;
   descripcion: string;
-
-  /**
-   * La primera es la portada, y **tiene que ser vertical**. Los listados usan
-   * siempre la portada, y es lo que hace que las grillas queden parejas aunque
-   * la galería mezcle orientaciones (decisión 14). Lo comprueba el script al
-   * preparar las fotos.
-   */
-  fotos: Foto[];
-
   activo: boolean;
   destacado: boolean;
 };
@@ -87,3 +78,19 @@ export type Proyecto = Publicable & {
   /** Texto libre, no una lista de localidades. Se muestra como chip. */
   ubicacion: string;
 };
+
+/**
+ * Un producto o proyecto con sus fotos ya resueltas, que es como lo consumen
+ * las páginas.
+ *
+ * La primera foto es la portada y **tiene que ser vertical**: los listados usan
+ * siempre la portada, y es lo que hace que las grillas queden parejas aunque la
+ * galería mezcle orientaciones (decisión 14). Lo comprueba el script al
+ * preparar las fotos.
+ *
+ * No hay campo `alt`: se arma al renderizar, a partir del nombre y la posición
+ * —«Casa en Nordelta — foto 3»—, con `altAutomatico()` de `lib/texto.ts`.
+ * Pedirlo por foto haría que se cargue cualquier cosa, que para un lector de
+ * pantalla es peor que un texto generado razonable.
+ */
+export type ConFotos<T> = T & { fotos: Foto[] };

@@ -10,19 +10,21 @@
  * cualquiera que descargue la imagen. Es el riesgo más concreto del proyecto y
  * `docs/seguridad.md` pide que **se verifique, no que se dé por sentado**.
  *
- * El panel recomprime cada foto en un canvas antes de subirla, y un canvas es
- * un búfer de píxeles: no tiene dónde guardar metadatos, así que el EXIF no
- * puede sobrevivir. El razonamiento es sólido y aun así hay que comprobarlo —
- * es exactamente el tipo de cosa que se rompe en silencio el día que alguien
- * cambia el flujo de subida.
+ * `scripts/preparar-fotos.mjs` recomprime cada foto con `sharp`, que descarta
+ * los metadatos salvo que se le pidan explícitamente. El razonamiento es sólido
+ * y aun así hay que comprobarlo — es exactamente el tipo de cosa que se rompe
+ * en silencio el día que alguien toca el pipeline.
+ *
+ * Acepta archivos y carpetas: `npm run fotos:revisar` lo corre sobre
+ * `public/fotos` entero.
  *
  * Sin dependencias: lee los contenedores a mano. No es un lector de EXIF
  * completo y no pretende serlo; responde una sola pregunta —¿quedó algún
  * metadato, y en particular coordenadas?— que es la que importa acá.
  */
 
-import { readFileSync } from "node:fs";
-import { basename } from "node:path";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { basename, join } from "node:path";
 
 // ── JPEG ───────────────────────────────────────────────────────────────────
 
@@ -262,7 +264,19 @@ function revisar(ruta) {
   return true;
 }
 
-const rutas = process.argv.slice(2);
+/** Todos los archivos de una carpeta, recursivamente. */
+function archivosDe(ruta) {
+  if (!statSync(ruta).isDirectory()) return [ruta];
+  return readdirSync(ruta).flatMap((n) => archivosDe(join(ruta, n)));
+}
+
+const rutas = process.argv.slice(2).flatMap((r) => {
+  try {
+    return archivosDe(r);
+  } catch {
+    return [r];
+  }
+});
 
 if (rutas.length === 0) {
   console.error(

@@ -12,7 +12,9 @@ import type { Producto } from "./tipos";
  * desde la base al sacar el panel — decisión 36 — sin corregir la redacción ni
  * la ortografía, porque es su voz y no la nuestra.
  *
- * Las fotos las agrega `scripts/preparar-fotos.mjs`.
+ * Las fotos NO van acá: las escribe `scripts/preparar-fotos.mjs` en `fotos.ts`
+ * y se unen por el slug. Lo generado y lo escrito a mano no comparten archivo,
+ * para que regenerar las fotos no pueda pisar los textos.
  */
 export const productos: Producto[] = [
   {
@@ -21,7 +23,6 @@ export const productos: Producto[] = [
     descripcion:
       "Es un tipo de cortina enrrollable, que puede ser manual (con cadena) o motorizada (a control remoto o tecla). Es una cortina funcional para bloquer la luz exterior y reducir la temperatura en el ambiente.",
     variantes: [],
-    fotos: [],
     activo: false,
     destacado: false,
   },
@@ -31,7 +32,6 @@ export const productos: Producto[] = [
     descripcion:
       "Es un tipo de cortina enrrollable, que puede ser manual (con cadena) o motorizada( a control remoto o tecla). Esta cortina permita que ingrese luz pero tambien genera cierto grado de privacidad. Tambien ayudan a reducir la temperatura en el ambiente y proteger pisos, muebles, etc; gracias a su filtro UV.",
     variantes: [],
-    fotos: [],
     activo: true,
     destacado: false,
   },
@@ -41,7 +41,6 @@ export const productos: Producto[] = [
     descripcion:
       "Es un tipo de cortina con tela blackout enrollable, que esta cubierta por un cajon y tiene unas guías laterales, que proporcionan un mayor porcentaje de oscuridad. Esta cortina puede ser manual o motorizada. Esta cortina tiene limitaciones en sus tamaños",
     variantes: [],
-    fotos: [],
     activo: false,
     destacado: false,
   },
@@ -51,7 +50,6 @@ export const productos: Producto[] = [
     descripcion:
       "Este tipo de cortina puede ser colocado a un riel o un barral. El riel te permite hacer cortinados en ventales de gran tamaño sin limitaciones, en cambio, el barral puede ser mas estetico pero te limita el recorrido de la tela. Estas telas pueden ser en black out o translúcidas y mucha variedad de colores y modelos.",
     variantes: [],
-    fotos: [],
     activo: true,
     destacado: false,
   },
@@ -61,7 +59,6 @@ export const productos: Producto[] = [
     descripcion:
       "Estas cortinas son funcionales y económicas, ideal para baños, lavaderos, etc. Con el movimiento de las lamas podes generar privacidad y tambien ingreso de luz.",
     variantes: [],
-    fotos: [],
     activo: false,
     destacado: false,
   },
@@ -71,7 +68,6 @@ export const productos: Producto[] = [
     descripcion:
       "Esta es un tipo de cortina de decorativa y tambien con el movimiento de lamas se puede generar privacidad e ingreso de luz.",
     variantes: [],
-    fotos: [],
     activo: true,
     destacado: false,
   },
@@ -81,7 +77,6 @@ export const productos: Producto[] = [
     descripcion:
       "Este es un sistema que se instala en el exterior, su principal funcion es la reduccion de luz y temperatura gracias al salto termico que tienen las telas. Los brazos permiten que el toldo se extienda para el uso y retraerse cuando no se necesita. Hay distintas variedad de telas que pueden ser opacas o translucidas.",
     variantes: [],
-    fotos: [],
     activo: false,
     destacado: false,
   },
@@ -91,7 +86,6 @@ export const productos: Producto[] = [
     descripcion:
       "Este es un sistema que se instala en el exterior, su principal funcion es la reduccion de luz y temperatura gracias al salto termico que tienen las telas. Este sistema es como una cortina roller pero preparada para el exterior . Hay distintas variedad de telas que pueden ser opacas o translucidas.",
     variantes: [],
-    fotos: [],
     activo: false,
     destacado: false,
   },

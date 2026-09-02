@@ -14,8 +14,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "esquema": "node scripts/verificar-esquema.mjs",
-    "esquema:actualizar": "node scripts/verificar-esquema.mjs --actualizar"
+    "fotos": "node scripts/preparar-fotos.mjs",
+    "fotos:revisar": "node scripts/revisar-metadatos.mjs public/fotos"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.20.2",
@@ -38,6 +38,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
     "prettier": "^3",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4",
     "typescript": "^5",
     "wrangler": "^4.115.0"
