@@ -1,4 +1,0 @@
-# Server Actions, una por entidad. Se construyen en la Fase 3.
-# Cada una arranca llamando a verificarAdmin(). Ver docs/seguridad.md.
-#
-# Carpeta creada vacía para fijar la estructura de docs/arquitectura.md.

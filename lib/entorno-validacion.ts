@@ -11,32 +11,29 @@
  *
  * Este archivo nunca entra al paquete del navegador: solo lo importan la
  * configuración y el arranque, los dos en Node. Por eso puede leer
- * `process.env` con acceso dinámico y nombrar variables secretas sin filtrar
- * ningún valor: acá solo se miran nombres, nunca se imprime el contenido.
+ * `process.env` con acceso dinámico sin filtrar ningún valor: acá solo se miran
+ * nombres, nunca se imprime el contenido.
+ *
+ * **Quedó con una sola variable** al sacar el panel (decisión 36). Se mantiene
+ * igual porque la razón por la que existe no cambió, y está probada: en la
+ * Fase 2 se comprobó que dejar la verificación solo en `instrumentation.ts` no
+ * alcanza —el build pasaba limpio sin ninguna variable cargada— y que una
+ * variable con la forma equivocada rompe el sitio con el build en verde.
  */
 
 /**
- * Obligatorias hoy, en la Fase 2.
+ * Obligatorias hoy.
  *
  * Las demás variables de `.env.example` existen pero todavía no se usan, así
- * que exigirlas ahora sería pedir datos que no existen. Cada fase suma la
- * suya a esta lista:
+ * que exigirlas ahora sería pedir datos que no existen. Cada fase suma la suya
+ * a esta lista (decisión 21):
  *
- *   Fase 1   → las cuatro de Supabase y del sitio
- *   Fase 2   → ADMIN_USER_ID
+ *   Fase 1   → NEXT_PUBLIC_SITE_URL
  *   Fase 4.6 → NEXT_PUBLIC_WHATSAPP, RESEND_API_KEY, EMAIL_CONTACTO
+ *
+ * Las cuatro de Supabase se fueron con el panel.
  */
-const OBLIGATORIAS = [
-  "NEXT_PUBLIC_SUPABASE_URL",
-  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-  "NEXT_PUBLIC_SITE_URL",
-  "SUPABASE_SERVICE_ROLE_KEY",
-
-  // Fase 2. Es el `user.id` del único administrador, creado a mano en la
-  // consola de Supabase. Sin esto `verificarAdmin()` no puede comparar contra
-  // nada, y "¿hay sesión?" no es autorización — ver docs/seguridad.md.
-  "ADMIN_USER_ID",
-] as const;
+const OBLIGATORIAS = ["NEXT_PUBLIC_SITE_URL"] as const;
 
 /** Nombres de las variables obligatorias que faltan o están vacías. */
 export function faltantes(): string[] {
@@ -46,38 +43,40 @@ export function faltantes(): string[] {
 /**
  * Variables que además de existir tienen que tener la forma correcta.
  *
- * Existe por un caso real: `NEXT_PUBLIC_SUPABASE_URL` se cargó una vez con el
- * endpoint REST pegado —`https://xxx.supabase.co/rest/v1`— porque es uno de los
- * valores que el panel de Supabase muestra para copiar. El build pasó, el sitio
- * se publicó, y todo lo del servidor que hablaba con Supabase falló con un
- * error del gateway que no dice nada:
- *
- *     AuthApiError: Invalid path specified in request URL
- *
- * Estar presente no alcanza: tiene que ser el origen pelado, sin ruta.
+ * Existe por un caso real de la Fase 2: `NEXT_PUBLIC_SUPABASE_URL` se cargó con
+ * el endpoint REST pegado, el build pasó, el sitio se publicó, y el login
+ * quedó roto para todo el mundo con el sitio respondiendo 200. Esa variable ya
+ * no existe, pero **la lección sí**, y `NEXT_PUBLIC_SITE_URL` es susceptible de
+ * lo mismo: de ahí salen las URLs canónicas, el sitemap y el Open Graph, así
+ * que una barra final de más o un `http` se propagan a todo el sitio sin que
+ * nada falle de forma visible.
  */
 function malFormadas(): string[] {
   const problemas: string[] = [];
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const url = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (url) {
     let analizada: URL | null = null;
     try {
       analizada = new URL(url);
     } catch {
-      problemas.push(`NEXT_PUBLIC_SUPABASE_URL no es una URL válida: «${url}»`);
+      problemas.push(`NEXT_PUBLIC_SITE_URL no es una URL válida: «${url}»`);
     }
     if (analizada) {
       // Se admite la barra final sola: `entornoPublico` la limpia.
       if (analizada.pathname !== "/" && analizada.pathname !== "") {
         problemas.push(
-          `NEXT_PUBLIC_SUPABASE_URL tiene una ruta de más («${analizada.pathname}»). ` +
-            `Va el origen pelado: ${analizada.origin} — sin /rest/v1, sin /auth/v1.`,
+          `NEXT_PUBLIC_SITE_URL tiene una ruta de más («${analizada.pathname}»). ` +
+            `Va el origen pelado: ${analizada.origin}`,
         );
       }
-      if (analizada.protocol !== "https:") {
+      // En local es http://localhost, y eso está bien.
+      if (
+        analizada.protocol !== "https:" &&
+        analizada.hostname !== "localhost"
+      ) {
         problemas.push(
-          `NEXT_PUBLIC_SUPABASE_URL tiene que ser https, y es «${analizada.protocol}».`,
+          `NEXT_PUBLIC_SITE_URL tiene que ser https, y es «${analizada.protocol}».`,
         );
       }
     }
@@ -113,9 +112,9 @@ export function validarEntorno(): void {
         ? ["  Mal escritas:", ...conFormatoMalo.map((p) => `    ✗ ${p}`), ""]
         : []),
       "  En local:      copiá .env.example a .env.local y completalo.",
-      "  En producción: Cloudflare → el Worker → Settings.",
-      "                 Las del build en «Build variables and secrets»,",
-      "                 las del runtime en «Variables and Secrets».",
+      "  En producción: las públicas van en el bloque `vars` de",
+      "                 wrangler.jsonc; las secretas, como Secret del",
+      "                 Worker. Decisión 30.",
       "",
       "  La lista completa y para qué sirve cada una está en",
       "  docs/arquitectura.md, sección «Variables de entorno».",
