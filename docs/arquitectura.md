@@ -7,23 +7,27 @@
 | Framework           | Next.js, App Router                     |
 | Lenguaje            | TypeScript, modo estricto               |
 | Estilos             | Tailwind CSS                            |
-| Base de datos       | PostgreSQL (Supabase)                   |
-| Autenticación       | Supabase Auth                           |
-| Archivos            | Supabase Storage                        |
+| **Contenido**       | **archivos de este repositorio**        |
+| Imágenes            | `sharp`, en la máquina de desarrollo    |
 | Envío de email      | Resend                                  |
 | Analítica           | Cloudflare Web Analytics                |
-| **Hosting**         | **Cloudflare Workers**                  |
+| Hosting             | Cloudflare Workers                      |
 | Adaptador           | `@opennextjs/cloudflare`                |
 | CDN, DNS y TLS      | Cloudflare                              |
 | Despliegue continuo | Cloudflare Workers Builds, desde `main` |
 | Repositorio         | GitHub                                  |
 
+**No hay base de datos.** Hubo una —PostgreSQL en Supabase, con autenticación,
+RLS y un bucket privado— y se sacó junto con el panel de administración en la
+decisión 36. El contenido son archivos versionados que se editan a mano y se
+publican con un `git push`.
+
 La versión de Next se fija en `package.json` sin rango abierto y se actualiza a
 propósito, no por arrastre.
 
 El sitio estuvo en Vercel durante la Fase 1 y se mudó a Cloudflare en julio de
-2026 — decisión 24. El motivo es de encuadre, no técnico: el plan Hobby de Vercel
-es para uso personal y no comercial.
+2026 — decisión 24. El motivo es de encuadre, no técnico: el plan Hobby de
+Vercel es para uso personal y no comercial.
 
 ## Por qué Next y no un SPA
 
@@ -37,20 +41,23 @@ valor del sitio. Detalle completo en `docs/decisiones.md`.
 
 ## Estrategia de renderizado
 
-| Ruta                              | Cómo se renderiza                        |
-| --------------------------------- | ---------------------------------------- |
-| `/`                               | estático, revalidado                     |
-| `/productos`, `/productos/[slug]` | estático, revalidado                     |
-| `/proyectos`, `/proyectos/[slug]` | estático, revalidado                     |
-| `/contacto`                       | estático                                 |
-| `/admin/*`                        | dinámico, siempre en servidor, sin caché |
+| Ruta                              | Cómo se renderiza |
+| --------------------------------- | ----------------- |
+| `/`                               | estático          |
+| `/productos`, `/productos/[slug]` | estático          |
+| `/proyectos`, `/proyectos/[slug]` | estático          |
+| `/contacto`                       | estático          |
 
-El contenido cambia pocas veces por mes. Las páginas públicas se generan y se
-revalidan; al guardar en el panel se revalidan las rutas afectadas para que el
-cambio se vea enseguida.
+**Todo es estático, y ahora de verdad.** Antes decía «estático, revalidado»,
+porque el contenido venía de una base y el panel revalidaba las rutas al
+guardar. Con el contenido dentro del build no hay nada que revalidar: cambiar
+una foto o un texto es construir de nuevo, y no existe ninguna copia guardada
+que pueda quedar vieja. Por eso tampoco hace falta el caché incremental
+compartido, que se sacó con sus dos recursos — decisión 36.
 
-**Regla:** ninguna página pública consulta la base desde el navegador. Los datos
-llegan resueltos desde el servidor.
+**Lo único que ejecuta código en respuesta a un visitante** es la Server Action
+del formulario de contacto (Fase 4.6). Por eso el sitio sigue siendo un Worker
+y no un montón de archivos estáticos.
 
 ## Estructura
 
@@ -65,57 +72,38 @@ app/
 │   │   ├── page.tsx
 │   │   └── [slug]/page.tsx
 │   ├── contacto/page.tsx
-│   └── layout.tsx               navegación y pie públicos
-├── admin/
-│   ├── login/
-│   │   ├── page.tsx             decide qué mostrar según la sesión
-│   │   └── formulario-login.tsx componente CLIENTE
-│   └── (panel)/                 grupo: no agrega segmento a la URL
-│       ├── layout.tsx           verifica sesión E IDENTIDAD
-│       ├── page.tsx             /admin
-│       ├── productos/
-│       └── proyectos/
+│   └── layout.tsx               navegación y pie
 ├── sitemap.ts
 ├── robots.ts
 └── layout.tsx
+contenido/
+├── productos.ts                 se edita a mano
+├── proyectos.ts                 se edita a mano
+├── fotos.ts                     GENERADO por scripts/preparar-fotos.mjs
+├── tipos.ts
+└── index.ts                     une contenido y fotos; es lo que leen las páginas
 components/
-├── ui/                          botón, chip, campo, diálogo
-└── ...                          compartidos entre público y admin
+└── ui/                          botón, campo, aviso
 lib/
-├── supabase/
-│   ├── servidor.ts              cliente de servidor
-│   ├── navegador.ts             cliente de navegador (solo lectura pública)
-│   └── admin.ts                 cliente service_role — SOLO servidor
 ├── entorno.ts                   variables públicas
 ├── entorno-servidor.ts          variables secretas — SOLO servidor
 ├── entorno-validacion.ts        qué es obligatorio y desde qué fase
-├── auth.ts                      verificarAdmin()
-├── imagenes.ts                  compresión, EXIF, subida
+├── texto.ts                     slugs y textos derivados
 └── constantes.ts
-acciones/                        Server Actions, una por entidad
-docs/
 scripts/
-└── verificar-esquema.mjs        compara la base real con supabase/esquema.txt
-supabase/
-├── migraciones/                 .sql numerados, se aplican a mano (decisión 28)
-└── esquema.txt                  foto del esquema real, versionada (decisión 31)
-middleware.ts                    solo redirige. NO renombrar a proxy.ts (dec. 26)
-instrumentation.ts               validación de entorno al arrancar
-next.config.ts                   configuración de Next
-open-next.config.ts              configuración del adaptador de Cloudflare
-wrangler.jsonc                   configuración del Worker
+├── preparar-fotos.mjs           recorta, redimensiona y borra los metadatos
+└── revisar-metadatos.mjs        comprueba que ninguna publicada conserve GPS
+public/fotos/                    las imágenes generadas
+fotos-originales/                los originales. NO se versiona
+docs/
+next.config.ts
+open-next.config.ts
+wrangler.jsonc
 .nvmrc                           versión de Node del build
 ```
 
-**Por qué el grupo `(panel)`:** el layout que verifica identidad no puede
-envolver al login, o redirigiría al login desde el propio login y sería un
-bucle. Un grupo de rutas resuelve eso sin ensuciar las URLs: los paréntesis no
-agregan segmento, así que `app/admin/(panel)/page.tsx` sigue sirviendo `/admin`
-y `/admin/login` queda deliberadamente afuera de la verificación — es la puerta.
-
-Los componentes del panel y los del sitio público comparten `components/ui/` pero
-no se mezclan: el panel prioriza densidad y claridad, el público prioriza
-composición.
+**Lo escrito a mano y lo generado nunca comparten archivo.** Si estuvieran
+juntos, regenerar las fotos pisaría los textos.
 
 ## Despliegue
 
@@ -149,28 +137,20 @@ Dos cosas de `wrangler.jsonc` no son opcionales:
 - **`compatibility_date`**, que congela el comportamiento del runtime. Se sube a
   propósito, igual que la versión de Next.
 
-### Qué hay en `open-next.config.ts`
+### Por qué `open-next.config.ts` vuelve a estar vacío
 
-El caché compartido, resuelto en la Fase 3. Sin él, `revalidatePath()` desde el
-panel invalida la copia de **una** instancia del Worker y las demás siguen
-sirviendo la página vieja: la administradora guardaría un cambio y lo vería o no
-según qué instancia la atienda.
+Tuvo un caché incremental compartido —Workers KV para las páginas y D1 para las
+etiquetas— porque el panel revalidaba rutas al guardar, y sin un almacén
+compartido esa revalidación tocaba una sola instancia del Worker mientras el
+resto seguía sirviendo lo viejo.
 
-**Son dos piezas, y la de arriba sola no alcanza:**
+**Al sacar el panel dejó de haber qué revalidar** (decisión 36): el contenido es
+parte del build, así que un cambio se publica construyendo de nuevo. Los dos
+recursos se borraron.
 
-| Pieza              | Recurso                         | Qué guarda                       |
-| ------------------ | ------------------------------- | -------------------------------- |
-| `incrementalCache` | Workers KV `cache-incremental`  | la página ya renderizada         |
-| `tagCache`         | D1 `espacio-cortinas-etiquetas` | cuándo se revalidó cada etiqueta |
-
-`revalidatePath()` no borra nada: anota en el `tagCache` que la etiqueta de esa
-ruta se revalidó recién. En la visita siguiente el adaptador compara esa marca
-contra la fecha de lo guardado y, si es más nueva, renderiza de nuevo en esa
-misma petición. Sin `tagCache` —que viene en `dummy` por defecto y no avisa—
-`revalidatePath()` no hace nada.
-
-Por qué KV y no R2, por qué D1 y no KV para las etiquetas, y por qué no hay
-`queue`: decisión 29 de `docs/decisiones.md`.
+**Si alguna vez vuelve a haber contenido que cambie sin build**, hay que volver
+a enchufarlo — y son **dos** piezas, no una: sin el `tagCache`,
+`revalidatePath()` no hace nada y no avisa. Está explicado en la decisión 29.
 
 ### Comandos
 
@@ -200,53 +180,48 @@ La versión de Node del build se fija en `.nvmrc`. Si falta, Cloudflare usa la
 suya por defecto, y este proyecto prefiere que eso no cambie sin que nos
 enteremos.
 
-## Subida de imágenes
+## Preparación de imágenes
 
-Este es el punto que más restricciones tiene y hay que respetarlo tal cual.
-
-**Todo el trabajo sobre la imagen ocurre en el navegador de quien sube, una sola
-vez.** Ni el servidor procesa fotos ni se transforma nada al servir. Las dos
-razones, que son independientes:
-
-1. **No se puede procesar en el servidor.** `sharp` es un módulo nativo y el
-   runtime de Workers no ejecuta binarios nativos. Además el plan gratuito da
-   10 ms de CPU por invocación, muy por debajo de lo que cuesta redimensionar una
-   foto de 8 MB (decisión 5).
-2. **No se puede transformar al servir.** Las Transformations de Cloudflare, en
-   el plan gratuito, topan en 5.000 transformaciones únicas por mes y pasado el
-   tope devuelven error en vez de degradarse. Para un sitio de 300 fotos con
-   cuatro cortes cada una, ese techo se toca (decisión 25).
-
-**El flujo correcto:**
+Las fotos se preparan **una vez, en la máquina de quien desarrolla**, con
+`scripts/preparar-fotos.mjs`. Ni el servidor procesa fotos ni se transforma nada
+al servir.
 
 ```
-1. La administradora elige fotos
+1. Los originales van en fotos-originales/<entidad>/<slug>/, numerados.
+   El orden alfabético es el de la galería y el primero es la portada
         ↓
-2. NAVEGADOR: normaliza la orientación EXIF, borra todo el EXIF, y genera
-   CUATRO archivos del mismo original — de 480, 960, 1600 y 2560 px de ANCHO.
-   En WebP si el navegador sabe generarlo, en JPEG si no (decisión 35)
+2. npm run fotos
+   sharp: aplica la orientación del EXIF, recorta la portada a 4:5 si hace
+   falta, genera un WebP por cada medida y BORRA TODOS LOS METADATOS
         ↓
-3. SERVER ACTION: verifica identidad, valida tipo y tamaño,
-   devuelve las URLs firmadas de subida
+3. Escribe public/fotos/ y el manifiesto contenido/fotos.ts
         ↓
-4. NAVEGADOR: sube los cuatro archivos directo a Supabase Storage
+4. npm run fotos:revisar  — comprueba que ninguna conserve GPS
         ↓
-5. SERVER ACTION: guarda la fila en la tabla de imágenes
-   (ruta, ancho, alto, orden, y QUÉ MEDIDAS existen)
-        ↓
-6. Se revalidan las rutas afectadas
+5. git push. El sitio se reconstruye con las fotos adentro
 ```
 
-Sigue estando autorizado por el servidor: el navegador no puede subir nada sin una
-URL firmada que el servidor emitió después de verificar quién es.
+**Por qué acá y no en el navegador.** Hasta la Fase 3 esto lo hacía el navegador
+de quien subía, y no por gusto: el runtime de Workers no ejecuta módulos nativos
+—`sharp` no corre ahí— y la persona que cargaba el contenido no era técnica.
+Con el contenido en el repositorio las dos razones desaparecen (decisión 36), y
+lo que queda es más simple, más rápido y no depende de qué navegador tenga
+nadie. De paso se recuperó WebP para todas las fotos: la rama JPEG existía
+porque WebKit no sabe codificar WebP y el panel se usaba desde un iPhone.
 
-**Se borra el EXIF siempre.** Las fotos son de casas de clientes y traen
-coordenadas GPS. Publicarlas con metadatos expondría la dirección del domicilio.
-La recompresión a WebP en canvas ya descarta el EXIF; hay que verificarlo, no
-darlo por hecho — en las cuatro medidas, no solo en la grande.
+**Se borra el EXIF siempre, y por diseño.** `sharp` descarta los metadatos salvo
+que se le pidan con `.withMetadata()`, cosa que ese script no hace. Las fotos
+son de casas de clientes y traen las coordenadas del domicilio; **igual se
+verifica**, porque es lo que se rompe en silencio el día que alguien toca el
+pipeline. Ver `docs/seguridad.md`.
 
-**Hay que normalizar la orientación antes de recomprimir.** Si no, las fotos
-sacadas con el teléfono girado aparecen rotadas.
+**Hay que aplicar la orientación antes de recomprimir.** Si no, las fotos
+sacadas con el teléfono girado aparecen rotadas — y después el EXIF ya no existe,
+así que no hay segunda oportunidad.
+
+**Los originales no se versionan.** Tienen el EXIF intacto, así que commitearlos
+publicaría justamente lo que hay que evitar. Viven en el Drive de la empresa —
+decisión 18.
 
 ### Cómo se sirven
 
@@ -334,45 +309,41 @@ es sobre el dominio nuevo.
 ## Variables de entorno
 
 ```
-NEXT_PUBLIC_SUPABASE_URL           pública
-NEXT_PUBLIC_SUPABASE_ANON_KEY      pública, solo lectura de contenido activo
 NEXT_PUBLIC_SITE_URL               para canonical, sitemap y Open Graph
-SUPABASE_SERVICE_ROLE_KEY          SOLO SERVIDOR — nunca NEXT_PUBLIC_
-ADMIN_USER_ID                      solo servidor — user.id del administrador
-RESEND_API_KEY                     solo servidor
-EMAIL_CONTACTO                     destino del formulario
 NEXT_PUBLIC_WHATSAPP               número en formato internacional
+RESEND_API_KEY                     SOLO SERVIDOR
+EMAIL_CONTACTO                     destino del formulario
 ```
+
+Quedaron cuatro, y solo la primera es obligatoria hoy: las tres restantes se
+cargan en la Fase 4.6 con el formulario de contacto. Las cuatro de Supabase se
+fueron con la base — decisión 36.
 
 Cualquier variable con `NEXT_PUBLIC_` termina en el navegador. Antes de agregar
 una, verificar que sea información pública.
 
-La plantilla versionada es `.env.example`; los valores reales van en `.env.local`,
-que no se versiona, y en Cloudflare.
+La plantilla versionada es `.env.example`; los valores reales van en
+`.env.local`, que no se versiona, y en Cloudflare.
 
-**En Cloudflare van dos veces.** Es la diferencia de operación más fácil de pasar
-por alto al venir de Vercel, donde había una sola lista:
+**En Cloudflare van dos veces.** Es la diferencia de operación más fácil de
+pasar por alto al venir de Vercel, donde había una sola lista:
 
 | Dónde                                              | Cuándo se usa    | Qué necesita                                                           |
 | -------------------------------------------------- | ---------------- | ---------------------------------------------------------------------- |
 | Settings → Build → **Build variables and secrets** | durante el build | todas. `NEXT_PUBLIC_*` se incrustan acá, y `next.config.ts` valida acá |
-| Settings → **Variables and Secrets**               | en cada petición | las que el servidor lee en tiempo de ejecución                         |
+| El Worker, en cada petición                        | en runtime       | las que el servidor lee al ejecutarse                                  |
 
-Cargarlas en un solo lado falla de dos formas distintas y las dos son confusas:
-si faltan en el build, el despliegue corta con la lista de faltantes (que es lo
-que se busca); si faltan en el runtime, el sitio se publica y falla en la primera
-petición que toque el servidor.
+Y en la de runtime **no todas se administran igual**:
 
-**En el runtime no todas se administran igual, desde la Fase 3.** Las tres
-`NEXT_PUBLIC_*` se declaran en el bloque `vars` de `wrangler.jsonc`: terminan en
-el navegador de todos modos, así que no hay nada que proteger, y ahí el valor
-queda auditable en el repositorio en vez de ser ilegible. Las dos secretas
-—`SUPABASE_SERVICE_ROLE_KEY` y `ADMIN_USER_ID`— se cargan como Secret y **nunca**
-van al archivo. Un Secret no se puede volver a leer: si se pierde, se rota en
-Supabase y se vuelve a cargar. Decisión 30.
+- las `NEXT_PUBLIC_*` van en el bloque `vars` de `wrangler.jsonc`, en el
+  repositorio. Terminan en el navegador de todas formas, así que no hay nada que
+  proteger y sí algo que ganar: el valor de producción se lee en un diff, con
+  historial, en vez de ser un Secret ilegible — decisión 30;
+- las secretas se cargan con `npx wrangler secret put NOMBRE` y **nunca** van al
+  archivo.
 
-En la lista de **build** siguen haciendo falta las cinco, y ahí el tipo es
-indistinto: esa lista no la toca wrangler.
+**Cargar una variable de texto a mano en el panel del Worker sin declararla en
+`wrangler.jsonc` no sirve:** la borra el próximo despliegue. El archivo manda.
 
 **No todas son obligatorias al mismo tiempo.** Solo se exigen las que la fase en
 curso ya usa; la lista vive en `lib/entorno-validacion.ts` y cada fase suma la
@@ -392,9 +363,11 @@ export const IMAGEN_PESO_MAXIMO_MB = 8;
 
 ## Copias de seguridad
 
-- **Código:** GitHub
-- **Base:** Supabase se queda en el plan gratuito, que **no incluye copias
-  automáticas**. Exportación manual cada tanto, que a este volumen de datos
-  alcanza (decisión 18)
-- **Imágenes:** viven en Supabase Storage. Conservar los originales sin comprimir
-  fuera del sistema (Drive de la empresa), porque lo que se sube está recomprimido
+- **Código y contenido:** GitHub. El contenido es parte del repositorio, así que
+  tiene historial y se recupera como cualquier archivo.
+- **Imágenes publicadas:** también en el repositorio, en `public/fotos/`.
+- **Originales de las fotos:** fuera del sistema, en el Drive de la empresa. Lo
+  que se publica está recomprimido y sin metadatos, y de ahí no se recupera el
+  original — decisión 18.
+
+Ya no hay base de datos que exportar.

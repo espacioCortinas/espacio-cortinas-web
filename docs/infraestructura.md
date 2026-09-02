@@ -248,13 +248,15 @@ Invoke-RestMethod -Uri 'https://api.github.com/repos/espacioCortinas/espacio-cor
 Si responde con datos, es público. Si devuelve 404, es privado. Mirar la página
 en el navegador no sirve: la sesión propia la muestra igual en los dos casos.
 
-## Base de datos y archivos
+## Base de datos y archivos — YA NO HAY
 
-Supabase, plan gratuito, organización Espacio Cortinas, región São Paulo.
+Hubo un proyecto de Supabase con PostgreSQL, autenticación y un bucket privado.
+**Se dio de baja al sacar el panel** — decisión 36. El contenido vive ahora en
+el repositorio y las imágenes en `public/fotos/`, generadas en el build.
 
-- Registro público de usuarios **desactivado** (requisito de `docs/seguridad.md`)
-- El usuario administrador se crea a mano en Fase 2
-- Sin copias automáticas: exportación manual periódica — decisión 18
+Lo que esto elimina de la operación: un proyecto que se pausaba solo por
+inactividad, una `service_role key` que administrar, migraciones que aplicar a
+mano y copias de seguridad que hacer.
 
 ## Hosting
 
@@ -282,78 +284,16 @@ aplicación.
 **El subdominio de la cuenta es `ventas-ccf.workers.dev`.** Solo, sin el nombre
 del Worker adelante, no resuelve: no es una dirección, es el espacio de nombres.
 
-### Recursos de caché — Fase 3
+### Recursos de caché — dados de baja
 
-Dos recursos de Cloudflare, los dos en plan gratuito, creados el 27/08/2026.
-Existen para que `revalidatePath()` desde el panel se propague a todas las
-instancias del Worker; sin ellos, guardar un cambio se ve o no según qué
-instancia atienda la recarga. Decisión 29.
+Hubo un Workers KV (`cache-incremental`) y una base D1
+(`espacio-cortinas-etiquetas`) para el caché incremental compartido, que existía
+porque el panel revalidaba rutas al guardar. **Se borraron los dos** al sacar el
+panel: sin contenido que cambie fuera del build no hay nada que revalidar —
+decisión 36.
 
-| Recurso | Nombre                       | Binding             | Qué guarda                       |
-| ------- | ---------------------------- | ------------------- | -------------------------------- |
-| KV      | `cache-incremental`          | `NEXT_INC_CACHE_KV` | las páginas ya renderizadas      |
-| D1      | `espacio-cortinas-etiquetas` | `NEXT_TAG_CACHE_D1` | cuándo se revalidó cada etiqueta |
-
-Los dos nombres de binding los fija `@opennextjs/cloudflare` y **no se eligen**:
-el adaptador los busca por ese nombre exacto. Los identificadores están en
-`wrangler.jsonc`.
-
-La D1 quedó en la región `ENAM`. No es una elección: D1 no ofrece región en
-Sudamérica, y de las disponibles es la más cercana. Se mide en la Fase 4, cuando
-haya páginas públicas cacheadas de verdad — cada visita a una página guardada
-consulta las etiquetas, así que esa latencia se suma al TTFB. Si molesta, el
-reemplazo es `doShardedTagCache` sobre Durable Objects, que se ubican cerca de
-quien las crea.
-
-**La tabla `revalidations` de D1 no se crea a mano.** La crea el paso
-`populateCache` de `opennextjs-cloudflare deploy`, en cada despliegue. Por eso
-el Deploy command del builder **tiene que seguir siendo
-`npx opennextjs-cloudflare deploy`** y no `wrangler deploy` pelado: con este
-último el caché queda sin inicializar y la revalidación falla en silencio.
-
-#### Sin `--remote`, wrangler mira el KV SIMULADO y no el de producción
-
-Es la trampa más cara de la Fase 3 y llevó a una conclusión equivocada durante
-un buen rato: **`wrangler kv key list`, `key get` y `key put` operan por defecto
-sobre el namespace local de miniflare** (`.wrangler/state/v3/kv/`), no sobre el
-de Cloudflare. Con wrangler 4.115:
-
-```
-npx wrangler kv key list --namespace-id <id>            # []           ← el local
-npx wrangler kv key list --namespace-id <id> --remote   # 19 claves    ← el real
-```
-
-Lo insidioso es que las tres operaciones son coherentes entre sí: se escribe una
-clave, se lee, se lista y aparece. Todo funciona — sobre el KV equivocado. Desde
-afuera se ve exactamente como «el caché no está guardando nada», que es la
-conclusión a la que se llegó antes de mirar el flag.
-
-**Regla: para preguntarle algo a un recurso de producción, `--remote`.** Vale
-para `kv`, y `d1 execute` tiene el mismo comportamiento.
-
-Los comandos del adaptador (`opennextjs-cloudflare populateCache remote`,
-`deploy`, `upload`) ya pasan `--remote` por su cuenta: ahí no hay nada que
-recordar.
-
-#### Cómo se comprobó que el caché compartido funciona de verdad
-
-Un `x-nextjs-cache: HIT` no alcanza como prueba, porque Next mantiene además su
-propia caché en memoria dentro de cada instancia del Worker: dos peticiones
-seguidas dan HIT aunque nada se haya guardado afuera.
-
-La prueba que sí distingue las dos cosas es **subir una versión nueva del mismo
-build y pedir una ruta que ya se había renderizado en la anterior**. La versión
-nueva arranca con la memoria vacía, así que si responde con el contenido viejo,
-ese contenido solo pudo venir del almacén compartido:
-
-```
-npx wrangler versions upload          # instancia nueva, mismo BUILD_ID
-curl -sI <url-nueva>/ruta-ya-vista    # x-nextjs-cache: STALE, no MISS
-```
-
-Que el `BUILD_ID` sea el mismo es lo que hace válida la comparación: la clave de
-caché lo incluye, así que un build distinto no encontraría nada y daría MISS por
-motivos que no tienen que ver con lo que se quiere probar.
+Se desataron de `wrangler.jsonc` y se desplegó **antes** de borrarlos. El orden
+importa: borrar un recurso que el Worker todavía referencia tira el sitio.
 
 ### Despliegue automático
 
@@ -393,17 +333,15 @@ operación más fácil de cometer al venir de Vercel, donde había una sola.
 | Settings → Build → **Build variables and secrets** | el build. Acá se incrustan las `NEXT_PUBLIC_*` y acá valida `next.config.ts` |
 | Settings → **Variables and Secrets**               | el runtime, en cada petición que toque el servidor                           |
 
-Las cinco en uso hoy son las cuatro de la Fase 1 más `ADMIN_USER_ID`, que se
-sumó en la Fase 2. **Desde la Fase 3 no se administran todas igual**, y esa es
-la parte que hay que leer con atención:
+Quedó **una sola** obligatoria al sacar el panel (decisión 36). Las tres que
+faltan se cargan en la Fase 4.6, con el formulario de contacto:
 
-| Variable                        | Dónde vive el valor de runtime | Valor en producción               |
-| ------------------------------- | ------------------------------ | --------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | `wrangler.jsonc` → `vars`      | el origen pelado del proyecto     |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `wrangler.jsonc` → `vars`      | igual que en `.env.local`         |
-| `NEXT_PUBLIC_SITE_URL`          | `wrangler.jsonc` → `vars`      | `https://espaciocortinas.com.ar`  |
-| `SUPABASE_SERVICE_ROLE_KEY`     | **Secret** del Worker          | igual que en `.env.local`         |
-| `ADMIN_USER_ID`                 | **Secret** del Worker          | el `user.id` de la administradora |
+| Variable               | Dónde vive el valor de runtime | Valor en producción              |
+| ---------------------- | ------------------------------ | -------------------------------- |
+| `NEXT_PUBLIC_SITE_URL` | `wrangler.jsonc` → `vars`      | `https://espaciocortinas.com.ar` |
+| `NEXT_PUBLIC_WHATSAPP` | `wrangler.jsonc` → `vars`      | Fase 4.6                         |
+| `RESEND_API_KEY`       | **Secret** del Worker          | Fase 4.6                         |
+| `EMAIL_CONTACTO`       | **Secret** del Worker          | Fase 4.6                         |
 
 `NEXT_PUBLIC_SITE_URL` es la única que difiere del archivo local, sin `www` y sin
 barra final — decisión 22.
@@ -437,6 +375,13 @@ falte una variable corta el build y la versión anterior sigue sirviendo.
 
 **Si falta alguna en la lista de _build_, el build falla a propósito con la lista
 completa de faltantes.** Es el comportamiento buscado.
+
+### Los dos incidentes de las variables — historial
+
+Las dos secciones que siguen hablan de variables de Supabase que **ya no
+existen**. Se conservan porque lo que enseñan sigue valiendo palabra por
+palabra: cómo trata wrangler al bloque `vars`, y que un build en verde no dice
+nada sobre si producción funciona.
 
 ### Incidente del 29/07/2026 — el sitio caído tras la mudanza
 
@@ -503,16 +448,15 @@ posterior era el que iba a romperlo, y fue el de la Fase 2.
 npx wrangler secret list
 ```
 
-Tienen que estar **exactamente dos**: `SUPABASE_SERVICE_ROLE_KEY` y
-`ADMIN_USER_ID`. Si falta alguna, se recarga con
-`npx wrangler secret put NOMBRE`.
+Hoy tiene que devolver **una lista vacía**: las dos que había
+—`SUPABASE_SERVICE_ROLE_KEY` y `ADMIN_USER_ID`— se borraron con el panel, y las
+de la Fase 4.6 todavía no se cargaron.
 
-Que aparezca una tercera **no es tranquilizador, es un problema**: significa que
-quedó un Secret viejo con el mismo nombre que una variable declarada en
-`wrangler.jsonc`, y entonces hay dos valores para el mismo nombre y no está
-claro cuál gana.
+Que aparezca un Secret con el mismo nombre que una variable declarada en
+`wrangler.jsonc` **no es tranquilizador, es un problema**: hay dos valores para
+el mismo nombre y no está claro cuál gana.
 
-Las otras tres se verifican leyendo el archivo, que es todo el punto:
+Las declaradas en el archivo se verifican leyéndolo, que es todo el punto:
 
 ```
 npx wrangler deploy --dry-run

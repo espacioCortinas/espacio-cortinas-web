@@ -2,7 +2,10 @@
 
 Sitio institucional con catálogo y portfolio para una empresa de cortinas, rollers
 blackout, venecianas y toldos con colocación, que trabaja en Buenos Aires.
-Incluye un panel de administración propio para que la dueña cargue el contenido.
+
+**No hay panel de administración ni base de datos.** Hubo los dos y se sacaron
+—decisión 36—: el contenido son archivos de este repositorio, se edita a mano y
+se publica con un `git push`.
 
 **No es un e-commerce.** No hay carrito, precios, stock ni pagos.
 
@@ -35,22 +38,19 @@ Se mudó desde Vercel en julio de 2026 — decisión 24 de `docs/decisiones.md`.
 
 1. **App Router únicamente.** Nunca Pages Router. No mezclar convenciones de los
    dos (`getServerSideProps`, `_app.tsx`, `next/router` no se usan).
-2. **Todo el contenido viene de la base.** Ningún producto ni proyecto
-   hardcodeado en componentes.
-3. **Toda mutación pasa por el servidor.** Server Actions o Route Handlers, con
-   verificación de identidad propia. El navegador nunca escribe en la base.
-4. **El middleware no autoriza.** Solo redirige al login. Toda Server Action
-   revalida por su cuenta. Ver `docs/seguridad.md`. El archivo se llama
-   `middleware.ts` y **no se renombra a `proxy.ts`** aunque Next lo pida en cada
-   build: `proxy.ts` obliga al runtime de Node y el adaptador de Cloudflare solo
-   admite edge — decisión 26.
-5. **La `service_role key` nunca sale del servidor.** Ni en un componente cliente,
-   ni en una variable `NEXT_PUBLIC_*`.
-6. **Se borra el EXIF de toda imagen antes de publicarla.** Las fotos son de
+2. **Todo el contenido viene de `contenido/`.** Ningún producto ni proyecto
+   hardcodeado en componentes, y las páginas leen de `contenido/index.ts`, que
+   es el que une los textos con las fotos.
+3. **Lo escrito a mano y lo generado no comparten archivo.** `productos.ts` y
+   `proyectos.ts` se editan; `fotos.ts` lo escribe el script y se pisa entero.
+4. **El `srcset` se arma leyendo `medidas` de cada foto**, nunca con la
+   constante del código: una foto chica no tiene todas las medidas y el
+   navegador pediría un archivo que no existe — decisión 32.
+5. **Se borra el EXIF de toda imagen antes de publicarla.** Las fotos son de
    casas de clientes y traen coordenadas GPS.
-7. **Español en todo:** interfaz, nombres de tablas y columnas, comentarios,
+6. **Español en todo:** interfaz, nombres de tablas y columnas, comentarios,
    mensajes de error, commits.
-8. **Sin dependencias nuevas sin justificarlas.** Preferir la plataforma antes
+7. **Sin dependencias nuevas sin justificarlas.** Preferir la plataforma antes
    que una librería.
 
 ## Reglas de diseño
@@ -73,9 +73,8 @@ Se mudó desde Vercel en julio de 2026 — decisión 24 de `docs/decisiones.md`.
   "ver código fuente", no con el inspector).
 - Cada página pública tiene `title`, `description` y Open Graph propios.
 - `npm run build` y `npx tsc --noEmit` pasan sin errores.
-- Si el cambio tocó la base, `npm run esquema` da verde (decisión 31). Al
-  aplicar una migración se corre `npm run esquema:actualizar` y se commitea el
-  diff junto con el `.sql`.
+- Si el cambio tocó fotos, `npm run fotos:revisar` da verde: ninguna publicada
+  conserva GPS. **No es opcional** — son fotos de casas de clientes.
 - Si el cambio toca código de servidor, además pasa por `npm run preview`, que
   lo corre en el mismo runtime que producción. `npm run dev` corre sobre Node y
   no detecta un uso de API que Cloudflare Workers no soporte.

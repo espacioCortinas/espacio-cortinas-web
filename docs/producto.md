@@ -121,21 +121,26 @@ nunca limita el portfolio completo.
 
 **Desactivar no es eliminar.** Eliminar pide confirmación.
 
-## Panel de administración
+## Cómo se carga el contenido
 
-Un solo usuario. Dos secciones, ninguna más:
+**No hay panel de administración.** Se construyó en la Fase 3, funcionó, y se
+sacó a propósito: el contenido cambia pocas veces al año y quien desarrolla
+prefiere editarlo a mano — decisión 36, que incluye lo que eso deja abierto.
+
+El contenido son archivos del repositorio:
 
 ```
-Productos           Proyectos
-├── Crear           ├── Crear
-├── Editar          ├── Editar
-├── Eliminar        ├── Eliminar
-├── Activar         ├── Activar
-├── Destacar        ├── Destacar
-└── Fotos           └── Fotos
-
-Fotos: subir · eliminar · reordenar · elegir portada
+contenido/productos.ts     nombre, descripción, variantes, publicado, destacado
+contenido/proyectos.ts     título, ubicación, descripción, publicado, destacado
+fotos-originales/          las fotos, que un script prepara y limpia
 ```
+
+Publicar un cambio es editar un archivo y hacer `git push`. Tarda lo que tarde
+el build: entre 2 y 9 minutos. El procedimiento está en
+`docs/modelo-de-datos.md`.
+
+**Consecuencia, y está anotada:** la empresa no puede publicar sola. Cada foto y
+cada corrección de texto pasan por quien desarrolla.
 
 ## Contacto
 
@@ -159,10 +164,9 @@ bandeja de mensajes en el panel: los mensajes van por email.
 Nada de esto se construye ahora:
 
 - E-commerce, carrito, precios, stock, pagos
-- Editor de la home o de textos institucionales desde el panel
-- Pantalla de configuración general
+- Panel de administración de cualquier tipo, propio o de terceros
 - Roles, permisos, varios administradores
-- Bandeja de mensajes en el panel
+- Bandeja de mensajes
 - CRM, estadísticas administrativas
 - Vista previa antes de publicar
 - Historial de versiones

@@ -1,220 +1,179 @@
 # Modelo de datos
 
-PostgreSQL en Supabase. Nombres de tablas y columnas en español, en minúscula y
-con guión bajo.
+**No hay base de datos.** El contenido son archivos de este repositorio, se
+edita a mano y se publica con un `git push` — decisión 36.
 
-## Diagrama
+Hasta la Fase 3 esto describía cinco tablas de PostgreSQL en Supabase, con RLS,
+migraciones y un bucket privado. Todo eso se sacó junto con el panel. La
+historia está en la decisión 36 y el código, en el historial de git.
 
-```
-productos ──< producto_variantes
-    │
-    └──< producto_imagenes
-
-proyectos ──< proyecto_imagenes
-```
-
-No hay relación entre productos y proyectos en V1.
-
-## productos
-
-| Columna          | Tipo          | Notas                    |
-| ---------------- | ------------- | ------------------------ |
-| `id`             | `uuid`        | PK, `gen_random_uuid()`  |
-| `nombre`         | `text`        | obligatorio              |
-| `slug`           | `text`        | único, obligatorio       |
-| `descripcion`    | `text`        | breve, texto plano       |
-| `activo`         | `boolean`     | `false` por defecto      |
-| `destacado`      | `boolean`     | `false` por defecto      |
-| `orden`          | `integer`     | posición en el catálogo  |
-| `creado_en`      | `timestamptz` | `now()`                  |
-| `actualizado_en` | `timestamptz` | se actualiza por trigger |
-
-## producto_variantes
-
-| Columna       | Tipo      | Notas                                 |
-| ------------- | --------- | ------------------------------------- |
-| `id`          | `uuid`    | PK                                    |
-| `producto_id` | `uuid`    | FK → `productos`, `ON DELETE CASCADE` |
-| `nombre`      | `text`    | ej. "Dos paños", "Motorizados"        |
-| `orden`       | `integer` |                                       |
-
-Las variantes no tienen descripción, slug ni foto propia. Son una lista de
-nombres. Si en el futuro hace falta una foto por variante, se agrega entonces.
-
-## proyectos
-
-| Columna          | Tipo          | Notas                        |
-| ---------------- | ------------- | ---------------------------- |
-| `id`             | `uuid`        | PK                           |
-| `titulo`         | `text`        | obligatorio                  |
-| `slug`           | `text`        | único, obligatorio           |
-| `ubicacion`      | `text`        | ej. "Nordelta, Buenos Aires" |
-| `descripcion`    | `text`        | texto plano                  |
-| `activo`         | `boolean`     | `false` por defecto          |
-| `destacado`      | `boolean`     | `false` por defecto          |
-| `orden`          | `integer`     |                              |
-| `creado_en`      | `timestamptz` |                              |
-| `actualizado_en` | `timestamptz` |                              |
-
-`ubicacion` es texto libre, no una tabla de localidades. Se muestra como chip.
-
-## producto_imagenes / proyecto_imagenes
-
-Dos tablas separadas, con la misma forma:
-
-| Columna                       | Tipo          | Notas                                         |
-| ----------------------------- | ------------- | --------------------------------------------- |
-| `id`                          | `uuid`        | PK                                            |
-| `producto_id` / `proyecto_id` | `uuid`        | FK, `ON DELETE CASCADE`                       |
-| `ruta`                        | `text`        | carpeta dentro del bucket — no un archivo     |
-| `medidas`                     | `integer[]`   | qué anchos existen. Ej. `{480,960,1600,2560}` |
-| `formato`                     | `text`        | la extensión de los archivos: `webp` o `jpg`  |
-| `ancho`                       | `integer`     | de la medida más grande                       |
-| `alto`                        | `integer`     | de la medida más grande                       |
-| `alt`                         | `text`        | ver más abajo                                 |
-| `orden`                       | `integer`     | posición en la galería                        |
-| `es_portada`                  | `boolean`     |                                               |
-| `creado_en`                   | `timestamptz` |                                               |
-
-### `medidas` y `ruta`
-
-Cada imagen no es un archivo: son **cuatro WebP del mismo original**, generados en
-el navegador al subir (480, 960, 1600 y 2560 px de **ancho**) y servidos con
-`srcset`. En Cloudflare no hay optimización de imágenes al servir — decisión 25.
-
-Por eso `ruta` guarda la **carpeta**, no el archivo, y el nombre de cada archivo
-es su ancho más la extensión que diga `formato`:
+## Dónde vive cada cosa
 
 ```
-productos/{producto_id}/{uuid}/480.webp
-productos/{producto_id}/{uuid}/960.webp
-productos/{producto_id}/{uuid}/1600.webp
-productos/{producto_id}/{uuid}/2560.webp
+contenido/
+├── productos.ts      se edita a mano
+├── proyectos.ts      se edita a mano
+├── fotos.ts          GENERADO por scripts/preparar-fotos.mjs
+├── tipos.ts          la forma de todo lo anterior
+└── index.ts          une el contenido con sus fotos, y es lo que leen las páginas
+
+public/fotos/         las imágenes ya recomprimidas, generadas
+fotos-originales/     los originales. NO se versiona
 ```
 
-**`formato` existe por la misma razón que `medidas`: no adivinar, registrar.**
-No todas las fotos son WebP. WebKit no sabe generarlo desde un canvas, y en iOS
-todos los navegadores son WebKit, así que lo que se carga desde el teléfono
-queda en JPEG y lo que se carga desde una computadora queda en WebP — decisión 35. Dos fotos del mismo proyecto pueden tener formatos distintos, y armar el
-nombre del archivo desde una constante del código fallaría con la primera que
-no coincida.
+**Lo escrito a mano y lo generado nunca comparten archivo.** Si estuvieran
+juntos, regenerar las fotos pisaría los textos. Se juntan al leer, en
+`contenido/index.ts`, por el slug.
 
-**`medidas` existe para no tener que adivinar.** Dos motivos concretos:
+## Por qué TypeScript y no JSON
 
-- Una foto original de 900 px de ancho no genera la medida de 1600 ni la de
-  2560: agrandarla no agrega detalle, solo bytes, y además mentiría en el
-  `srcset`. Esa fila tiene `{480,900}` —las medidas fijas que le entran, más
-  su propio ancho— y el `srcset` sale con dos entradas.
-- Si algún día hace falta un corte nuevo (1200 px, o AVIF), se puede agregar
-  **fila por fila**, sin tener que regenerar las 300 fotos de una vez para que el
-  sitio no se rompa a la mitad.
+Esto se edita a mano, así que conviene que el editor autocomplete y que `tsc`
+frene el build si falta un campo, si un booleano está mal escrito o si algo
+apunta a una carpeta que no existe. Con JSON esos errores no aparecen hasta que
+alguien visita la página.
 
-Armar el `srcset` a partir de una constante en el código, en vez de leer esta
-columna, funcionaría hoy y fallaría con la primera foto chica: el navegador
-pediría un archivo que no existe.
+## Producto
 
-**`ancho` y `alto` son los de la medida más grande.** Todas comparten la misma
-relación de aspecto, así que con ese par alcanza para reservar el espacio y para
-saber la orientación.
+| Campo         | Tipo       | Notas                                              |
+| ------------- | ---------- | -------------------------------------------------- |
+| `slug`        | `string`   | la parte final del enlace, y la clave de las fotos |
+| `nombre`      | `string`   |                                                    |
+| `descripcion` | `string`   | breve, texto plano                                 |
+| `variantes`   | `string[]` | solo nombres. Ej. `["Dos paños", "Motorizado"]`    |
+| `activo`      | `boolean`  |                                                    |
+| `destacado`   | `boolean`  |                                                    |
 
-**Por qué dos tablas y no una tabla polimórfica** (`entidad` + `entidad_id`): una
-tabla polimórfica no puede tener clave foránea real, así que Postgres deja de
-garantizar integridad y el borrado en cascada hay que hacerlo a mano. Con solo dos
-entidades, la duplicación es mínima y la integridad vale más. El componente de
-galería del panel se comparte igual, recibiendo la entidad como parámetro.
+Las variantes **no** son productos independientes: `Toldos motorizados` es una
+variante de `Toldos`, no una entrada más del catálogo. No tienen descripción,
+slug ni foto propia.
 
-**Una sola portada por entidad**, garantizado por índice único parcial:
+## Proyecto
 
-```sql
-create unique index una_portada_por_producto
-  on producto_imagenes (producto_id) where es_portada;
+| Campo         | Tipo      | Notas                                     |
+| ------------- | --------- | ----------------------------------------- |
+| `slug`        | `string`  |                                           |
+| `titulo`      | `string`  |                                           |
+| `ubicacion`   | `string`  | texto libre. Ej. "Nordelta, Buenos Aires" |
+| `descripcion` | `string`  | texto plano                               |
+| `activo`      | `boolean` |                                           |
+| `destacado`   | `boolean` |                                           |
+
+**Cuatro campos y no más** — decisión 11. Sin categoría, sin fecha, sin cliente,
+sin superficie, sin qué productos se usaron. Cada campo agregado es un campo que
+hay que completar en cada carga.
+
+## Fotos
+
+`contenido/fotos.ts` es un mapa de `<entidad>/<slug>` a una lista de fotos:
+
+```ts
+"productos/roller-blackout": [
+  { carpeta: "productos/roller-blackout/1", medidas: [480, 960, 1600, 2560], ancho: 2560, alto: 3200 },
+]
 ```
 
-Si se elimina la imagen de portada, se promueve automáticamente la de menor
-`orden`.
+| Campo     | Notas                                                     |
+| --------- | --------------------------------------------------------- |
+| `carpeta` | dentro de `public/fotos/`. Adentro, un archivo por medida |
+| `medidas` | qué anchos existen de verdad para esta foto               |
+| `ancho`   | de la medida más grande                                   |
+| `alto`    | de la medida más grande                                   |
 
-**Texto alternativo:** se genera solo al subir, a partir de la entidad
-(`"Casa en Nordelta — foto 3"`). Es editable, pero no se pide en el momento de la
-carga. Obligar a escribirlo en cada foto haría que se cargue cualquier cosa, que es
-peor que un texto generado razonable.
+**Nada de esto se escribe a mano.** Lo calcula `scripts/preparar-fotos.mjs` a
+partir del archivo que efectivamente escribió, no de una cuenta — que es lo que
+evita que el manifiesto describa una foto distinta de la que hay en el disco.
+
+### `medidas` existe para no adivinar
+
+Una foto de 900 px de ancho no genera la medida de 1600 ni la de 2560: agrandar
+no agrega detalle, solo bytes, y además **mentiría en el `srcset`**, donde el
+descriptor `w` es por definición el ancho real del archivo. Esa foto tiene
+`{480, 900}` — las medidas fijas que le entran, más su propio ancho.
+
+Armar el `srcset` a partir de una constante del código funcionaría hoy y
+fallaría con la primera foto chica: el navegador pediría un archivo que no
+existe. **Se lee de la lista, siempre.** Decisión 32.
+
+### `ancho` y `alto` no son decorativos
+
+Van al `<img>`. Sin ellos el navegador no puede reservar el espacio y la página
+salta mientras carga. Y con ese par se sabe la orientación sin abrir el archivo.
+
+### Cómo se sirven
+
+```html
+<img
+  src="/fotos/productos/roller-blackout/1/1600.webp"
+  srcset="
+    /fotos/productos/roller-blackout/1/480.webp   480w,
+    /fotos/productos/roller-blackout/1/960.webp   960w,
+    /fotos/productos/roller-blackout/1/1600.webp 1600w,
+    /fotos/productos/roller-blackout/1/2560.webp 2560w
+  "
+  sizes="(max-width: 768px) 100vw, 50vw"
+  width="2560"
+  height="3200"
+  alt="Roller Blackout — foto 1"
+/>
+```
+
+**El optimizador de `next/image` no se usa.** Los tamaños ya están generados; en
+Cloudflare, dejarlo activo gastaría cuota de Transformations rehaciendo un
+trabajo hecho — decisión 25.
+
+### El orden, la portada y el texto alternativo
+
+- **El orden del arreglo es el orden de la galería.** No hay campo `orden`.
+- **La primera foto es la portada**, y tiene que ser vertical: los listados usan
+  siempre la portada, y es lo que hace que las grillas queden parejas aunque la
+  galería mezcle orientaciones (decisión 14). Si la primera es apaisada, el
+  script la recorta a 4:5 por el centro y lo avisa.
+- **No hay campo `alt`.** Se arma al renderizar con `altAutomatico()`, a partir
+  del nombre y la posición: «Casa en Nordelta — foto 3». Pedirlo por foto haría
+  que se cargue cualquier cosa, que para un lector de pantalla es peor que un
+  texto generado razonable.
 
 ## Slugs
 
-Se generan del nombre o del título al crear: minúsculas, sin tildes, espacios por
-guiones. Si ya existe, se agrega un sufijo numérico.
+Se escriben a mano, en minúsculas, sin tildes y con guiones. Son la clave con la
+que se buscan las fotos, así que tienen que coincidir con el nombre de la
+carpeta en `fotos-originales/`.
 
-**El slug no se regenera al cambiar el nombre.** Es un campo propio y editable,
-pero cambiarlo rompe cualquier enlace ya compartido por WhatsApp. En el panel, el
-campo aparece con esa advertencia.
+**No se cambian una vez publicados.** Rompen los enlaces ya compartidos por
+WhatsApp, que es por donde se comparte este sitio — decisión 10.
 
 ## Activo y destacado
 
 Son independientes:
 
 ```
-activo = true                    → aparece en /productos o /proyectos
+activo = true                     → aparece en /productos o /proyectos
 activo = true  y destacado = true → además puede aparecer en Inicio
-activo = false                   → no aparece en ningún lado
+activo = false                    → no aparece en ningún lado
 ```
 
-Un elemento inactivo pero destacado no se muestra: `activo` manda.
+Un elemento inactivo pero destacado no se muestra: **`activo` manda**.
 
 El tope de Inicio (`PROYECTOS_DESTACADOS_HOME`, `PRODUCTOS_DESTACADOS_HOME`) se
-aplica **al consultar**, ordenando por `orden`. No se impone al guardar: se pueden
-marcar más destacados de los que entran, y solo aparecen los primeros. Así se puede
-reordenar sin tener que desmarcar primero.
+aplica **al leer**, tomando los primeros del arreglo. Se pueden dejar más
+destacados de los que entran y solo aparecen los primeros, así que se cambia qué
+sale en la portada moviendo un bloque de lugar, sin desmarcar nada.
 
-## Storage
+## Cómo se agrega contenido
 
-Un bucket **privado**, `imagenes`. Una carpeta por imagen, y dentro las medidas:
+1. Se ponen los originales en `fotos-originales/<entidad>/<slug>/`, numerados.
+   El orden alfabético es el de la galería y **el primero es la portada**.
+2. `npm run fotos` — recorta, redimensiona, borra los metadatos y reescribe
+   `contenido/fotos.ts`.
+3. `npm run fotos:revisar` — comprueba que ninguna conserve GPS. **No es
+   opcional**: son fotos de casas de clientes. Ver `docs/seguridad.md`.
+4. Se agrega o edita el bloque en `contenido/productos.ts` o `proyectos.ts`.
+5. `npm run build` para que `tsc` valide, y `git push`.
 
-```
-imagenes/
-├── productos/{producto_id}/{uuid}/{ancho}.webp
-└── proyectos/{proyecto_id}/{uuid}/{ancho}.webp
-```
+El cambio tarda lo que tarde el build: entre 2 y 9 minutos.
 
-Carpetas con UUID, no con el nombre original: los nombres que vienen del teléfono
-son inútiles y pueden filtrar información.
+## Copias de seguridad
 
-**Por qué una carpeta por imagen y no `{uuid}-480.webp` suelto:** borrar una
-imagen es borrar un prefijo, no armar cuatro nombres a mano y esperar acertar con
-todos. Con la lista de medidas cambiando entre filas, esa diferencia evita
-archivos huérfanos.
-
-El bucket es privado y el sitio público sirve las imágenes a través de URLs
-firmadas o de una política de lectura acotada. Al eliminar un producto o proyecto,
-la cascada borra las filas: **borrar los archivos de Storage es responsabilidad de
-la Server Action**, no de la base — y ahora son cuatro archivos por fila.
-
-## Cómo se comprueba que esto es cierto
-
-Las migraciones se aplican a mano (decisión 28), así que este documento y la
-base pueden separarse sin que nada avise. La comprobación es un comando:
-
-```
-npm run esquema
-```
-
-Compara el esquema real contra la foto versionada en `supabase/esquema.txt` y
-muestra qué sobra y qué falta. Después de aplicar una migración se corre
-`npm run esquema:actualizar` y se commitea el diff junto con el `.sql`.
-Decisión 31.
-
-## Datos iniciales
-
-**Ninguno.** Las tablas arrancan vacías. Todo el contenido se carga desde el panel
-en la Fase 3, antes de la fase de diseño, para diseñar contra material real.
-
-El catálogo previsto es Cortinas · Roller Blackout · Venecianas · Toldos, pero se
-cargan a mano.
-
-## Orientación de las imágenes
-
-`ancho` y `alto` no son solo para reservar espacio: con ellos se sabe la
-orientación sin abrir el archivo.
-
-**La portada tiene que ser vertical** (`alto > ancho`). El panel lo valida al
-marcar una imagen como portada. Mientras el archivo histórico siga siendo
-horizontal, se admite una horizontal recortada a 4:5 en el navegador antes de
-subir. Ver `docs/diseno.md`.
+Todo el contenido está en git, con historial. **Los originales de las fotos no**:
+viven en el Drive de la empresa, porque lo que se publica está recomprimido y
+sin metadatos y de ahí no se recupera el original — decisión 18.
