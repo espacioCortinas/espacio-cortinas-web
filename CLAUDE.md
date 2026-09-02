@@ -44,9 +44,11 @@ Se mudó desde Vercel en julio de 2026 — decisión 24 de `docs/decisiones.md`.
    es el que une los textos con las fotos.
 3. **Lo escrito a mano y lo generado no comparten archivo.** `productos.ts` y
    `proyectos.ts` se editan; `fotos.ts` lo escribe el script y se pisa entero.
-4. **El `srcset` se arma leyendo `medidas` de cada foto**, nunca con la
-   constante del código: una foto chica no tiene todas las medidas y el
-   navegador pediría un archivo que no existe — decisión 32.
+4. **La ruta de una foto se arma leyendo el manifiesto**, nunca con las
+   constantes del código: `medidas` dice qué anchos existen de ESA foto y
+   `formato` con qué extensión se escribieron. Una foto chica no tiene todas las
+   medidas y el navegador pediría un archivo que no existe — decisiones 32 y 37.
+   Todo eso vive en `lib/fotos.ts`, que es lo único que arma rutas de imágenes.
 5. **Se borra el EXIF de toda imagen antes de publicarla.** Las fotos son de
    casas de clientes y traen coordenadas GPS.
 6. **Español en todo:** interfaz, nombres de tablas y columnas, comentarios,
@@ -76,6 +78,9 @@ Se mudó desde Vercel en julio de 2026 — decisión 24 de `docs/decisiones.md`.
 - `npm run build` y `npx tsc --noEmit` pasan sin errores.
 - Si el cambio tocó fotos, `npm run fotos:revisar` da verde: ninguna publicada
   conserva GPS. **No es opcional** — son fotos de casas de clientes.
-- Si el cambio toca código de servidor, además pasa por `npm run preview`, que
-  lo corre en el mismo runtime que producción. `npm run dev` corre sobre Node y
-  no detecta un uso de API que Cloudflare Workers no soporte.
+- Si el cambio toca rutas, renderizado, caché o código de servidor, además pasa
+  por `npm run preview`, que lo corre en el mismo runtime que producción.
+  `npm run dev` corre sobre Node: no detecta un uso de API que Workers no
+  soporte, y **tampoco usa el caché incremental del adaptador**. En la Fase 4.0
+  eso escondió un 404 en todas las páginas de producto, con `npm run build` y
+  `npm run dev` en verde — decisión 39.

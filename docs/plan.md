@@ -248,6 +248,17 @@ cae.
 La fase más larga. Se subdivide, pero **la dirección visual se define primero y
 una sola vez**.
 
+**4.0 Armazón — HECHA.** El sitio público existe, con el contenido leído de
+`contenido/`, las rutas generadas desde ahí, el componente de imagen, la
+metadata por página, `sitemap.ts`, `robots.ts`, los datos estructurados y el
+WhatsApp contextual. **Sin nada visual decidido:** maquetación mínima con los
+valores por defecto de Tailwind, a propósito, para no condicionar la 4.1.
+
+La metadata, el sitemap, el robots y los datos estructurados estaban en la Fase
+5 y se adelantaron acá — decisión 38: `generateMetadata()` vive en el mismo
+archivo que la página, así que dejarla para el final significaba volver a abrir
+los diez archivos.
+
 **4.1 Dirección visual.** Con las fotos reales a la vista: color, tipografía,
 ritmo, tratamiento de imagen. Sin escribir componentes todavía.
 
@@ -274,10 +285,15 @@ anticipar.
 
 ## Fase 5 — SEO, rendimiento y publicación
 
-- Metadata y Open Graph por página, con imagen propia
-- `sitemap.ts` y `robots.ts`
-- URLs canónicas
-- Datos estructurados de negocio local
+Los cuatro primeros puntos se adelantaron a la Fase 4.0 — decisión 38. Quedan
+tachados acá para que no se hagan dos veces, y con lo que sí falta de cada uno:
+
+- ~~Metadata y Open Graph por página, con imagen propia~~ — falta la **imagen de
+  reserva** para las páginas sin foto propia, que es una decisión visual de la 4.1
+- ~~`sitemap.ts` y `robots.ts`~~
+- ~~URLs canónicas~~
+- ~~Datos estructurados de negocio local~~ — falta `address` y horario, que no
+  se pueden inventar; sale junto con el Perfil de Empresa de Google
 - Cloudflare Web Analytics activado, con evento propio para los clics a WhatsApp
 - Revisión de Core Web Vitals en móvil
 - Alta en Google Search Console

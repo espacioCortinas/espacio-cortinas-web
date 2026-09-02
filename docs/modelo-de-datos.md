@@ -68,7 +68,13 @@ hay que completar en cada carga.
 
 ```ts
 "productos/roller-blackout": [
-  { carpeta: "productos/roller-blackout/1", medidas: [480, 960, 1600, 2560], ancho: 2560, alto: 3200 },
+  {
+    carpeta: "productos/roller-blackout/1",
+    medidas: [480, 960, 1600, 2560],
+    formato: "webp",
+    ancho: 2560,
+    alto: 3200,
+  },
 ]
 ```
 
@@ -76,6 +82,7 @@ hay que completar en cada carga.
 | --------- | --------------------------------------------------------- |
 | `carpeta` | dentro de `public/fotos/`. Adentro, un archivo por medida |
 | `medidas` | qué anchos existen de verdad para esta foto               |
+| `formato` | la extensión, sin el punto. Hoy `"webp"` en todas         |
 | `ancho`   | de la medida más grande                                   |
 | `alto`    | de la medida más grande                                   |
 
@@ -114,12 +121,31 @@ salta mientras carga. Y con ese par se sabe la orientación sin abrir el archivo
   width="2560"
   height="3200"
   alt="Roller Blackout — foto 1"
+  loading="lazy"
+  decoding="async"
 />
 ```
 
+Las tres cosas que este `<img>` tiene que respetar, y que fallan en silencio si
+no: los candidatos del `srcset` salen de `medidas` y no de una constante, el
+descriptor `w` es el ancho real del archivo —que es también su nombre—, y
+`width` y `height` van siempre para que la página no salte mientras carga.
+
+### `formato` existe por la misma razón que `medidas`
+
+Hoy el script genera WebP para todas —la rama JPEG existía porque WebKit no sabe
+codificar WebP y el panel se usaba desde un iPhone, y con el panel se fue— así
+que el campo dice `"webp"` en todas las filas. **Se registra igual, y se lee
+igual.** Armar el nombre del archivo concatenando una constante del código
+funciona hasta la primera foto que no siga la regla, y ahí el navegador pide un
+archivo que no existe. Es exactamente el error de `medidas` con otro nombre —
+decisión 37.
+
 **El optimizador de `next/image` no se usa.** Los tamaños ya están generados; en
 Cloudflare, dejarlo activo gastaría cuota de Transformations rehaciendo un
-trabajo hecho — decisión 25.
+trabajo hecho — decisión 25. `next.config.ts` lo apaga con
+`images.unoptimized`, y el sitio sirve las fotos con `<img>` a través de
+`components/foto.tsx`.
 
 ### El orden, la portada y el texto alternativo
 

@@ -1291,6 +1291,121 @@ WhatsApp— la cubren los dos igual. Queda anotado por si alguna vez se replante
 
 ---
 
+### 37. Cada foto registra su formato, aunque hoy todas sean WebP
+
+**Fecha:** septiembre de 2026, durante la Fase 4.0. Matiza la decisión 36.
+
+**El planteo.** La decisión 36 sacó la rama JPEG de la decisión 35 —existía
+porque WebKit no sabe codificar WebP y el panel se usaba desde un iPhone, y ya
+no comprime ningún navegador— y con ella se fue la columna `formato`. Al
+escribir el componente de imagen apareció la pregunta: ¿el nombre del archivo se
+arma con `.webp` fijo en el código, o se lee del manifiesto?
+
+**Se lee del manifiesto, y el script escribe el formato del archivo que
+efectivamente generó.** Es la misma regla que ya vale para `medidas` (decisión 32) y por la misma razón: armar una ruta desde una constante del código funciona
+hasta la primera foto que no siga la regla, y ahí el navegador pide un archivo
+que no existe. Falla en silencio, en producción, y solo para algunas fotos.
+
+**Esto no reabre la rama JPEG.** Hoy el campo dice `"webp"` en todas las filas y
+`scripts/preparar-fotos.mjs` tiene un solo formato de salida. Lo que se registra
+es un hecho sobre cada archivo, no una detección ni una bifurcación: si algún día
+aparece un formato nuevo —AVIF, o un original que convenga dejar en otra cosa—
+el manifiesto ya lo dice y el sitio no cambia.
+
+**Lo que cuesta:** un campo más por foto en un archivo generado. No lo carga
+nadie a mano.
+
+**Cómo se protege.** El script comprueba que el formato que devolvió `sharp`
+coincida con el que puso en el nombre del archivo, y corta si no. Es la misma
+comprobación que ya hacía con el ancho, y por el mismo motivo: el nombre del
+archivo es un dato del que depende el navegador.
+
+---
+
+### 38. Metadata, sitemap, robots y datos estructurados se adelantan a la Fase 4.0
+
+**Fecha:** septiembre de 2026.
+
+`docs/plan.md` los tenía en la Fase 5, junto con la analítica y el alta en Search
+Console. Se adelantan al armazón del sitio público por una razón concreta: la
+metadata por ruta **no es una capa que se agregue encima de las páginas**, es
+parte de cómo se escribe cada página. `generateMetadata()` vive en el mismo
+archivo que la página y lee el mismo contenido; dejarla para el final significaría
+volver a abrir los diez archivos y agregarles un bloque.
+
+Es además lo que motivó elegir Next y no un SPA (decisión 1): si el enlace de un
+producto pegado en WhatsApp no muestra su foto y su título, buena parte del valor
+del sitio no existe. Que eso funcione desde el primer día en que hay páginas es
+más barato que descubrir en la Fase 5 que la estructura del contenido no da para
+armar un Open Graph decente.
+
+**Lo que se queda en la Fase 5**, porque no depende del código de las páginas:
+Cloudflare Web Analytics, el alta en Search Console, el Perfil de Empresa de
+Google, las cabeceras de seguridad, la revisión de Core Web Vitals y el checklist
+de `docs/seguridad.md`.
+
+---
+
+### 39. Vuelve el caché incremental, ahora sobre los assets estáticos
+
+**Fecha:** septiembre de 2026, durante la Fase 4.0. Corrige la decisión 36.
+
+**Cómo apareció.** `npm run build` en verde, `npm run dev` mostrando
+`/productos/roller-screen` perfecta, y `npm run preview` —el Worker real, sobre
+`workerd`— devolviendo **404** en esa misma URL. Los listados y las páginas
+sueltas respondían 200; las únicas rotas eran las de `/productos/[slug]`.
+
+**La causa.** La decisión 36 sacó Workers KV y D1 con este razonamiento: el
+caché incremental existía porque el panel revalidaba rutas al guardar, y sin
+panel no hay nada que revalidar. Eso es cierto y sigue siendo cierto. Lo que no
+vio es que **el caché incremental no sirve solo para revalidar: también es de
+donde el servidor de Next lee las páginas ya prerenderizadas.**
+
+Sin ningún override configurado, el adaptador deja el caché `dummy`, que falla
+todas las búsquedas. De ahí sale el comportamiento en dos partes:
+
+| Ruta                    | Falla la búsqueda y…                                                                                                       |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `/productos` (estática) | la vuelve a renderizar. **Funciona, y por eso no se nota**                                                                 |
+| `/productos/[slug]`     | no puede: con `dynamicParams = false` solo existen los params de `generateStaticParams`, y esos viven en el caché. **404** |
+
+La respuesta lo decía entero y nadie la estaba mirando: `x-nextjs-prerender: 1`
+junto con `x-nextjs-cache: MISS`.
+
+**Lo que se hace.** `open-next.config.ts` pasa a usar
+`staticAssetsIncrementalCache`, que guarda las páginas prerenderizadas entre los
+**assets estáticos del Worker** —donde ya vive el resto del sitio—. Es el
+override que el adaptador documenta para aplicaciones que no quieren
+revalidación y solo sirven contenido prerenderizado, que es exactamente este
+sitio desde la decisión 36.
+
+**Por qué esto y no volver a KV.** KV y D1 eran dos recursos de Cloudflare que
+administrar, y existían para que varias instancias del Worker compartieran una
+revalidación que ya no ocurre. El caché sobre assets no agrega ningún recurso:
+se publica con el mismo despliegue, se reemplaza entero en cada build y no puede
+quedar viejo, porque el contenido y el caché salen del mismo `next build`. Lo
+que la decisión 36 quería —dejar de administrar infraestructura de caché— se
+conserva; lo que se recupera es la capacidad de servir lo prerenderizado.
+
+**El `tagCache` sigue sin ir, y a propósito.** Sin él `revalidatePath()` no hace
+nada y no avisa (decisión 29). Acá nadie lo llama.
+
+#### La lección, que es la tercera vez que este proyecto la aprende
+
+Un build en verde no dice nada sobre si producción funciona. Ya había pasado dos
+veces con las variables de entorno (`docs/infraestructura.md`, «Los dos
+incidentes de las variables») y volvió a pasar acá, con otra causa. **La
+diferencia esta vez es que se agarró antes de desplegar**, porque `npm run
+preview` corre sobre `workerd` y no sobre Node.
+
+Y el detalle que conviene no perder: `npm run dev` **tampoco** lo detecta. No es
+que Workers no soporte una API —el motivo por el que `CLAUDE.md` ya pedía correr
+`preview`—, es que el servidor de desarrollo de Next no usa el caché incremental
+del adaptador. Cualquier cosa que dependa de cómo el adaptador traduce Next a
+Worker solo se ve en `preview`.
+
+---
+
 ## Decisiones abiertas
 
 **Dónde viven las fotos cuando se cargue el archivo histórico.** Unas 300 fotos
@@ -1298,6 +1413,25 @@ por cuatro medidas son del orden de 240 MB, y git guarda todas las versiones de
 cada archivo que se reemplace. Las opciones son git a secas, `git-lfs`, o
 dejarlas fuera del repositorio y subirlas en el despliegue. No bloquea nada
 hasta que haya que cargar el archivo — decisión 36.
+
+**Del lado de Cloudflare ya está verificado y no es el problema**: ~1.200
+archivos contra un tope de 20.000 por versión en el plan gratuito, sin tope
+documentado de tamaño total (`docs/infraestructura.md`, «Límites de los assets
+del Worker»). El que aprieta es el repositorio, y hay que decidirlo **antes** de
+cargar el archivo: sacar archivos grandes de la historia de git después obliga a
+reescribirla.
+
+**La ficha de negocio local está incompleta y no se puede completar con datos
+inventados.** `LocalBusiness` sin `address` es JSON-LD válido pero Google no lo
+muestra como resultado enriquecido. Falta saber si hay una dirección publicable
+—la empresa trabaja a domicilio— y con qué horario. Se resuelve junto con el
+alta del Perfil de Empresa de Google, que es donde ese dato importa de verdad
+(Fase 5).
+
+**Falta una imagen de Open Graph de reserva**, para las páginas sin foto propia
+—Inicio, los listados, Contacto— y para un producto todavía sin fotos. Hoy esos
+enlaces se comparten sin miniatura. Poner una implica logo, color y tipografía,
+así que sale de la Fase 4.1 y no antes.
 
 Cuando aparezca una decisión no contemplada durante la implementación: preguntar,
 decidir, y anotarla acá antes de seguir.

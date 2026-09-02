@@ -48,6 +48,7 @@ import {
 import { basename, dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import prettier from "prettier";
 import sharp from "sharp";
 
 import {
@@ -75,6 +76,17 @@ const EXTENSIONES = new Set([
   ".heic",
   ".heif",
 ]);
+
+/**
+ * El formato de salida. Uno solo: la rama JPEG existía porque WebKit no sabe
+ * codificar WebP y el panel se usaba desde un iPhone, y ya no comprime ningún
+ * navegador (decisiones 35 y 36).
+ *
+ * **Aun así cada foto registra el suyo en el manifiesto** — decisión 37. El
+ * sitio arma el nombre del archivo leyendo ese campo, no esta constante, que
+ * es la misma regla que ya vale para `medidas`.
+ */
+const FORMATO = "webp";
 
 let avisos = 0;
 const aviso = (t) => {
@@ -173,7 +185,7 @@ async function prepararFoto(rutaOriginal, carpetaDestino, esPortada) {
       // equipo ni de la fecha.
       .withIccProfile("srgb")
       .webp({ quality: Math.round(IMAGEN_CALIDAD * 100) })
-      .toFile(join(carpetaDestino, `${ancho}.webp`));
+      .toFile(join(carpetaDestino, `${ancho}.${FORMATO}`));
 
     // El nombre del archivo ES su ancho, porque de ahí sale el descriptor `w`
     // del `srcset`. Si alguna vez no coincidieran, el navegador elegiría el
@@ -185,12 +197,29 @@ async function prepararFoto(rutaOriginal, carpetaDestino, esPortada) {
       );
     }
 
+    // Y lo mismo con la extensión: el manifiesto la registra, así que el
+    // sitio va a pedir `${ancho}.${info.format}`. Si eso no coincide con el
+    // archivo escrito, la foto no carga.
+    if (info.format !== FORMATO) {
+      throw new Error(
+        `${basename(rutaOriginal)}: se pidió ${FORMATO} y salió ${info.format}.`,
+      );
+    }
+
     escrito = info;
   }
 
   // El manifiesto sale del archivo QUE SE ESCRIBIÓ, no de una cuenta. Es la
-  // misma idea que `medidas`: registrar, no adivinar.
-  return { medidas, ancho: escrito.width, alto: escrito.height };
+  // misma idea que `medidas`: registrar, no adivinar. El formato también sale
+  // de ahí y no de la extensión que pusimos en el nombre: si algún día el
+  // codificador devolviera otra cosa, el manifiesto lo diría en vez de que el
+  // navegador pida un archivo que no existe (decisión 37).
+  return {
+    medidas,
+    formato: escrito.format,
+    ancho: escrito.width,
+    alto: escrito.height,
+  };
 }
 
 async function main() {
@@ -274,27 +303,40 @@ async function main() {
         fotos
           .map(
             (f) =>
-              `    { carpeta: ${JSON.stringify(f.carpeta)}, medidas: [${f.medidas.join(", ")}], ancho: ${f.ancho}, alto: ${f.alto} },`,
+              `    { carpeta: ${JSON.stringify(f.carpeta)}, medidas: [${f.medidas.join(", ")}], ` +
+              `formato: ${JSON.stringify(f.formato)}, ancho: ${f.ancho}, alto: ${f.alto} },`,
           )
           .join("\n") +
         `\n  ],`,
     )
     .join("\n");
 
+  const fuente =
+    `import type { Foto } from "./tipos";\n` +
+    `\n` +
+    `/**\n` +
+    ` * ARCHIVO GENERADO — no editar a mano.\n` +
+    ` *\n` +
+    ` * Lo escribe \`scripts/preparar-fotos.mjs\` y se pisa entero en cada corrida.\n` +
+    ` * La clave es \`<entidad>/<slug>\`, y el orden del arreglo es el de la\n` +
+    ` * galería: la primera foto es la portada.\n` +
+    ` */\n` +
+    `export const fotos: Record<string, Foto[]> = {\n` +
+    (cuerpo ? `${cuerpo}\n` : "") +
+    `};\n`;
+
+  // Se formatea con prettier antes de escribirlo, y no es cosmética:
+  // `npm run format:check` corre sobre TODO el repositorio, así que un archivo
+  // generado con otro ancho de línea rompe la verificación. Hoy la rompe el
+  // manifiesto vacío —prettier escribe `{}` en una línea y esto escribía dos—
+  // y mañana la rompería la primera foto con el slug lo bastante largo.
+  // Prettier ya es dependencia de desarrollo del proyecto: no entra nada nuevo.
   writeFileSync(
     MANIFIESTO,
-    `import type { Foto } from "./tipos";\n` +
-      `\n` +
-      `/**\n` +
-      ` * ARCHIVO GENERADO — no editar a mano.\n` +
-      ` *\n` +
-      ` * Lo escribe \`scripts/preparar-fotos.mjs\` y se pisa entero en cada corrida.\n` +
-      ` * La clave es \`<entidad>/<slug>\`, y el orden del arreglo es el de la\n` +
-      ` * galería: la primera foto es la portada.\n` +
-      ` */\n` +
-      `export const fotos: Record<string, Foto[]> = {\n` +
-      (cuerpo ? `${cuerpo}\n` : "") +
-      `};\n`,
+    await prettier.format(fuente, {
+      ...(await prettier.resolveConfig(MANIFIESTO)),
+      filepath: MANIFIESTO,
+    }),
   );
 
   console.log(

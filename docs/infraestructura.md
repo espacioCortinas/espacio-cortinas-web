@@ -284,6 +284,51 @@ aplicación.
 **El subdominio de la cuenta es `ventas-ccf.workers.dev`.** Solo, sin el nombre
 del Worker adelante, no resuelve: no es una dirección, es el espacio de nombres.
 
+### Límites de los assets del Worker — verificado
+
+Las fotos son **assets estáticos del Worker**: `opennextjs-cloudflare build` las
+copia de `public/` a `.open-next/assets/` y Cloudflare las sirve directamente,
+sin ejecutar el Worker. Antes de cargar el archivo histórico había que saber si
+ese camino aguanta, porque si no aguanta se reabre una decisión de
+infraestructura y conviene saberlo antes de mover 300 fotos.
+
+Verificado contra la documentación de Cloudflare en septiembre de 2026
+(`developers.cloudflare.com/workers/platform/limits/`, sección «Static Assets»):
+
+| Límite                     | Plan gratuito        | Plan pago            | Lo que necesitamos        |
+| -------------------------- | -------------------- | -------------------- | ------------------------- |
+| Archivos por versión       | 20.000               | 100.000              | ~1.200 · **6 % del tope** |
+| Tamaño de un archivo       | 25 MiB               | 25 MiB               | ~5 MB la más pesada       |
+| Tamaño total de los assets | sin tope documentado | sin tope documentado | ~240 MB                   |
+
+**El camino resiste, y con margen amplio.** Unas 300 fotos por cuatro medidas
+son ~1.200 archivos: con los estáticos que genera Next —JS, CSS, el sitemap—
+el total queda en el orden de 1.500, contra un tope de 20.000. Ninguna foto se
+acerca a 25 MiB: la medida de 2560 px de una foto de interiores ronda los 5 MB
+en el peor caso, y las otras tres pesan mucho menos. **No hay tope documentado
+de tamaño total de assets**, que es el número que hubiera sido el problema.
+
+Dos advertencias que salen de mirarlo:
+
+- **El tope es por VERSIÓN del Worker, no acumulado.** Reemplazar una foto no
+  suma: cada despliegue publica el conjunto entero de nuevo. Lo que hay que
+  vigilar es cuántos archivos tiene el sitio en un momento dado, no cuántos se
+  subieron alguna vez.
+- **El de 100.000 pide `wrangler` 4.34.0 o superior**; las versiones anteriores
+  siguen aplicando el de 20.000 aunque la cuenta sea de pago. Este proyecto
+  tiene `wrangler ^4.115.0`, así que no aplica hoy, pero es la clase de detalle
+  que aparece el día que haga falta.
+
+**Donde sí aprieta es en el repositorio, no en Cloudflare.** Los ~240 MB de
+fotos entran en `public/fotos/`, que se versiona, y **git guarda todas las
+versiones de cada archivo que se reemplace**: un clon nuevo se lleva el
+histórico completo, no el estado actual. Cambiar la calidad de compresión o
+recortar de nuevo las portadas reescribiría los ~1.200 archivos de una vez y
+sumaría otros ~240 MB al repositorio, para siempre. Eso es lo que sigue abierto
+en `docs/decisiones.md` —git a secas, `git-lfs`, o fuera del repositorio— y lo
+que hay que decidir **antes** de cargar el archivo, no después: sacar archivos
+grandes de la historia de git obliga a reescribirla.
+
 ### Recursos de caché — dados de baja
 
 Hubo un Workers KV (`cache-incremental`) y una base D1
@@ -294,6 +339,14 @@ decisión 36.
 
 Se desataron de `wrangler.jsonc` y se desplegó **antes** de borrarlos. El orden
 importa: borrar un recurso que el Worker todavía referencia tira el sitio.
+
+**No volvieron, y no hacen falta.** En la Fase 4.0 se descubrió que el caché
+incremental además es de donde Next lee las páginas prerenderizadas, y que sin
+ninguno `/productos/[slug]` devolvía 404 en el Worker (decisión 39). Se resolvió
+con `staticAssetsIncrementalCache`, que guarda esas páginas entre los **assets
+estáticos del Worker**: se publica con el mismo despliegue y **no hay ningún
+recurso nuevo de Cloudflare que dar de alta ni administrar**. Ni KV, ni D1, ni
+binding en `wrangler.jsonc`.
 
 ### Despliegue automático
 

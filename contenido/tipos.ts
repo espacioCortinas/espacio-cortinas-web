@@ -38,6 +38,19 @@ export type Foto = {
    */
   medidas: number[];
 
+  /**
+   * La extensión de los archivos de esta foto, sin el punto: `"webp"`.
+   *
+   * **Se registra, no se asume.** Hoy `scripts/preparar-fotos.mjs` genera WebP
+   * para todas —la rama JPEG existía porque WebKit no sabe codificar WebP y el
+   * panel se usaba desde un iPhone, y con el panel se fue (decisión 36)— así
+   * que este campo dice `"webp"` en todas las filas. Existe igual por la misma
+   * razón que `medidas`: armar el nombre del archivo desde una constante del
+   * código funciona hasta la primera foto que no siga la regla, y ahí el
+   * navegador pide un archivo que no existe. Decisión 37.
+   */
+  formato: string;
+
   /** De la medida más grande. Con `alto` alcanza para reservar el espacio. */
   ancho: number;
   alto: number;

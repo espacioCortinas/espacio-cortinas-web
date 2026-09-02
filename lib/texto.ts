@@ -1,19 +1,23 @@
 /**
  * Slugs y textos derivados.
  *
- * Sin `server-only`: lo usa la Server Action al crear, y también el formulario
- * del panel para mostrar cómo va a quedar la URL mientras se escribe el
- * nombre. No hay nada secreto acá.
+ * Sin `server-only`: no hay nada secreto acá y lo usan las páginas públicas,
+ * que se renderizan en el build.
  */
 
 /**
  * Convierte un nombre en un slug: minúsculas, sin tildes, espacios por guiones.
  *
- * **El slug no se regenera al cambiar el nombre** — decisión 10. Esta función
- * corre una sola vez, al crear. Después el campo es propio y editable a mano,
- * con la advertencia puesta en el formulario: cambiarlo rompe todos los
- * enlaces ya compartidos por WhatsApp, que es justamente por donde se comparte
- * este sitio.
+ * **Hoy no la usa nadie, y está bien que siga acá.** Desde que se sacó el panel
+ * los slugs se escriben a mano en `contenido/productos.ts` y en
+ * `contenido/proyectos.ts` (docs/modelo-de-datos.md), así que ya no hay ningún
+ * momento en que se genere uno solo. Queda como la regla escrita de cómo se
+ * escribe un slug de este proyecto, que es lo que hay que respetar al agregar
+ * contenido a mano.
+ *
+ * **Y no se regenera al cambiar el nombre** — decisión 10: cambiar un slug
+ * rompe todos los enlaces ya compartidos por WhatsApp, que es justamente por
+ * donde se comparte este sitio.
  */
 export function aSlug(texto: string): string {
   return (
@@ -37,8 +41,10 @@ export function aSlug(texto: string): string {
  *
  * Se genera solo y no se pide al cargar. Obligar a escribirlo en cada foto
  * haría que se cargue cualquier cosa —«imagen», «foto», «asd»— que es peor
- * para un lector de pantalla que un texto generado razonable. Es editable
- * desde la galería del panel para cuando valga la pena — docs/modelo-de-datos.md.
+ * para un lector de pantalla que un texto generado razonable. Por eso no hay
+ * campo `alt` en el manifiesto — docs/modelo-de-datos.md.
+ *
+ * La posición es la de la galería, empezando en 1: la foto 1 es la portada.
  */
 export function altAutomatico(nombreDeLaEntidad: string, posicion: number) {
   return `${nombreDeLaEntidad.trim()} — foto ${posicion}`;

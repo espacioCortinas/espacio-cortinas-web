@@ -83,11 +83,17 @@ contenido/
 ├── tipos.ts
 └── index.ts                     une contenido y fotos; es lo que leen las páginas
 components/
+├── foto.tsx                     el <img> con srcset leído del manifiesto
+├── whatsapp.tsx                 el enlace, con el mensaje según la página
+├── datos-estructurados.tsx      JSON-LD del negocio local
 └── ui/                          botón, campo, aviso
 lib/
 ├── entorno.ts                   variables públicas
 ├── entorno-servidor.ts          variables secretas — SOLO servidor
 ├── entorno-validacion.ts        qué es obligatorio y desde qué fase
+├── fotos.ts                     rutas y srcset. Lo ÚNICO que arma rutas de fotos
+├── metadata.ts                  title, description, canonical y Open Graph
+├── whatsapp.ts                  el mensaje contextual y el enlace
 ├── texto.ts                     slugs y textos derivados
 └── constantes.ts
 scripts/
@@ -137,20 +143,30 @@ Dos cosas de `wrangler.jsonc` no son opcionales:
 - **`compatibility_date`**, que congela el comportamiento del runtime. Se sube a
   propósito, igual que la versión de Next.
 
-### Por qué `open-next.config.ts` vuelve a estar vacío
+### El caché incremental de `open-next.config.ts`
 
-Tuvo un caché incremental compartido —Workers KV para las páginas y D1 para las
-etiquetas— porque el panel revalidaba rutas al guardar, y sin un almacén
-compartido esa revalidación tocaba una sola instancia del Worker mientras el
-resto seguía sirviendo lo viejo.
+Tuvo un caché compartido —Workers KV para las páginas y D1 para las etiquetas—
+porque el panel revalidaba rutas al guardar, y sin un almacén compartido esa
+revalidación tocaba una sola instancia del Worker mientras el resto seguía
+sirviendo lo viejo. **Al sacar el panel dejó de haber qué revalidar**
+(decisión 36) y los dos recursos se borraron.
 
-**Al sacar el panel dejó de haber qué revalidar** (decisión 36): el contenido es
-parte del build, así que un cambio se publica construyendo de nuevo. Los dos
-recursos se borraron.
+**Y ahí quedó un archivo vacío, que rompía el sitio en producción.** El caché
+incremental no sirve solo para revalidar: **también es de donde el servidor de
+Next lee las páginas ya prerenderizadas**. Sin ningún override, el adaptador
+deja el caché `dummy`, que falla todas las búsquedas. Una ruta estática se
+vuelve a renderizar y no se nota; `/productos/[slug]`, con
+`dynamicParams = false`, no puede renderizarse fuera de su lista de params y
+devuelve **404**.
 
-**Si alguna vez vuelve a haber contenido que cambie sin build**, hay que volver
-a enchufarlo — y son **dos** piezas, no una: sin el `tagCache`,
-`revalidatePath()` no hace nada y no avisa. Está explicado en la decisión 29.
+Hoy el archivo usa `staticAssetsIncrementalCache`: las páginas prerenderizadas
+viajan entre los assets estáticos del Worker, que ya es donde vive el resto del
+sitio. No agrega ningún recurso de Cloudflare que administrar, se reemplaza
+entero en cada build y no puede quedar viejo. Detalle en la decisión 39.
+
+**El `tagCache` sigue sin ir.** Si alguna vez vuelve a haber contenido que
+cambie sin build, hay que enchufar **las dos** piezas, no una: sin el
+`tagCache`, `revalidatePath()` no hace nada y no avisa — decisión 29.
 
 ### Comandos
 
@@ -166,6 +182,12 @@ a enchufarlo — y son **dos** piezas, no una: sin el `tagCache`,
 que dependa del servidor: es el único que ejecuta el código en el mismo runtime
 que producción. `npm run dev` corre sobre Node y **no** detecta un uso de API que
 Workers no soporte.
+
+**Y no es solo cuestión de APIs.** `npm run dev` tampoco usa el caché
+incremental del adaptador, así que no ve nada de cómo `@opennextjs/cloudflare`
+traduce Next a Worker. En la Fase 4.0 eso escondió un 404 en todas las páginas
+de producto, con el build y el servidor de desarrollo en verde — decisión 39.
+Si el cambio toca rutas, renderizado o caché, `preview` no es opcional.
 
 Lee las variables de `.env.local` gracias a `NEXTJS_ENV=development` en
 `.dev.vars`, que no se versiona.
@@ -225,7 +247,7 @@ decisión 18.
 
 ### Cómo se sirven
 
-Con `srcset` y `sizes`, apuntando a las medidas que ya existen en Storage:
+Con `srcset` y `sizes`, apuntando a las medidas que ya existen en `public/fotos/`:
 
 ```html
 <img
@@ -255,12 +277,18 @@ tamaño de cada foto, que es exactamente lo que la decisión 25 evita.
 `srcset` es HTML estándar y no depende del hosting. Si el sitio se mudara otra
 vez, esta parte no se toca.
 
-**Qué medidas existen, y en qué formato, se lee de la base — no se asume.** Las
-columnas `medidas` y `formato` de la tabla de imágenes dicen cuáles se generaron
-para esa fila y con qué extensión. Una foto chica no tiene las cuatro medidas, y
-una cargada desde un iPhone es JPEG y no WebP. Ver `docs/modelo-de-datos.md`.
+**Qué medidas existen, y en qué formato, se lee del manifiesto — no se asume.**
+Los campos `medidas` y `formato` de cada foto de `contenido/fotos.ts` dicen
+cuáles se generaron para esa foto y con qué extensión. Una foto chica no tiene
+las cuatro medidas: una de 1206 px de ancho tiene tres, y armar el `srcset` con
+`MEDIDAS_IMAGEN` haría que el navegador pida dos archivos que no existen
+(decisiones 32 y 37). Antes esos dos datos eran columnas de una tabla; hoy son
+campos de un archivo generado, y la regla es la misma.
 
-Implementación: Fase 3.
+Está en `lib/fotos.ts`, y es lo único que arma rutas de imágenes. El componente
+que las muestra es `components/foto.tsx`.
+
+Implementación: Fase 4.0.
 
 ## Formulario de contacto
 
