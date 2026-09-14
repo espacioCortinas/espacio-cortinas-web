@@ -259,8 +259,19 @@ La metadata, el sitemap, el robots y los datos estructurados estaban en la Fase
 archivo que la página, así que dejarla para el final significaba volver a abrir
 los diez archivos.
 
-**4.1 Dirección visual.** Con las fotos reales a la vista: color, tipografía,
-ritmo, tratamiento de imagen. Sin escribir componentes todavía.
+**4.1 Dirección visual — HECHA.** Análisis de las 23 fotos una por una, tres
+direcciones alternativas renderizadas con el material real en `/muestra`, y una
+elegida: **«Cal» con el acento de «Regla»** — decisión 43. Los tokens están
+fijados en `app/globals.css`, las dos familias se cargan con `next/font` en
+`app/tipografias.ts`, y `docs/diseno.md` quedó reescrito con la dirección
+ganadora y con las dos descartadas al final.
+
+El logo llegó durante esta fase y cambió la paleta: su amarillo `#FFF100` no
+puede ser el acento —1,06:1 contra el papel— así que el acento es el negro del
+propio logo y el amarillo es un color de superficie con reglas de uso propias.
+
+**Queda para la 4.2 la imagen de Open Graph de reserva** para las páginas sin
+foto propia. Necesitaba logo, color y tipografía; ahora los tres existen.
 
 **4.2 Sistema y estructura.** Componentes base, navegación y pie, estados de carga,
 vacío y error.
@@ -271,6 +282,11 @@ vacío y error.
 
 **4.5 Inicio.** Se compone al final, cuando ya existe todo lo que tiene que
 anticipar.
+
+**Y se borra el andamio de la 4.1:** `app/muestra/` entera —página, estilos y
+tipografías— más `public/muestra-logo.png`. Era para elegir la dirección visual
+y deja de tener sentido apenas el sitio está compuesto. Ninguna otra ruta los
+importa. Decisión 41.
 
 **4.6 Contacto.** Formulario con Resend, y WhatsApp contextual en todo el sitio.
 

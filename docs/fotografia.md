@@ -77,6 +77,12 @@ Son casas de clientes:
 El sitio borra automáticamente la ubicación GPS de cada foto al subirla, pero eso
 no cubre lo que se ve en la imagen.
 
+**Esta guía rige para las fotos nuevas.** El archivo que ya está publicado se
+mira caso por caso, y ahí el criterio es si alguien es **identificable**, no si
+aparece: hay dos fotos viejas con una persona de espaldas o lejos y se
+conservan — decisión 42. Para lo que se saca de ahora en más no hay excepción:
+nada de personas.
+
 ---
 
 ## Cómo pasar las fotos

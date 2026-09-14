@@ -1406,7 +1406,204 @@ Worker solo se ve en `preview`.
 
 ---
 
+### 40. El catálogo son siete productos, y las variantes pueden llevar descripción
+
+**Contexto:** la empresa trajo una lista de doce ítems donde varios eran
+variantes: `toldos-motorizados`, `roller-motorizada`, `cortina-riel-motorizado`.
+
+**El criterio para separar:** un producto es aparte **solo si la diferencia se
+ve en una foto**. Venecianas de madera y de PVC se separan porque se distinguen
+a simple vista. Un roller motorizado y uno manual son la misma foto: eso es una
+variante, no un producto.
+
+Dos páginas con galerías casi idénticas son peores que una buena — para el que
+mira, que busca la diferencia y no la encuentra, y para el buscador, que ve
+contenido repetido.
+
+**Lo que la motorización sí necesita es video**, que es lo único que muestra lo
+que una foto no puede. Uno por variante motorizada.
+
+**Las variantes pasan de `string` a `{ nombre, descripcion? }`.** La descripción
+es opcional y existe donde la diferencia hay que explicar —screen deja pasar luz,
+blackout no—, que es justo lo que decide la compra. Al reestructurar el catálogo,
+esto permitió que los textos que ya había escrito la empresa sobrevivieran
+textuales: la parte común quedó en el producto y la diferencia en la variante,
+sin reescribir nada.
+
+Aclaración: hasta acá el código citaba «decisión 11» para esta regla, que trata
+de otra cosa. La regla existía en `docs/producto.md` pero nunca había sido una
+decisión numerada.
+
+---
+
+### 41. `/muestra` es una página desechable, y rompe dos reglas a propósito
+
+**Contexto:** la Fase 4.1 pide elegir una dirección visual mirando las fotos
+reales. Una dirección visual no se puede elegir leyendo una descripción: hay que
+verla, con estas fotos y en un teléfono. Por eso existe `/muestra`, que
+renderiza tres direcciones completas —paleta, escala tipográfica, escala de
+espaciado, tarjeta de producto, galería y bloque de texto— con el contenido y
+las fotos de verdad.
+
+**Lo que rompe, y por qué está bien que lo rompa:**
+
+**Carga seis familias tipográficas** contra el máximo de dos de la regla 7 de
+`docs/diseno.md`. Comparar tres propuestas tipográficas con las fuentes
+equivocadas no compara nada: sería elegir a ciegas, que es justo lo que la fase
+existe para evitar. La excepción está acotada a `app/muestra/tipografias.ts` y no
+toca `:root`, así que fuera de esa ruta no cambia nada.
+
+**Tiene CSS escrito a mano** en vez de utilidades de Tailwind. La página necesita
+tres juegos de variables de color y tipografía **simultáneos**, que es
+exactamente lo que un sistema de tokens único no puede representar. Y fijar los
+tokens en `app/globals.css` antes de elegir sería decidir antes de mirar.
+
+**Lo que sí respeta:** las diez reglas verificables valen para las tres
+propuestas. Ninguna tiene gradiente, sombra difusa, radio mayor a 4 px, ícono
+decorativo, grilla de valores, azul o violeta de marca, animación al hacer
+scroll ni texto sobre foto sin capa opaca.
+
+**`noindex` por metadata, no por `Disallow`.** Son cosas distintas y combinarlas
+es un error clásico: un `Disallow` impide el rastreo, así que el buscador nunca
+llega a leer el `noindex` y la página puede terminar indexada igual, sin
+descripción. Por eso `app/robots.ts` sigue con la lista vacía y el `noindex` va
+en la metadata de la página. Tampoco entra al `sitemap.ts`, que se arma desde el
+contenido y no incluye rutas sueltas.
+
+**Sin JavaScript.** El conmutador entre direcciones son tres `input[type=radio]`
+ocultos y selectores de hermano en CSS. No hay `"use client"`, no hay estado y la
+página es HTML estático: funciona con el JS apagado y se puede leer con «ver
+código fuente», igual que el resto del sitio.
+
+**Se borra.** Elegida la dirección, sus valores pasan a `app/globals.css` como
+tokens de Tailwind, se reescribe `docs/diseno.md` con la ganadora y **se borra
+`app/muestra/` entera** en la Fase 4.5. Está anotado en `docs/plan.md`, en la
+cabecera de `app/muestra/page.tsx` y acá. Una página de andamio que sobrevive al
+andamio es deuda: queda indexable por error, se desactualiza y nadie se anima a
+tocarla porque no sabe si se usa.
+
+---
+
+### 42. «Nada de personas» rige para las fotos nuevas, no para el archivo
+
+**Contexto:** al auditar las 23 fotos para la Fase 4.1 aparecieron dos que
+incumplen `docs/fotografia.md`: `roller/3` tiene una persona y un perro en el
+borde izquierdo, y `toldos/3` una persona junto a la pileta. `roller/2` tiene
+además ropa tendida en el patio vecino.
+
+**Se quedan las tres.** En las dos que tienen personas están de espaldas o
+lejos y no son identificables a simple vista, que es lo que la regla existe para
+evitar. Sacarlas costaría dos de las ocho fotos que hay de esos dos productos, y
+el archivo ya es chico.
+
+**Lo que sí cambia es el alcance de la regla, que estaba sin escribir.**
+`docs/fotografia.md` es una guía para quien saca las fotos, así que **rige de
+acá en adelante** y no es un criterio retroactivo de depuración del archivo. La
+regla no se ablanda: para las fotos nuevas sigue siendo «nada de personas», sin
+excepción. Lo que se aclara es que el archivo histórico se mira caso por caso y
+el criterio es la identificabilidad, no la presencia.
+
+**Qué lo reabriría:** que alguien sea reconocible, que aparezca la cara de
+alguien, o que el cliente de esa casa lo pida. Cualquiera de las tres se
+resuelve sacando la foto, que no cuesta nada porque ninguna de las dos es
+portada.
+
+Alternativas evaluadas: sacarlas —lo más barato y lo más seguro— y recortarlas.
+El recorte se descartó porque en `toldos/3` la persona está casi en el centro, y
+esa foto además tiene solo 1600 px, así que no le sobra encuadre.
+
+---
+
+### 43. La dirección visual es «Cal» con el acento de «Regla», y el amarillo del logo es un color de superficie
+
+**Contexto:** la Fase 4.1 propuso tres direcciones y se miraron en `/muestra` con
+las fotos reales. El logo apareció después de las tres, y cambió el análisis.
+
+**Lo elegido:** el papel de cal de la dirección A —fondo `#F6F2EC`, Fraunces y
+Karla, la foto siempre dentro de la columna, ritmo de 64 a 112— con el acento de
+la dirección C: el negro del propio logo, `#211F20`, y ningún color inventado.
+
+#### Lo que decidió el logo, que no es lo que parecía
+
+El amarillo del logo es `#FFF100`: amarillo proceso, croma máximo. Contra
+cualquier fondo claro da entre 1,06:1 y 1,18:1, y hace falta 4,5:1 para texto y
+3:1 para un elemento de interfaz con significado.
+
+**O sea que el amarillo no puede ser el acento.** No es cuestión de gusto: no
+puede ser color de enlace, ni de texto, ni de línea fina, ni el único indicio de
+un estado, sobre ningún fondo claro. Lo que sí puede ser es **una superficie con
+texto negro encima** —negro sobre amarillo da 13,92:1— o una forma.
+
+Eso reencuadra la pregunta: el amarillo no es un acento, es un color de
+superficie. Las reglas de uso están en `docs/diseno.md`, «La marca».
+
+#### Por qué el acento terminó siendo el mismo negro
+
+La dirección A traía un acento terracota `#8C4A2F`. Se descartó por dos razones:
+es el vecino de al lado del amarillo en el círculo cromático, así que competía en
+vez de acompañar; y sumado al amarillo daba un sitio de cuatro colores, con la
+marca peleando contra un acento inventado.
+
+Con el acento en `#211F20` el sitio queda con **papel, negro y amarillo**, que
+son exactamente los tres colores del logo. Enlaces negros subrayados, botón
+principal negro sólido con papel encima (14,69:1).
+
+**El botón principal no es amarillo, y es deliberado.** Un bloque `#FFF100` sobre
+el papel de cal da 1,06:1: sería una mancha clara sobre fondo claro, justo en el
+CTA, que es lo único que este sitio tiene que lograr (`docs/producto.md`).
+
+#### Lo que el papel de cal cuesta, anotado
+
+El papel `#F6F2EC` es, en términos de tono, un amarillo desaturado. El amarillo
+del logo cae sobre su propio tono y pierde brillo — es el peor de los tres fondos
+evaluados para ese color. Se eligió igual porque el papel cálido es lo que
+resuelve el problema número uno del archivo fotográfico, que es la disparidad de
+calidad, y porque el logo sigue funcionando: lo que se pierde es intensidad del
+amarillo, no legibilidad de nada.
+
+Se probaron cinco papeles entre `#FFFFFF` y `#F6F2EC`. El límite donde el
+amarillo todavía se lee limpio es alrededor de `#F8F6F2`. **Si en algún momento
+el amarillo se ve apagado de más, ese es el valor al que moverse**, y no hace
+falta rehacer nada más: es un token.
+
+#### Tipografía: por qué no se copió la geométrica del logo
+
+El logo es una geométrica de la familia Futura. Los títulos del sitio son
+Fraunces, una serif. Deliberado: si los títulos también fueran geométricos, el
+logo dejaría de leerse como logo y se confundiría con la página. Y las
+geométricas tienen altura de x chica, que a 17 px en un teléfono se lee peor.
+
+#### Lo que se descartó
+
+**B · Contraluz** era donde el amarillo rendía al máximo —15,16:1 sobre el fondo
+oscuro, sirve hasta como color de texto— pero el producto es luz natural entrando
+a una casa y un sitio oscuro trabaja en contra de ese mensaje. Además el logo es
+negro y sobre fondo oscuro desaparece.
+
+**C · Regla** se descartó por frialdad, pero aportó el acento y deja una idea
+disponible para la Fase 4.3: que el tamaño del módulo de cada foto salga de la
+tabla de calidad de `docs/diseno.md` en vez del orden.
+
+#### Lo que esta decisión deja pendiente
+
+Hay que pedirle a la empresa el logo **en vector**, una versión para fondo oscuro
+y un favicon. Hoy hay un JPG de 524 px, que alcanza para el encabezado y para
+nada más grande.
+
+---
+
 ## Decisiones abiertas
+
+**Falta el logo en vector, y una versión para fondo oscuro.** Hoy hay un JPG de
+524 px en `fotos-originales/logo.jpg`. Alcanza para el encabezado —160 px a
+triple densidad son 480— pero no para nada más grande, y no hay versión clara
+para usar sobre un fondo oscuro. Tampoco hay favicon. Se le pide a la empresa
+— decisión 43.
+
+**No hay ninguna foto 4:5 de repuesto.** Las siete que existen son exactamente
+las siete portadas, así que cualquier portada que haya que retirar obliga a
+recortar una 3:4. No bloquea la Fase 4.1, pero define qué hay que fotografiar
+primero.
 
 **Dónde viven las fotos cuando se cargue el archivo histórico.** Unas 300 fotos
 por cuatro medidas son del orden de 240 MB, y git guarda todas las versiones de
