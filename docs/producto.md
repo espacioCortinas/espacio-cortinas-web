@@ -83,7 +83,8 @@ La distinción tiene que quedar clara para el visitante:
 Las variantes **no** son productos independientes. `Toldos motorizados` es una
 variante de `Toldos`, no una entrada más del catálogo.
 
-Catálogo inicial: Cortinas, Roller Blackout, Venecianas, Toldos.
+Catálogo: Roller · Compacta Blackout · Cortinas de tela · Venecianas de madera ·
+Venecianas de PVC · Toldos · Bandas verticales — decisión 40.
 
 ### Proyecto
 

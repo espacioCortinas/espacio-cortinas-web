@@ -77,13 +77,24 @@ type Publicable = {
   destacado: boolean;
 };
 
+/**
+ * Una opción del mismo producto: «Screen», «Motorizado», «Barral».
+ *
+ * **No son productos aparte** — decisión 40. Un roller screen y un roller
+ * blackout son el mismo producto con dos telas, no dos entradas del catálogo.
+ *
+ * La descripción es **opcional** y existe solo donde la diferencia hay que
+ * explicarla: screen deja pasar luz y blackout no, y eso es justamente lo que
+ * decide la compra. Una variante que se entiende sola no la necesita.
+ */
+export type Variante = {
+  nombre: string;
+  descripcion?: string;
+};
+
 export type Producto = Publicable & {
   nombre: string;
-  /**
-   * Las opciones de este mismo producto: «Dos paños», «Motorizado». **No son
-   * productos aparte** y no llevan foto ni descripción propia — decisión 11.
-   */
-  variantes: string[];
+  variantes: Variante[];
 };
 
 export type Proyecto = Publicable & {

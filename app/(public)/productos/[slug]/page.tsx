@@ -61,11 +61,15 @@ export default async function Producto({ params }: Props) {
         {producto.variantes.length > 0 && (
           <section>
             {/* Las variantes no son productos aparte: son opciones del mismo
-                producto, sin página ni foto propia (decisión 11). */}
+                producto, sin página propia (decisión 11). La descripción es
+                opcional y solo está donde la diferencia hay que explicarla. */}
             <h2>Variantes</h2>
             <ul>
               {producto.variantes.map((variante) => (
-                <li key={variante}>{variante}</li>
+                <li key={variante.nombre}>
+                  {variante.nombre}
+                  {variante.descripcion ? <p>{variante.descripcion}</p> : null}
+                </li>
               ))}
             </ul>
           </section>
