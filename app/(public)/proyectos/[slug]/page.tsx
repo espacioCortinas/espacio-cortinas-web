@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 
 import { FotoImg } from "@/components/foto";
 import { EnlaceWhatsapp } from "@/components/whatsapp";
+import { Chip } from "@/components/ui/chip";
+import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
 import { proyectoPorSlug, proyectosPublicados } from "@/contenido";
 import { portadaDe } from "@/lib/fotos";
 import { metadataDePagina } from "@/lib/metadata";
@@ -11,7 +13,9 @@ import { altAutomatico } from "@/lib/texto";
 /**
  * Un trabajo del portfolio.
  *
- * MAQUETACIÓN MÍNIMA A PROPÓSITO — ver la nota de `../page.tsx`.
+ * ARMAZÓN, NO COMPOSICIÓN — ver la nota de `../page.tsx`. **La página de
+ * proyecto se compone en la Fase 4.3**, con la galería. Lo que hay acá son los
+ * componentes del sistema aplicados a la estructura que ya existía.
  *
  * Hoy no genera ninguna página: `contenido/proyectos.ts` está vacío. La ruta
  * existe igual para que cargar el primer proyecto sea agregar un bloque de
@@ -48,18 +52,26 @@ export default async function Proyecto({ params }: Props) {
   if (!proyecto) notFound();
 
   return (
-    <main>
+    <main className={`${CLASES_CONTENEDOR} py-16 md:py-28`}>
       <article>
-        <h1>{proyecto.titulo}</h1>
-        <p>{proyecto.ubicacion}</p>
-        <p>{proyecto.descripcion}</p>
+        <h1 className="text-display">{proyecto.titulo}</h1>
+        {/* El título es el trabajo y la ubicación va como chip
+            (docs/producto.md). */}
+        <p className="mt-5">
+          <Chip>{proyecto.ubicacion}</Chip>
+        </p>
+        <p className="max-w-lectura mt-6 text-subtitulo">
+          {proyecto.descripcion}
+        </p>
 
-        <section>
-          <h2>Fotos</h2>
+        <section className="mt-12 md:mt-16">
+          <h2 className="text-titulo">Fotos</h2>
           {proyecto.fotos.length === 0 ? (
-            <p>Todavía no hay fotos de este proyecto.</p>
+            <p className="text-texto-suave mt-6">
+              Todavía no hay fotos de este proyecto.
+            </p>
           ) : (
-            <ul>
+            <ul className="mt-6 flex flex-col gap-8">
               {proyecto.fotos.map((foto, i) => (
                 <li key={foto.carpeta}>
                   <div className="max-w-2xl">
@@ -76,9 +88,11 @@ export default async function Proyecto({ params }: Props) {
           )}
         </section>
 
-        <EnlaceWhatsapp
-          contexto={{ tipo: "proyecto", titulo: proyecto.titulo }}
-        />
+        <div className="empty:hidden mt-16 md:mt-20">
+          <EnlaceWhatsapp
+            contexto={{ tipo: "proyecto", titulo: proyecto.titulo }}
+          />
+        </div>
       </article>
     </main>
   );

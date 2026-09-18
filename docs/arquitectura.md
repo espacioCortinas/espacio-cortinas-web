@@ -72,21 +72,31 @@ app/
 │   │   ├── page.tsx
 │   │   └── [slug]/page.tsx
 │   ├── contacto/page.tsx
-│   └── layout.tsx               navegación y pie
+│   ├── layout.tsx               encabezado, salto al contenido y pie
+│   ├── loading.tsx              mientras llega la página siguiente
+│   └── error.tsx                si se corta la navegación. "use client"
+├── not-found.tsx                404. En la raíz: una URL sin ruta no entra
+│                                al grupo (public) y no hereda su layout
 ├── sitemap.ts
 ├── robots.ts
+├── globals.css                  los tokens del sistema
 └── layout.tsx
 contenido/
 ├── productos.ts                 se edita a mano
 ├── proyectos.ts                 se edita a mano
 ├── fotos.ts                     GENERADO por scripts/preparar-fotos.mjs
+├── marca.ts                     GENERADO por scripts/preparar-marca.mjs
 ├── tipos.ts
 └── index.ts                     une contenido y fotos; es lo que leen las páginas
 components/
-├── foto.tsx                     el <img> con srcset leído del manifiesto
+├── foto.tsx                     el <img> con srcset, proporción y recorte
+├── logo.tsx                     el logo del encabezado
+├── encabezado.tsx               logo y navegación
+├── navegacion.tsx               los cuatro enlaces. ÚNICO "use client" público
+├── pie.tsx
 ├── whatsapp.tsx                 el enlace, con el mensaje según la página
 ├── datos-estructurados.tsx      JSON-LD del negocio local
-└── ui/                          botón, campo, aviso
+└── ui/                          botón, chip, campo, aviso, vacío, contenedor
 lib/
 ├── entorno.ts                   variables públicas
 ├── entorno-servidor.ts          variables secretas — SOLO servidor
@@ -95,11 +105,14 @@ lib/
 ├── metadata.ts                  title, description, canonical y Open Graph
 ├── whatsapp.ts                  el mensaje contextual y el enlace
 ├── texto.ts                     slugs y textos derivados
+├── navegacion.ts                los enlaces del menú, en un solo lugar
 └── constantes.ts
 scripts/
 ├── preparar-fotos.mjs           recorta, redimensiona y borra los metadatos
+├── preparar-marca.mjs           el logo sin fondo y la imagen de Open Graph
 └── revisar-metadatos.mjs        comprueba que ninguna publicada conserve GPS
 public/fotos/                    las imágenes generadas
+public/marca/                    logo.png y og.jpg, GENERADOS
 fotos-originales/                los originales. NO se versiona
 docs/
 next.config.ts
@@ -173,6 +186,7 @@ cambie sin build, hay que enchufar **las dos** piezas, no una: sin el
 | Comando            | Qué hace                                                    |
 | ------------------ | ----------------------------------------------------------- |
 | `npm run dev`      | Next en local. Es el de todos los días                      |
+| `npm run marca`    | rehace `public/marca/` y `contenido/marca.ts` desde el logo |
 | `npm run build`    | solo `next build`. Es el que verifica que el código compila |
 | `npm run build:cf` | además arma el Worker. Lo que corre el despliegue           |
 | `npm run preview`  | levanta el Worker real en local, sobre `workerd`            |

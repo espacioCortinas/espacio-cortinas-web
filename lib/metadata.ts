@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { og } from "@/contenido/marca";
 import type { Foto } from "@/contenido/tipos";
 import { entornoPublico } from "@/lib/entorno";
 import { medidaPredeterminada, rutaDeFoto } from "@/lib/fotos";
@@ -17,7 +18,7 @@ import { medidaPredeterminada, rutaDeFoto } from "@/lib/fotos";
  * (decisión 1).
  */
 
-/** Lo que se muestra cuando algo todavía no tiene foto propia. */
+/** El nombre que acompaña a cada título en una previsualización de enlace. */
 const MARCA = "Espacio Cortinas";
 
 /**
@@ -69,10 +70,20 @@ export function metadataDePagina({
   // NEXT_PUBLIC_SITE_URL y no hay dos formas de escribir la misma URL.
   const canonica = ruta;
 
-  // Sin foto no va imagen, y es a propósito: una imagen de reserva sería una
-  // decisión visual —logo, color, tipografía— y eso se define en la Fase 4.1,
-  // con las fotos reales del negocio delante. Un enlace sin miniatura se ve
-  // pobre; uno con una miniatura provisoria se ve mal y además condiciona.
+  /*
+   * La miniatura. Si la página tiene foto propia va esa; si no, la de reserva.
+   *
+   * **La de reserva es de la Fase 4.2 y antes no existía a propósito.** Hasta
+   * la 4.1 no había paleta, ni tipografía, ni logo procesado, así que cualquier
+   * imagen habría sido una decisión visual tomada antes de tiempo. Ahora existe:
+   * `public/marca/og.jpg`, que arma `scripts/preparar-marca.mjs` con el logo y
+   * `cortinas-tela/1`, la mejor foto del archivo. Es una foto real de un trabajo
+   * real, no un gráfico inventado, y el texto va sobre el papel y no sobre la
+   * foto — que en esta dirección no se hace nunca.
+   *
+   * Sin esto, Inicio, los dos listados y Contacto se comparten por WhatsApp sin
+   * ninguna imagen, que en un negocio visual es medio mensaje.
+   */
   const imagenes = foto
     ? [
         {
@@ -87,7 +98,16 @@ export function metadataDePagina({
           alt: altFoto ?? titulo,
         },
       ]
-    : undefined;
+    : [
+        {
+          url: og.ruta,
+          // Del manifiesto generado, no de dos números escritos acá: si algún
+          // día la imagen cambia de tamaño, esto la sigue solo.
+          width: og.ancho,
+          height: og.alto,
+          alt: `${MARCA} — cortinas de tela en una casa de Buenos Aires`,
+        },
+      ];
 
   return {
     title: titulo,
@@ -103,10 +123,12 @@ export function metadataDePagina({
       images: imagenes,
     },
     twitter: {
-      card: imagenes ? "summary_large_image" : "summary",
+      // Siempre hay imagen —propia o de reserva— así que siempre es la tarjeta
+      // grande.
+      card: "summary_large_image",
       title: `${titulo} · ${MARCA}`,
       description: descripcionCorta,
-      images: imagenes?.map((i) => i.url),
+      images: imagenes.map((i) => i.url),
     },
   };
 }

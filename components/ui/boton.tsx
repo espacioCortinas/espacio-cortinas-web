@@ -1,45 +1,61 @@
 import type { ComponentProps } from "react";
 
 /**
- * ESTO NO ESTÁ DISEÑADO, Y ES A PROPÓSITO.
+ * Los botones del sitio: **tres variantes y ninguna más** — `docs/diseno.md`.
  *
- * Sin paleta, sin tipografía elegida, sin logo: solo grises de Tailwind y un
- * rojo para lo que borra. La dirección visual se define en la Fase 4.1, con
- * las fotos reales del negocio a la vista; si el panel llegara con estética
- * propia, la condicionaría sin haber mirado una sola foto (docs/plan.md).
+ *     principal    negro sólido, papel encima      14,69:1
+ *     secundario   filete de 1 px, sin relleno     14,69:1
+ *     enlace       texto negro subrayado           14,69:1
  *
- * Lo que sí está resuelto es que se pueda usar, que es otra cosa:
+ * **El principal no es amarillo, y es deliberado.** El amarillo de la marca da
+ * 1,06:1 contra el papel de cal: un botón amarillo sería una mancha clara sobre
+ * fondo claro, justo en lo único que este sitio tiene que lograr, que es que
+ * alguien escriba por WhatsApp. El amarillo es un color de superficie con texto
+ * negro encima, y en este sitio lo gasta entero el logo del encabezado —
+ * decisión 43.
  *
- * - **`min-h-12`, o sea 48 px.** Es lo que hace falta para que un pulgar
- *   acierte sin mirar. La administradora va a usar esto parada en la casa de
- *   un cliente, con el teléfono en una mano.
- * - **`text-base`, o sea 16 px.** Por debajo de eso, iOS hace zoom solo al
- *   tocar un campo y descoloca la pantalla entera.
+ * Se fue la variante `peligro`, que era del panel: en un sitio público no hay
+ * ninguna acción que destruya nada.
+ *
+ * Lo que se conserva de la versión del panel, porque no era estética:
+ *
+ * - **`min-h-12`, o sea 48 px**, por encima de los 44 que pide la zona táctil
+ *   mínima. En `enlace` son 44, que es el piso.
+ * - **17 px de texto.** Por debajo de 16, iOS hace zoom solo al tocar un campo
+ *   y descoloca la pantalla.
  * - **`disabled:` visible.** Un botón que no responde y no parece apagado se
  *   toca cinco veces.
  */
 
-type Variante = "primario" | "secundario" | "peligro";
+type Variante = "principal" | "secundario" | "enlace";
 
+/*
+ * El estado de hover cambia de fondo, no de color de texto, y nunca es lo único
+ * que informa algo: nada de este sitio depende de `hover` para entenderse
+ * (`docs/diseno.md`, mobile-first). En un teléfono no existe.
+ *
+ * El hover del principal va al gris cálido del sistema y no a un negro más
+ * claro inventado: papel sobre `texto-suave` da 5,23:1, que sigue pasando.
+ */
 const ESTILOS: Record<Variante, string> = {
-  primario: "bg-neutral-900 text-white hover:bg-neutral-700",
+  principal:
+    "min-h-12 px-6 bg-texto text-fondo hover:bg-texto-suave rounded-boton",
   secundario:
-    "bg-white text-neutral-900 border border-neutral-400 hover:bg-neutral-100",
-  peligro: "bg-red-700 text-white hover:bg-red-800",
+    "min-h-12 px-6 border border-texto text-texto hover:bg-texto hover:text-fondo rounded-boton",
+  enlace:
+    "min-h-11 text-texto underline underline-offset-4 decoration-1 hover:decoration-2",
 };
 
 const BASE =
-  "inline-flex min-h-12 items-center justify-center gap-2 rounded px-4 text-base " +
-  "font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 " +
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900";
+  "inline-flex items-center justify-center gap-2 text-cuerpo font-medium " +
+  "transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50";
 
 /**
  * La rueda que gira mientras algo está en curso.
  *
- * **Por qué hace falta:** varias acciones del panel tardan de verdad —subir una
- * foto son cuatro archivos, guardar revalida el sitio— y un botón que se apaga
- * y no hace nada más se lee como una página tildada. El texto también cambia
- * («Guardando…»), pero el texto hay que leerlo; el movimiento se ve de reojo.
+ * **Queda una sola cosa que la usa**, y llega en la Fase 4.6: el botón de
+ * enviar del formulario de contacto, que habla con Resend y tarda. Un botón que
+ * se apaga y no hace nada más se lee como una página tildada.
  *
  * `aria-hidden` porque no aporta nada a un lector de pantalla: para eso están
  * el texto del botón y `aria-busy`, que sí se anuncian.
@@ -75,23 +91,28 @@ export function Rueda() {
   );
 }
 
-/**
- * «Guardando…» con la rueda al lado, para lo que no es un botón.
- *
- * Los interruptores de publicado y destacado se guardan al tocarlos, sin botón
- * que se pueda apagar, así que sin esto no hay ninguna señal entre el toque y
- * el cartel de «Guardado».
- */
+/** «Cargando…» con la rueda al lado, para lo que no es un botón. */
 export function Cargando({ children }: { children: React.ReactNode }) {
   return (
     <span
       role="status"
-      className="flex items-center gap-2 text-sm text-neutral-600"
+      className="text-texto-suave flex items-center gap-2 text-meta"
     >
       <Rueda />
       {children}
     </span>
   );
+}
+
+/**
+ * Las clases de una variante, sueltas.
+ *
+ * Es para `next/link`, que tiene que ser un `<Link>` de verdad en las
+ * navegaciones internas —si no, cada botón del sitio recarga la página entera—
+ * y no puede ser `BotonEnlace`, que renderiza un `<a>` pelado.
+ */
+export function clasesDeBoton(variante: Variante = "secundario") {
+  return `${BASE} ${ESTILOS[variante]}`;
 }
 
 export function Boton({
@@ -105,8 +126,8 @@ export function Boton({
   return (
     <button
       {...resto}
-      // Un botón que está trabajando no se puede volver a tocar: dos envíos
-      // del mismo formulario crearían dos productos.
+      // Un botón que está trabajando no se puede volver a tocar: dos envíos del
+      // mismo formulario mandarían dos correos.
       disabled={disabled || cargando}
       aria-busy={cargando || undefined}
       className={`${BASE} ${ESTILOS[variante]} ${className}`.trim()}
@@ -117,7 +138,14 @@ export function Boton({
   );
 }
 
-/** Mismo aspecto, pero es un enlace. Para «Editar», «Volver» y demás. */
+/**
+ * Mismo aspecto, pero es un enlace.
+ *
+ * Es la forma que más se usa en el sitio público: el llamado a la acción lleva
+ * a WhatsApp y a `/contacto`, que son navegaciones, no acciones. Un `<a>` que
+ * parece botón se abre en una pestaña nueva, se copia y se comparte; un
+ * `<button>` con `onClick` no hace ninguna de las tres.
+ */
 export function BotonEnlace({
   variante = "secundario",
   className = "",

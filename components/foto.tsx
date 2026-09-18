@@ -4,10 +4,7 @@ import { medidaPredeterminada, rutaDeFoto, srcSetDe } from "@/lib/fotos";
 /**
  * Una foto del sitio.
  *
- * ESTO NO ESTÁ DISEÑADO, Y ES A PROPÓSITO. No pone proporción, ni recorte, ni
- * `object-fit`, ni borde: eso se decide en la Fase 4.1 con las fotos reales
- * delante (docs/plan.md, docs/diseno.md). Lo que sí resuelve, y es lo que esta
- * fase tiene que dejar bien, son las tres cosas que después no se miran más:
+ * Tres cosas que esta fase resolvió y después no se miran más:
  *
  * **1. El `srcset` se arma leyendo `medidas` de esta foto.** Nunca desde
  * `MEDIDAS_IMAGEN`, que dice qué anchos intenta generar el script y no cuáles
@@ -25,11 +22,52 @@ import { medidaPredeterminada, rutaDeFoto, srcSetDe } from "@/lib/fotos";
  * build. Dejar el optimizador activo en Cloudflare gastaría cuota de
  * Transformations rehaciendo un trabajo hecho, y pasado el tope el sitio deja
  * de mostrar fotos — que es lo único que este sitio hace (decisión 25).
+ *
+ * Y una que agregó la Fase 4.2: **el recorte**. Ver `enfoque`.
  */
+
+/**
+ * Las proporciones que usa el sitio.
+ *
+ * `4/5` es la de las portadas y la de los listados, sin excepción: es lo que
+ * hace que las grillas queden parejas aunque la galería mezcle orientaciones
+ * (decisión 14). `propia` es la de la galería, que respeta la proporción de
+ * cada foto porque el archivo es mitad vertical y mitad horizontal, y una
+ * galería que suponga una sola orientación se rompe la mitad de las veces.
+ */
+type Proporcion = "4/5" | "3/4" | "1/1" | "16/9" | "propia";
+
+/**
+ * **Dónde se recorta, cuando hay que recortar.**
+ *
+ * El predeterminado es `alto` y no `centro`, y no es una preferencia: en casi
+ * todas las fotos del archivo **la ventana está en la mitad de arriba y el piso
+ * en la de abajo, y el piso es la zona más oscura y más desordenada del cuadro**
+ * (`docs/diseno.md`). Además hay cuatro fotos con mueble embalado o material de
+ * obra a la vista —son casas entregadas y sin habitar, que es el momento en que
+ * la empresa instala, así que va a volver a pasar—. El recorte alto es lo que
+ * las salva.
+ *
+ * Un `object-position` centrado, que es lo que traen todos los componentes de
+ * imagen por defecto, deja justamente esa franja adentro.
+ */
+type Enfoque = "alto" | "centro" | "bajo";
+
+const POSICION: Record<Enfoque, string> = {
+  // No es 0%: recortar contra el borde de arriba corta cielorrasos y barrales,
+  // que es donde se ve cómo está colgada la cortina. 15% deja el riel adentro y
+  // el piso afuera.
+  alto: "50% 15%",
+  centro: "50% 50%",
+  bajo: "50% 85%",
+};
+
 export function FotoImg({
   foto,
   alt,
   sizes,
+  proporcion = "propia",
+  enfoque = "alto",
   prioridad = false,
   className,
 }: {
@@ -45,11 +83,15 @@ export function FotoImg({
    * Qué ancho va a ocupar la foto en pantalla. Sin esto el navegador supone
    * `100vw` y descarga de más en escritorio.
    *
-   * Hoy los valores son los de la maquetación mínima de esta fase. Cambian en
-   * la 4.1 junto con la composición: `sizes` y el ancho real de la caja son el
-   * mismo dato escrito dos veces, y si se separan el navegador elige mal.
+   * **`sizes` y el ancho real de la caja son el mismo dato escrito dos veces.**
+   * Si se separan, el navegador elige mal el archivo: de más en teléfono o de
+   * menos en escritorio. Cambian juntos, siempre.
    */
   sizes: string;
+  /** Predeterminado `propia`: la proporción de la foto, sin recortar nada. */
+  proporcion?: Proporcion;
+  /** Predeterminado `alto`. Solo tiene efecto si hay recorte. */
+  enfoque?: Enfoque;
   /**
    * La primera imagen visible de la página. Se descarga con prioridad y sin
    * diferir; todas las demás van diferidas (docs/diseno.md).
@@ -65,7 +107,7 @@ export function FotoImg({
    * ancho de banda»— no aplica: el `srcset` de abajo hace lo mismo que haría el
    * optimizador, con los archivos ya generados.
    */
-  return (
+  const imagen = (
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={rutaDeFoto(foto, medidaPredeterminada(foto))}
@@ -77,7 +119,35 @@ export function FotoImg({
       loading={prioridad ? "eager" : "lazy"}
       fetchPriority={prioridad ? "high" : undefined}
       decoding="async"
-      className={className}
+      className={
+        proporcion === "propia"
+          ? className
+          : `h-full w-full object-cover ${className ?? ""}`.trim()
+      }
+      style={
+        proporcion === "propia"
+          ? undefined
+          : { objectPosition: POSICION[enfoque] }
+      }
     />
+  );
+
+  if (proporcion === "propia") return imagen;
+
+  /*
+   * La caja de proporción fija. Va sin borde, sin sombra y sin radio: lo que
+   * separa una foto del papel es el aire, no un marco (`docs/diseno.md`).
+   *
+   * El fondo de superficie es lo que se ve mientras la foto carga y en la
+   * franja que el navegador todavía no pintó. Es un paso del papel, no un gris:
+   * un recuadro gris sobre papel cálido se ve como un agujero.
+   */
+  return (
+    <div
+      className="bg-superficie overflow-hidden"
+      style={{ aspectRatio: proporcion }}
+    >
+      {imagen}
+    </div>
   );
 }

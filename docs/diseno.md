@@ -3,12 +3,13 @@
 Este documento define **restricciones y sistema**, no maquetas. La composición de
 cada página se decide en su fase, dentro de estas reglas.
 
-> **Estado: Fase 4.1 cerrada.** La dirección elegida es **«Cal», con el acento
-> de «Regla»** — decisión 43. Sus valores están fijados como tokens en
-> `app/globals.css` y descritos abajo en «La dirección». Las otras dos
-> propuestas quedan documentadas al final, en «Las dos que no se eligieron»,
-> porque la razón por la que se descartaron sigue valiendo. `/muestra` sigue en
-> pie hasta la Fase 4.5.
+> **Estado: Fase 4.2 cerrada.** La dirección es **«Cal», con el acento de
+> «Regla»** — decisión 43, elegida en la 4.1 y **no se reabre**. Sus valores son
+> tokens de `app/globals.css` y están descritos abajo en «La dirección». La 4.2
+> los convirtió en componentes: ver «Componentes», que ahora dice qué existe y
+> qué no. Las otras dos propuestas quedan documentadas al final, en «Las dos que
+> no se eligieron», porque la razón por la que se descartaron sigue valiendo.
+> `/muestra` sigue en pie hasta la Fase 4.5.
 
 ---
 
@@ -234,14 +235,48 @@ ser es una superficie con texto negro encima, o una forma.
 4. **Una vez por pantalla.** El logo, y a lo sumo una cosa más. Si aparece en
    todos lados deja de ser la marca y pasa a ser ruido.
 
+**Y desde la Fase 4.2 esa vez la gasta entera el logo del encabezado**, que está
+en todas las páginas. Por eso no hay amarillo en ningún otro lado del sitio: ni
+en el botón principal, ni en los chips, ni en el foco, ni en el estado activo del
+menú, ni en los avisos — decisión 44.
+
+### El logo sobre el papel: por qué va directo y sin campo propio
+
+Es el problema que la 4.2 tenía que resolver, porque el encabezado se ve en todas
+las páginas. **El logo se apoya directo sobre el papel de cal, con el fondo
+blanco del JPG recortado, y `--color-fondo` no se movió.**
+
+Lo que tiene que ser legible es la palabra, y la palabra es negra: **14,69:1**.
+El amarillo es el círculo, que es una forma, y para una forma el contraste WCAG
+—que mide luminancia— es el instrumento equivocado: el amarillo tiene L\* 93,5 y
+el papel L\* 95,6, casi la misma claridad. La separación es de croma:
+
+| Fondo del logo         | Contraste WCAG | ΔE2000 |
+| ---------------------- | -------------: | -----: |
+| papel de cal `#F6F2EC` |         1,06:1 |   28,5 |
+| recambio `#F8F6F2`     |         1,09:1 |   29,0 |
+| campo blanco `#FFFFFF` |         1,18:1 |   30,3 |
+
+Los tres papeles están a menos de dos unidades entre sí, o sea que **ninguna de
+las salidas compra lo que cuesta**: mover el papel gana 0,5 —por debajo de lo que
+se nota— y afloja lo único que resuelve la disparidad del archivo fotográfico. El
+detalle completo, con lo que se descartó y por qué, está en la decisión 44.
+
 ### Lo que falta pedirle a la empresa
 
 - **El logo en vector** (SVG, `.ai` o `.eps`). Hoy hay un JPG de 524 px, que
-  alcanza para el encabezado pero no para nada más grande.
+  después de recortarle el fondo y el aire quedan 504: alcanza justo para los
+  168 px del encabezado en una pantalla de triple densidad, y para nada más
+  grande. **En el vector, además, el círculo tiene que estar entero**: en el JPG
+  viene cortado por el borde superior del archivo y arriba le queda una tangente
+  plana.
 - **Una versión para fondo oscuro**, con la palabra en claro. La que hay es
   negra y sobre oscuro desaparece. No hace falta para el sitio, sí para el pie
   de un PDF o una publicación.
-- Un favicon, o la autorización para recortar el círculo amarillo como favicon.
+- **Un favicon**, o la autorización para componer uno con las formas del logo.
+  Sigue pendiente después de la Fase 4.2 y ahora se sabe por qué: el recorte
+  literal del círculo sale sucio —está cortado arriba y la «e» lo pisa— y
+  cualquier otra composición sería un lockup nuevo. Decisión 45.
 
 ---
 
@@ -387,8 +422,41 @@ más reconocibles de la plantilla genérica.
 **Sin sombras.** La separación se logra con espacio y con un cambio de tono de
 fondo. Las tarjetas flotantes con sombra difusa son la otra marca reconocible.
 
-Botones: uno principal sólido, uno secundario con línea, y enlaces de texto. Tres
-variantes, no siete.
+**Lo que existe, desde la Fase 4.2.** La lista es corta a propósito: cada
+componente que se agrega es uno que hay que mantener coherente con todos los
+demás.
+
+| Componente        | Archivo                                           | Variantes                            |
+| ----------------- | ------------------------------------------------- | ------------------------------------ |
+| Botón             | `components/ui/boton.tsx`                         | principal, secundario, enlace — tres |
+| Chip              | `components/ui/chip.tsx`                          | una                                  |
+| Campo             | `components/ui/campo.tsx`                         | una, con dos controles               |
+| Aviso             | `components/ui/aviso.tsx`                         | error y nota                         |
+| Estado vacío      | `components/ui/vacio.tsx`                         | una                                  |
+| Columna de página | `components/ui/contenedor.tsx`                    | una                                  |
+| Foto              | `components/foto.tsx`                             | cinco proporciones, tres recortes    |
+| Logo              | `components/logo.tsx`                             | una                                  |
+| Encabezado y pie  | `components/encabezado.tsx`, `components/pie.tsx` | una                                  |
+
+Botones: **uno principal sólido, uno secundario con línea, y enlaces de texto.
+Tres variantes, no siete.** El principal es negro, no amarillo — decisión 43.
+
+**Los estados no usan color** — decisión 46. Un error va en negro, en negrita, con
+un filete de 3 px al costado y la palabra escrita; un campo inválido engorda su
+borde. La paleta son tres colores y son los del logo: un rojo sería un cuarto, y
+el amarillo no puede marcar un estado (1,06:1 contra el papel, contra los 3:1 que
+hacen falta).
+
+**El borde de un control es `--color-texto-suave`, no `--color-linea`.** La línea
+da 1,29:1 contra el papel: alcanza para un filete decorativo y no para el borde de
+un campo, que es lo único que dice dónde empieza y dónde termina. WCAG pide 3:1;
+el texto suave da 5,23:1.
+
+**El estado vacío se dice, no se tapa.** Un listado sin contenido —hoy,
+`/proyectos`— lleva un bloque de superficie con el mismo ritmo vertical que una
+sección de verdad, alineado al margen de la columna, que explica por qué está
+vacío y ofrece a dónde seguir. Sin ícono y sin centrar: un bloque centrado con un
+ícono arriba es el estado vacío de plantilla que la regla 4 existe para evitar.
 
 ---
 

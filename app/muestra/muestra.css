@@ -38,7 +38,15 @@
   max-width: 70ch;
 }
 
+/*
+  La Fase 4.2 puso la familia de títulos del sitio en `h1`–`h4` de la capa base
+  de `app/globals.css`, y esta página tiene que quedar afuera: su armazón es
+  deliberadamente neutro —no es ninguna de las tres direcciones— y un título en
+  Fraunces acá ya sería tomar partido. La compensación vive en este archivo, que
+  se borra entero en la Fase 4.5 junto con la página.
+*/
 .muestra-intro h1 {
+  font-family: inherit;
   font-size: 20px;
   font-weight: 600;
   letter-spacing: -0.01em;

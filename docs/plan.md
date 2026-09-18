@@ -270,11 +270,28 @@ El logo llegó durante esta fase y cambió la paleta: su amarillo `#FFF100` no
 puede ser el acento —1,06:1 contra el papel— así que el acento es el negro del
 propio logo y el amarillo es un color de superficie con reglas de uso propias.
 
-**Queda para la 4.2 la imagen de Open Graph de reserva** para las páginas sin
-foto propia. Necesitaba logo, color y tipografía; ahora los tres existen.
+~~**Queda para la 4.2 la imagen de Open Graph de reserva**~~ — hecha:
+`public/marca/og.jpg`, 1200×630, con el logo sobre el papel y `cortinas-tela/1`
+dentro de su margen. Sin texto sobre la foto.
 
-**4.2 Sistema y estructura.** Componentes base, navegación y pie, estados de carga,
-vacío y error.
+**4.2 Sistema y estructura — HECHA.** Los tokens de la 4.1 se volvieron
+componentes: botón con tres variantes, chip, campo, aviso, estado vacío y la
+columna de la página. Encabezado y pie de verdad, con el logo procesado desde
+`fotos-originales/logo.jpg`. `components/foto.tsx` pasó a recibir proporción y
+recorte, con **recorte alto por defecto** porque el piso es la zona más oscura y
+más desordenada de casi todas las fotos. Estados de carga, vacío y error, con
+`/proyectos` diciendo que está vacía en vez de taparlo. Y la imagen de Open Graph
+de reserva, que venía arrastrada de la 4.1.
+
+**El problema de la fase era el logo sobre el papel**, y se resolvió apoyándolo
+directo sobre el papel de cal, sin campo propio y sin mover `--color-fondo`:
+medido, las tres salidas posibles se separan menos de dos unidades de ΔE2000 y
+ninguna compra lo que cuesta — decisión 44.
+
+**Sigue sin haber favicon**, y ahora está escrito por qué: el círculo amarillo
+viene cortado por el borde superior del archivo fuente, así que el recorte
+literal sale sucio y cualquier otra composición sería un lockup nuevo que la
+empresa no autorizó — decisión 45.
 
 **4.3 Proyectos.** `/proyectos` y `/proyectos/[slug]`, con galería.
 
@@ -304,8 +321,8 @@ importa. Decisión 41.
 Los cuatro primeros puntos se adelantaron a la Fase 4.0 — decisión 38. Quedan
 tachados acá para que no se hagan dos veces, y con lo que sí falta de cada uno:
 
-- ~~Metadata y Open Graph por página, con imagen propia~~ — falta la **imagen de
-  reserva** para las páginas sin foto propia, que es una decisión visual de la 4.1
+- ~~Metadata y Open Graph por página, con imagen propia~~ — y la **imagen de
+  reserva**, hecha en la Fase 4.2
 - ~~`sitemap.ts` y `robots.ts`~~
 - ~~URLs canónicas~~
 - ~~Datos estructurados de negocio local~~ — falta `address` y horario, que no

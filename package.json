@@ -15,6 +15,7 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "fotos": "node scripts/preparar-fotos.mjs",
+    "marca": "node scripts/preparar-marca.mjs",
     "fotos:revisar": "node scripts/revisar-metadatos.mjs public/fotos"
   },
   "dependencies": {

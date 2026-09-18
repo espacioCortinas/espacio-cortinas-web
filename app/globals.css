@@ -1,6 +1,23 @@
 @import "tailwindcss";
 
 /*
+  La documentación no es código, y Tailwind no lo sabe.
+
+  Tailwind 4 detecta clases escaneando todo el proyecto, así que las reglas
+  prohibidas de `docs/diseno.md` —que están escritas ahí con su nombre:
+  `rounded-2xl`, `shadow-lg`, `rounded-xl`— terminaban **emitidas en el CSS
+  publicado**. Nadie las usaba, pero estaban, y eso arruina la única forma
+  barata de auditar la regla 3: buscar un radio grande en la hoja de estilos
+  que se sirve.
+
+  Con esto, «el CSS del sitio no contiene ningún radio mayor a 4 px» vuelve a
+  ser una afirmación comprobable sobre el artefacto y no solo sobre el código.
+*/
+@source not "../docs";
+@source not "../CLAUDE.md";
+@source not "../README.md";
+
+/*
   Tokens del sistema de diseño — Fase 4.1, dirección elegida.
 
   La dirección es «Cal»: papel cálido, tipografía como estructura, la foto
@@ -104,6 +121,23 @@
   */
   --spacing: 0.25rem;
 
+  /* --- Ancho de la columna ------------------------------------------ */
+
+  /*
+    La página es una sola columna editorial: el texto y la foto entran en el
+    mismo ancho y contra el mismo margen. Estos dos son los únicos anchos del
+    sitio, y salen como `max-w-columna` y `max-w-lectura`.
+
+    `columna` es la caja de la página. 1120 px deja aire a los costados en un
+    monitor de 1440 sin que el contenido quede flotando en el medio.
+
+    `lectura` es para los párrafos, y no es lo mismo: a 17-18 px, 65 caracteres
+    caen entre las 60 y las 75 por línea que pide `docs/diseno.md`. Un párrafo
+    de 1120 px de ancho se lee mal aunque la columna lo permita.
+  */
+  --container-columna: 70rem; /* 1120 */
+  --container-lectura: 65ch;
+
   /* --- Radios ------------------------------------------------------- */
 
   /*
@@ -131,8 +165,25 @@
   }
 
   /*
+    Los títulos son de la familia de títulos, una vez y no en cada componente.
+    Los tamaños sí los pone cada uno: la escala es corta y el h2 de una página
+    no siempre es del mismo tamaño que el de otra.
+  */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-titulo);
+    text-wrap: balance;
+  }
+
+  /*
     Foco visible en todo lo navegable por teclado, sin tener que acordarse en
     cada componente. Es parte de terminado, no un extra.
+
+    El desplazamiento de 2 px es lo que hace que el anillo del botón principal
+    —que es negro sólido— caiga sobre el papel y se vea. Sin él, un anillo negro
+    sobre un botón negro no existe.
   */
   :focus-visible {
     outline: 2px solid var(--color-acento);

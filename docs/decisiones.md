@@ -1592,13 +1592,161 @@ nada más grande.
 
 ---
 
+### 44. El logo va sobre el papel de cal, sin campo propio, y el papel no se mueve
+
+**Fecha:** septiembre de 2026, Fase 4.2.
+
+**El problema.** El logo llegó como JPG con fondo blanco y el sitio es papel de
+cal `#F6F2EC`. El encabezado está en todas las páginas, así que lo que se decida
+acá se ve siempre. La decisión 43 ya había anotado que sobre este papel el
+amarillo «pierde brillo», y dejó `#F8F6F2` medido como valor de recambio.
+
+**Lo decidido:** el logo se apoya **directo sobre el papel**, con el fondo blanco
+recortado, **sin campo propio**, y **`--color-fondo` se queda en `#F6F2EC`**.
+
+#### Lo primero: el contraste WCAG es el instrumento equivocado para el círculo
+
+Lo que tiene que ser legible es la palabra, y la palabra es negra: `#211F20`
+sobre el papel da **14,69:1**. Nada del logo depende de que el amarillo se lea.
+
+El amarillo es el círculo detrás de la «e», que es una **forma**. Y el 1,06:1 que
+la decisión 43 midió es contraste de luminancia, que para este par no dice nada
+útil: `#FFF100` tiene L\* 93,5 y el papel L\* 95,6, o sea casi la misma claridad.
+La separación no es de claridad, es de croma. Medida como diferencia perceptual:
+
+| Fondo del logo         | Contraste WCAG | ΔE2000 |
+| ---------------------- | -------------: | -----: |
+| papel de cal `#F6F2EC` |         1,06:1 |   28,5 |
+| recambio `#F8F6F2`     |         1,09:1 |   29,0 |
+| campo blanco `#FFFFFF` |         1,18:1 |   30,3 |
+
+(ΔE2000 está calibrado para diferencias chicas, así que a 28 está extrapolando.
+Lo que el número sí sostiene con seguridad es **la comparación entre los tres**,
+que están a menos de dos unidades uno de otro.)
+
+#### Por qué se descartó cada una de las otras tres salidas
+
+**Mover el papel a `#F8F6F2` compra 0,5 unidades de ΔE**, por debajo del umbral
+en que se nota un cambio —que ronda 2— y a cambio afloja el papel de cal, que es
+lo que resuelve el problema número uno del archivo fotográfico: la disparidad de
+calidad entre las 23 fotos (`docs/diseno.md`, «El material real»). Se paga el
+activo más valioso de la dirección por una mejora que no se ve.
+
+**El campo blanco detrás del logo compra 1,8 unidades**, y a cambio mete en el
+encabezado de todas las páginas un color que no está en la paleta, con aspecto de
+calcomanía pegada sobre el papel.
+
+**La versión en negro** —sacarle el círculo— tira el único color de la marca en
+la única pantalla donde aparece, para arreglar un problema que mide 1,8.
+
+#### Lo que sí hubo que resolver, y era lo técnico
+
+**El fondo blanco del JPG.** Pegado tal cual, el encabezado tendría un recuadro
+blanco. Lo recorta `scripts/preparar-marca.mjs`, y **no alcanza con «lo blanco se
+vuelve transparente»**: entre la letra negra y el fondo hay una banda de grises
+de suavizado, que dejada opaca se ve como un halo gris sobre el papel. El script
+deshace la mezcla —`α = 1 − min(r,g,b)/255`, y el color se despeja de ese α— así
+que el suavizado sobrevive como transparencia y no como color, y el mismo archivo
+sirve sobre papel, sobre blanco o sobre oscuro.
+
+#### La consecuencia sobre el resto del sitio
+
+**El amarillo del logo es el único amarillo de la pantalla.** La regla de «una vez
+por pantalla» de `docs/diseno.md` la gasta entera el encabezado, que está en todas
+las páginas. Por eso en la Fase 4.2 no hay amarillo en ningún otro lado: ni en el
+botón principal (negro sólido, decisión 43), ni en los chips, ni en el foco, ni en
+el estado activo del menú, ni en los avisos.
+
+#### Lo que queda abierto
+
+- **El archivo es un JPG de 524 px**, que da 504 después de recortarle el aire.
+  Alcanza justo para los 168 px de ancho del encabezado en una pantalla de triple
+  densidad, y para nada más grande. El vector sigue pendiente.
+- **El círculo viene cortado por el borde superior del archivo fuente**, así que
+  arriba tiene una tangente plana. Se ve en el original y se arregla con el
+  vector, no con código.
+
+---
+
+### 45. El favicon sigue pendiente, y ahora se sabe por qué no salía
+
+**Fecha:** septiembre de 2026, Fase 4.2.
+
+**El estado.** `docs/diseno.md` lo tenía en «lo que falta pedirle a la empresa»:
+«un favicon, o la autorización para recortar el círculo amarillo como favicon».
+La Fase 4.2 lo tenía en alcance y **se decidió no hacerlo**.
+
+**El dato nuevo, que es lo que cambia la conversación.** Medido sobre
+`fotos-originales/logo.jpg`: el círculo amarillo ocupa de (15, 2) a (98, 86), o
+sea que **está cortado por el borde superior del archivo**, y la «e» lo pisa
+empezando en x = 59. Un recorte literal del círculo sale con la tangente plana
+arriba y con media letra adentro; a 16 px queda una mancha amarilla pálida con
+algo oscuro encima.
+
+Las alternativas que sí se leen a 16 px —una baldosa amarilla con la «e» negra
+(13,92:1), o una baldosa negra con la «e» en papel— **son un lockup nuevo**: no
+existen en el logo de la empresa. Fabricar una marca nueva para una pestaña del
+navegador es exactamente la clase de decisión que no le toca a quien programa.
+
+**Lo que se hace mientras tanto:** nada, que es lo que ya pasaba. Sin
+`app/icon.*` ni `app/favicon.ico`, el navegador pide `/favicon.ico`, recibe 404 y
+muestra su ícono genérico. No se publica el logo de Vercel ni el de Next, que era
+lo que la Fase 3 quiso evitar.
+
+**Qué lo destraba:** el vector que `docs/diseno.md` le sigue pidiendo a la
+empresa —con el círculo entero—, o la autorización explícita para componer la
+baldosa amarilla con la «e».
+
+---
+
+### 46. Los estados no usan color: la paleta se queda en tres
+
+**Fecha:** septiembre de 2026, Fase 4.2.
+
+**Qué se revierte.** `components/ui/aviso.tsx` y `components/ui/campo.tsx` venían
+del panel con rojo, verde y ámbar de Tailwind para error, éxito y atención. Eso
+tenía su propia justificación escrita —«no son una propuesta visual, son parte del
+mensaje»— y valía mientras el panel fuera todo gris y no hubiera paleta.
+
+**Ahora hay paleta, y son tres colores que son los del logo** (decisión 43):
+papel, negro y amarillo. Un rojo sería un cuarto color inventado, y el amarillo no
+puede marcar un estado: 1,06:1 contra el papel, contra los 3:1 que pide WCAG para
+un elemento de interfaz con significado.
+
+**Lo decidido:** los estados se marcan **sin color**. El error va en negro sobre
+papel (**14,69:1**), en negrita, con un filete negro de 3 px al costado y la
+palabra escrita; una confirmación va igual pero con filete de 1 px y peso normal.
+El campo inválido engorda su borde en vez de cambiar de color.
+
+**Por qué esto no pierde nada:**
+
+- **El color nunca podía ir solo.** Una de cada doce personas no distingue rojo de
+  verde, así que el aviso ya tenía que decir con palabras qué pasó. Lo que se saca
+  es el refuerzo, no la información.
+- **Este sitio tiene un solo par de estados en todo el recorrido**, y llega en la
+  Fase 4.6: el formulario de contacto se envió o no se envió. No hay una bandeja
+  con veinte filas de colores distintos que haga falta barrer con la vista.
+- **El borde de los controles sí cambió por contraste:** era `--color-linea`, que
+  da 1,29:1 contra el papel y no llega a los 3:1 que pide el borde de un control.
+  Pasa a `--color-texto-suave`, 5,23:1.
+
+**Qué lo reabriría:** que aparezca una pantalla con varios estados simultáneos que
+haya que distinguir de un vistazo. Hoy no existe ninguna, y `docs/producto.md`
+deja el panel y la bandeja de mensajes fuera del alcance de V1.
+
+---
+
 ## Decisiones abiertas
 
 **Falta el logo en vector, y una versión para fondo oscuro.** Hoy hay un JPG de
 524 px en `fotos-originales/logo.jpg`. Alcanza para el encabezado —160 px a
 triple densidad son 480— pero no para nada más grande, y no hay versión clara
-para usar sobre un fondo oscuro. Tampoco hay favicon. Se le pide a la empresa
-— decisión 43.
+para usar sobre un fondo oscuro. Se le pide a la empresa — decisión 43.
+
+**El favicon sigue sin salir, y ya se sabe por qué** — decisión 45. El círculo
+amarillo viene cortado por el borde superior del archivo fuente y la «e» lo pisa,
+así que un recorte literal sale sucio; cualquier otra cosa sería un lockup nuevo
+que la empresa no autorizó. Se destraba con el vector, o con esa autorización.
 
 **No hay ninguna foto 4:5 de repuesto.** Las siete que existen son exactamente
 las siete portadas, así que cualquier portada que haya que retirar obliga a
@@ -1625,10 +1773,10 @@ muestra como resultado enriquecido. Falta saber si hay una dirección publicable
 alta del Perfil de Empresa de Google, que es donde ese dato importa de verdad
 (Fase 5).
 
-**Falta una imagen de Open Graph de reserva**, para las páginas sin foto propia
-—Inicio, los listados, Contacto— y para un producto todavía sin fotos. Hoy esos
-enlaces se comparten sin miniatura. Poner una implica logo, color y tipografía,
-así que sale de la Fase 4.1 y no antes.
+~~**Falta una imagen de Open Graph de reserva.**~~ Resuelto en la Fase 4.2:
+`public/marca/og.jpg`, que arma `scripts/preparar-marca.mjs` con el logo y
+`cortinas-tela/1`. La usan Inicio, los dos listados, Contacto y cualquier
+producto que todavía no tenga fotos.
 
 Cuando aparezca una decisión no contemplada durante la implementación: preguntar,
 decidir, y anotarla acá antes de seguir.
