@@ -297,8 +297,20 @@ empresa no autorizó — decisión 45.
 
 **4.4 Productos.** `/productos` y `/productos/[slug]`, con variantes.
 
-**4.5 Inicio.** Se compone al final, cuando ya existe todo lo que tiene que
-anticipar.
+**4.5 Inicio — COMPUESTA, fuera de orden.** Se adelantó a pedido: la página
+se compuso antes que `/proyectos` (4.3) y `/productos` (4.4), porque el armazón
+de la 4.2 la dejaba sin estructura. Cinco sectores —apertura, qué hacemos, cómo
+trabajamos, arquitectos y oficinas, cierre— decididos mirando cuatro sitios
+profesionales del rubro, con los textos provisorios en `contenido/inicio.ts`
+esperando la redacción de la empresa. Decisión 47.
+
+Al ir a construirla apareció que **los siete productos tenían `destacado:
+false`** y que no hay ningún proyecto, así que las dos secciones con contenido
+que este plan pedía para Inicio renderizaban vacío las dos. Se marcaron cuatro
+destacados por criterio de venta, no fotográfico.
+
+**Queda pendiente de la 4.5:** el sector de proyectos, que entra cuando haya
+contenido cargado.
 
 **Y se borra el andamio de la 4.1:** `app/muestra/` entera —página, estilos y
 tipografías— más `public/muestra-logo.png`. Era para elegir la dirección visual

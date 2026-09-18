@@ -61,6 +61,25 @@ export const proyectosDestacados = (tope: number): ConFotos<Proyecto>[] =>
     .filter((p) => p.destacado)
     .slice(0, tope);
 
+/**
+ * Una foto suelta del manifiesto, para cuando una página necesita **una foto
+ * concreta** y no la galería de una entidad: la que abre Inicio, la que
+ * acompaña al bloque de arquitectos y oficinas.
+ *
+ * `posicion` empieza en 1 y es la misma numeración que ve el visitante y que
+ * usa `altAutomatico()`: la 1 es la portada.
+ *
+ * **Devuelve `null` en vez de romper.** Las fotos las regenera un script, así
+ * que el día que alguien saque una foto del archivo esta llamada se queda sin
+ * respuesta. Que la página se dibuje sin esa foto es mejor que un build roto o,
+ * peor, un hueco con una imagen que no carga.
+ */
+export const fotoDe = (
+  entidad: "productos" | "proyectos",
+  slug: string,
+  posicion: number,
+) => fotos[`${entidad}/${slug}`]?.[posicion - 1] ?? null;
+
 /** Para `/productos/[slug]` y `/proyectos/[slug]`. */
 export const productoPorSlug = (slug: string) =>
   productosPublicados().find((p) => p.slug === slug) ?? null;

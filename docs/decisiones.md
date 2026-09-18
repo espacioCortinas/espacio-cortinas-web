@@ -1736,6 +1736,115 @@ deja el panel y la bandeja de mensajes fuera del alcance de V1.
 
 ---
 
+### 47. Inicio se compone por sectores, y no son los que pedía `docs/producto.md`
+
+**Fecha:** septiembre de 2026. Adelanta la Fase 4.5 y **rompe el orden del
+plan**: Inicio se compone antes que `/proyectos` (4.3) y `/productos` (4.4).
+Lo pidió quien desarrolla, mirando el armazón de la 4.2 y viendo que la página
+no tenía estructura.
+
+#### Qué se miró antes de decidir
+
+Cuatro sitios profesionales del rubro, quedándose con la secuencia de sectores
+de cada uno y no con su estética:
+
+| Sitio           | Qué es                                  | Cómo ordena su Inicio                                       |
+| --------------- | --------------------------------------- | ----------------------------------------------------------- |
+| Silent Gliss    | fabricante premium, habla a arquitectos | foto grande con título encima → novedades                   |
+| The Shade Store | cortinas a medida con colocación        | foto → CTA → grilla de productos → grilla de servicios      |
+| Dino Conte      | el competidor local grande              | foto con título encima + formulario en la primera pantalla  |
+| Studio McGee    | estudio de interiorismo                 | foto → frase **debajo** de la foto → grilla → quiénes somos |
+
+Tres cosas salieron de ahí:
+
+1. **Lo único que las cuatro comparten es una grilla de fotos con nombre.**
+   Ninguna se sostiene con texto. Por eso el sector de productos es el que lleva
+   el peso visual de la página.
+2. **Studio McGee valida por su cuenta la regla de no poner texto sobre foto**:
+   su frase de posicionamiento va debajo de la foto, sobre fondo sólido. Las
+   otras tres ponen texto encima, que acá no se puede.
+3. **La grilla de íconos de The Shade Store es exactamente la regla 5 de
+   `docs/diseno.md`.** Es el patrón a resolver de otra manera, no a copiar.
+
+#### El hallazgo que cambió el planteo
+
+`docs/producto.md` pedía para Inicio «empresa, productos destacados, proyectos
+destacados, servicio de colocación, trabajo con arquitectos, CTA». Al ir a
+construirlo, **las dos secciones con contenido renderizaban vacío las dos**:
+
+```
+productos destacados ....  0   hay 7 productos, TODOS con destacado: false
+proyectos destacados ....  0   contenido/proyectos.ts está vacío
+```
+
+`productosDestacados(4)` devolvía un arreglo vacío porque nadie había marcado
+ningún producto. No era un problema de diseño: era que el contenido no existía.
+
+#### Los cinco sectores
+
+```
+1  APERTURA                  la frase, la foto, una acción
+2  QUÉ HACEMOS               los cuatro productos destacados
+3  CÓMO TRABAJAMOS           asesoramiento, medición, fabricación, colocación
+4  ARQUITECTOS Y OFICINAS    los otros dos públicos
+5  CIERRE                    una sola acción
+```
+
+**«Empresa» no abre la página**, contra lo que decía `docs/producto.md`. Es la
+apertura más débil posible para un negocio visual, y además no hay con qué: ni
+foto de equipo, ni taller, ni años documentados. Se disuelve en la bajada y en
+«cómo trabajamos». `docs/producto.md` queda corregido.
+
+**Productos antes que proyectos**, porque productos es la única sección con
+material.
+
+#### Las tres decisiones de composición
+
+**La frase primero y la foto después.** Es lo contrario de lo que hacen los
+cuatro sitios de referencia. Dos razones: la dirección elegida dice que lo que
+sostiene las páginas es la tipografía —«la mitad del archivo no da para sostener
+nada»— y en un teléfono una foto 4:5 arriba de todo empuja el mensaje abajo del
+pliegue. De paso, nos distingue del competidor local.
+
+**No hay sector de proyectos mientras `contenido/proyectos.ts` esté vacío.** Una
+página de inicio no promete lo que no existe, y poner ahí el bloque de «todavía
+no hay nada» sería gastar la página que más se comparte en decir que falta
+contenido. `/proyectos` sigue en el menú con su estado vacío, así que un enlace
+ya compartido no cae en el aire. El día que se cargue el primer proyecto, Inicio
+suma su sector.
+
+**Los cuatro destacados se eligieron por venta, no por foto:** Roller, Cortinas
+de tela, Venecianas de PVC y Toldos, «lo más vendido en el día a día» según la
+empresa. Se había propuesto elegirlos por la tabla de calidad fotográfica de
+`docs/diseno.md` y **se descartó**: cuál se vende más es el dato que el sitio no
+puede deducir solo, y el objetivo comercial manda sobre el lucimiento. La
+consecuencia está anotada: la portada del Roller está calificada como «apoyo»,
+que es la más floja de las cuatro, y es la primera que se ve.
+
+#### Los textos son provisorios, y viven en un solo archivo
+
+`contenido/inicio.ts`. **Los redacta la empresa, no el desarrollo**, y
+reemplazarlos es editar ese archivo: ninguna cadena de Inicio está escrita
+dentro de un componente. Es la regla 2 de `CLAUDE.md` aplicada al texto de una
+página, y acá vale doble porque **se sabe de antemano que va a cambiar** y lo va
+a cambiar alguien que no escribe código.
+
+El archivo lleva escrito qué no se puede afirmar sin confirmarlo: años de
+trayectoria, cantidad de trabajos, marcas y garantías **no están documentados en
+ningún lado del proyecto**. Es la misma regla que ya sigue
+`components/datos-estructurados.tsx` con la dirección y el horario.
+
+#### Lo que esto le deja a las fases 4.3 y 4.4
+
+- **`components/tarjeta-producto.tsx` ya existe** y es el elemento de grilla del
+  sitio. La 4.4 lo reusa en `/productos`; no se escribe otro.
+- **`contenido/index.ts` ganó `fotoDe()`**, para cuando una página necesita una
+  foto concreta y no la galería de una entidad.
+- Inicio queda esperando **un sector más**, el de proyectos, que entra solo
+  cuando haya contenido.
+
+---
+
 ## Decisiones abiertas
 
 **Falta el logo en vector, y una versión para fondo oscuro.** Hoy hay un JPG de

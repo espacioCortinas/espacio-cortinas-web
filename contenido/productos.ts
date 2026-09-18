@@ -8,6 +8,15 @@ import type { Producto } from "./tipos";
  * tope de `PRODUCTOS_DESTACADOS_HOME` (decisión 9). Para reordenar, se mueve
  * el bloque.
  *
+ * **Los cuatro destacados son Roller, Cortinas de tela, Venecianas de PVC y
+ * Toldos**, y el criterio no es fotográfico: son los que más se venden en el
+ * día a día, según la empresa. Es el dato que el sitio no puede deducir solo y
+ * la única razón válida para elegir cuáles anticipar en Inicio — decisión 47.
+ *
+ * Nota para cuando cambie: Inicio los muestra **en el orden de este arreglo**,
+ * no en orden de importancia. Si hiciera falta que Inicio los ordene distinto,
+ * hay que mover los bloques acá, y eso reordena también el catálogo.
+ *
  * Las descripciones son las que escribió la empresa. Se corrigió únicamente la
  * ortografía —«enrrollable», «bloquer», «permita» por «permite»—; ni una
  * palabra, ni el orden, ni el tono. Es su voz y no la nuestra, pero una falta
@@ -43,7 +52,7 @@ export const productos: Producto[] = [
       { nombre: "Motorizado" },
     ],
     activo: true,
-    destacado: false,
+    destacado: true,
   },
   {
     slug: "compacta-blackout",
@@ -66,7 +75,7 @@ export const productos: Producto[] = [
       { nombre: "Blackout" },
     ],
     activo: true,
-    destacado: false,
+    destacado: true,
   },
   {
     slug: "venecianas-madera",
@@ -84,7 +93,7 @@ export const productos: Producto[] = [
       "Este es un tipo de cortina decorativa y también con el movimiento de lamas se puede generar privacidad e ingreso de luz.",
     variantes: [],
     activo: true,
-    destacado: false,
+    destacado: true,
   },
   {
     slug: "toldos",
@@ -100,7 +109,7 @@ export const productos: Producto[] = [
       { nombre: "Motorizado" },
     ],
     activo: true,
-    destacado: false,
+    destacado: true,
   },
   {
     slug: "bandas-verticales",

@@ -47,8 +47,8 @@ cualquier texto.
 ## Estructura
 
 ```
-INICIO      Empresa, productos destacados, proyectos destacados,
-            servicio de colocación, trabajo con arquitectos, CTA
+INICIO      Apertura, productos destacados, cómo trabajamos,
+            arquitectos y oficinas, cierre
 
 PROYECTOS   Listado de trabajos realizados
             Proyecto → título, ubicación, descripción, galería
@@ -58,6 +58,21 @@ PRODUCTOS   Catálogo
 
 CONTACTO    WhatsApp, teléfono, email, formulario, redes
 ```
+
+Inicio se compuso en cinco sectores y **«Empresa» dejó de abrir la página** —
+decisión 47. Es la apertura más débil posible para un negocio visual y además no
+hay con qué: ni foto de equipo, ni taller, ni años documentados. Lo que la
+empresa es se dice en la bajada del titular y en «cómo trabajamos», que es donde
+vive el diferencial de verdad: la colocación es propia.
+
+**El sector de proyectos no está mientras no haya proyectos cargados.** Una
+página de inicio no promete lo que no existe. Entra solo cuando se cargue el
+primero.
+
+**Los textos de Inicio son provisorios y los redacta la empresa.** Viven en
+`contenido/inicio.ts`, en un solo archivo, y ahí está escrito qué no se puede
+afirmar sin confirmarlo: años de trayectoria, cantidad de trabajos, marcas y
+garantías.
 
 **Productos vive como sección aparte del recorrido institucional.** Inicio,
 Proyectos y Contacto son el recorrido comercial; Productos es el catálogo, que se
