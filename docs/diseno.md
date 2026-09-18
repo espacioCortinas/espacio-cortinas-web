@@ -461,7 +461,7 @@ demás.
 | Foto                | `components/foto.tsx`                             | cinco proporciones, tres recortes    |
 | Galería             | `components/galeria.tsx`                          | dos módulos, según la foto           |
 | Video de variante   | `components/video-variante.tsx`                   | una                                  |
-| Tarjeta de producto | `components/tarjeta-producto.tsx`                 | dos niveles de encabezado            |
+| Tarjeta de producto | `components/tarjeta-producto.tsx`                 | una — solo Inicio                    |
 | Logo                | `components/logo.tsx`                             | una                                  |
 | Encabezado y pie    | `components/encabezado.tsx`, `components/pie.tsx` | una                                  |
 

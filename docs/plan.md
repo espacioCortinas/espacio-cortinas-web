@@ -295,11 +295,17 @@ empresa no autorizó — decisión 45.
 
 **4.3 Proyectos.** `/proyectos` y `/proyectos/[slug]`, con galería.
 
-**4.4 Productos — HECHA.** `/productos` es una grilla de portadas con su
-nombre, que reusa `components/tarjeta-producto.tsx` sin escribir una segunda
-tarjeta. `/productos/[slug]` se compuso en cuatro sectores —apertura, variantes,
-más fotos, cierre—, con las variantes **antes** que el resto de la galería
-porque es lo que decide la compra.
+**4.4 Productos — HECHA.** `/productos` es **una fila por producto**, con la
+portada de un lado y el nombre, la descripción y las variantes del otro, y el
+lado alternado en escritorio. Se eligió entre tres composiciones renderizadas
+con el material real en un andamio que ya se borró — decisión 49: siete
+productos no se reparten parejo en ninguna grilla, y una fila por producto no
+deja huérfano en ningún ancho. `/productos/[slug]` se compuso en cuatro sectores
+—apertura, variantes, más fotos, cierre—, con las variantes **antes** que el
+resto de la galería porque es lo que decide la compra.
+
+`components/tarjeta-producto.tsx` queda para Inicio, que sigue siendo una grilla
+de anticipo, y perdió la prop `nivel` que había durado una sola decisión.
 
 Lo grande de la fase fueron **las ocho fotos de variante**, que estaban en el
 disco y que el pipeline no veía. Se resolvieron las tres capas: el script baja
@@ -316,9 +322,11 @@ hallazgos de contenido sobre los videos y que el control de metadatos daba por
 buena cualquier cosa que no supiera leer.
 
 **Queda pendiente de la 4.4, y lo resuelve la empresa:** `venecianas-madera` y
-`venecianas-pvc` tienen la misma descripción palabra por palabra y en el listado
-quedan una al lado de la otra; el video del roller motorizado no muestra un
-roller; y el de cortinas de tela es vertical dentro de una caja 16:9.
+`venecianas-pvc` tienen la misma descripción palabra por palabra y ahora quedan
+en filas consecutivas con el párrafo a la vista —se publica así a propósito,
+decisión 49—; el video del roller motorizado no muestra un roller; y el de
+cortinas de tela es vertical dentro de una caja 16:9. Acortar las descripciones
+además bajaría el alto de la página, que quedó en unos 5.900 px en escritorio.
 
 **4.5 Inicio — COMPUESTA, fuera de orden.** Se adelantó a pedido: la página
 se compuso antes que `/proyectos` (4.3) y `/productos` (4.4), porque el armazón

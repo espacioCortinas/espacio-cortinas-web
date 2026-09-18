@@ -1,48 +1,69 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { TarjetaProducto } from "@/components/tarjeta-producto";
+import { FotoImg } from "@/components/foto";
 import { EnlaceWhatsapp } from "@/components/whatsapp";
 import { clasesDeBoton } from "@/components/ui/boton";
+import { Chip } from "@/components/ui/chip";
 import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
 import { Vacio } from "@/components/ui/vacio";
 import { productosPublicados } from "@/contenido";
+import type { ProductoConMedios } from "@/contenido/tipos";
 import { entornoPublico } from "@/lib/entorno";
+import { portadaDe } from "@/lib/fotos";
 import { metadataDePagina } from "@/lib/metadata";
+import { altAutomatico } from "@/lib/texto";
 
 /**
  * El catálogo.
  *
- * # Es una grilla de portadas con su nombre, y nada más
+ * # Una fila por producto, con el lado de la foto alternado
  *
- * **Reusa `components/tarjeta-producto.tsx`**, que es el elemento de grilla del
- * sitio y el que ya usa Inicio: no hay una segunda tarjeta. Lo único que se le
- * agregó en esta fase es `nivel`, porque acá la grilla cuelga del `<h1>` y en
- * Inicio de un `<h2>` — el aspecto no cambió, así que Inicio sigue igual.
+ * Es la propuesta «Alternada», elegida mirando las tres renderizadas con el
+ * material real — decisión 49. Resuelve los tres problemas que tenía la grilla
+ * de siete tarjetas iguales:
  *
- * **No lleva la descripción de cada producto**, contra lo que hacía el armazón
- * de la 4.0, y son tres razones:
+ * **1. El huérfano.** Siete productos en tres columnas dan 3 + 3 + 1, y entre
+ * 640 y 1023 dan 2 + 2 + 2 + 1: siete no se reparte parejo en ninguna grilla, y
+ * siete es el número del catálogo. Siete filas son siete filas en cualquier
+ * ancho.
  *
- * - Las descripciones son un párrafo largo cada una, escritas por la empresa
- *   para explicar el producto, no para una tarjeta. Recortadas a 180
- *   caracteres se leen como prosa cortada al medio.
- * - **`venecianas-madera` y `venecianas-pvc` tienen la misma descripción
- *   palabra por palabra**, y en esta grilla quedan una al lado de la otra. La
- *   corrige la empresa, no el desarrollo; mientras tanto, mostrarla dos veces
- *   sería subrayar el problema.
- * - Lo único que los cuatro sitios de referencia comparten es una grilla de
- *   fotos con nombre — decisión 47. Ninguno se sostiene con texto.
+ * **2. El módulo único.** La decisión 48 estableció que el tamaño del módulo
+ * sale del material y no de la posición, y se había aplicado solo a
+ * `components/galeria.tsx`. Acá la caja de foto pasa de 325 a 416 px, que en un
+ * archivo sacado con celular es la diferencia entre ver el cabezal y adivinarlo.
  *
- * El texto completo está en la página de cada producto, que es donde se lee
- * entero y no cortado.
+ * **3. Las variantes invisibles.** Hay nueve en el catálogo —Roller tres,
+ * Cortinas de tela cuatro, Toldos dos— y la grilla no nombraba ninguna, cuando
+ * la decisión 40 dice que la variante es lo que decide la compra. Ahora van como
+ * chips, debajo de la descripción.
  *
- * # La grilla
+ * **Lo que cuesta, y está asumido:** la página pasa de unos 1.300 px a unos
+ * 3.600 px en escritorio, así que el séptimo producto queda a cuatro pantallas
+ * del primero. Se aceptó porque es un catálogo de siete elementos y no de
+ * setenta — decisión 49.
  *
- * Una columna en teléfono, dos desde 640 y tres desde 1024. **En teléfono no
- * son dos**, a diferencia de Inicio: a 320 px de ancho, dos columnas dejan cada
- * portada en 130 px, que para una foto de interior es una estampilla. Inicio se
- * lo puede permitir porque muestra cuatro productos como anticipo; el catálogo
- * es el lugar donde se los mira.
+ * # La descripción vuelve al listado
+ *
+ * La grilla anterior la había sacado por tres razones. Dos se caen con esta
+ * composición: al lado de la foto hay ancho de lectura de verdad, así que el
+ * párrafo entra entero en vez de cortado, y ya no compite con nada por espacio.
+ *
+ * **La tercera sigue en pie y ahora se ve:** `venecianas-madera` y
+ * `venecianas-pvc` tienen la misma descripción palabra por palabra, y en el
+ * arreglo están una al lado de la otra, así que quedan en filas consecutivas
+ * con el párrafo a la vista. **Se publica igual**, y es deliberado —
+ * decisión 49. Recortar no arregla nada: los dos textos miden 120 caracteres, o
+ * sea que `recortar()` los devolvería enteros e idénticos. Y esconder la
+ * descripción de los siete para tapar un problema de dos le saca a cinco
+ * productos su mejor texto. Lo corrige la empresa; mientras tanto el sitio lo
+ * muestra, que es lo que hace que se corrija.
+ *
+ * # Por qué no usa `components/tarjeta-producto.tsx`
+ *
+ * Porque esto no es una tarjeta: no hay grilla, la foto y el texto van uno al
+ * lado del otro, y el lado cambia. Ese componente se queda para Inicio, que
+ * sigue siendo una grilla de anticipo.
  */
 
 export const metadata: Metadata = metadataDePagina({
@@ -52,6 +73,28 @@ export const metadata: Metadata = metadataDePagina({
     "Todo a medida, con asesoramiento y colocación en Buenos Aires.",
   ruta: "/productos",
 });
+
+/**
+ * El ancho de la caja de foto, escrito una vez.
+ *
+ * **Es el mismo dato que `max-w-[26rem]` de abajo**, y los dos cambian juntos:
+ * si se separan, el navegador descarga de más en el teléfono o de menos en el
+ * escritorio.
+ *
+ * Los tres tramos son los tres anchos que la caja tiene de verdad:
+ *
+ *     ≥ 768   media columna —(100vw − 96 de margen − 48 de hueco) / 2— topeada
+ *             en 26rem, que es donde queda a partir de unos 976 px de ancho
+ *     < 768   el ancho de la columna, también topeado en 26rem: de 456 px de
+ *             viewport para arriba la caja ya no crece
+ *
+ * El tope tiene que estar en los dos tramos. Sin él, una tablet de 700 px
+ * pediría una foto de 660 para una caja de 416 y se bajaría `1600.webp` donde
+ * alcanzaba `960.webp`.
+ */
+const SIZES_PORTADA =
+  "(min-width: 768px) min(calc((100vw - 9rem) / 2), 26rem), " +
+  "min(calc(100vw - 2.5rem), 26rem)";
 
 export default function Productos() {
   const productos = productosPublicados();
@@ -82,20 +125,9 @@ export default function Productos() {
           </Vacio>
         </div>
       ) : (
-        <ul className="mt-12 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 md:mt-16 lg:grid-cols-3">
+        <ul className="border-linea mt-12 border-t md:mt-16">
           {productos.map((producto, i) => (
-            <li key={producto.slug}>
-              <TarjetaProducto
-                producto={producto}
-                // La grilla cuelga del `<h1>` de esta página, así que el nombre
-                // de cada producto es un `h2`.
-                nivel={2}
-                // El mismo dato que los anchos de la grilla de arriba, escrito
-                // dos veces. Cambian juntos.
-                sizes="(min-width: 1216px) 325px, (min-width: 1024px) calc((100vw - 9rem) / 3), (min-width: 768px) calc((100vw - 7.5rem) / 2), (min-width: 640px) calc((100vw - 4rem) / 2), calc(100vw - 2.5rem)"
-                prioridad={i === 0}
-              />
-            </li>
+            <Fila key={producto.slug} producto={producto} posicion={i} />
           ))}
         </ul>
       )}
@@ -130,5 +162,109 @@ export default function Productos() {
         </div>
       </section>
     </main>
+  );
+}
+
+/**
+ * Un producto del catálogo: la portada de un lado, el texto del otro.
+ *
+ * **Un solo encabezado y un solo elemento enfocable.** El nombre va una vez, en
+ * el `<h2>`, y su enlace se estira sobre la fila entera con
+ * `after:absolute after:inset-0` contra el `relative` del `<article>`. Así la
+ * zona táctil es toda la fila —que es lo que hace falta en un teléfono— sin
+ * envolver la foto en un segundo enlace ni repetir el nombre para mostrar uno
+ * en cada punto de quiebre: tabular las siete filas anuncia siete nombres de
+ * producto y no catorce.
+ *
+ * **La alternancia es solo de escritorio.** `md:order-2` invierte las impares
+ * de 768 para arriba; en teléfono todo se apila en el mismo orden —foto,
+ * después nombre— porque invertir en una columna no alterna nada: pondría el
+ * nombre arriba de su foto en la mitad de las filas, que es justo lo que este
+ * sitio no hace nunca.
+ *
+ * **La portada siempre 4:5** (decisión 14), y sin nada de texto encima.
+ */
+function Fila({
+  producto,
+  posicion,
+}: {
+  producto: ProductoConMedios;
+  /** Empieza en 0. Decide el lado de la foto y cuál se carga con prioridad. */
+  posicion: number;
+}) {
+  const portada = portadaDe(producto.fotos);
+  const invertida = posicion % 2 === 1;
+
+  return (
+    <li className="border-linea border-b py-10 md:py-16">
+      <article className="group relative md:grid md:grid-cols-2 md:items-center md:gap-12">
+        <div
+          className={`max-w-[26rem] ${invertida ? "md:order-2" : ""}`.trim()}
+        >
+          {portada ? (
+            <FotoImg
+              foto={portada}
+              alt={altAutomatico(producto.nombre, 1)}
+              proporcion="4/5"
+              sizes={SIZES_PORTADA}
+              // Solo la primera foto de la página se carga sin diferir.
+              prioridad={posicion === 0}
+            />
+          ) : (
+            // Sin portada no se dibuja una caja vacía con un ícono de imagen
+            // rota: queda el mismo bloque de superficie que ocupa una foto
+            // mientras carga, así la fila no se descuadra.
+            <div className="bg-superficie" style={{ aspectRatio: "4/5" }} />
+          )}
+        </div>
+
+        <div className="mt-6 md:mt-0">
+          <h2 className="text-titulo">
+            <Link
+              href={`/productos/${producto.slug}`}
+              className="underline-offset-4 group-hover:underline after:absolute after:inset-0"
+            >
+              {producto.nombre}
+            </Link>
+          </h2>
+
+          <p className="max-w-lectura text-texto-suave mt-4">
+            {producto.descripcion}
+          </p>
+
+          <Variantes producto={producto} />
+        </div>
+      </article>
+    </li>
+  );
+}
+
+/**
+ * Las variantes, como chips.
+ *
+ * Son la diferencia que decide la compra —decisión 40— y hasta ahora el
+ * catálogo no las nombraba: había que entrar a cada producto para enterarse de
+ * que existían.
+ *
+ * `Chip` es filete de 1 px y sin relleno, que es el único recurso gráfico del
+ * sistema y el que rima con las lamas y los pliegues de las fotos. Sin tono: un
+ * dato al lado de un título no tiene ningún estado que marcar.
+ *
+ * **Van fuera del enlace**, y eso importa acá aunque el enlace cubra la fila:
+ * lo que decide el nombre accesible es el contenido del `<a>`, y sumarle siete
+ * palabras sueltas lo convertiría en una frase que un lector de pantalla lee
+ * entera cada vez.
+ */
+function Variantes({ producto }: { producto: ProductoConMedios }) {
+  if (producto.variantes.length === 0) return null;
+
+  return (
+    <ul className="mt-4 flex flex-wrap gap-2">
+      {producto.variantes.map((variante) => (
+        <li key={variante.nombre}>
+          <Chip>{variante.nombre}</Chip>
+        </li>
+      ))}
+    </ul>
   );
 }

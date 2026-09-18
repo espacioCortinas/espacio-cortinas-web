@@ -1859,7 +1859,7 @@ de que se olviden.
 no sirve de clave**. Se agregó `clave?: string`.
 
 **Se evaluó derivarla del nombre con `aSlug()` y se descartó.** Funciona con los
-cuatro nombres de hoy —`aSlug("Riel motorizado")` da `riel-motorizado`, que es
+seis claves de hoy —`aSlug("Riel motorizado")` da `riel-motorizado`, que es
 exactamente el nombre del archivo— y esa coincidencia es justamente la trampa:
 el día que alguien escriba «Screen (filtro UV)» o corrija una mayúscula, la
 clave cambia, las fotos dejan de encontrarse y **la página se dibuja igual, sin
@@ -2011,6 +2011,159 @@ que se publica. `npm run fotos:revisar` pasa a cubrir también `public/videos`.
 
 Verificado con dos videos sintéticos, uno con cada caja: los dos se detectan, se
 imprime la coordenada y el script devuelve 1.
+
+---
+
+### 49. El catálogo es una fila por producto, con el lado de la foto alternado
+
+**Fecha:** septiembre de 2026, Fase 4.4.
+
+**Cómo se eligió.** Con el mismo mecanismo que usó la 4.1 para la dirección
+visual: las alternativas renderizadas con el material real, una al lado de la
+otra en `app/muestra-productos/`, y se eligió mirando. El andamio no inventaba
+ningún token ni ninguna familia —solo cambiaba la composición— y se borró al
+decidir, como hizo `/muestra` en su momento (decisión 41).
+
+Se eligió **C, «Alternada»**: una columna, un producto por fila, la foto y el
+texto al lado, y el lado va cambiando. Las otras dos fueron A, «Índice» —una
+lista con miniatura de 96 px— y B, «Dos pesos» —la grilla con módulos de uno y
+dos anchos según cuánto material tenga cada producto—.
+
+#### Los tres problemas que tenía la grilla, y que C resuelve
+
+**1. El huérfano.** Siete productos en tres columnas dan 3 + 3 + 1, y entre 640
+y 1023 dan 2 + 2 + 2 + 1. Siete no se reparte parejo en ninguna grilla, y siete
+es el número del catálogo. Una fila por producto no deja huérfano en ningún
+ancho.
+
+**2. El módulo único.** La decisión 48 estableció que el tamaño del módulo sale
+del material y no de la posición, y se había aplicado solo a
+`components/galeria.tsx`. El catálogo forzaba las siete portadas al mismo 4:5 y
+al mismo ancho. La caja de foto pasa de 325 a 416 px, que en un archivo sacado
+con celular es la diferencia entre ver el cabezal y adivinarlo.
+
+**3. Las variantes invisibles.** Hay nueve en el catálogo —Roller tres,
+Cortinas de tela cuatro, Toldos dos— y la grilla no nombraba ninguna, cuando la
+decisión 40 dice que la variante es lo que decide la compra. Ahora van como
+chips. Esa mejora entraba gane la que gane: las tres alternativas las mostraban.
+
+**Corrección de un número que venía mal.** La 4.4 había escrito «once variantes»
+en `contenido/tipos.ts`, en `contenido/index.ts`, en la página de producto y en
+`docs/modelo-de-datos.md`, y el andamio lo repitió. Son **nueve**: cuatro con
+fotos, dos con video y tres sin nada —y no cinco sin nada, como también decía—.
+Corregido en los cinco lugares. De paso queda visible algo que la decisión 48 no
+había anotado: hay **tres variantes motorizadas** —`roller/Motorizado`,
+`cortinas-tela/Riel motorizado` y `toldos/Motorizado`— y solo dos videos, uno de
+los cuales además no muestra el producto que dice. Toldos motorizado no tiene
+video ninguno.
+
+#### La objeción asumida: la página es mucho más larga
+
+Se aceptó porque es un catálogo de siete elementos y no de setenta, y porque la
+foto grande es lo que este negocio tiene para mostrar.
+
+**El número real es peor que el estimado al elegir.** El andamio calculaba «de
+unos 1.300 px a unos 3.600». Medido sobre la página terminada:
+
+| Ancho   | Alto de página |
+| ------- | -------------: |
+| 320 px  |       6.571 px |
+| 375 px  |       6.674 px |
+| 768 px  |       4.862 px |
+| 1024 px |       5.859 px |
+| 1440 px |       5.870 px |
+
+O sea **unos 5.900 px en escritorio y no 3.600**: el séptimo producto queda a
+seis pantallas del primero, no a cuatro. La diferencia son las descripciones,
+que el cálculo del andamio no tenía porque la grilla no las llevaba, más los
+chips. **La decisión no se reabre por esto** —el orden de magnitud es el mismo y
+las razones para elegir C no cambian— pero queda escrito con el número medido,
+porque si algún día alguien quiere volver sobre esto tiene que hacerlo con el
+dato correcto. Lo que lo destrabaría es acortar las descripciones, y eso es de
+la empresa.
+
+Curiosamente el alto baja a 768 px: ahí entran las dos columnas pero la columna
+de texto todavía es angosta, así que la foto y el párrafo se equilibran. Los
+extremos son el teléfono, donde todo se apila, y el escritorio, donde la foto
+mide 416 px de alto útil y el texto no la llena.
+
+#### Lo que hubo que decidir al migrar, que el andamio no resolvía
+
+**El nivel de encabezado.** En el andamio los nombres eran `h3` porque cada
+propuesta colgaba de un `h2`. En `/productos` la lista cuelga del `<h1>`, así que
+son `h2`. Verificado: la página tiene un `h1` y siete `h2` de producto, sin
+saltos.
+
+**Un solo encabezado y un solo elemento enfocable.** El andamio dibujaba el
+nombre dos veces —uno dentro del enlace con `md:hidden` y otro afuera con
+`hidden md:block`— para que en teléfono la zona táctil fuera la foto entera. Era
+un apaño del andamio: dos encabezados con el mismo texto en el DOM, y tabular
+las siete filas habría anunciado catorce nombres de producto.
+
+Se resolvió con un **enlace estirado**: el `<article>` es `relative` y el enlace
+del título lleva `after:absolute after:inset-0`. Queda un nombre accesible, un
+elemento enfocable por fila, y toda la fila sigue siendo clickeable. La foto ya
+no va envuelta en un enlace. Verificado golpeando cinco puntos de cada fila con
+`elementFromPoint`: los cinco responden el enlace del producto.
+
+Lo que cuesta, y es el costo conocido de este patrón: el texto de la fila no se
+puede seleccionar, porque la capa del enlace se lo come. En un listado cuyo
+texto completo está a un clic de distancia, es aceptable.
+
+**La descripción vuelve al listado, duplicado incluido.** La grilla anterior la
+había sacado por tres razones; dos se caen con C, porque al lado de la foto hay
+ancho de lectura de verdad y el párrafo entra entero. **La tercera sigue en pie
+y ahora se ve:** `venecianas-madera` y `venecianas-pvc` tienen la misma
+descripción palabra por palabra y en el arreglo están una al lado de la otra, así
+que quedan en filas consecutivas con el párrafo a la vista.
+
+**Se publica igual.** Se evaluaron las tres salidas:
+
+- _Recortar con `recortar()`_ — **no arregla nada.** Los dos textos miden 120
+  caracteres, o sea que cualquier tope razonable los devuelve enteros e
+  idénticos. Se descartó por aritmética, no por criterio.
+- _No mostrar la descripción hasta que el texto esté diferenciado_ — le saca a
+  cinco productos su mejor texto para tapar un problema de dos, y deja a C sin
+  una de las dos cosas que la hacían mejor que la grilla.
+- _Publicarla_ — lo elegido. El duplicado es un problema de contenido que
+  corrige la empresa, y la grilla anterior ya lo estaba tapando: lleva así desde
+  que se cargó el catálogo y sigue sin corregirse. Que el sitio lo muestre es lo
+  que hace que se corrija.
+
+#### `components/tarjeta-producto.tsx` se queda, y pierde una prop
+
+Lo sigue usando **Inicio, y solo Inicio**, que es una grilla de cuatro productos
+como anticipo y para eso la tarjeta es exactamente lo correcto. Su comentario
+decía que `/productos` lo reusaba y que «no hay una segunda tarjeta»: las dos
+cosas dejaron de ser ciertas y quedaron corregidas.
+
+**Se sacó la prop `nivel`**, que había durado una decisión. Se agregó en la 48
+únicamente porque `/productos` colgaba la grilla de un `<h1>` y necesitaba `h2`;
+con un solo consumidor que usa el predeterminado, es una opción que no elige
+nadie. El `h3` vuelve a estar fijo, con el porqué escrito al lado.
+
+#### Una corrección al `sizes` del andamio
+
+El andamio declaraba `(min-width: 768px) 416px, calc(100vw - 2.5rem)`. La
+primera mitad es correcta de unos 976 px para arriba; **la segunda está mal en
+la franja de 456 a 767 px**, donde `max-w-[26rem]` ya topeó la caja en 416 y el
+`sizes` sigue declarando el ancho de la columna entera.
+
+Medido a 700 px de viewport con densidad 2: la caja mide 416, o sea que hacen
+falta 832 px de archivo y corresponde `960.webp`. Con el `sizes` del andamio se
+declaran 660 px, que a densidad 2 piden 1.320 y caen en `1600.webp` — unos
+230 kB de más por foto, por siete fotos, justo en tablets y teléfonos grandes.
+
+Se publicó con el tope en los dos tramos:
+
+```
+(min-width: 768px) min(calc((100vw - 9rem) / 2), 26rem),
+min(calc(100vw - 2.5rem), 26rem)
+```
+
+Verificado: a 700 px el navegador elige `960.webp`. Es la misma regla que ya
+vale en todo el proyecto —«`sizes` y el ancho real de la caja son el mismo dato
+escrito dos veces»— y es la que el propio enunciado del cambio pedía respetar.
 
 ---
 

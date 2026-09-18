@@ -8,6 +8,13 @@ import { altAutomatico } from "@/lib/texto";
 /**
  * Un producto dentro de una grilla: la portada, y el nombre debajo.
  *
+ * **Lo usa Inicio, y solo Inicio.** Hasta la decisión 49 también lo usaba
+ * `/productos`, y el comentario decía que no había una segunda tarjeta; el
+ * catálogo pasó a una fila por producto con la foto al costado, que no es una
+ * tarjeta ni entra en una grilla, así que dejó de reusarlo. Acá sigue siendo lo
+ * correcto: Inicio muestra cuatro productos como anticipo, y para eso una
+ * grilla de cuatro portadas parejas es exactamente lo que hace falta.
+ *
  * **Es el único elemento visual que las cuatro referencias profesionales tienen
  * en común**, y el único que este archivo fotográfico puede sostener bien: las
  * siete portadas son 4:5, verticales y parejas, así que una grilla de portadas
@@ -31,7 +38,6 @@ import { altAutomatico } from "@/lib/texto";
 export function TarjetaProducto({
   producto,
   sizes,
-  nivel = 3,
   prioridad = false,
 }: {
   producto: ConFotos<Producto>;
@@ -42,23 +48,9 @@ export function TarjetaProducto({
    * menos en el escritorio.
    */
   sizes: string;
-  /**
-   * Qué nivel de encabezado le toca al nombre, según de qué cuelgue la grilla.
-   *
-   * **No es cosmético: es la jerarquía de la página**, que `docs/diseno.md`
-   * pide que sea consistente. En Inicio la grilla cuelga del `<h2>` del sector
-   * «Qué hacemos», así que el nombre es un `h3` —el predeterminado, o sea que
-   * Inicio no cambia—. En `/productos` la grilla cuelga directo del `<h1>`, y
-   * ahí un `h3` se saltearía un nivel.
-   *
-   * El aspecto es el mismo en los dos casos: la escala tipográfica la pone la
-   * clase, no la etiqueta.
-   */
-  nivel?: 2 | 3;
   prioridad?: boolean;
 }) {
   const portada = portadaDe(producto.fotos);
-  const Titulo = nivel === 2 ? "h2" : "h3";
 
   return (
     <article>
@@ -80,9 +72,15 @@ export function TarjetaProducto({
           // mientras carga, así la grilla no se descuadra.
           <div className="bg-superficie" style={{ aspectRatio: "4/5" }} />
         )}
-        <Titulo className="mt-3 text-subtitulo underline-offset-4 group-hover:underline">
+        {/*
+          `h3` fijo, y no una prop: la grilla cuelga del `<h2>` del sector «Qué
+          hacemos» de Inicio, que es su único lugar. La prop existió entre las
+          decisiones 48 y 49, mientras `/productos` también lo usaba colgando de
+          un `<h1>`; con un solo consumidor es una opción que nadie elige.
+        */}
+        <h3 className="mt-3 text-subtitulo underline-offset-4 group-hover:underline">
           {producto.nombre}
-        </Titulo>
+        </h3>
       </Link>
     </article>
   );

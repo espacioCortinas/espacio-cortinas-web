@@ -71,7 +71,7 @@ sin fotos y sin error. Es la misma regla que ya vale para el slug de un
 producto — decisiones 10 y 48.
 
 Es **opcional**: una variante que no tiene nada que mostrar no la lleva. De las
-once del catálogo, cuatro tienen fotos, dos tienen video y cinco no tienen
+nueve del catálogo, cuatro tienen fotos, dos tienen video y tres no tienen
 nada.
 
 ## Proyecto

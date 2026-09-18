@@ -34,7 +34,7 @@ function unir<T extends { slug: string }>(
  * nombre: ver `Variante.clave` en `tipos.ts`.
  *
  * **Una variante sin clave, o con una clave que no encontró nada, se devuelve
- * igual, vacía.** Cinco de las once variantes del catálogo no tienen nada que
+ * igual, vacía.** Tres de las nueve variantes del catálogo no tienen nada que
  * mostrar y siguen siendo opciones que el visitante tiene que poder leer. Lo
  * que avisa cuando una clave se quedó sin carpeta es
  * `scripts/preparar-fotos.mjs`, que es el único que puede mirar el disco.

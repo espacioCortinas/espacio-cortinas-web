@@ -141,7 +141,7 @@ export type Variante = {
    * La clave con la que esta variante encuentra sus fotos y su video.
    *
    * **Se escribe a mano y no se deriva del nombre** — decisión 48. Derivarla
-   * con `aSlug(nombre)` funciona con los cuatro nombres de hoy y se rompe en
+   * con `aSlug(nombre)` funciona con las seis claves de hoy y se rompe en
    * silencio el día que alguien corrija una mayúscula o agregue un paréntesis:
    * la clave cambiaría, las fotos dejarían de encontrarse y la página se
    * dibujaría igual, sin fotos y sin error. Es la misma regla que ya vale para
@@ -192,8 +192,8 @@ export type ConFotos<T> = T & { fotos: Foto[] };
  * Una variante con sus medios ya resueltos.
  *
  * Los dos campos pueden venir vacíos y eso es lo normal, no un caso de borde:
- * de las once variantes del catálogo, cuatro tienen fotos, dos tienen video y
- * cinco no tienen nada. Una variante sin medios sigue siendo una opción que el
+ * de las nueve variantes del catálogo, cuatro tienen fotos, dos tienen video y
+ * tres no tienen nada. Una variante sin medios sigue siendo una opción que el
  * visitante tiene que poder leer, así que se dibuja igual — con su nombre y,
  * si la tiene, su descripción.
  */
