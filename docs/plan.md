@@ -295,7 +295,30 @@ empresa no autorizó — decisión 45.
 
 **4.3 Proyectos.** `/proyectos` y `/proyectos/[slug]`, con galería.
 
-**4.4 Productos.** `/productos` y `/productos/[slug]`, con variantes.
+**4.4 Productos — HECHA.** `/productos` es una grilla de portadas con su
+nombre, que reusa `components/tarjeta-producto.tsx` sin escribir una segunda
+tarjeta. `/productos/[slug]` se compuso en cuatro sectores —apertura, variantes,
+más fotos, cierre—, con las variantes **antes** que el resto de la galería
+porque es lo que decide la compra.
+
+Lo grande de la fase fueron **las ocho fotos de variante**, que estaban en el
+disco y que el pipeline no veía. Se resolvieron las tres capas: el script baja
+un nivel y cruza lo que encuentra contra `contenido/productos.ts`, `Variante`
+gana una `clave` escrita a mano, y la galería las muestra en la posición de su
+variante. Y **los dos videos**, con su cuadro de cartel extraído por el script,
+en bucle, mudos, sin saltar a pantalla completa y sin reproducirse con
+`prefers-reduced-motion`.
+
+De la dirección «Regla» se tomó la idea que quedaba: **el tamaño del módulo de
+cada foto sale de la foto y no de su posición**, pero leído del manifiesto y no
+de la tabla de calidad de `docs/diseno.md`. Decisión 48, que también anota dos
+hallazgos de contenido sobre los videos y que el control de metadatos daba por
+buena cualquier cosa que no supiera leer.
+
+**Queda pendiente de la 4.4, y lo resuelve la empresa:** `venecianas-madera` y
+`venecianas-pvc` tienen la misma descripción palabra por palabra y en el listado
+quedan una al lado de la otra; el video del roller motorizado no muestra un
+roller; y el de cortinas de tela es vertical dentro de una caja 16:9.
 
 **4.5 Inicio — COMPUESTA, fuera de orden.** Se adelantó a pedido: la página
 se compuso antes que `/proyectos` (4.3) y `/productos` (4.4), porque el armazón

@@ -54,6 +54,30 @@ fotos-originales/
 Se aceptan `.jpg`, `.png`, `.webp`, `.tif` y **`.heic`** — no hace falta
 convertir las del iPhone.
 
+### Si las fotos son de una variante
+
+Una variante —«Screen», «Barral», «Riel motorizado»— puede tener fotos propias,
+y van **un nivel más adentro**, en una carpeta con el nombre de su clave. El
+video de una variante motorizada va al lado, con el mismo nombre:
+
+```
+fotos-originales/productos/roller/
+├── 1.jpg  2.jpg  3.jpg     la galería del producto
+├── screen/
+│   ├── 1.jpg
+│   └── 2.jpg               las fotos de la variante «Screen»
+├── blackout/
+│   └── …
+└── motorizado.mp4          el video de la variante «Motorizado»
+```
+
+**El nombre de la carpeta tiene que coincidir con la `clave` de la variante** en
+`contenido/productos.ts`. Si no coincide, el script lo avisa por pantalla y las
+fotos no se ven en ningún lado — no se rompe nada, simplemente no aparecen.
+
+Acá **ninguna es portada**, así que no hace falta que la primera sea vertical y
+ninguna se recorta.
+
 ---
 
 ## 2. Prepararlas
@@ -69,6 +93,15 @@ Eso hace, para cada foto:
 - recorta la portada a vertical 4:5 si estaba apaisada, avisando
 - genera un archivo por cada medida, en WebP
 - reescribe `contenido/fotos.ts` con los datos de cada foto
+
+Y para cada video:
+
+- lo mide —ancho, alto y duración— y le saca el primer cuadro como cartel
+- comprueba que no haya quedado con pista de audio
+- reescribe `contenido/videos.ts`
+- **si el video ya estaba publicado, no lo vuelve a convertir** y lo dice. Es a
+  propósito: los archivos publicados viven en git y volver a escribirlos suma su
+  peso otra vez a la historia del repositorio
 
 Sale algo así:
 
@@ -89,9 +122,14 @@ importar — más abajo está qué significa cada uno.
 npm run fotos:revisar
 ```
 
-**Este paso no es opcional.** Es el que confirma que ninguna foto publicada
-lleva la dirección de la casa de un cliente. Recorre todo `public/fotos/` y
-devuelve error si encuentra algo.
+**Este paso no es opcional.** Es el que confirma que ningún archivo publicado
+lleva la dirección de la casa de un cliente. Recorre `public/fotos/` **y
+`public/videos/`** y devuelve error si encuentra algo — un video de celular trae
+las coordenadas igual que una foto.
+
+Si aparece un archivo que el control no sabe leer, **también da error**. No es
+un falso positivo que haya que ignorar: todo lo que hay en esas dos carpetas es
+material que se publica, y lo que no se puede comprobar no se da por bueno.
 
 Lo que tiene que decir de cada archivo:
 

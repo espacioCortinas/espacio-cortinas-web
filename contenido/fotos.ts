@@ -91,6 +91,38 @@ export const fotos: Record<string, Foto[]> = {
       alto: 1920,
     },
   ],
+  "productos/cortinas-tela/barral": [
+    {
+      carpeta: "productos/cortinas-tela/barral/1",
+      medidas: [480, 960, 1600, 2338],
+      formato: "webp",
+      ancho: 2338,
+      alto: 2922,
+    },
+    {
+      carpeta: "productos/cortinas-tela/barral/2",
+      medidas: [480, 960, 1028],
+      formato: "webp",
+      ancho: 1028,
+      alto: 822,
+    },
+  ],
+  "productos/cortinas-tela/riel": [
+    {
+      carpeta: "productos/cortinas-tela/riel/1",
+      medidas: [480, 960, 1600, 2220],
+      formato: "webp",
+      ancho: 2220,
+      alto: 2776,
+    },
+    {
+      carpeta: "productos/cortinas-tela/riel/2",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 2047,
+    },
+  ],
   "productos/roller": [
     {
       carpeta: "productos/roller/1",
@@ -108,6 +140,38 @@ export const fotos: Record<string, Foto[]> = {
     },
     {
       carpeta: "productos/roller/3",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3413,
+    },
+  ],
+  "productos/roller/blackout": [
+    {
+      carpeta: "productos/roller/blackout/1",
+      medidas: [480, 960, 1600, 2524],
+      formato: "webp",
+      ancho: 2524,
+      alto: 3154,
+    },
+    {
+      carpeta: "productos/roller/blackout/2",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 2048,
+    },
+  ],
+  "productos/roller/screen": [
+    {
+      carpeta: "productos/roller/screen/1",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3200,
+    },
+    {
+      carpeta: "productos/roller/screen/2",
       medidas: [480, 960, 1600, 2560],
       formato: "webp",
       ancho: 2560,

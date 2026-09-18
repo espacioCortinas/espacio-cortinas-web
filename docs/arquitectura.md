@@ -85,14 +85,18 @@ contenido/
 ├── productos.ts                 se edita a mano
 ├── proyectos.ts                 se edita a mano
 ├── fotos.ts                     GENERADO por scripts/preparar-fotos.mjs
+├── videos.ts                    GENERADO por scripts/preparar-fotos.mjs
 ├── marca.ts                     GENERADO por scripts/preparar-marca.mjs
 ├── tipos.ts
-└── index.ts                     une contenido y fotos; es lo que leen las páginas
+└── index.ts                     une contenido y medios; es lo que leen las páginas
 components/
 ├── foto.tsx                     el <img> con srcset, proporción y recorte
+├── galeria.tsx                  la galería de dos módulos, apaisada y vertical
+├── video-variante.tsx           el video en bucle. "use client" (uno de dos)
+├── tarjeta-producto.tsx         la portada y el nombre; el elemento de grilla
 ├── logo.tsx                     el logo del encabezado
 ├── encabezado.tsx               logo y navegación
-├── navegacion.tsx               los cuatro enlaces. ÚNICO "use client" público
+├── navegacion.tsx               los cuatro enlaces. "use client" (uno de dos)
 ├── pie.tsx
 ├── whatsapp.tsx                 el enlace, con el mensaje según la página
 ├── datos-estructurados.tsx      JSON-LD del negocio local
@@ -101,7 +105,8 @@ lib/
 ├── entorno.ts                   variables públicas
 ├── entorno-servidor.ts          variables secretas — SOLO servidor
 ├── entorno-validacion.ts        qué es obligatorio y desde qué fase
-├── fotos.ts                     rutas y srcset. Lo ÚNICO que arma rutas de fotos
+├── fotos.ts                     rutas, srcset y el tope de ancho de cada medio.
+│                                Lo ÚNICO que arma rutas de fotos y de videos
 ├── metadata.ts                  title, description, canonical y Open Graph
 ├── whatsapp.ts                  el mensaje contextual y el enlace
 ├── texto.ts                     slugs y textos derivados
@@ -112,6 +117,7 @@ scripts/
 ├── preparar-marca.mjs           el logo sin fondo y la imagen de Open Graph
 └── revisar-metadatos.mjs        comprueba que ninguna publicada conserve GPS
 public/fotos/                    las imágenes generadas
+public/videos/                   los videos publicados y su cuadro de cartel
 public/marca/                    logo.png y og.jpg, GENERADOS
 fotos-originales/                los originales. NO se versiona
 docs/
@@ -224,18 +230,38 @@ al servir.
 
 ```
 1. Los originales van en fotos-originales/<entidad>/<slug>/, numerados.
-   El orden alfabético es el de la galería y el primero es la portada
+   El orden alfabético es el de la galería y el primero es la portada.
+   Un nivel más adentro, una carpeta por variante; y su video al lado,
+   con el mismo nombre que la carpeta
         ↓
 2. npm run fotos
    sharp: aplica la orientación del EXIF, recorta la portada a 4:5 si hace
    falta, genera un WebP por cada medida y BORRA TODOS LOS METADATOS
+   ffprobe/ffmpeg: mide cada video y le saca el primer cuadro de cartel
         ↓
-3. Escribe public/fotos/ y el manifiesto contenido/fotos.ts
+3. Escribe public/fotos/, public/videos/ y los manifiestos
+   contenido/fotos.ts y contenido/videos.ts
         ↓
 4. npm run fotos:revisar  — comprueba que ninguna conserve GPS
         ↓
 5. git push. El sitio se reconstruye con las fotos adentro
 ```
+
+**Las variantes entran un nivel más abajo.** La carpeta de una variante se llama
+como su `clave` en `contenido/productos.ts`, y su clave en el manifiesto cuelga
+de la del producto: `productos/roller/screen`. El script importa
+`contenido/productos.ts` y **avisa en las dos direcciones** —una carpeta que
+ninguna variante reclama, una clave sin carpeta— porque las dos fallan calladas.
+Decisión 48.
+
+**Ninguna foto de variante es portada**, así que ninguna se recorta a 4:5: los
+listados usan siempre la portada del producto.
+
+**El video se mide, no se supone**, y si ya está publicado no se reconvierte:
+`public/videos/` está en git y reencodearlo duplicaría su peso en la historia.
+Los parámetros de la conversión, para lo que entre de ahora en adelante, están
+en `convertirVideo()`; `-map_metadata -1` es la línea que borra las coordenadas,
+que un video de celular trae igual que una foto.
 
 **Por qué acá y no en el navegador.** Hasta la Fase 3 esto lo hacía el navegador
 de quien subía, y no por gusto: el runtime de Workers no ejecuta módulos nativos
@@ -246,10 +272,16 @@ nadie. De paso se recuperó WebP para todas las fotos: la rama JPEG existía
 porque WebKit no sabe codificar WebP y el panel se usaba desde un iPhone.
 
 **Se borra el EXIF siempre, y por diseño.** `sharp` descarta los metadatos salvo
-que se le pidan con `.withMetadata()`, cosa que ese script no hace. Las fotos
-son de casas de clientes y traen las coordenadas del domicilio; **igual se
-verifica**, porque es lo que se rompe en silencio el día que alguien toca el
-pipeline. Ver `docs/seguridad.md`.
+que se le pidan con `.withMetadata()`, cosa que ese script no hace, y los videos
+se convierten con `-map_metadata -1`. Las fotos y los videos son de casas de
+clientes y traen las coordenadas del domicilio; **igual se verifica**, porque es
+lo que se rompe en silencio el día que alguien toca el pipeline. Ver
+`docs/seguridad.md`.
+
+`npm run fotos:revisar` lee JPEG, WebP, PNG y MP4 —las dos cajas de ubicación
+que existen, `©xyz` de QuickTime y `loci` de 3GPP— y **un formato que no sabe
+leer cuenta como fallo**. Hasta la Fase 4.4 lo daba por bueno, y así los dos
+videos pasaban sin que nadie los mirara (decisión 48).
 
 **Hay que aplicar la orientación antes de recomprimir.** Si no, las fotos
 sacadas con el teléfono girado aparecen rotadas — y después el EXIF ya no existe,

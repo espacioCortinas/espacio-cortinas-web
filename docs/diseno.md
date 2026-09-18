@@ -390,8 +390,32 @@ diseñado y no como ensamblado. Margen lateral 20 → 48.
 
 ### Movimiento en la galería
 
-El video es un ítem más de la galería, al ancho de la columna, en la posición de
-la variante que documenta.
+El video es un ítem más de la galería, en la posición de la variante que
+documenta — y **no al ancho de la columna**, que es lo que decía este documento
+hasta la Fase 4.4 y contradecía su propia aritmética cuatro secciones más
+arriba: los videos tienen 1280 px y a doble densidad eso es una caja de 640, no
+de 1024. Cae solo con la regla del módulo de abajo, sin ninguna excepción.
+
+### El tamaño del módulo sale de la foto, no de su posición
+
+Es lo que sobrevivió de la dirección «Regla» — decisión 48. Dos reglas, y las
+dos salen de `contenido/fotos.ts`, que lo escribe el script:
+
+1. **La orientación elige el módulo.** Apaisada al ancho de la columna
+   (1024 px); vertical, a media columna (500 px). Una vertical a 1024 de ancho
+   mide 1280 de alto y empuja la página fuera de la pantalla; una apaisada a
+   media columna se lee como una miniatura.
+2. **El tope de píxeles lo baja si no dan.** Nada se muestra más ancho que
+   `ancho / 2`. Hoy muerde en `toldos/3` (1600 px → 800), en
+   `cortinas-tela/barral/2` (1028 px → 514) y en los dos videos (1280 → 640).
+
+**El aire que queda al lado es la curaduría.** Que `toldos/3` no salga nunca del
+módulo chico deja de ser una limitación y pasa a ser una decisión editorial.
+
+**No reemplaza a la tabla de calidad de más arriba**, que califica por contenido
+y que ningún número deduce: `bandas-verticales/4` y `/5` están calificadas
+«apoyo» y salen igual en el módulo ancho, porque son apaisadas y tienen 2560 px.
+La respuesta a una foto floja sigue siendo sacarla.
 
 ---
 
@@ -426,17 +450,20 @@ fondo. Las tarjetas flotantes con sombra difusa son la otra marca reconocible.
 componente que se agrega es uno que hay que mantener coherente con todos los
 demás.
 
-| Componente        | Archivo                                           | Variantes                            |
-| ----------------- | ------------------------------------------------- | ------------------------------------ |
-| Botón             | `components/ui/boton.tsx`                         | principal, secundario, enlace — tres |
-| Chip              | `components/ui/chip.tsx`                          | una                                  |
-| Campo             | `components/ui/campo.tsx`                         | una, con dos controles               |
-| Aviso             | `components/ui/aviso.tsx`                         | error y nota                         |
-| Estado vacío      | `components/ui/vacio.tsx`                         | una                                  |
-| Columna de página | `components/ui/contenedor.tsx`                    | una                                  |
-| Foto              | `components/foto.tsx`                             | cinco proporciones, tres recortes    |
-| Logo              | `components/logo.tsx`                             | una                                  |
-| Encabezado y pie  | `components/encabezado.tsx`, `components/pie.tsx` | una                                  |
+| Componente          | Archivo                                           | Variantes                            |
+| ------------------- | ------------------------------------------------- | ------------------------------------ |
+| Botón               | `components/ui/boton.tsx`                         | principal, secundario, enlace — tres |
+| Chip                | `components/ui/chip.tsx`                          | una                                  |
+| Campo               | `components/ui/campo.tsx`                         | una, con dos controles               |
+| Aviso               | `components/ui/aviso.tsx`                         | error y nota                         |
+| Estado vacío        | `components/ui/vacio.tsx`                         | una                                  |
+| Columna de página   | `components/ui/contenedor.tsx`                    | una                                  |
+| Foto                | `components/foto.tsx`                             | cinco proporciones, tres recortes    |
+| Galería             | `components/galeria.tsx`                          | dos módulos, según la foto           |
+| Video de variante   | `components/video-variante.tsx`                   | una                                  |
+| Tarjeta de producto | `components/tarjeta-producto.tsx`                 | dos niveles de encabezado            |
+| Logo                | `components/logo.tsx`                             | una                                  |
+| Encabezado y pie    | `components/encabezado.tsx`, `components/pie.tsx` | una                                  |
 
 Botones: **uno principal sólido, uno secundario con línea, y enlaces de texto.
 Tres variantes, no siete.** El principal es negro, no amarillo — decisión 43.
@@ -494,9 +521,13 @@ cambio de foto. Nada que se dispare solo al hacer scroll.
 **Los dos videos** son 1280×720, once segundos, sin pista de audio. Se presentan
 como un ítem más de la galería, en la posición de la variante motorizada que
 documentan —que es lo único que una foto no puede mostrar, decisión 40—, con
-`muted`, `loop` y `playsinline`. Con `prefers-reduced-motion: reduce` no se
-reproducen: queda el cuadro fijo y un control para iniciarlo. Cablearlos es de la
-Fase 4.4, y necesita un cuadro de cartel (`poster`) extraído por el script.
+`muted`, `loop` y `playsinline`, sin controles y con `preload="none"`. Con
+`prefers-reduced-motion: reduce` no se reproducen: queda el cuadro fijo y un
+control para iniciarlo.
+
+**Acá el movimiento ES el contenido y no un adorno**, y es la única excepción a
+«escaso y con función» de arriba. Cableados en la Fase 4.4 — decisión 48, que
+además anota qué muestra cada archivo, porque no es lo que dice su nombre.
 
 Respetar `prefers-reduced-motion` en todo lo demás también.
 

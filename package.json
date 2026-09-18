@@ -16,7 +16,7 @@
     "typecheck": "tsc --noEmit",
     "fotos": "node scripts/preparar-fotos.mjs",
     "marca": "node scripts/preparar-marca.mjs",
-    "fotos:revisar": "node scripts/revisar-metadatos.mjs public/fotos"
+    "fotos:revisar": "node scripts/revisar-metadatos.mjs public/fotos public/videos"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.20.2",

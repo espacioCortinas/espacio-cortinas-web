@@ -31,6 +31,7 @@ import { altAutomatico } from "@/lib/texto";
 export function TarjetaProducto({
   producto,
   sizes,
+  nivel = 3,
   prioridad = false,
 }: {
   producto: ConFotos<Producto>;
@@ -41,9 +42,23 @@ export function TarjetaProducto({
    * menos en el escritorio.
    */
   sizes: string;
+  /**
+   * Qué nivel de encabezado le toca al nombre, según de qué cuelgue la grilla.
+   *
+   * **No es cosmético: es la jerarquía de la página**, que `docs/diseno.md`
+   * pide que sea consistente. En Inicio la grilla cuelga del `<h2>` del sector
+   * «Qué hacemos», así que el nombre es un `h3` —el predeterminado, o sea que
+   * Inicio no cambia—. En `/productos` la grilla cuelga directo del `<h1>`, y
+   * ahí un `h3` se saltearía un nivel.
+   *
+   * El aspecto es el mismo en los dos casos: la escala tipográfica la pone la
+   * clase, no la etiqueta.
+   */
+  nivel?: 2 | 3;
   prioridad?: boolean;
 }) {
   const portada = portadaDe(producto.fotos);
+  const Titulo = nivel === 2 ? "h2" : "h3";
 
   return (
     <article>
@@ -65,9 +80,9 @@ export function TarjetaProducto({
           // mientras carga, así la grilla no se descuadra.
           <div className="bg-superficie" style={{ aspectRatio: "4/5" }} />
         )}
-        <h3 className="mt-3 text-subtitulo underline-offset-4 group-hover:underline">
+        <Titulo className="mt-3 text-subtitulo underline-offset-4 group-hover:underline">
           {producto.nombre}
-        </h3>
+        </Titulo>
       </Link>
     </article>
   );

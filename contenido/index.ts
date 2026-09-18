@@ -1,7 +1,8 @@
 import { fotos } from "./fotos";
 import { productos } from "./productos";
 import { proyectos } from "./proyectos";
-import type { ConFotos, Producto, Proyecto } from "./tipos";
+import { videos } from "./videos";
+import type { ConFotos, Producto, ProductoConMedios, Proyecto } from "./tipos";
 
 /**
  * El contenido del sitio, con las fotos ya unidas.
@@ -24,9 +25,40 @@ function unir<T extends { slug: string }>(
   }));
 }
 
+/**
+ * Las variantes de un producto, con sus fotos y su video ya resueltos.
+ *
+ * La clave de una variante cuelga de la del producto —`productos/roller/screen`
+ * en los dos manifiestos— así que la unión es la misma que la de arriba con un
+ * nivel más. La escribe a mano `contenido/productos.ts` y no se deriva del
+ * nombre: ver `Variante.clave` en `tipos.ts`.
+ *
+ * **Una variante sin clave, o con una clave que no encontró nada, se devuelve
+ * igual, vacía.** Cinco de las once variantes del catálogo no tienen nada que
+ * mostrar y siguen siendo opciones que el visitante tiene que poder leer. Lo
+ * que avisa cuando una clave se quedó sin carpeta es
+ * `scripts/preparar-fotos.mjs`, que es el único que puede mirar el disco.
+ */
+function unirVariantes(producto: Producto): ProductoConMedios["variantes"] {
+  return producto.variantes.map((variante) => {
+    const clave = variante.clave
+      ? `productos/${producto.slug}/${variante.clave}`
+      : null;
+
+    return {
+      ...variante,
+      fotos: (clave && fotos[clave]) || [],
+      video: (clave && videos[clave]) || null,
+    };
+  });
+}
+
 /** Todo, incluido lo que no está publicado. */
-export const todosLosProductos = (): ConFotos<Producto>[] =>
-  unir("productos", productos);
+export const todosLosProductos = (): ProductoConMedios[] =>
+  unir("productos", productos).map((producto) => ({
+    ...producto,
+    variantes: unirVariantes(producto),
+  }));
 
 export const todosLosProyectos = (): ConFotos<Proyecto>[] =>
   unir("proyectos", proyectos);
@@ -37,7 +69,7 @@ export const todosLosProyectos = (): ConFotos<Proyecto>[] =>
  * `activo` manda: algo destacado pero sin publicar no aparece en ningún lado
  * — decisión 8.
  */
-export const productosPublicados = (): ConFotos<Producto>[] =>
+export const productosPublicados = (): ProductoConMedios[] =>
   todosLosProductos().filter((p) => p.activo);
 
 export const proyectosPublicados = (): ConFotos<Proyecto>[] =>
@@ -51,7 +83,7 @@ export const proyectosPublicados = (): ConFotos<Proyecto>[] =>
  * portada moviendo un bloque de lugar, sin desmarcar nada —
  * docs/modelo-de-datos.md.
  */
-export const productosDestacados = (tope: number): ConFotos<Producto>[] =>
+export const productosDestacados = (tope: number): ProductoConMedios[] =>
   productosPublicados()
     .filter((p) => p.destacado)
     .slice(0, tope);

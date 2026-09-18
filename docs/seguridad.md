@@ -56,9 +56,22 @@ que se rompe en silencio el día que alguien toca el pipeline:
 npm run fotos:revisar
 ```
 
-Recorre `public/fotos/` entero, dice qué metadatos tiene cada archivo, imprime
-las coordenadas si las hay y **devuelve 1 si alguna imagen las conserva**. Se
-corre sobre todas las medidas, no solo sobre la más grande.
+Recorre `public/fotos/` **y `public/videos/`** enteros, dice qué metadatos tiene
+cada archivo, imprime las coordenadas si las hay y **devuelve 1 si alguno las
+conserva**. Se corre sobre todas las medidas, no solo sobre la más grande.
+
+**Los videos también.** Un video de celular guarda las coordenadas igual que una
+foto, en una de dos cajas del contenedor MP4: `©xyz`, la de QuickTime que pone
+un iPhone, y `loci`, la de 3GPP que ponen Android y ffmpeg. El script lee las
+dos. Hasta la Fase 4.4 no sabía leer MP4 y **daba por bueno cualquier formato
+que no reconociera**, así que los dos videos del catálogo pasaban el control sin
+que nadie los mirara. Ahora un formato ilegible cuenta como fallo: todo lo que
+hay en esas dos carpetas es material que se publica, y lo que no se puede
+comprobar no se aprueba — decisión 48.
+
+Del lado del pipeline, lo que borra los metadatos de un video es
+`-map_metadata -1`, y lo que le saca la pista de audio es `-an`. El script
+comprueba además que ningún video publicado conserve pista.
 
 Lo único que sobrevive a propósito es el **perfil de color ICC** (unos 480
 bytes). Describe el espacio de color y no dice nada del lugar, del equipo ni de
@@ -140,7 +153,8 @@ este código.
 
 ## Checklist antes de publicar
 
-- [ ] `npm run fotos:revisar` en verde: ninguna foto publicada conserva GPS
+- [ ] `npm run fotos:revisar` en verde: ninguna foto ni ningún video publicado
+      conserva GPS
 - [ ] Ninguna foto muestra personas, documentos ni el número de la casa
 - [ ] `fotos-originales/` sigue en `.gitignore`
 - [ ] El repositorio sigue siendo privado, verificado sin autenticar

@@ -78,6 +78,52 @@ type Publicable = {
 };
 
 /**
+ * Un video corto, mudo y en bucle.
+ *
+ * **Existe porque hay una cosa que una foto no puede mostrar**, que es que la
+ * cortina se mueve sola — decisión 40. Por eso cuelga de una variante
+ * motorizada y no de un producto: es la variante lo que documenta.
+ *
+ * **Esto tampoco se carga a mano**, y por la misma razón que `Foto`: lo escribe
+ * `scripts/preparar-fotos.mjs` leyendo con `ffprobe` el archivo que se publica,
+ * no el original ni una cuenta.
+ */
+export type Video = {
+  /**
+   * Dentro de `public/videos/`, sin extensión: `"roller/motorizado"`. El video
+   * y su cuadro de cartel se llaman igual y solo cambian de extensión.
+   *
+   * **No lleva la entidad adelante**, a diferencia de `Foto.carpeta`: los
+   * videos son de variantes y las variantes son solo de productos. Si algún día
+   * un proyecto llevara video, esto gana un nivel.
+   */
+  archivo: string;
+
+  /** La extensión del video, sin el punto: `"mp4"`. */
+  formato: string;
+
+  /**
+   * La extensión del cuadro de cartel, sin el punto: `"webp"`.
+   *
+   * Se registra aparte y por la misma razón que `Foto.formato` (decisión 37):
+   * el sitio arma la ruta del `poster` leyendo este campo, no una constante.
+   */
+  formatoPoster: string;
+
+  /** Del archivo que se publica, no del original. Van al `<video>`. */
+  ancho: number;
+  alto: number;
+
+  /**
+   * Duración en segundos, redondeada. Se escribe al lado del video —«11
+   * segundos, sin sonido»— porque un video que arranca solo y no tiene
+   * controles no da ninguna otra forma de saber cuánto dura ni que no hay audio
+   * que encender.
+   */
+  duracion: number;
+};
+
+/**
  * Una opción del mismo producto: «Screen», «Motorizado», «Barral».
  *
  * **No son productos aparte** — decisión 40. Un roller screen y un roller
@@ -90,6 +136,29 @@ type Publicable = {
 export type Variante = {
   nombre: string;
   descripcion?: string;
+
+  /**
+   * La clave con la que esta variante encuentra sus fotos y su video.
+   *
+   * **Se escribe a mano y no se deriva del nombre** — decisión 48. Derivarla
+   * con `aSlug(nombre)` funciona con los cuatro nombres de hoy y se rompe en
+   * silencio el día que alguien corrija una mayúscula o agregue un paréntesis:
+   * la clave cambiaría, las fotos dejarían de encontrarse y la página se
+   * dibujaría igual, sin fotos y sin error. Es la misma regla que ya vale para
+   * el slug de un producto, que tampoco se regenera al cambiar el nombre
+   * (decisión 10).
+   *
+   * Es el nombre de la carpeta dentro de `fotos-originales/productos/<slug>/`
+   * y también el del archivo de video, así que
+   * `{ nombre: "Riel motorizado", clave: "riel-motorizado" }` busca en
+   * `fotos-originales/productos/cortinas-tela/riel-motorizado/` y en
+   * `fotos-originales/productos/cortinas-tela/riel-motorizado.mp4`.
+   *
+   * **Es opcional**: una variante que no tiene nada que mostrar no la lleva.
+   * `scripts/preparar-fotos.mjs` avisa en los dos sentidos —una clave sin
+   * carpeta, una carpeta sin clave— porque las dos fallan calladas.
+   */
+  clave?: string;
 };
 
 export type Producto = Publicable & {
@@ -118,3 +187,35 @@ export type Proyecto = Publicable & {
  * pantalla es peor que un texto generado razonable.
  */
 export type ConFotos<T> = T & { fotos: Foto[] };
+
+/**
+ * Una variante con sus medios ya resueltos.
+ *
+ * Los dos campos pueden venir vacíos y eso es lo normal, no un caso de borde:
+ * de las once variantes del catálogo, cuatro tienen fotos, dos tienen video y
+ * cinco no tienen nada. Una variante sin medios sigue siendo una opción que el
+ * visitante tiene que poder leer, así que se dibuja igual — con su nombre y,
+ * si la tiene, su descripción.
+ */
+export type VarianteConMedios = Variante & {
+  fotos: Foto[];
+  video: Video | null;
+};
+
+/**
+ * Un producto listo para la página de producto: con su galería y con sus
+ * variantes ya unidas a las fotos y los videos de cada una.
+ *
+ * Es lo que devuelve `contenido/index.ts`, y es asignable a
+ * `ConFotos<Producto>` — o sea que `components/tarjeta-producto.tsx`, que solo
+ * necesita el nombre y la portada, no se entera de nada de esto.
+ *
+ * **El `Omit` no es un adorno.** Sin él esto sería una intersección con dos
+ * `variantes` distintas —`Variante[] & VarianteConMedios[]`— y al llamar a
+ * `.map()` TypeScript elige una de las dos firmas: la de `Variante[]`, donde
+ * `fotos` y `video` no existen. Sacando el campo del lado izquierdo queda uno
+ * solo y gana el que tiene los medios.
+ */
+export type ProductoConMedios = ConFotos<Omit<Producto, "variantes">> & {
+  variantes: VarianteConMedios[];
+};

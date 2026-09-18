@@ -1845,6 +1845,175 @@ ningún lado del proyecto**. Es la misma regla que ya sigue
 
 ---
 
+### 48. Las variantes tienen fotos y video propios, y el tamaño de cada módulo sale de la foto
+
+**Fecha:** septiembre de 2026, Fase 4.4.
+
+Esta decisión resuelve tres cosas que aparecieron juntas al componer
+`/productos/[slug]`, más dos hallazgos de contenido que hay que escribir antes
+de que se olviden.
+
+#### 1. La variante se une a su carpeta por una clave escrita a mano
+
+`Variante` era `{ nombre, descripcion? }` — decisión 40 — y **el nombre visible
+no sirve de clave**. Se agregó `clave?: string`.
+
+**Se evaluó derivarla del nombre con `aSlug()` y se descartó.** Funciona con los
+cuatro nombres de hoy —`aSlug("Riel motorizado")` da `riel-motorizado`, que es
+exactamente el nombre del archivo— y esa coincidencia es justamente la trampa:
+el día que alguien escriba «Screen (filtro UV)» o corrija una mayúscula, la
+clave cambia, las fotos dejan de encontrarse y **la página se dibuja igual, sin
+fotos y sin ningún error**. Es el mismo razonamiento de la decisión 10, que
+prohíbe regenerar el slug de un producto al cambiarle el nombre, y de las 32 y
+37, que leen del manifiesto en vez de armar rutas con constantes del código.
+
+Como nada en el tipo puede comprobar que una clave apunte a una carpeta que
+existe, **lo comprueba el script**, que es el único que ve el disco.
+`scripts/preparar-fotos.mjs` importa `contenido/productos.ts` y avisa en las dos
+direcciones: una carpeta o un video que ninguna variante reclama, y una clave
+declarada que no encontró nada. Las dos fallan calladas.
+
+En el manifiesto la clave de una variante cuelga de la del producto:
+`productos/roller/screen`. No hace falta un mapa nuevo.
+
+#### 2. El tamaño del módulo sale de la foto, no de su posición
+
+La dirección «Regla» (decisión 43) dejó disponible una idea: que el tamaño del
+módulo de cada foto salga de la **tabla de calidad** de `docs/diseno.md` en vez
+del orden. Es la única forma estructural de curar un archivo desparejo.
+
+**Se toma el mecanismo y se descarta la tabla como fuente.** El mecanismo —el
+módulo es una propiedad de la foto— es correcto. La tabla no: es un juicio
+escrito a mano sobre 23 fotos concretas, y el archivo va camino a unas 300. Una
+lista de calificaciones indexada por ruta de foto es una segunda cosa que hay
+que mantener al día, que se queda vieja en la primera carga que alguien haga sin
+leer este documento, y que falla en silencio — que es exactamente el problema
+que las decisiones 32 y 37 resolvieron leyendo del manifiesto.
+
+**Las dos reglas salen de `contenido/fotos.ts`, que lo escribe el script a
+partir del archivo que efectivamente guardó:**
+
+1. **La orientación elige el módulo.** Apaisada al ancho de la columna
+   (1024 px), vertical a media columna (500 px). No es gusto: una vertical a
+   1024 de ancho mide 1280 de alto y empuja la página fuera de la pantalla, y
+   una apaisada a media columna mide 500 × 375 y se lee como una miniatura. El
+   archivo es mitad y mitad, así que esto produce dos anchos de verdad y no una
+   columna disfrazada.
+2. **`topeDeAncho()` lo baja si los píxeles no dan:** ninguna foto se muestra
+   más ancha que `ancho / 2`, con el 2 de `DENSIDAD_DE_REFERENCIA`, que es la
+   misma cuenta con la que está escrito `docs/diseno.md` («1280 px a doble
+   densidad es una caja de 640 px de CSS»).
+
+Medido en el navegador, a 1440 px de ancho:
+
+| Foto                     | Archivo | Módulo | Se muestra a |
+| ------------------------ | ------: | -----: | -----------: |
+| `cortinas-tela/3`        |    2560 |   1024 |         1024 |
+| `toldos/3`               |    1600 |   1024 |      **800** |
+| `cortinas-tela/barral/2` |    1028 |   1024 |      **514** |
+| los dos videos           |    1280 |   1024 |      **640** |
+
+**El aire que queda al lado es la curaduría.** Que `toldos/3` no salga nunca del
+módulo chico deja de ser una limitación y pasa a ser una decisión editorial, que
+es lo que «Regla» perseguía. Y `cortinas-tela/barral/2` —1028 × 822, la más
+chica del catálogo— cae en un módulo que a lo ancho la dejaría blanda, y el tope
+la salva sin que nadie tenga que acordarse.
+
+**Lo que esto NO hace, y hay que saberlo:** no reemplaza la curaduría. La tabla
+de `docs/diseno.md` califica por contenido —un auto rojo en el centro, una
+cartera sobre el escritorio— y eso ningún número lo deduce. Hay dos fotos
+calificadas «apoyo» que igual salen en el módulo ancho porque son apaisadas y
+tienen 2560 px: `bandas-verticales/4` y `/5`. **La respuesta a una foto floja es
+sacarla**, que es lo que `docs/diseno.md` ya dice —«la curaduría sigue siendo
+más importante que el diseño»— y es una decisión de la empresa, no de
+maquetación.
+
+#### 3. El video: qué hace el script y qué no
+
+El script **mide** cada video con `ffprobe` y le **extrae el primer cuadro** como
+cartel, que pasa por `sharp` con la misma calidad que las fotos. El manifiesto va
+en `contenido/videos.ts`, aparte de `fotos.ts` porque la forma es otra y porque
+quien busca un video tiene que encontrarlo en un archivo que se llame así.
+
+**No reconvierte un video ya publicado.** `public/videos/` está en git, así que
+reencodear los mismos once segundos con otros bytes suma su peso otra vez a la
+historia del repositorio, para siempre. Los dos que hay se convirtieron a mano en
+la Fase 4.2, con parámetros que nadie anotó, así que se los deja como están y
+solo se los mide; lo que entre de ahora en adelante sale de `convertirVideo()`,
+con los parámetros escritos (`-an`, `-map_metadata -1`, CRF 28, `+faststart`).
+
+**Es la misma regla que ya valía para las fotos y no estaba escrita en ningún
+documento**, solo en el mensaje del commit `7bbf0a4`: lo publicado es
+_append-only_ y los parámetros del pipeline están congelados. Se verificó que
+`sharp` es determinista —regenerar las 23 fotos con los mismos parámetros da
+archivos idénticos byte a byte, y `git status` no las marca— así que correr
+`npm run fotos` sigue siendo seguro. **Si alguien cambia `IMAGEN_CALIDAD` o
+`MEDIDAS_IMAGEN`, deja de serlo.**
+
+El cartel se toma del **primer** cuadro y no de uno del medio: es lo que se ve
+hasta que la reproducción empieza, y tomando el primero el cambio no se nota.
+
+#### 4. Dos hallazgos de contenido, que resuelve la empresa
+
+Al mirar los dos videos cuadro por cuadro aparecieron dos cosas que ninguna
+documentación contemplaba:
+
+- **`public/videos/roller/motorizado.mp4` no muestra un roller.** Muestra una
+  cortina de tela sobre riel motorizado cerrándose sobre una gasa, en un
+  comedor. Los dos videos muestran el mismo producto, así que hoy Roller no
+  tiene documentada su motorización —que es lo único que una foto no puede
+  mostrar, decisión 40— y Cortinas de tela la tiene dos veces.
+- **`public/videos/cortinas-tela/riel-motorizado.mp4` es un video vertical
+  metido en una caja 16:9.** `cropdetect` da 464 × 704 de contenido útil: el
+  62 % de cada cuadro es negro puro, y en este sitio no hay ninguna superficie
+  negra.
+
+**Se decidió dejar cada uno donde está**, a pedido de quien desarrolla, y
+anotarlo. Lo que destraba las dos cosas es filmar de nuevo: un video del roller
+motorizado, y el de cortinas de tela en apaisado.
+
+#### 5. Un segundo `"use client"` en el sitio público
+
+`components/video-variante.tsx`. `docs/arquitectura.md` decía que
+`components/navegacion.tsx` era el único; queda corregido.
+
+**No hay forma declarativa de no reproducir con `prefers-reduced-motion`:** el
+CSS puede parar una animación pero no un `<video autoplay>`, y el atributo no se
+puede poner desde el servidor porque el servidor no sabe qué prefiere quien
+mira. `docs/diseno.md` pide que ahí «queda el cuadro fijo y un control para
+iniciarlo», y eso solo se decide en el navegador.
+
+De paso resuelve dos cosas más: **el archivo no se pide hasta que el video está
+por entrar en pantalla** —`preload="none"` más un `IntersectionObserver`;
+verificado en el navegador: arriba de la página `readyState` es 0 y no hay
+ningún pedido del `.mp4`— y **si la reproducción automática está bloqueada
+aparece el control**, que es el caso real del modo de bajo consumo de iOS, donde
+`play()` se rechaza aunque el video esté mudo y en línea.
+
+El estado de «está en marcha» lo llevan los eventos `play` y `pause` del propio
+elemento, y no cada llamada que lo arranca o lo frena. Se escribió al revés
+primero y el error se vio en el navegador: al encender «menos movimiento» con la
+página abierta, el video seguía en bucle y el botón decía «Pausar» sobre un
+video que no se había frenado.
+
+#### 6. El control de metadatos lee MP4, y un formato desconocido reprueba
+
+`scripts/revisar-metadatos.mjs` sabía leer JPEG, WebP y PNG, y **cualquier otra
+cosa la daba por buena**. O sea que los dos videos pasaban el control sin que
+nadie los mirara, siendo que un video de celular trae las coordenadas del
+domicilio igual que una foto — el mismo riesgo de `docs/seguridad.md`.
+
+Ahora lee el árbol de cajas de un MP4 y busca las dos cajas de ubicación que
+existen: `©xyz`, la de QuickTime que pone un iPhone, y `loci`, la de 3GPP que
+ponen Android y ffmpeg. **Y un formato que no sabe leer cuenta como fallo**, no
+como aprobado: todo lo que hay en `public/fotos/` y `public/videos/` es material
+que se publica. `npm run fotos:revisar` pasa a cubrir también `public/videos`.
+
+Verificado con dos videos sintéticos, uno con cada caja: los dos se detectan, se
+imprime la coordenada y el script devuelve 1.
+
+---
+
 ## Decisiones abiertas
 
 **Falta el logo en vector, y una versión para fondo oscuro.** Hoy hay un JPG de

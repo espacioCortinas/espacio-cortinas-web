@@ -41,15 +41,17 @@ export const productos: Producto[] = [
     variantes: [
       {
         nombre: "Screen",
+        clave: "screen",
         descripcion:
           "Permite que ingrese luz pero también genera cierto grado de privacidad. También ayuda a reducir la temperatura en el ambiente y proteger pisos, muebles, etc; gracias a su filtro UV.",
       },
       {
         nombre: "Blackout",
+        clave: "blackout",
         descripcion:
           "Es una cortina funcional para bloquear la luz exterior y reducir la temperatura en el ambiente.",
       },
-      { nombre: "Motorizado" },
+      { nombre: "Motorizado", clave: "motorizado" },
     ],
     activo: true,
     destacado: true,
@@ -69,9 +71,9 @@ export const productos: Producto[] = [
     descripcion:
       "Este tipo de cortina puede ser colocado a un riel o un barral. El riel te permite hacer cortinados en ventanales de gran tamaño sin limitaciones, en cambio, el barral puede ser más estético pero te limita el recorrido de la tela. Estas telas pueden ser en blackout o translúcidas y mucha variedad de colores y modelos.",
     variantes: [
-      { nombre: "Riel" },
-      { nombre: "Riel motorizado" },
-      { nombre: "Barral" },
+      { nombre: "Riel", clave: "riel" },
+      { nombre: "Riel motorizado", clave: "riel-motorizado" },
+      { nombre: "Barral", clave: "barral" },
       { nombre: "Blackout" },
     ],
     activo: true,

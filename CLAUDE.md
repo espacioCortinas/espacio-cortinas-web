@@ -48,9 +48,13 @@ Se mudó desde Vercel en julio de 2026 — decisión 24 de `docs/decisiones.md`.
    constantes del código: `medidas` dice qué anchos existen de ESA foto y
    `formato` con qué extensión se escribieron. Una foto chica no tiene todas las
    medidas y el navegador pediría un archivo que no existe — decisiones 32 y 37.
-   Todo eso vive en `lib/fotos.ts`, que es lo único que arma rutas de imágenes.
-5. **Se borra el EXIF de toda imagen antes de publicarla.** Las fotos son de
-   casas de clientes y traen coordenadas GPS.
+   Todo eso vive en `lib/fotos.ts`, que es lo único que arma rutas de imágenes y
+   de videos. Y de ahí sale también **el tope de ancho** de cada foto: nada se
+   muestra más ancho que sus píxeles sobre dos — decisión 48.
+5. **Se borran los metadatos de toda imagen y de todo video antes de
+   publicarlos.** Son de casas de clientes y traen coordenadas GPS. Lo publicado
+   es **append-only**: los parámetros del pipeline están congelados porque
+   regenerar un archivo con otros bytes duplica su peso en git para siempre.
 6. **Español en todo:** interfaz, nombres de tablas y columnas, comentarios,
    mensajes de error, commits.
 7. **Sin dependencias nuevas sin justificarlas.** Preferir la plataforma antes
@@ -76,8 +80,8 @@ Se mudó desde Vercel en julio de 2026 — decisión 24 de `docs/decisiones.md`.
   "ver código fuente", no con el inspector).
 - Cada página pública tiene `title`, `description` y Open Graph propios.
 - `npm run build` y `npx tsc --noEmit` pasan sin errores.
-- Si el cambio tocó fotos, `npm run fotos:revisar` da verde: ninguna publicada
-  conserva GPS. **No es opcional** — son fotos de casas de clientes.
+- Si el cambio tocó fotos o videos, `npm run fotos:revisar` da verde: ninguno
+  conserva GPS. **No es opcional** — son de casas de clientes.
 - Si el cambio toca rutas, renderizado, caché o código de servidor, además pasa
   por `npm run preview`, que lo corre en el mismo runtime que producción.
   `npm run dev` corre sobre Node: no detecta un uso de API que Workers no

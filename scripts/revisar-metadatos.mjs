@@ -215,6 +215,117 @@ function leerPng(datos) {
   return { hallazgos, ancho, alto, gps: null };
 }
 
+// ── MP4 ────────────────────────────────────────────────────────────────────
+
+/**
+ * Un MP4 es un árbol de cajas: cuatro bytes de tamaño, cuatro de nombre, y
+ * adentro el contenido o más cajas. Los metadatos viven en `udta` —«user
+ * data»—, que cuelga de `moov` o de cada `trak`.
+ *
+ * **La caja que importa es `©xyz`**: es donde un iPhone y un Android guardan
+ * las coordenadas de donde se filmó, en formato ISO 6709. Es exactamente el
+ * mismo riesgo que el EXIF de una foto y está en el mismo lugar —la casa de un
+ * cliente— así que se revisa igual. `scripts/preparar-fotos.mjs` convierte con
+ * `-map_metadata -1`, que las borra; esto lo comprueba.
+ */
+/**
+ * Las coordenadas de una caja de ubicación, vengan de donde vengan.
+ *
+ * Las dos cajas que las guardan terminan en el mismo par de números con signo,
+ * escritos uno detrás del otro —«-34.6037-058.3816», que es ISO 6709— o
+ * separados por una coma. El signo alcanza para separarlos, así que la misma
+ * expresión sirve para las dos.
+ *
+ * Devuelve `null` si no hay dos números: una caja de ubicación vacía es un
+ * hallazgo que hay que informar igual, pero no es una coordenada.
+ */
+function coordenadas(texto, caja) {
+  const partes = texto.match(/([+-]\d+(?:\.\d+)?)\s*,?\s*([+-]\d+(?:\.\d+)?)/);
+  if (!partes) return null;
+
+  const lat = Number(partes[1]);
+  const lon = Number(partes[2]);
+  return {
+    texto: `${lat.toFixed(6)}, ${lon.toFixed(6)}  (${caja})`,
+    mapa: `https://www.google.com/maps?q=${lat},${lon}`,
+  };
+}
+
+function leerMp4(datos) {
+  const hallazgos = [];
+  let gps = null;
+  let ancho = null;
+  let alto = null;
+
+  const recorrer = (desde, hasta, dentroDeUdta) => {
+    let i = desde;
+    while (i + 8 <= hasta) {
+      let largo = datos.readUInt32BE(i);
+      const nombre = datos.subarray(i + 4, i + 8).toString("latin1");
+      let cuerpo = i + 8;
+
+      // `size === 1` significa que el tamaño real son ocho bytes más, y
+      // `size === 0` que la caja llega hasta el final del archivo.
+      if (largo === 1) {
+        largo = Number(datos.readBigUInt64BE(i + 8));
+        cuerpo = i + 16;
+      } else if (largo === 0) {
+        largo = hasta - i;
+      }
+      if (largo < 8 || i + largo > hasta) break;
+
+      const fin = i + largo;
+
+      if (nombre === "tkhd") {
+        // El ancho y el alto de la pista van al final, en punto fijo 16.16.
+        ancho ??= datos.readUInt32BE(fin - 8) >> 16;
+        alto ??= datos.readUInt32BE(fin - 4) >> 16;
+      } else if (dentroDeUdta && nombre === "\xa9xyz") {
+        // La caja de ubicación de QuickTime, que es la que pone un iPhone: dos
+        // bytes de largo, dos de idioma, y después la cadena ISO 6709
+        // «-34.6037-058.3816/».
+        hallazgos.push(`Ubicación (©xyz, ${largo - 8} bytes)`);
+        gps ??= coordenadas(
+          datos.subarray(cuerpo + 4, fin).toString("latin1"),
+          "©xyz",
+        );
+      } else if (dentroDeUdta && nombre === "loci") {
+        /*
+         * La caja de ubicación de 3GPP, que es la que ponen Android y ffmpeg.
+         * No es una cadena: después de la versión, las banderas, el idioma y un
+         * nombre terminado en cero viene un byte de rol y tres enteros en coma
+         * fija 16.16 — longitud, latitud y altura, EN ESE ORDEN.
+         */
+        hallazgos.push(`Ubicación (loci, ${largo - 8} bytes)`);
+        let p = cuerpo + 6;
+        while (p < fin && datos[p] !== 0) p += 1;
+        p += 2; // el cero que cierra el nombre, más el byte de rol
+        if (p + 8 <= fin) {
+          const fija = (o) => (datos.readInt32BE(o) / 65536).toFixed(6);
+          gps ??= coordenadas(`${fija(p + 4)},${fija(p)}`, "loci");
+        }
+      } else if (dentroDeUdta) {
+        hallazgos.push(`Metadato ${nombre} (udta, ${largo - 8} bytes)`);
+      } else if (nombre === "uuid" || nombre === "XMP_") {
+        hallazgos.push(`${nombre} (${largo - 8} bytes)`);
+      }
+
+      // Las cajas que contienen otras cajas. `meta` lleva cuatro bytes de
+      // versión y banderas antes de sus hijas; las demás, no.
+      if (["moov", "trak", "mdia", "udta", "ilst"].includes(nombre)) {
+        recorrer(cuerpo, fin, dentroDeUdta || nombre === "udta");
+      } else if (nombre === "meta") {
+        recorrer(cuerpo + 4, fin, dentroDeUdta);
+      }
+
+      i = fin;
+    }
+  };
+
+  recorrer(0, datos.length, false);
+  return { hallazgos, ancho, alto, gps };
+}
+
 // ── Salida ─────────────────────────────────────────────────────────────────
 
 function revisar(ruta) {
@@ -234,9 +345,24 @@ function revisar(ruta) {
   ) {
     formato = "PNG";
     resultado = leerPng(datos);
+  } else if (datos.subarray(4, 8).toString("latin1") === "ftyp") {
+    formato = "MP4";
+    resultado = leerMp4(datos);
   } else {
-    console.log(`\n${basename(ruta)}\n  formato desconocido`);
-    return true;
+    /*
+     * **Un formato que no se sabe leer cuenta como fallo**, no como aprobado.
+     *
+     * Antes devolvía `true` y eso convertía a este script en un sello de goma
+     * para cualquier archivo que no fuera JPEG, WebP o PNG: los dos videos
+     * pasaban sin que nadie los mirara. Todo lo que hay en `public/fotos/` y en
+     * `public/videos/` es material que se publica, así que si acá aparece algo
+     * ilegible la respuesta correcta es avisar y no dejar pasar.
+     */
+    console.log(`\n${basename(ruta)}`);
+    console.log(
+      `  ✗ formato desconocido: no se puede comprobar si trae metadatos`,
+    );
+    return false;
   }
 
   const kb = (datos.length / 1024).toFixed(1).replace(".", ",");

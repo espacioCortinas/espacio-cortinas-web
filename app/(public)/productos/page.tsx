@@ -1,27 +1,48 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { FotoImg } from "@/components/foto";
+import { TarjetaProducto } from "@/components/tarjeta-producto";
 import { EnlaceWhatsapp } from "@/components/whatsapp";
+import { clasesDeBoton } from "@/components/ui/boton";
 import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
 import { Vacio } from "@/components/ui/vacio";
 import { productosPublicados } from "@/contenido";
-import { portadaDe } from "@/lib/fotos";
+import { entornoPublico } from "@/lib/entorno";
 import { metadataDePagina } from "@/lib/metadata";
-import { altAutomatico, recortar } from "@/lib/texto";
 
 /**
  * El catálogo.
  *
- * ARMAZÓN, NO COMPOSICIÓN. La Fase 4.2 le puso la columna, el ritmo vertical,
- * la escala tipográfica y los componentes del sistema. **La grilla, la tarjeta
- * de producto y el tamaño de cada módulo son de la Fase 4.4**, que es la que
- * decide cómo se cura un archivo desparejo — sigue siendo una lista en una sola
- * columna a propósito.
+ * # Es una grilla de portadas con su nombre, y nada más
  *
- * **Productos es el catálogo y Proyectos es el portfolio.** La distinción tiene
- * que quedar clara para el visitante: qué vendemos y qué hicimos
- * (docs/producto.md).
+ * **Reusa `components/tarjeta-producto.tsx`**, que es el elemento de grilla del
+ * sitio y el que ya usa Inicio: no hay una segunda tarjeta. Lo único que se le
+ * agregó en esta fase es `nivel`, porque acá la grilla cuelga del `<h1>` y en
+ * Inicio de un `<h2>` — el aspecto no cambió, así que Inicio sigue igual.
+ *
+ * **No lleva la descripción de cada producto**, contra lo que hacía el armazón
+ * de la 4.0, y son tres razones:
+ *
+ * - Las descripciones son un párrafo largo cada una, escritas por la empresa
+ *   para explicar el producto, no para una tarjeta. Recortadas a 180
+ *   caracteres se leen como prosa cortada al medio.
+ * - **`venecianas-madera` y `venecianas-pvc` tienen la misma descripción
+ *   palabra por palabra**, y en esta grilla quedan una al lado de la otra. La
+ *   corrige la empresa, no el desarrollo; mientras tanto, mostrarla dos veces
+ *   sería subrayar el problema.
+ * - Lo único que los cuatro sitios de referencia comparten es una grilla de
+ *   fotos con nombre — decisión 47. Ninguno se sostiene con texto.
+ *
+ * El texto completo está en la página de cada producto, que es donde se lee
+ * entero y no cortado.
+ *
+ * # La grilla
+ *
+ * Una columna en teléfono, dos desde 640 y tres desde 1024. **En teléfono no
+ * son dos**, a diferencia de Inicio: a 320 px de ancho, dos columnas dejan cada
+ * portada en 130 px, que para una foto de interior es una estampilla. Inicio se
+ * lo puede permitir porque muestra cuatro productos como anticipo; el catálogo
+ * es el lugar donde se los mira.
  */
 
 export const metadata: Metadata = metadataDePagina({
@@ -34,12 +55,14 @@ export const metadata: Metadata = metadataDePagina({
 
 export default function Productos() {
   const productos = productosPublicados();
+  const hayWhatsapp = entornoPublico.whatsapp !== null;
 
   return (
     <main className={`${CLASES_CONTENEDOR} py-16 md:py-28`}>
       <h1 className="text-display">Productos</h1>
       <p className="max-w-lectura text-texto-suave mt-6 text-subtitulo">
         Cortinas y protección solar a medida, con asesoramiento y colocación.
+        Todo se fabrica para su ventana y lo colocamos nosotros.
       </p>
 
       {productos.length === 0 ? (
@@ -59,50 +82,53 @@ export default function Productos() {
           </Vacio>
         </div>
       ) : (
-        <ul className="mt-12 flex flex-col gap-12 md:mt-16">
-          {productos.map((producto, i) => {
-            const portada = portadaDe(producto.fotos);
-            return (
-              <li key={producto.slug}>
-                <article>
-                  {portada && (
-                    <div className="max-w-xs">
-                      <FotoImg
-                        foto={portada}
-                        alt={altAutomatico(producto.nombre, 1)}
-                        // Los listados usan siempre la portada, y la portada
-                        // siempre es 4:5 (decisión 14).
-                        proporcion="4/5"
-                        // El ancho de la caja, escrito dos veces: acá y en
-                        // `max-w-xs`. Los dos cambian juntos en la Fase 4.4.
-                        sizes="(max-width: 320px) 100vw, 320px"
-                        prioridad={i === 0}
-                      />
-                    </div>
-                  )}
-                  <h2 className="mt-4 text-titulo">
-                    <Link
-                      href={`/productos/${producto.slug}`}
-                      className="underline-offset-4 hover:underline"
-                    >
-                      {producto.nombre}
-                    </Link>
-                  </h2>
-                  <p className="max-w-lectura text-texto-suave mt-3">
-                    {recortar(producto.descripcion, 180)}
-                  </p>
-                </article>
-              </li>
-            );
-          })}
+        <ul className="mt-12 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 md:mt-16 lg:grid-cols-3">
+          {productos.map((producto, i) => (
+            <li key={producto.slug}>
+              <TarjetaProducto
+                producto={producto}
+                // La grilla cuelga del `<h1>` de esta página, así que el nombre
+                // de cada producto es un `h2`.
+                nivel={2}
+                // El mismo dato que los anchos de la grilla de arriba, escrito
+                // dos veces. Cambian juntos.
+                sizes="(min-width: 1216px) 325px, (min-width: 1024px) calc((100vw - 9rem) / 3), (min-width: 768px) calc((100vw - 7.5rem) / 2), (min-width: 640px) calc((100vw - 4rem) / 2), calc(100vw - 2.5rem)"
+                prioridad={i === 0}
+              />
+            </li>
+          ))}
         </ul>
       )}
 
-      {/* `empty:hidden`: sin `NEXT_PUBLIC_WHATSAPP` el enlace no dibuja nada, y
-          un bloque vacío con su margen deja un hueco (Fase 4.6). */}
-      <div className="empty:hidden mt-16 md:mt-20">
-        <EnlaceWhatsapp contexto={{ tipo: "general" }} />
-      </div>
+      {/*
+        El cierre, con el mismo bloque de superficie que usa Inicio: un sector
+        de verdad, con su ritmo vertical, y una sola acción.
+      */}
+      <section className="bg-superficie mt-16 -mx-5 px-5 py-12 md:mt-28 md:-mx-12 md:px-12 md:py-20">
+        <h2 className="text-titulo">¿No sabés cuál te conviene?</h2>
+        <p className="max-w-lectura text-texto-suave mt-4">
+          Contanos qué ventana tenés que resolver —cuánta luz entra, cuánta
+          privacidad hace falta— y te asesoramos sobre qué sistema va mejor.
+        </p>
+
+        <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
+          {hayWhatsapp ? (
+            <>
+              <EnlaceWhatsapp contexto={{ tipo: "general" }} />
+              <Link href="/contacto" className={clasesDeBoton("enlace")}>
+                Otras formas de contacto
+              </Link>
+            </>
+          ) : (
+            // Sin número cargado el botón de WhatsApp no se dibuja (Fase 4.6),
+            // y un cierre sin ninguna acción no cierra nada. Es el mismo camino
+            // que toma Inicio.
+            <Link href="/contacto" className={clasesDeBoton("principal")}>
+              Escribinos
+            </Link>
+          )}
+        </div>
+      </section>
     </main>
   );
 }

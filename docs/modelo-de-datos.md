@@ -14,10 +14,12 @@ contenido/
 ├── productos.ts      se edita a mano
 ├── proyectos.ts      se edita a mano
 ├── fotos.ts          GENERADO por scripts/preparar-fotos.mjs
+├── videos.ts         GENERADO por scripts/preparar-fotos.mjs
 ├── tipos.ts          la forma de todo lo anterior
 └── index.ts          une el contenido con sus fotos, y es lo que leen las páginas
 
 public/fotos/         las imágenes ya recomprimidas, generadas
+public/videos/        los videos publicados y su cuadro de cartel, generados
 fotos-originales/     los originales. NO se versiona
 ```
 
@@ -34,18 +36,43 @@ alguien visita la página.
 
 ## Producto
 
-| Campo         | Tipo       | Notas                                              |
-| ------------- | ---------- | -------------------------------------------------- |
-| `slug`        | `string`   | la parte final del enlace, y la clave de las fotos |
-| `nombre`      | `string`   |                                                    |
-| `descripcion` | `string`   | breve, texto plano                                 |
-| `variantes`   | `string[]` | solo nombres. Ej. `["Dos paños", "Motorizado"]`    |
-| `activo`      | `boolean`  |                                                    |
-| `destacado`   | `boolean`  |                                                    |
+| Campo         | Tipo         | Notas                                              |
+| ------------- | ------------ | -------------------------------------------------- |
+| `slug`        | `string`     | la parte final del enlace, y la clave de las fotos |
+| `nombre`      | `string`     |                                                    |
+| `descripcion` | `string`     | breve, texto plano                                 |
+| `variantes`   | `Variante[]` | ver abajo                                          |
+| `activo`      | `boolean`    |                                                    |
+| `destacado`   | `boolean`    |                                                    |
+
+### Variante
 
 Las variantes **no** son productos independientes: `Toldos motorizados` es una
-variante de `Toldos`, no una entrada más del catálogo. No tienen descripción,
-slug ni foto propia.
+variante de `Toldos`, no una entrada más del catálogo — decisión 40.
+
+| Campo         | Tipo      | Notas                                       |
+| ------------- | --------- | ------------------------------------------- |
+| `nombre`      | `string`  | lo que se lee. Ej. `"Riel motorizado"`      |
+| `descripcion` | `string?` | solo donde la diferencia hay que explicarla |
+| `clave`       | `string?` | con qué carpeta y qué video se une          |
+
+**Sí pueden tener descripción, fotos y video**, contra lo que decía este
+documento hasta la Fase 4.4. La descripción llegó con la decisión 40 —existe
+donde la diferencia decide la compra: «screen deja pasar luz, blackout no»— y
+las fotos y el video, con la 48. Lo que siguen sin tener es **slug y página
+propia**: una variante se lee dentro de la página de su producto.
+
+**`clave` se escribe a mano y no se deriva del nombre.** Es el nombre de la
+carpeta dentro de `fotos-originales/productos/<slug>/` y también el del archivo
+de video. Derivarla con `aSlug(nombre)` funcionaría hoy y se rompería en
+silencio la primera vez que alguien corrija el nombre visible: la clave
+cambiaría, las fotos dejarían de encontrarse y la página se dibujaría igual,
+sin fotos y sin error. Es la misma regla que ya vale para el slug de un
+producto — decisiones 10 y 48.
+
+Es **opcional**: una variante que no tiene nada que mostrar no la lleva. De las
+once del catálogo, cuatro tienen fotos, dos tienen video y cinco no tienen
+nada.
 
 ## Proyecto
 
@@ -64,7 +91,10 @@ hay que completar en cada carga.
 
 ## Fotos
 
-`contenido/fotos.ts` es un mapa de `<entidad>/<slug>` a una lista de fotos:
+`contenido/fotos.ts` es un mapa a una lista de fotos. La clave es
+`<entidad>/<slug>` para la galería de un producto o un proyecto, y
+`<entidad>/<slug>/<clave de la variante>` para la de una variante — la clave de
+la variante cuelga de la del producto, así que no hace falta un mapa aparte:
 
 ```ts
 "productos/roller-blackout": [
@@ -159,6 +189,44 @@ trabajo hecho — decisión 25. `next.config.ts` lo apaga con
   que se cargue cualquier cosa, que para un lector de pantalla es peor que un
   texto generado razonable.
 
+## Videos
+
+`contenido/videos.ts` es un mapa de `<entidad>/<slug>/<clave de la variante>` a
+**un** video. Cuelgan de una variante y no de un producto: lo que un video
+documenta es la motorización, que es lo único que una foto no puede mostrar —
+decisión 40.
+
+```ts
+"productos/roller/motorizado": {
+  archivo: "roller/motorizado",
+  formato: "mp4",
+  formatoPoster: "webp",
+  ancho: 1280,
+  alto: 720,
+  duracion: 11,
+}
+```
+
+| Campo           | Notas                                                 |
+| --------------- | ----------------------------------------------------- |
+| `archivo`       | dentro de `public/videos/`, sin extensión             |
+| `formato`       | la extensión del video, sin el punto                  |
+| `formatoPoster` | la del cuadro de cartel, que se llama igual           |
+| `ancho`, `alto` | del archivo que se publica, no del original           |
+| `duracion`      | en segundos, redondeada. Se escribe al lado del video |
+
+`archivo` no lleva la entidad adelante, a diferencia de `Foto.carpeta`: los
+videos son de variantes y las variantes son solo de productos.
+
+**Tampoco se carga a mano**, y por la misma razón que las fotos: lo mide
+`ffprobe` sobre el archivo publicado, y el cartel lo extrae el script del primer
+cuadro de ese mismo archivo. El nombre del cartel sale de `formatoPoster` y no
+de una constante — la misma regla de la decisión 37.
+
+**Un video ya publicado no se vuelve a convertir.** `public/videos/` está en
+git: reencodearlo con otros bytes suma su peso otra vez a la historia, para
+siempre. Ver la decisión 48.
+
 ## Slugs
 
 Se escriben a mano, en minúsculas, sin tildes y con guiones. Son la clave con la
@@ -189,14 +257,48 @@ sale en la portada moviendo un bloque de lugar, sin desmarcar nada.
 
 1. Se ponen los originales en `fotos-originales/<entidad>/<slug>/`, numerados.
    El orden alfabético es el de la galería y **el primero es la portada**.
+
+   Las fotos de una variante van un nivel más adentro, en una carpeta con el
+   nombre de su `clave`, y su video al lado con el mismo nombre:
+
+   ```
+   fotos-originales/productos/roller/
+   ├── 1.jpg  2.jpg  3.jpg     la galería del producto
+   ├── screen/1.jpg  2.jpg     la de la variante «Screen»
+   └── motorizado.mp4          el video de la variante «Motorizado»
+   ```
+
+   **Ninguna foto de variante es portada**, así que ninguna se recorta a 4:5.
+
 2. `npm run fotos` — recorta, redimensiona, borra los metadatos y reescribe
    `contenido/fotos.ts`.
-3. `npm run fotos:revisar` — comprueba que ninguna conserve GPS. **No es
-   opcional**: son fotos de casas de clientes. Ver `docs/seguridad.md`.
+3. `npm run fotos:revisar` — comprueba que ninguna foto **ni ningún video**
+   conserve GPS. **No es opcional**: son casas de clientes. Ver
+   `docs/seguridad.md`.
 4. Se agrega o edita el bloque en `contenido/productos.ts` o `proyectos.ts`.
+   Si se cargaron fotos o un video de variante, la variante necesita su
+   `clave`. El script avisa si una carpeta quedó sin variante que la reclame, o
+   una clave sin carpeta.
 5. `npm run build` para que `tsc` valide, y `git push`.
 
 El cambio tarda lo que tarde el build: entre 2 y 9 minutos.
+
+### Lo publicado es append-only, y los parámetros están congelados
+
+`public/fotos/` y `public/videos/` viven en git, que guarda **todas** las
+versiones de cada archivo que se reemplace. Agregar fotos suma; regenerar las
+que ya están con otros bytes duplicaría su peso en la historia para siempre, y
+sacarlo después obliga a reescribir la historia.
+
+Por eso `IMAGEN_CALIDAD`, `MEDIDAS_IMAGEN` e `IMAGEN_LADO_MAXIMO` de
+`lib/constantes.ts` **están congelados**. Mientras no se toquen, `npm run fotos`
+es seguro de correr cuantas veces haga falta: `sharp` es determinista y
+regenerar una foto con los mismos parámetros da un archivo idéntico byte a byte,
+así que `git status` no la marca. Está verificado. El día que uno de esos
+números cambie, deja de serlo, y hay que decidir el costo antes.
+
+Con los videos es más directo: un video que ya está en `public/videos/` no se
+reconvierte, y el script lo dice en pantalla — decisión 48.
 
 ## Copias de seguridad
 
