@@ -287,13 +287,11 @@ function Fila({
             catorce elementos enfocables donde tiene que haber siete.
 
             Va subrayado y en negro —14,69:1— porque es la forma que este sitio
-            le da a un enlace (`docs/diseno.md`, «Color»), y lleva el número de
-            fotos porque eso es lo que hay adentro y es la razón para entrar. El
-            número sale del manifiesto, no de una cuenta escrita acá.
+            le da a un enlace (`docs/diseno.md`, «Color»).
           */}
           <p className="mt-6 text-meta">
             <span className="underline decoration-1 underline-offset-4">
-              {resumenDeMedios(producto)}
+              Ver más
             </span>
             {/* La flecha es del texto de la acción, no un ícono al lado de un
                 título: la regla 4 prohíbe lo segundo. `aria-hidden` porque no
@@ -304,35 +302,6 @@ function Fila({
       </article>
     </li>
   );
-}
-
-/**
- * Qué hay adentro de un producto, en palabras: «Ver las 7 fotos y el video».
- *
- * **Sale del contenido y no de una cuenta escrita a mano.** Suma las fotos del
- * producto más las de cada variante, que es exactamente lo que la página de
- * producto muestra, así que el número no puede prometer de más. Cargar una foto
- * nueva lo mueve solo.
- *
- * Hoy da 7 para Roller y Cortinas de tela —tres propias más dos por variante—,
- * 5 para Bandas verticales y 3 para el resto.
- */
-function resumenDeMedios(producto: ProductoConMedios): string {
-  const fotos =
-    producto.fotos.length +
-    producto.variantes.reduce((total, v) => total + v.fotos.length, 0);
-  const videos = producto.variantes.filter((v) => v.video).length;
-
-  const partes: string[] = [];
-  if (fotos === 1) partes.push("la foto");
-  else if (fotos > 1) partes.push(`las ${fotos} fotos`);
-  if (videos === 1) partes.push("el video");
-  else if (videos > 1) partes.push(`los ${videos} videos`);
-
-  // Un producto sin nada cargado todavía se abre igual: tiene su descripción y
-  // sus variantes. Lo que no puede es prometer fotos que no existen.
-  if (partes.length === 0) return "Ver el producto";
-  return `Ver ${partes.join(" y ")}`;
 }
 
 /**

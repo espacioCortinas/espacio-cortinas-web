@@ -1,70 +1,79 @@
 import { FotoImg } from "@/components/foto";
 import type { Foto } from "@/contenido/tipos";
-import { esApaisada, sizesConTope, topeDeAncho } from "@/lib/fotos";
+import { sizesConTope, topeDeAncho } from "@/lib/fotos";
 import { altAutomatico } from "@/lib/texto";
 
 /**
- * Una galería de fotos que mezcla orientaciones y le da a cada una el tamaño
- * que sus píxeles aguantan.
+ * Una galería que se recorre de costado, arrastrando.
  *
- * # El tamaño del módulo sale de la foto, no de su posición
+ * # Por qué no apila
  *
- * Es la idea que la dirección «Regla» dejó disponible —decisión 43— resuelta
- * con los datos del manifiesto en vez de con la tabla de calidad de
- * `docs/diseno.md`. El porqué de esa elección está en la decisión 48. Son dos
- * reglas y las dos salen de `contenido/fotos.ts`:
+ * Porque `docs/diseno.md` pide, en la sección mobile-first, que **«la galería
+ * se recorre con el pulgar, gestos naturales»**, y una pila vertical no se
+ * recorre con el pulgar: se scrollea como el resto de la página y empuja todo
+ * lo que viene abajo. Con cuatro fotos de un producto, la variante siguiente
+ * queda a dos pantallas.
  *
- * **1. La orientación elige el módulo.** Apaisada al ancho de la columna,
- * vertical a media columna. No es gusto: una vertical a 1024 px de ancho mide
- * 1280 de alto y empuja el resto de la página fuera de la pantalla, y una
- * apaisada a media columna mide 500 × 375 y se lee como una miniatura. El
- * archivo es mitad y mitad —doce verticales y once apaisadas— así que esto
- * produce una galería de dos anchos de verdad y no una columna disfrazada.
+ * # Cómo está hecho: sin JavaScript
  *
- * **2. `topeDeAncho()` lo baja si los píxeles no dan.** Ninguna foto se muestra
- * más ancha que sus píxeles divididos por dos. Hoy muerde en las dos que la
- * documentación señala como problema:
+ * Es `overflow-x` con `scroll-snap` del navegador. En un teléfono eso **es** el
+ * gesto nativo —el mismo que cualquier otra cosa que se desliza—, en un
+ * trackpad es el deslizamiento de dos dedos, y con el contenedor enfocable las
+ * flechas del teclado lo mueven. No hay estado, no hay `"use client"` y no hay
+ * una librería de carrusel: son tres propiedades de CSS.
  *
- *     toldos/3                1600 px → 800 px de CSS, en un módulo de 1024
- *     cortinas-tela/barral/2  1028 px → 514 px de CSS, en un módulo de 1024
+ * Eso además resuelve solo el `prefers-reduced-motion`: no hay ninguna
+ * animación que suprimir, porque el movimiento lo hace el dedo.
  *
- * **El aire que queda al lado es la curaduría.** Una foto mediana rodeada de
- * papel se lee como una lámina; la misma foto estirada se lee como un error
- * (`docs/diseno.md`, «La tesis»). Que `toldos/3` no salga nunca del módulo
- * chico deja de ser una limitación y pasa a ser una decisión editorial, que es
- * exactamente lo que «Regla» perseguía.
+ * # La caja de cada foto sale de las fotos
  *
- * # Lo que NO hace
+ * Un carrusel de orientaciones mezcladas tiene que elegir: o recorta, o deforma,
+ * o deja aire. **Deja aire**, que es lo único compatible con `docs/diseno.md`
+ * —«Nunca deformar», «la proporción propia de cada foto»— y con la tesis de la
+ * dirección: una foto rodeada de papel se lee como una lámina.
  *
- * **No recorta ninguna foto.** `proporcion="propia"`: cada una conserva la
- * suya, porque una galería que supone un formato se rompe la mitad de las veces
- * en este archivo. El recorte a 4:5 es cosa de las portadas y de los listados.
+ * Todas las diapositivas de una galería miden lo mismo, y esa medida sale de la
+ * foto **más alta de esa galería**, con tope en 4:5 (ver `RELACION_MAXIMA`). O
+ * sea que una galería de puras apaisadas queda en una tira baja y ancha, sin
+ * nada de aire desperdiciado, y una mezclada queda en una caja vertical donde
+ * las apaisadas flotan. Es la decisión 48 otra vez —el tamaño sale del
+ * material, no de la posición— aplicada a la caja en vez de al módulo.
  *
- * **No pone texto encima de ninguna foto**, nunca — `docs/diseno.md`.
+ * **El tope de píxeles sigue valiendo**: ninguna foto se muestra más ancha que
+ * `topeDeAncho()`, así que `cortinas-tela/barral/2` no pasa de 514 px aunque la
+ * diapositiva dé más.
  */
 
 /**
- * En teléfono todo ocupa el ancho de la columna: a 375 px de ancho, una foto
- * son 335 px de CSS, o sea 670 de archivo, y la más chica del catálogo tiene
- * 1028. El módulo solo existe de 768 para arriba.
+ * Lo más vertical que puede ponerse la caja: 4:5, la proporción de las portadas
+ * y la única que este sitio declara como propia.
+ *
+ * Sin tope, una galería con una foto 3:4 daría una caja más alta todavía, y la
+ * apaisada que estuviera al lado flotaría en el medio de mucho papel. Con el
+ * tope, la 3:4 pierde un poco de ancho —queda contenida, no recortada— y la
+ * apaisada respira menos.
  */
-const TRAMOS_ANCHO = [
-  // Arriba de 1216 el contenedor ya está topeado en 1120 y el margen es de 48,
-  // así que la columna mide 1024 y no crece más.
-  { desde: "1216px", ancho: "1024px" },
-  { desde: "768px", ancho: "calc(100vw - 6rem)" },
-  { ancho: "calc(100vw - 2.5rem)" },
-];
+const RELACION_MAXIMA = 5 / 4;
 
 /**
- * Media columna, descontando el hueco de 24 px de la grilla. Es el mismo dato
- * que `gap-6` y `md:grid-cols-2` de abajo, escrito dos veces: si se separan, el
- * navegador descarga de más en el teléfono o de menos en el escritorio.
+ * El ancho de una diapositiva, escrito una vez.
+ *
+ * **No llega al 100 %, y es a propósito:** lo que asoma de la foto siguiente es
+ * lo que dice que hay más y que esto se desliza. Es la única señal que funciona
+ * sin `hover` y sin texto, que es lo que pide la regla mobile-first.
+ *
+ * En escritorio el tope de 30rem hace que entren dos y pico en la columna, que
+ * es lo que convierte la tira en algo que se lee como una tira.
  */
-const TRAMOS_MEDIO = [
-  { desde: "1216px", ancho: "500px" },
-  { desde: "768px", ancho: "calc((100vw - 7.5rem) / 2)" },
-  { ancho: "calc(100vw - 2.5rem)" },
+const ANCHO_DIAPOSITIVA = "w-[86%]";
+
+/** El tope de la diapositiva en escritorio. Ver `ANCHO_DIAPOSITIVA`. */
+const ANCHO_MAXIMO = "30rem";
+
+/** El mismo dato que `ANCHO_DIAPOSITIVA`, del lado del navegador. */
+const TRAMOS = [
+  { desde: "768px", ancho: "30rem" },
+  { ancho: "calc((100vw - 2.5rem) * 0.86)" },
 ];
 
 export function Galeria({
@@ -91,45 +100,92 @@ export function Galeria({
 }) {
   if (fotos.length === 0) return null;
 
+  // La caja, sacada de la foto más alta de esta galería. `aspectRatio` se
+  // escribe ancho/alto, así que va invertida.
+  const masAlta = Math.max(...fotos.map((f) => f.alto / f.ancho));
+  const relacionCaja = 1 / Math.min(RELACION_MAXIMA, masAlta);
+
+  // Con una sola foto no hay nada que recorrer: se dibuja sola, al ancho que
+  // sus píxeles permitan. Un carrusel de un elemento es un carrusel roto.
+  if (fotos.length === 1) {
+    const foto = fotos[0];
+    return (
+      <div style={{ maxWidth: `${topeDeAncho(foto)}px` }}>
+        <FotoImg
+          foto={foto}
+          alt={altAutomatico(nombre, desde)}
+          sizes={sizesConTope(foto, TRAMOS)}
+          prioridad={prioridad}
+        />
+      </div>
+    );
+  }
+
   return (
     /*
-     * Dos columnas desde 768, y las apaisadas ocupan las dos. Es una grilla y
-     * no un `flex` con envoltura porque las verticales tienen que quedar
-     * alineadas entre sí; `items-start` es lo que deja que cada una conserve su
-     * alto en vez de estirarse hasta el de su vecina.
+     * `tabIndex` y `role` no son adorno: un contenedor que scrollea tiene que
+     * poder recibir foco para que se lo pueda recorrer con el teclado, y tiene
+     * que anunciar qué es. Es lo que convierte esto en algo usable sin mouse.
+     *
+     * La barra va fina y del gris del sistema —`texto-suave`, 5,23:1, el mismo
+     * que la decisión 46 fijó para el borde de un control— porque en escritorio
+     * es la otra señal de que esto se mueve. Con `--color-linea` daría 1,29:1 y
+     * no se vería.
      */
-    <ul className="grid grid-cols-1 items-start gap-6 md:grid-cols-2">
-      {fotos.map((foto, i) => {
-        const ancha = esApaisada(foto);
-        const tope = topeDeAncho(foto);
-
-        return (
-          <li
-            key={foto.carpeta}
-            className={ancha ? "md:col-span-2" : undefined}
-            /*
-             * El tope, aplicado a la caja. Sin esto la foto se estira hasta el
-             * ancho del módulo y se ve blanda; con esto se queda en lo que sus
-             * píxeles dan y el resto queda en papel.
-             *
-             * Va en el `<li>` y no en la foto para que el hueco de la grilla lo
-             * respete: la caja mide lo que la foto puede, y lo que sobra es
-             * margen de la celda.
-             */
-            style={{ maxWidth: `${tope}px` }}
+    <ul
+      tabIndex={0}
+      role="group"
+      aria-label={`Fotos de ${nombre}, se recorren de costado`}
+      className={
+        "flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-3 " +
+        "[scrollbar-color:var(--color-texto-suave)_transparent] [scrollbar-width:thin]"
+      }
+    >
+      {fotos.map((foto, i) => (
+        <li
+          key={foto.carpeta}
+          className={`${ANCHO_DIAPOSITIVA} shrink-0 snap-start`}
+          /*
+            **El tope de píxeles vive acá**, en la diapositiva, y no en un
+            envoltorio de la foto: la foto nunca puede ser más ancha que su
+            diapositiva, así que topear la diapositiva topea la foto sin
+            inventar una caja intermedia.
+            
+            Hoy no llega a morder —la diapositiva no pasa de 480 px y el tope
+            más bajo del archivo es el de `cortinas-tela/barral/2`, que son
+            514— pero va igual: es la garantía que hace que ensanchar la tira
+            mañana no devuelva una foto blanda.
+          */
+          style={{ maxWidth: `min(${ANCHO_MAXIMO}, ${topeDeAncho(foto)}px)` }}
+        >
+          {/*
+            La caja de la diapositiva. Todas iguales dentro de una galería, y
+            **sin fondo propio**: lo que sobra queda en papel, no en un
+            rectángulo de superficie. Una foto apaisada dentro de una caja
+            vertical con el fondo un paso más oscuro se lee como una barra negra
+            de televisor; sobre el papel se lee como una lámina, que es
+            literalmente la tesis de la dirección.
+          */}
+          <div
+            className="flex items-center justify-center"
+            style={{ aspectRatio: relacionCaja }}
           >
+            {/*
+              `max-w-full` y `max-h-full` son lo que hace el «contain»: la foto
+              se achica hasta entrar por los dos lados y conserva su proporción
+              —la altura la deja en `auto` el preflight de Tailwind—. Acá no se
+              recorta nada, y lo que sobra de la caja queda en papel.
+            */}
             <FotoImg
               foto={foto}
               alt={altAutomatico(nombre, desde + i)}
-              // El mismo tope otra vez, ahora del lado del navegador: si el
-              // `sizes` no lo tuviera, descargaría un archivo más grande del
-              // que va a mostrar.
-              sizes={sizesConTope(foto, ancha ? TRAMOS_ANCHO : TRAMOS_MEDIO)}
+              sizes={sizesConTope(foto, TRAMOS)}
               prioridad={prioridad && i === 0}
+              className="max-h-full max-w-full object-contain"
             />
-          </li>
-        );
-      })}
+          </div>
+        </li>
+      ))}
     </ul>
   );
 }

@@ -396,26 +396,30 @@ hasta la Fase 4.4 y contradecía su propia aritmética cuatro secciones más
 arriba: los videos tienen 1280 px y a doble densidad eso es una caja de 640, no
 de 1024. Cae solo con la regla del módulo de abajo, sin ninguna excepción.
 
-### El tamaño del módulo sale de la foto, no de su posición
+### El tamaño de cada foto sale de la foto, no de su posición
 
-Es lo que sobrevivió de la dirección «Regla» — decisión 48. Dos reglas, y las
-dos salen de `contenido/fotos.ts`, que lo escribe el script:
+Es lo que sobrevivió de la dirección «Regla» — decisión 48. Todo sale de
+`contenido/fotos.ts`, que lo escribe el script, y nada de una lista escrita a
+mano.
 
-1. **La orientación elige el módulo.** Apaisada al ancho de la columna
-   (1024 px); vertical, a media columna (500 px). Una vertical a 1024 de ancho
-   mide 1280 de alto y empuja la página fuera de la pantalla; una apaisada a
-   media columna se lee como una miniatura.
-2. **El tope de píxeles lo baja si no dan.** Nada se muestra más ancho que
-   `ancho / 2`. Hoy muerde en `toldos/3` (1600 px → 800), en
-   `cortinas-tela/barral/2` (1028 px → 514) y en los dos videos (1280 → 640).
+**En la galería**, que es una tira que se desliza de costado (decisión 50), la
+caja de cada diapositiva sale de la foto **más alta de esa galería**, con tope
+en 4:5. Una galería de puras apaisadas queda en una tira baja y ancha sin nada
+de aire desperdiciado —`bandas-verticales` da 4:3—; una que mezcla queda en una
+caja vertical donde las apaisadas flotan. Nada se recorta ni se deforma: lo que
+sobra queda en papel.
 
-**El aire que queda al lado es la curaduría.** Que `toldos/3` no salga nunca del
-módulo chico deja de ser una limitación y pasa a ser una decisión editorial.
+**En el resto del sitio**, donde una foto ocupa un lugar fijo, manda el **tope
+de píxeles**: nada se muestra más ancho que `ancho / 2`, con el 2 de
+`DENSIDAD_DE_REFERENCIA`. Hoy muerde en `toldos/3` (1600 px → 800), en
+`cortinas-tela/barral/2` (1028 px → 514) y en los dos videos (1280 → 640).
+
+**El aire que queda al lado es la curaduría.** Que `toldos/3` no pueda ocupar un
+lugar grande deja de ser una limitación y pasa a ser una decisión editorial.
 
 **No reemplaza a la tabla de calidad de más arriba**, que califica por contenido
 y que ningún número deduce: `bandas-verticales/4` y `/5` están calificadas
-«apoyo» y salen igual en el módulo ancho, porque son apaisadas y tienen 2560 px.
-La respuesta a una foto floja sigue siendo sacarla.
+«apoyo» y aparecen igual. La respuesta a una foto floja sigue siendo sacarla.
 
 ---
 
@@ -459,7 +463,7 @@ demás.
 | Estado vacío        | `components/ui/vacio.tsx`                         | una                                  |
 | Columna de página   | `components/ui/contenedor.tsx`                    | una                                  |
 | Foto                | `components/foto.tsx`                             | cinco proporciones, tres recortes    |
-| Galería             | `components/galeria.tsx`                          | dos módulos, según la foto           |
+| Galería             | `components/galeria.tsx`                          | tira que se desliza de costado       |
 | Video de variante   | `components/video-variante.tsx`                   | una                                  |
 | Tarjeta de producto | `components/tarjeta-producto.tsx`                 | una — solo Inicio                    |
 | Logo                | `components/logo.tsx`                             | una                                  |
@@ -540,7 +544,8 @@ revés.
 
 - Nada depende de `hover` para funcionar o entenderse
 - Zonas táctiles de 44 px como mínimo
-- La galería se recorre con el pulgar, gestos naturales
+- La galería se recorre con el pulgar, gestos naturales — cumplido en la
+  decisión 50, con `scroll-snap` y sin JavaScript
 - WhatsApp siempre alcanzable sin buscarlo
 - Se verifica en 320, 375, 768, 1024 y 1440
 

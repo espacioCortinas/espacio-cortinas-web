@@ -1890,6 +1890,11 @@ que mantener al día, que se queda vieja en la primera carga que alguien haga si
 leer este documento, y que falla en silencio — que es exactamente el problema
 que las decisiones 32 y 37 resolvieron leyendo del manifiesto.
 
+**La primera de las dos reglas de abajo quedó reemplazada por la decisión 50**,
+que convirtió la galería en una tira que se desliza: ahí el tamaño lo da la caja
+de la diapositiva y no un módulo de grilla. El tope de píxeles —la segunda— sigue
+valiendo en todo el sitio.
+
 **Las dos reglas salen de `contenido/fotos.ts`, que lo escribe el script a
 partir del archivo que efectivamente guardó:**
 
@@ -2169,9 +2174,9 @@ subrayaba al pasar por encima y eso era todo, o sea que **en un teléfono no lo
 decía nada** — contra la regla explícita de `docs/diseno.md`: «nada depende de
 `hover` para funcionar o entenderse».
 
-Cada fila termina ahora en una línea que dice qué hay adentro: «Ver las 7 fotos
-y el video →». Va en negro sobre papel (14,69:1), a 13 px y subrayada, que es la
-forma que este sitio le da a un enlace.
+Cada fila termina ahora en una línea que lo dice: «Ver más →». Va en negro sobre
+papel (14,69:1), a 13 px y subrayada, que es la forma que este sitio le da a un
+enlace.
 
 **No es un enlace, y eso es lo que la hace posible.** El enlace de la fila sigue
 siendo uno solo —el del nombre, estirado por encima de todo— así que tocar esa
@@ -2181,11 +2186,10 @@ enlace estirado vino a evitar. Verificado: siete filas, siete elementos
 enfocables, y tocar la foto, un chip o la línea de acción cae siempre en el
 enlace del producto.
 
-**El número sale del manifiesto**: las fotos del producto más las de cada
-variante, que es exactamente lo que la página de producto muestra. Da 7 para
-Roller y Cortinas de tela, 5 para Bandas verticales y 3 para el resto, y se
-mueve solo al cargar una foto. Un producto sin fotos dice «Ver el producto»: la
-línea no puede prometer lo que no existe.
+**Primero decía cuántas fotos había** —«Ver las 7 fotos y el video»—, contadas
+del manifiesto. Se sacó: el número no agregaba nada que el visitante fuera a
+usar y le ponía a cada fila un dato que competía con el nombre del producto. La
+línea dice que hay más; cuántas se ve al entrar.
 
 La flecha es parte del texto de la acción y va `aria-hidden`. No es el «ícono
 decorativo al lado de cada título» que prohíbe la regla 4: no está al lado de un
@@ -2213,6 +2217,98 @@ min(calc(100vw - 2.5rem), 26rem)
 Verificado: a 700 px el navegador elige `960.webp`. Es la misma regla que ya
 vale en todo el proyecto —«`sizes` y el ancho real de la caja son el mismo dato
 escrito dos veces»— y es la que el propio enunciado del cambio pedía respetar.
+
+---
+
+### 50. La galería se desliza de costado, y la caja sale de sus propias fotos
+
+**Fecha:** septiembre de 2026, Fase 4.4. **Reemplaza la grilla de dos módulos de
+la decisión 48**, que valía para una galería apilada.
+
+**El planteo.** La galería de la página de producto era una grilla: una columna
+en teléfono, dos en escritorio, las apaisadas ocupando las dos. O sea que en un
+teléfono las fotos quedaban **una debajo de la otra**, y con cuatro fotos la
+variante siguiente quedaba a dos pantallas.
+
+**Eso ya contradecía `docs/diseno.md`**, que en la sección mobile-first pide que
+«la galería se recorre con el pulgar, gestos naturales». Una pila vertical no se
+recorre con el pulgar: se scrollea como el resto de la página. La regla estaba
+escrita desde la 4.1 y la 4.4 no la había cumplido.
+
+#### Cómo está hecho: sin JavaScript y sin librería
+
+`overflow-x` con `scroll-snap` del navegador. En un teléfono eso **es** el gesto
+nativo, en un trackpad es el deslizamiento de dos dedos, y con el contenedor
+enfocable —`tabIndex`, `role="group"` y su etiqueta— las flechas del teclado lo
+mueven. Son tres propiedades de CSS: no hay estado, no hay un tercer
+`"use client"` y no entra ninguna dependencia.
+
+De paso resuelve solo el `prefers-reduced-motion`: no hay ninguna animación que
+suprimir, porque el movimiento lo hace el dedo.
+
+Verificado: empujar la tira 120 px la deja enganchada en 496, que es el paso de
+una diapositiva más el hueco.
+
+#### Qué dice que se desliza
+
+**Lo que asoma de la foto siguiente.** La diapositiva mide el 86 % del ancho
+disponible, así que siempre hay un pedazo de la próxima a la derecha. Es la
+única señal que funciona sin `hover` y sin texto, que es lo que pide la regla
+mobile-first.
+
+En escritorio se suma la barra, fina y del gris del sistema —`texto-suave`,
+5,23:1, el mismo que la decisión 46 fijó para el borde de un control—. Con
+`--color-linea` daría 1,29:1 y no se vería.
+
+**La tira no sangra.** Vive dentro de la columna y contra el mismo margen que el
+texto, así que ninguna foto toca el borde de la pantalla. Es lo que pide
+`docs/diseno.md` y es lo que separa esto de un carrusel de plantilla, que
+justamente sangra para verse «inmersivo».
+
+#### La caja sale de la foto más alta de cada galería
+
+Un carrusel de orientaciones mezcladas tiene que elegir entre recortar, deformar
+o dejar aire. **Deja aire**, que es lo único compatible con «Nunca deformar» y
+«la proporción propia de cada foto», y con la tesis de la dirección: una foto
+rodeada de papel se lee como una lámina.
+
+Todas las diapositivas de una galería miden lo mismo, y esa medida sale de la
+foto más alta de esa galería, con tope en 4:5 —la proporción de las portadas, la
+única que este sitio declara como propia—. Medido:
+
+| Galería                      | Fotos                |    Caja |
+| ---------------------------- | -------------------- | ------: |
+| `bandas-verticales`          | cuatro apaisadas 4:3 | **4:3** |
+| `roller` y sus dos variantes | mezcla               | **4:5** |
+| `toldos`                     | una 3:4 y una 16:9   | **4:5** |
+
+Es la decisión 48 otra vez —el tamaño sale del material, no de la posición—
+aplicada a la caja en vez de al módulo. Una galería de puras apaisadas no
+desperdicia un píxel de aire.
+
+**Lo que cuesta, y hay que anotarlo:** `toldos` mezcla una 3:4 con una 16:9, así
+que en su caja de 4:5 la 16:9 se muestra a 288 × 162 con 198 px de papel arriba
+y abajo. Ninguna caja uniforme puede evitarlo cuando el material va de 1,33 a
+0,56 de proporción, y las alternativas son peores: recortar está prohibido, y
+una tira de altura fija haría que una 16:9 no entre en el ancho de un teléfono.
+Es el mismo `toldos/3` que `docs/diseno.md` ya califica como la foto más floja
+del archivo, y la respuesta sigue siendo sacarla.
+
+#### El tope de píxeles se mudó a la diapositiva
+
+Antes se aplicaba a la caja de la foto. Ahora va en el `<li>`: una foto no puede
+ser más ancha que su diapositiva, así que topear la diapositiva topea la foto
+sin inventar una caja intermedia.
+
+**Hoy no llega a morder** —la diapositiva no pasa de 480 px y el tope más bajo
+del archivo es el de `cortinas-tela/barral/2`, 514— y va igual, porque es la
+garantía de que ensanchar la tira mañana no devuelva una foto blanda.
+
+El primer intento lo puso en un envoltorio de la foto, con la foto en `w-auto`
+dentro de un flex de ancho automático. **Las fotos no cargaban**: el ancho del
+envoltorio dependía de la foto y el de la foto del envoltorio, la circularidad
+resolvía a cero, y con una caja de 0 × 0 el navegador nunca disparaba la carga
+diferida. Se vio en el navegador, no leyendo el código.
 
 ---
 
