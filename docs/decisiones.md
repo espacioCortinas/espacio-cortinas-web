@@ -2142,6 +2142,55 @@ cosas dejaron de ser ciertas y quedaron corregidas.
 con un solo consumidor que usa el predeterminado, es una opción que no elige
 nadie. El `h3` vuelve a estar fijo, con el porqué escrito al lado.
 
+#### La apertura de la página, y lo que dice que una fila se abre
+
+Dos cosas que se vieron recién con la página armada y entera.
+
+**El encabezado no tenía presencia.** Era la palabra «Productos» a 56 px y un
+párrafo gris debajo: se leía como una etiqueta pegada arriba de una lista. Una
+sola palabra no sostiene el tamaño de display, y además no agrega nada —el menú
+ya marca «Productos» como la página actual—.
+
+Se reescribió con tres piezas, ninguna de ellas un recurso nuevo del sistema:
+
+- **Un antetítulo con un dato**, en el tratamiento que ya usan el estado vacío y
+  la numeración de Inicio —13 px, versalita, tracking de 0,12em, texto suave a
+  5,23:1—. Dice «Catálogo · 7 productos», y **el número se cuenta del arreglo**:
+  si entra un producto, el número lo sigue solo.
+- **El titular dice los productos en vez de nombrarlos en abstracto**:
+  «Cortinas, rollers, venecianas y toldos». Es lo mismo que ya decía la
+  `description` de la página y lo que alguien busca de verdad, y es una frase que
+  aguanta el display. El nombre de la sección lo siguen diciendo el menú y el
+  `<title>`.
+- **La bajada orienta**, y su última frase avisa que cada fila se abre.
+
+**Nada decía que una fila fuera clickeable, salvo el hover.** El nombre se
+subrayaba al pasar por encima y eso era todo, o sea que **en un teléfono no lo
+decía nada** — contra la regla explícita de `docs/diseno.md`: «nada depende de
+`hover` para funcionar o entenderse».
+
+Cada fila termina ahora en una línea que dice qué hay adentro: «Ver las 7 fotos
+y el video →». Va en negro sobre papel (14,69:1), a 13 px y subrayada, que es la
+forma que este sitio le da a un enlace.
+
+**No es un enlace, y eso es lo que la hace posible.** El enlace de la fila sigue
+siendo uno solo —el del nombre, estirado por encima de todo— así que tocar esa
+línea abre el producto igual. Un segundo `<a>` habría duplicado el nombre
+accesible de cada fila y devuelto los catorce elementos enfocables que el
+enlace estirado vino a evitar. Verificado: siete filas, siete elementos
+enfocables, y tocar la foto, un chip o la línea de acción cae siempre en el
+enlace del producto.
+
+**El número sale del manifiesto**: las fotos del producto más las de cada
+variante, que es exactamente lo que la página de producto muestra. Da 7 para
+Roller y Cortinas de tela, 5 para Bandas verticales y 3 para el resto, y se
+mueve solo al cargar una foto. Un producto sin fotos dice «Ver el producto»: la
+línea no puede prometer lo que no existe.
+
+La flecha es parte del texto de la acción y va `aria-hidden`. No es el «ícono
+decorativo al lado de cada título» que prohíbe la regla 4: no está al lado de un
+título y no es decorativa.
+
 #### Una corrección al `sizes` del andamio
 
 El andamio declaraba `(min-width: 768px) 416px, calc(100vw - 2.5rem)`. La

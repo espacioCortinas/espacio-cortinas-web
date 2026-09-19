@@ -102,11 +102,49 @@ export default function Productos() {
 
   return (
     <main className={`${CLASES_CONTENEDOR} py-16 md:py-28`}>
-      <h1 className="text-display">Productos</h1>
-      <p className="max-w-lectura text-texto-suave mt-6 text-subtitulo">
-        Cortinas y protección solar a medida, con asesoramiento y colocación.
-        Todo se fabrica para su ventana y lo colocamos nosotros.
-      </p>
+      {/*
+        La apertura.
+
+        **Antes era la palabra «Productos» a 56 px y un párrafo gris debajo**, y
+        se leía como una etiqueta pegada arriba de una lista, no como el
+        principio de algo. Una sola palabra no sostiene el tamaño de display: no
+        dice nada que no diga ya el menú, donde «Productos» está marcado como la
+        página actual.
+
+        Tres cosas la sostienen ahora, y ninguna agrega un recurso nuevo al
+        sistema:
+
+        **Un antetítulo con un dato**, en el mismo tratamiento que ya usan el
+        estado vacío y la numeración de Inicio —13 px, versalita, con tracking—.
+        Dice de qué son las siete filas de abajo y cuántas son, **contadas del
+        arreglo**: si mañana entra un producto, el número lo sigue solo.
+
+        **El titular dice los productos en vez de nombrarlos en abstracto.** Es
+        lo mismo que ya decía la `description` de esta página y lo que alguien
+        busca de verdad, y ahí sí hay una frase que aguanta el display. El nombre
+        de la sección lo siguen diciendo el menú y el `<title>`.
+
+        **La bajada orienta.** La última frase es la que le dice al visitante que
+        cada fila se abre, que es lo que en un teléfono no se puede aprender de
+        otra manera — ver `Fila`.
+      */}
+      <header>
+        <p className="text-texto-suave text-meta tracking-[0.12em] uppercase">
+          Catálogo
+          {productos.length > 0 &&
+            ` · ${productos.length} producto${productos.length === 1 ? "" : "s"}`}
+        </p>
+
+        <h1 className="mt-4 text-display">
+          Cortinas, rollers, venecianas y toldos
+        </h1>
+
+        <p className="max-w-lectura text-texto-suave mt-6 text-subtitulo">
+          Todo se fabrica a medida para su ventana, y la medición y la
+          colocación son nuestras. Entrá en cualquiera para ver las fotos de los
+          trabajos terminados.
+        </p>
+      </header>
 
       {productos.length === 0 ? (
         // Un listado vacío se dice, no se tapa: es información sobre el estado
@@ -233,10 +271,68 @@ function Fila({
           </p>
 
           <Variantes producto={producto} />
+
+          {/*
+            **Lo que dice que la fila se abre.**
+
+            Sin esto, lo único que lo decía era el subrayado del nombre al pasar
+            por encima, y `docs/diseno.md` es explícito: «nada depende de
+            `hover` para funcionar o entenderse». En un teléfono no hay hover, o
+            sea que en un teléfono no lo decía nada.
+
+            **No es un enlace**, y es a propósito: el enlace de la fila es uno
+            solo, el del nombre, y está estirado por encima de todo esto, así que
+            tocar esta línea abre el producto igual. Un segundo `<a>` acá
+            duplicaría el nombre accesible de cada fila y volvería a dejar
+            catorce elementos enfocables donde tiene que haber siete.
+
+            Va subrayado y en negro —14,69:1— porque es la forma que este sitio
+            le da a un enlace (`docs/diseno.md`, «Color»), y lleva el número de
+            fotos porque eso es lo que hay adentro y es la razón para entrar. El
+            número sale del manifiesto, no de una cuenta escrita acá.
+          */}
+          <p className="mt-6 text-meta">
+            <span className="underline decoration-1 underline-offset-4">
+              {resumenDeMedios(producto)}
+            </span>
+            {/* La flecha es del texto de la acción, no un ícono al lado de un
+                título: la regla 4 prohíbe lo segundo. `aria-hidden` porque no
+                agrega nada a lo que la frase ya dice. */}
+            <span aria-hidden> →</span>
+          </p>
         </div>
       </article>
     </li>
   );
+}
+
+/**
+ * Qué hay adentro de un producto, en palabras: «Ver las 7 fotos y el video».
+ *
+ * **Sale del contenido y no de una cuenta escrita a mano.** Suma las fotos del
+ * producto más las de cada variante, que es exactamente lo que la página de
+ * producto muestra, así que el número no puede prometer de más. Cargar una foto
+ * nueva lo mueve solo.
+ *
+ * Hoy da 7 para Roller y Cortinas de tela —tres propias más dos por variante—,
+ * 5 para Bandas verticales y 3 para el resto.
+ */
+function resumenDeMedios(producto: ProductoConMedios): string {
+  const fotos =
+    producto.fotos.length +
+    producto.variantes.reduce((total, v) => total + v.fotos.length, 0);
+  const videos = producto.variantes.filter((v) => v.video).length;
+
+  const partes: string[] = [];
+  if (fotos === 1) partes.push("la foto");
+  else if (fotos > 1) partes.push(`las ${fotos} fotos`);
+  if (videos === 1) partes.push("el video");
+  else if (videos > 1) partes.push(`los ${videos} videos`);
+
+  // Un producto sin nada cargado todavía se abre igual: tiene su descripción y
+  // sus variantes. Lo que no puede es prometer fotos que no existen.
+  if (partes.length === 0) return "Ver el producto";
+  return `Ver ${partes.join(" y ")}`;
 }
 
 /**
