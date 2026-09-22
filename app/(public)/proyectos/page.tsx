@@ -1,56 +1,76 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { FotoImg } from "@/components/foto";
+import { ListadoProyectos } from "@/components/listado-proyectos";
 import { EnlaceWhatsapp } from "@/components/whatsapp";
 import { clasesDeBoton } from "@/components/ui/boton";
-import { Chip } from "@/components/ui/chip";
 import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
 import { Vacio } from "@/components/ui/vacio";
 import { proyectosPublicados } from "@/contenido";
-import { portadaDe } from "@/lib/fotos";
+import { entornoPublico } from "@/lib/entorno";
 import { metadataDePagina } from "@/lib/metadata";
-import { altAutomatico, recortar } from "@/lib/texto";
 
 /**
  * El portfolio.
  *
- * **Hoy está vacío, y la sección se construye igual.** No se llegó a cargar
- * ningún proyecto antes de sacar el panel, y llenarla con trabajos inventados
- * sería mentir sobre lo que la empresa hizo.
+ * **Es la evidencia del sitio.** `docs/producto.md`: «Productos = qué vendemos.
+ * Proyectos = qué hicimos», y los proyectos reales son la prueba de las cuatro
+ * cosas que el sitio tiene que transmitir —estética, calidad, profesionalismo,
+ * integralidad—. Es además el primer material corporativo del sitio, el que le
+ * habla al público de oficinas.
  *
- * **Que esté vacía se dice, no se tapa.** Es el único listado del sitio que
- * hoy se ve en ese estado, así que es el que prueba que el estado vacío
- * funciona: ver `components/ui/vacio.tsx`.
+ * # Los sectores
  *
- * La composición del listado con contenido —la grilla, el tamaño de cada
- * módulo, la galería de cada proyecto— es de la Fase 4.3. Lo que hay acá es el
- * armazón con los componentes del sistema, que es lo que esta fase deja.
+ *     1  APERTURA    antetítulo con el recuento, titular y bajada
+ *     2  LISTADO     el primero en fila y el resto en grilla — decisión 52
+ *     3  CIERRE      una sola acción, sobre superficie
+ *
+ * La apertura usa las mismas tres piezas que `/productos` (decisión 49): un
+ * dato en el antetítulo, contado del arreglo, un titular que dice qué hay en
+ * vez de repetir el nombre del menú, y una bajada que avisa que cada trabajo
+ * se abre.
+ *
+ * **El estado vacío sigue existiendo.** Si algún día todos los proyectos quedan
+ * inactivos, el listado no desaparece del menú ni deja una página en blanco:
+ * dice que está vacío, con `components/ui/vacio.tsx`. Un enlace a `/proyectos`
+ * ya compartido nunca cae en el aire.
  */
 
 export const metadata: Metadata = metadataDePagina({
   titulo: "Proyectos",
   descripcion:
-    "Trabajos realizados por Espacio Cortinas en casas, estudios de " +
-    "arquitectura y oficinas de Buenos Aires.",
+    "Proyectos integrales de Espacio Cortinas en Buenos Aires: espacios " +
+    "resueltos completos, con las fotos y los videos de cada uno.",
   ruta: "/proyectos",
 });
 
 export default function Proyectos() {
   const proyectos = proyectosPublicados();
+  const hayWhatsapp = entornoPublico.whatsapp !== null;
 
   return (
     <main className={`${CLASES_CONTENEDOR} py-16 md:py-28`}>
-      <h1 className="text-display">Proyectos</h1>
-      <p className="max-w-lectura text-texto-suave mt-6 text-subtitulo">
-        Trabajos terminados, con fotos de las casas y oficinas reales.
-      </p>
+      <header>
+        <p className="text-texto-suave text-meta tracking-[0.12em] uppercase">
+          Portfolio
+          {proyectos.length > 0 &&
+            ` · ${proyectos.length} proyecto${proyectos.length === 1 ? "" : "s"}`}
+        </p>
 
-      {proyectos.length === 0 ? (
-        <div className="mt-12 md:mt-16">
+        <h1 className="mt-4 text-display">Proyectos integrales</h1>
+
+        <p className="max-w-lectura text-texto-suave mt-6 text-subtitulo">
+          Espacios completos que resolvimos de principio a fin, con
+          asesoramiento, medición y colocación propias. Entrá en cualquiera para
+          ver todas las fotos y los videos.
+        </p>
+      </header>
+
+      <div className="mt-12 md:mt-16">
+        {proyectos.length === 0 ? (
           <Vacio
             etiqueta="Todavía sin proyectos publicados"
-            titulo="El archivo de trabajos terminados se está armando."
+            titulo="El archivo de proyectos se está armando."
             acciones={
               <>
                 <Link href="/productos" className={clasesDeBoton("principal")}>
@@ -70,60 +90,42 @@ export default function Proyectos() {
               reales.
             </p>
           </Vacio>
-        </div>
-      ) : (
-        <ul className="mt-12 flex flex-col gap-12 md:mt-16">
-          {proyectos.map((proyecto, i) => {
-            const portada = portadaDe(proyecto.fotos);
-            return (
-              <li key={proyecto.slug}>
-                <article>
-                  {portada && (
-                    <div className="max-w-xs">
-                      <FotoImg
-                        foto={portada}
-                        alt={altAutomatico(proyecto.titulo, 1)}
-                        // Los listados usan siempre la portada, y la portada
-                        // siempre es 4:5: es lo que hace que la grilla quede
-                        // pareja aunque la galería mezcle orientaciones
-                        // (decisión 14).
-                        proporcion="4/5"
-                        // El ancho de la caja, escrito dos veces: acá y en
-                        // `max-w-xs`. Los dos cambian juntos en la Fase 4.3.
-                        sizes="(max-width: 320px) 100vw, 320px"
-                        prioridad={i === 0}
-                      />
-                    </div>
-                  )}
-                  <h2 className="mt-4 text-titulo">
-                    <Link
-                      href={`/proyectos/${proyecto.slug}`}
-                      className="underline-offset-4 hover:underline"
-                    >
-                      {proyecto.titulo}
-                    </Link>
-                  </h2>
-                  {/* El título es el trabajo y la ubicación va aparte, como
-                      chip (docs/producto.md). */}
-                  <p className="mt-3">
-                    <Chip>{proyecto.ubicacion}</Chip>
-                  </p>
-                  <p className="max-w-lectura text-texto-suave mt-3">
-                    {recortar(proyecto.descripcion, 180)}
-                  </p>
-                </article>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-
-      {/* `empty:hidden` porque sin `NEXT_PUBLIC_WHATSAPP` el enlace no dibuja
-          nada, y un bloque vacío con su margen arriba deja un hueco que parece
-          un error de maquetación (Fase 4.6). */}
-      <div className="empty:hidden mt-16 md:mt-20">
-        <EnlaceWhatsapp contexto={{ tipo: "general" }} />
+        ) : (
+          <ListadoProyectos proyectos={proyectos} nivel={2} prioridad />
+        )}
       </div>
+
+      {/*
+        El cierre, con el mismo bloque de superficie que Inicio y el catálogo.
+        Sin proyectos no se dibuja: el estado vacío ya ofrece a dónde seguir, y
+        dos bloques de superficie seguidos se leen como uno solo mal cortado.
+      */}
+      {proyectos.length > 0 && (
+        <section className="bg-superficie mt-16 -mx-5 px-5 py-12 md:mt-28 md:-mx-12 md:px-12 md:py-20">
+          <h2 className="text-titulo">¿Tenés un proyecto parecido?</h2>
+          <p className="max-w-lectura text-texto-suave mt-4">
+            Contanos qué espacio hay que resolver —una casa, una obra o una
+            oficina— y te asesoramos sobre qué sistema conviene.
+          </p>
+
+          <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
+            {hayWhatsapp ? (
+              <>
+                <EnlaceWhatsapp contexto={{ tipo: "general" }} />
+                <Link href="/contacto" className={clasesDeBoton("enlace")}>
+                  Otras formas de contacto
+                </Link>
+              </>
+            ) : (
+              // Sin número cargado el botón de WhatsApp no se dibuja (Fase
+              // 4.6), y un cierre sin ninguna acción no cierra nada.
+              <Link href="/contacto" className={clasesDeBoton("principal")}>
+                Escribinos
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

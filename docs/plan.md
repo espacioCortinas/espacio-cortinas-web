@@ -293,7 +293,25 @@ viene cortado por el borde superior del archivo fuente, así que el recorte
 literal sale sucio y cualquier otra composición sería un lockup nuevo que la
 empresa no autorizó — decisión 45.
 
-**4.3 Proyectos.** `/proyectos` y `/proyectos/[slug]`, con galería.
+**4.3 Proyectos — HECHA.** `/proyectos` y `/proyectos/[slug]`, destrabada por el
+primer proyecto cargado, `cowork-nordelta`: seis fotos y dos videos, uno de
+ellos el primer vertical del sitio.
+
+- **Los videos van intercalados en la galería**, en el lugar que les da la
+  carpeta, en bucle como los de producto — decisión 51. `components/video-variante.tsx`
+  se generalizó a `components/video-mudo.tsx`, que entra en una diapositiva
+  con su propia proporción; `components/galeria.tsx` acepta fotos y videos.
+- **El listado está pensado para uno y para veinte**: el primero en fila, el
+  resto en grilla de tres — decisión 52. Medido con veinte: 5.751 px a 1440.
+- **Inicio suma su sector de proyectos**, con la misma regla, a pedido de quien
+  desarrolla y con un solo proyecto — decisión 52.
+- **El pipeline**: el lado mayor de un video va a 1280 —el vertical se habría
+  agrandado—, un video de más de 25 MiB no se publica, y un HEIC se convierte
+  con ffmpeg o, si está truncado, no se publica y se dice por qué — decisiones
+  51 y 53.
+
+**Queda pendiente de la 4.3, y lo resuelve la empresa:** la descripción del
+proyecto, que es provisoria y está marcada así en `contenido/proyectos.ts`.
 
 **4.4 Productos — HECHA.** `/productos` es **una fila por producto**, con la
 portada de un lado y el nombre, la descripción y las variantes del otro, y el
@@ -340,8 +358,8 @@ false`** y que no hay ningún proyecto, así que las dos secciones con contenido
 que este plan pedía para Inicio renderizaban vacío las dos. Se marcaron cuatro
 destacados por criterio de venta, no fotográfico.
 
-**Queda pendiente de la 4.5:** el sector de proyectos, que entra cuando haya
-contenido cargado.
+~~**Queda pendiente de la 4.5:** el sector de proyectos, que entra cuando haya
+contenido cargado.~~ Entró en la Fase 4.3, con el primer proyecto — decisión 52.
 
 **Y se borra el andamio de la 4.1:** `app/muestra/` entera —página, estilos y
 tipografías— más `public/muestra-logo.png`. Era para elegir la dirección visual

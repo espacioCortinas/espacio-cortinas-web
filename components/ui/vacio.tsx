@@ -3,8 +3,9 @@ import type { ReactNode } from "react";
 /**
  * Un listado que no tiene nada.
  *
- * **Se dice, no se tapa.** Hoy `/proyectos` está vacía —nunca se llegó a cargar
- * un proyecto antes de sacar el panel— y eso es información sobre el estado del
+ * **Se dice, no se tapa.** `/proyectos` estuvo vacía hasta la Fase 4.3 —nunca
+ * se llegó a cargar un proyecto antes de sacar el panel—, y vuelve a estarlo si
+ * algún día todos quedan inactivos. Eso es información sobre el estado del
  * contenido, no un error que haya que esconder. Las dos salidas fáciles son
  * peores que decirlo: llenar la sección con trabajos inventados sería mentir
  * sobre lo que la empresa hizo, y esconder la sección del menú haría que un

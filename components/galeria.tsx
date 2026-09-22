@@ -1,6 +1,7 @@
 import { FotoImg } from "@/components/foto";
-import type { Foto } from "@/contenido/tipos";
-import { sizesConTope, topeDeAncho } from "@/lib/fotos";
+import { VideoMudo } from "@/components/video-mudo";
+import type { Medio } from "@/contenido/tipos";
+import { esVideo, sizesConTope, topeDeAncho } from "@/lib/fotos";
 import { altAutomatico } from "@/lib/texto";
 
 /**
@@ -42,7 +43,42 @@ import { altAutomatico } from "@/lib/texto";
  * **El tope de píxeles sigue valiendo**: ninguna foto se muestra más ancha que
  * `topeDeAncho()`, así que `cortinas-tela/barral/2` no pasa de 514 px aunque la
  * diapositiva dé más.
+ *
+ * # Fotos y videos, en el mismo orden
+ *
+ * Desde la Fase 4.3 un elemento puede ser un video: la galería de un proyecto
+ * los trae intercalados en el orden de la carpeta — decisión 51. Ocupa una
+ * diapositiva como cualquier foto, con la misma caja, y va en bucle y mudo
+ * como los de variante. Arranca cuando su diapositiva queda a la vista, no
+ * antes: los que están más allá en la tira no se descargan hasta que alguien
+ * desliza hasta ellos. Ver `components/video-mudo.tsx`.
+ *
+ * Las galerías de producto no traen videos —los de una variante van debajo de
+ * ella, en bucle— así que para ellas nada de esto cambia.
  */
+
+/**
+ * El ancho máximo de una diapositiva para que el medio que lleva adentro no se
+ * muestre más ancho que sus píxeles.
+ *
+ * **Si el medio es más ancho que la caja, o igual, se muestra al ancho de la
+ * diapositiva**, y el tope es el suyo tal cual. **Si es más alto**, se muestra
+ * al alto de la caja y queda más angosto que la diapositiva, así que la
+ * diapositiva puede ser proporcionalmente más ancha sin que el medio pase de su
+ * tope. Sin esta cuenta, el video vertical del cowork —720 px de ancho, tope de
+ * 360— achicaría su diapositiva a 360 y la tira quedaría con una caja más baja
+ * que las demás, cuando adentro de una caja de 480 × 600 se muestra a 337 de
+ * ancho y le sobra.
+ *
+ * Para las fotos de producto da lo mismo que antes: todas tienen el tope por
+ * encima de los 480 px de la diapositiva.
+ */
+function topeDeDiapositiva(medio: Medio, altoSobreAnchoCaja: number): number {
+  const altoSobreAncho = medio.alto / medio.ancho;
+  return Math.floor(
+    topeDeAncho(medio) * Math.max(1, altoSobreAncho / altoSobreAnchoCaja),
+  );
+}
 
 /**
  * Lo más vertical que puede ponerse la caja: 4:5, la proporción de las portadas
@@ -77,44 +113,64 @@ const TRAMOS = [
 ];
 
 export function Galeria({
-  fotos,
+  medios,
   nombre,
   desde = 1,
   prioridad = false,
 }: {
-  fotos: Foto[];
+  /**
+   * Fotos, o fotos y videos intercalados. Un `Foto[]` entra tal cual: es lo
+   * que mandan las páginas de producto.
+   */
+  medios: Medio[];
   /** Para el texto alternativo: «Roller — foto 3». */
   nombre: string;
   /**
-   * La posición de la primera foto de este arreglo dentro de la galería
+   * La posición de la primera FOTO de este arreglo dentro de la galería
    * completa, empezando en 1.
    *
-   * Existe porque la página de producto muestra la portada arriba y manda acá
-   * el resto: la primera de este arreglo es la foto 2 del producto, y el texto
-   * alternativo tiene que decir «foto 2» y no «foto 1» — es la misma
+   * Existe porque las páginas de producto y de proyecto muestran la portada
+   * arriba y mandan acá el resto: la primera de este arreglo es la foto 2, y
+   * el texto alternativo tiene que decir «foto 2» y no «foto 1» — es la misma
    * numeración que ve el visitante.
+   *
+   * **Las fotos y los videos se cuentan por separado**: «foto 3», «video 1».
+   * Un lector de pantalla que oye «foto 7» esperando la séptima foto y recibe
+   * un video pierde la cuenta; y ningún video es portada, así que su cuenta
+   * siempre empieza en 1.
    */
   desde?: number;
   /** La primera foto de la página, si esta galería es lo primero que se ve. */
   prioridad?: boolean;
 }) {
-  if (fotos.length === 0) return null;
+  if (medios.length === 0) return null;
 
-  // La caja, sacada de la foto más alta de esta galería. `aspectRatio` se
+  // La caja, sacada del medio más alto de esta galería. `aspectRatio` se
   // escribe ancho/alto, así que va invertida.
-  const masAlta = Math.max(...fotos.map((f) => f.alto / f.ancho));
-  const relacionCaja = 1 / Math.min(RELACION_MAXIMA, masAlta);
+  const masAlta = Math.max(...medios.map((m) => m.alto / m.ancho));
+  const altoSobreAnchoCaja = Math.min(RELACION_MAXIMA, masAlta);
+  const relacionCaja = 1 / altoSobreAnchoCaja;
 
-  // Con una sola foto no hay nada que recorrer: se dibuja sola, al ancho que
+  // La numeración de cada elemento, contando fotos y videos por separado.
+  let fotos = desde - 1;
+  let videos = 0;
+  const numeros = medios.map((m) => (esVideo(m) ? ++videos : ++fotos));
+
+  const etiquetaDeVideo = (n: number) => `${nombre.trim()} — video ${n}`;
+
+  // Con un solo elemento no hay nada que recorrer: se dibuja solo, al ancho que
   // sus píxeles permitan. Un carrusel de un elemento es un carrusel roto.
-  if (fotos.length === 1) {
-    const foto = fotos[0];
+  if (medios.length === 1) {
+    const medio = medios[0];
+    if (esVideo(medio)) {
+      return <VideoMudo video={medio} etiqueta={etiquetaDeVideo(1)} />;
+    }
     return (
-      <div style={{ maxWidth: `${topeDeAncho(foto)}px` }}>
+      <div style={{ maxWidth: `${topeDeAncho(medio)}px` }}>
         <FotoImg
-          foto={foto}
+          foto={medio}
           alt={altAutomatico(nombre, desde)}
-          sizes={sizesConTope(foto, TRAMOS)}
+          sizes={sizesConTope(medio, TRAMOS)}
           prioridad={prioridad}
         />
       </div>
@@ -135,55 +191,69 @@ export function Galeria({
     <ul
       tabIndex={0}
       role="group"
-      aria-label={`Fotos de ${nombre}, se recorren de costado`}
+      aria-label={`${videos > 0 ? "Fotos y videos" : "Fotos"} de ${nombre}, se recorren de costado`}
       className={
         "flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-3 " +
         "[scrollbar-color:var(--color-texto-suave)_transparent] [scrollbar-width:thin]"
       }
     >
-      {fotos.map((foto, i) => (
+      {medios.map((medio, i) => (
         <li
-          key={foto.carpeta}
+          key={esVideo(medio) ? medio.archivo : medio.carpeta}
           className={`${ANCHO_DIAPOSITIVA} shrink-0 snap-start`}
           /*
             **El tope de píxeles vive acá**, en la diapositiva, y no en un
             envoltorio de la foto: la foto nunca puede ser más ancha que su
             diapositiva, así que topear la diapositiva topea la foto sin
-            inventar una caja intermedia.
-            
-            Hoy no llega a morder —la diapositiva no pasa de 480 px y el tope
-            más bajo del archivo es el de `cortinas-tela/barral/2`, que son
-            514— pero va igual: es la garantía que hace que ensanchar la tira
-            mañana no devuelva una foto blanda.
+            inventar una caja intermedia. La cuenta, en `topeDeDiapositiva()`.
+
+            Hoy no llega a morder en ninguna foto —la diapositiva no pasa de
+            480 px y el tope más bajo es el de `cortinas-tela/barral/2`, que
+            son 514— pero va igual: es la garantía que hace que ensanchar la
+            tira mañana no devuelva una foto blanda.
           */
-          style={{ maxWidth: `min(${ANCHO_MAXIMO}, ${topeDeAncho(foto)}px)` }}
+          style={{
+            maxWidth: `min(${ANCHO_MAXIMO}, ${topeDeDiapositiva(medio, altoSobreAnchoCaja)}px)`,
+          }}
         >
-          {/*
-            La caja de la diapositiva. Todas iguales dentro de una galería, y
-            **sin fondo propio**: lo que sobra queda en papel, no en un
-            rectángulo de superficie. Una foto apaisada dentro de una caja
-            vertical con el fondo un paso más oscuro se lee como una barra negra
-            de televisor; sobre el papel se lee como una lámina, que es
-            literalmente la tesis de la dirección.
-          */}
-          <div
-            className="flex items-center justify-center"
-            style={{ aspectRatio: relacionCaja }}
-          >
-            {/*
-              `max-w-full` y `max-h-full` son lo que hace el «contain»: la foto
-              se achica hasta entrar por los dos lados y conserva su proporción
-              —la altura la deja en `auto` el preflight de Tailwind—. Acá no se
-              recorta nada, y lo que sobra de la caja queda en papel.
-            */}
-            <FotoImg
-              foto={foto}
-              alt={altAutomatico(nombre, desde + i)}
-              sizes={sizesConTope(foto, TRAMOS)}
-              prioridad={prioridad && i === 0}
-              className="max-h-full max-w-full object-contain"
+          {esVideo(medio) ? (
+            // El video trae su propia caja, con la misma proporción que las de
+            // las fotos: así queda a la misma altura que ellas y su leyenda y
+            // su botón caen debajo, nunca encima.
+            <VideoMudo
+              video={medio}
+              etiqueta={etiquetaDeVideo(numeros[i])}
+              caja={relacionCaja}
             />
-          </div>
+          ) : (
+            /*
+              La caja de la diapositiva. Todas iguales dentro de una galería, y
+              **sin fondo propio**: lo que sobra queda en papel, no en un
+              rectángulo de superficie. Una foto apaisada dentro de una caja
+              vertical con el fondo un paso más oscuro se lee como una barra
+              negra de televisor; sobre el papel se lee como una lámina, que es
+              literalmente la tesis de la dirección.
+            */
+            <div
+              className="flex items-center justify-center"
+              style={{ aspectRatio: relacionCaja }}
+            >
+              {/*
+                `max-w-full` y `max-h-full` son lo que hace el «contain»: la
+                foto se achica hasta entrar por los dos lados y conserva su
+                proporción —la altura la deja en `auto` el preflight de
+                Tailwind—. Acá no se recorta nada, y lo que sobra de la caja
+                queda en papel.
+              */}
+              <FotoImg
+                foto={medio}
+                alt={altAutomatico(nombre, numeros[i])}
+                sizes={sizesConTope(medio, TRAMOS)}
+                prioridad={prioridad && i === 0}
+                className="max-h-full max-w-full object-contain"
+              />
+            </div>
+          )}
         </li>
       ))}
     </ul>

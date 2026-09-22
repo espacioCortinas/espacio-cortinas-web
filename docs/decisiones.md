@@ -2312,7 +2312,253 @@ diferida. Se vio en el navegador, no leyendo el código.
 
 ---
 
+### 51. Los videos de un proyecto van intercalados en su galería, en bucle como los de producto
+
+**Fecha:** septiembre de 2026, Fase 4.3.
+
+**El planteo.** En productos, un video pertenece a una variante motorizada
+(decisión 40). **Los proyectos no tienen variantes**, y el primero que se cargó,
+`cowork-nordelta`, trae dos videos numerados `7.mp4` y `8.mp4`: o sea, al final
+de la secuencia de su galería. Uno es apaisado de 15 segundos; el otro es el
+primer video vertical del sitio, 1080 × 1920 y 22 segundos. Mirados cuadro por
+cuadro, **los dos son recorridos de cámara por la oficina**, no una cortina que
+se mueve.
+
+#### Dónde van: en la galería, en el lugar que les da la carpeta
+
+Se evaluó la lectura directa —la galería admite videos intercalados en su orden,
+igual que una foto— contra dos alternativas:
+
+- _Un sector aparte de «videos» debajo de la galería_: separa lo que la carpeta
+  junta, y obliga a quien carga a saber que el número del archivo no significa
+  nada para los videos. `7.mp4` después de `6.jpg` dice exactamente dónde va.
+- _Una etiqueta `tipo` en cada entrada de `contenido/fotos.ts`_: habría cambiado
+  las 37 filas de un manifiesto que funciona para decir algo que ya dice su
+  forma.
+
+**Se eligió la lectura directa, y así quedó modelada:**
+
+- `contenido/fotos.ts` **no cambia de forma**: sigue teniendo solo fotos. De ahí
+  salen la portada, los listados y la miniatura de WhatsApp, y ninguno de los
+  tres puede recibir un video.
+- `contenido/videos.ts` suma los de proyecto con la clave
+  `proyectos/<slug>/<nombre>` y un campo nuevo, `posicion`: el lugar en la
+  galería **contando fotos y videos juntos**, que es el orden alfabético de la
+  carpeta. Lo calcula el script; no se escribe a mano.
+- `contenido/index.ts` arma `galeria` para cada proyecto insertando cada video en
+  su posición. **La portada queda primera aunque la carpeta empiece con un
+  video**, y el script lo avisa.
+- `Medio = Foto | Video`, y se distinguen por su forma —`carpeta` contra
+  `archivo`— con `esVideo()` de `lib/fotos.ts`. `components/galeria.tsx` acepta
+  `Medio[]`; un `Foto[]` entra tal cual, así que para productos no cambió nada.
+
+**La ruta del archivo lleva la entidad adelante**
+(`public/videos/proyectos/cowork-nordelta/7.mp4`) y la de los videos de variante
+no (`public/videos/roller/motorizado.mp4`). Es una asimetría heredada y
+deliberada: los de variante ya estaban publicados y moverlos sería reescribirlos
+en git (decisión 48). El comentario de `Video.archivo` ya lo preveía.
+
+#### Cómo se reproducen: en bucle, igual que en productos
+
+**Primero se hicieron a pedido, y se revirtió después de probarlo.** El
+argumento era que el video de variante documenta un gesto —la cortina que sube
+y baja sola, que se entiende repetido— y el de proyecto un lugar, un paneo que
+al volver a empezar se lee como un salto; que 22 segundos mudos repitiéndose
+son movimiento que nadie pidió; y que son los archivos más pesados de la
+página. Quedaban en su cuadro de cartel con un botón «Reproducir» debajo.
+
+**Quien desarrolla lo probó y pidió que se comporten como los de productos**:
+sin botón, arrancan solos, mudos y en bucle. Pesa más la coherencia del sitio
+—un video es un video en cualquier página— que la diferencia entre un gesto y
+un recorrido.
+
+Lo que se conserva del planteo anterior es lo que no dependía del modo: **el
+archivo no se pide hasta que el video está por entrar en pantalla**, y dentro de
+la tira eso es la diapositiva visible —`IntersectionObserver` recorta contra el
+contenedor que se desliza—, así que un video que está más allá en la galería no
+se descarga hasta que alguien desliza hasta él. Se pausa al salir. Con
+`prefers-reduced-motion` o con la reproducción bloqueada aparece el botón, igual
+que en productos.
+
+**Sin la barra de controles nativa**: se dibuja **encima** del video, y en este
+sitio no va nada sobre una imagen.
+
+`components/video-variante.tsx` pasó a ser `components/video-mudo.tsx` —no se
+copió—, con una sola novedad: `caja`, para entrar en una diapositiva de la
+galería con su propia proporción. El modo «a pedido» que tuvo durante la fase
+se sacó al revertir: no lo usaba nadie.
+
+#### El vertical, sin barras
+
+Dentro de la tira, el `<video>` **se dimensiona a su propia proporción** dentro
+de la caja —al alto si es más alto que ella, al ancho si no— en vez de estirarse
+a la caja entera, que es donde aparecerían las franjas. Medido: en la caja 4:5
+de 480 × 600 el vertical ocupa 338 × 600, y a 375 de ancho, 203 × 360. Justo
+9:16.
+
+**Y el tope de la diapositiva se corrigió para medios más altos que la caja.**
+`topeDeAncho()` del vertical da 360 px; aplicado tal cual a la diapositiva, la
+habría achicado a 360 y la tira quedaba con una caja más baja que las demás,
+cuando adentro de 480 × 600 el video se muestra a 338 y le sobra. La cuenta
+nueva, `topeDeDiapositiva()`, escala el tope por cuánto más alto que la caja es
+el medio. Para las fotos de producto da lo mismo que antes: ninguna tiene el
+tope por debajo de los 480 px de la diapositiva.
+
+#### Lo que se encontró en el pipeline: el vertical se habría agrandado
+
+`convertirVideo()` escalaba con `scale=1280:-2` —siempre el ancho a 1280—, que
+con los dos videos apaisados de la 4.4 daba bien. **Con el vertical lo habría
+agrandado a 1280 × 2276.** Ahora el lado mayor va a `VIDEO_LADO_MAYOR` (1280) y
+nunca se agranda: el vertical sale a 720 × 1280. Para un apaisado de 1280 o más
+el resultado es idéntico al anterior, y ningún video publicado se reconvierte.
+
+El script además **se niega a publicar un video de más de 25 MiB**, el tope por
+archivo de Workers, y borra lo que escribió: el que falla si no es el
+despliegue. Los dos salieron en 2,4 y 3,6 MB, sin pista de audio y sin los
+metadatos de Clipchamp con que llegaron.
+
+---
+
+### 52. El listado de proyectos: el primero en fila, el resto en grilla — y así también en Inicio
+
+**Fecha:** septiembre de 2026, Fase 4.3.
+
+**El problema.** Hay un proyecto y va a haber veinte. Una grilla pensada para
+muchos se ve rota con uno —una tarjeta de un tercio y dos tercios de papel—; una
+composición pensada para uno no escala: veinte filas como las del catálogo son
+del orden de 14.000 px en escritorio.
+
+**La regla: el primero del arreglo va en fila y todos los demás, en grilla.** La
+fila es la de `/productos` —portada 4:5 al costado, título, ubicación como chip,
+descripción y «Ver el proyecto →», con el enlace estirado de la decisión 49—; la
+grilla son tarjetas —portada, título y chip— en una columna en teléfono, dos
+desde 640 y tres desde 1024.
+
+- **Con uno**, la página es una fila y se ve igual que el catálogo, no como una
+  grilla a la que le faltan tarjetas.
+- **Con veinte**, medido con diecinueve copias temporales: **5.751 px a 1440** y
+  **12.491 px a 375**, donde las tarjetas van de a una a todo el ancho.
+- **Con dos**, la grilla tiene una tarjeta sola. Es un estado de paso y está
+  asumido: es preferible a una regla que cambie de forma según cuántos haya, que
+  es la clase de cosa que nadie recuerda por qué pasa.
+
+**Tres columnas y no dos**, porque a dos cada tarjeta mediría 488 px y la foto
+del proyecto que abre —416— sería la más chica de la página: la jerarquía al
+revés. A tres son 325.
+
+**Dos columnas en teléfono se descartaron**: dejan 155 px por tarjeta, y el chip
+de ubicación, que no parte línea, no entra.
+
+**Cuál abre lo decide el orden de `contenido/proyectos.ts`**, que es donde ya se
+decide todo el orden del sitio. No hay un campo nuevo: los cuatro de la decisión
+11 siguen siendo cuatro.
+
+`components/tarjeta-proyecto.tsx` tiene las dos formas y
+`components/listado-proyectos.tsx` la regla. **La tarjeta lleva la prop `nivel`
+que la de producto perdió en la decisión 49**, y es coherente con esa decisión:
+allá quedaba un solo consumidor; acá hay dos desde el primer día —`/proyectos`
+cuelga del `<h1>` y usa `h2`, Inicio cuelga del `<h2>` de su sector y usa `h3`—.
+
+#### El título es «Proyectos integrales», no «Trabajos terminados»
+
+El primer título fue «Trabajos terminados» y se cambió después de probarlo:
+sugería que los proyectos son los **únicos** trabajos terminados, cuando las
+fotos del catálogo también lo son. Esta sección muestra los proyectos grandes.
+«Integral» es el cuarto valor de `docs/producto.md` —asesoran y colocan—: dice
+un espacio resuelto entero, no una ventana, y dice escala sin prometer tamaño.
+Se descartaron «Obras» —corto, pero pide una bajada que diga de qué tipo— y
+«Grandes instalaciones» —con un solo proyecto cargado, suena a más de lo que
+hay—. Vale para el `<h1>` de `/proyectos` y para el sector de Inicio; el menú
+sigue diciendo «Proyectos».
+
+#### El sector de Inicio entró con un solo proyecto
+
+`docs/producto.md` decía que entraba «cuando se cargue el primero». La
+recomendación fue esperar a tener dos o tres —un sector de portada con una
+tarjeta puede verse más pobre que no tenerlo— y **quien desarrolla eligió que
+entre ahora**. Lo que lo hace sostenible es que usa el mismo listado: con uno, el
+sector es una fila, no una grilla incompleta.
+
+**Va cuarto**, después de «Cómo trabajamos» y antes de «Arquitectos y oficinas»:
+el sector 3 dice cómo se trabaja y este muestra el resultado; y el primer
+proyecto es una oficina, que es la evidencia que el sector 5 no tenía. Sale
+solo si hay proyectos destacados: si todos quedan inactivos, desaparece solo y
+`/proyectos` vuelve al estado vacío, que sigue en el código.
+
+---
+
+### 53. `sharp` no decodifica ningún HEIC de iPhone: el script lo convierte, y se niega con uno truncado
+
+**Fecha:** septiembre de 2026, Fase 4.3.
+
+**El diagnóstico anterior estaba mal.** Dos tandas de HEIC llegaron del mismo
+origen, fallaron en `npm run fotos` con «no se pudo preparar», se rescataron a
+mano con ffmpeg y quedaron anotadas como **truncadas**. Medido en esta fase:
+
+- `sharp.format.heif` solo lista `.avif` como entrada. **El binario precompilado
+  trae libheif con AV1 y sin HEVC**, y un HEIC de iPhone es HEVC.
+- Un HEIC **sano** —decodificado entero por ffmpeg sin un solo error— falla en
+  `sharp` con «Decoder plugin generated an error», que se lee como daño aunque no
+  lo sea. `metadata()` sí funciona, así que el archivo parece legible hasta que
+  se lo quiere procesar.
+- Los `.HEIC` que hay en `fotos-originales/productos/` y se publicaron bien son
+  en realidad **JPEG con otra extensión**: `sharp` los lee por el contenido.
+
+O sea que `docs/publicar-fotos.md` —«se aceptan `.heic`, no hace falta convertir
+las del iPhone»— era falso para cualquier HEIC de verdad, y lo que se atribuyó a
+la transferencia pudo haber sido, al menos en parte, el formato. Los originales
+de las dos tandas ya no están, así que no se puede saber cuáles estaban cortados
+de verdad.
+
+**Lo que se hizo:**
+
+- **HEIC sano → se convierte solo**, con la receta de abajo, a una carpeta
+  temporal —el original no se toca—, **y se avisa con `!`**: cuenta en el
+  resumen de avisos. No es un problema que haya que resolver, y pedirle a una
+  persona que convierta a mano cada foto de iPhone es un paso que se olvida.
+- **HEIC truncado o dañado → no se publica.** La prueba es decodificarlo entero
+  con ffmpeg: uno cortado da `partial file` o `Invalid NAL unit size`, uno sano
+  no da nada. El script dice cuál es, cuánto pesa, qué encontró ffmpeg y el
+  comando exacto de rescate con sus rutas. **No se arregla en silencio**: un
+  archivo cortado es un problema de transferencia que conviene saber, y el
+  rescate puede salir con una franja gris donde faltaban datos, que solo se ve
+  mirándolo.
+- **Cualquier original que no se publica** —HEIC dañado, JPEG cortado, algo que
+  no es una imagen— sale con el mismo formato: `NO SE PUBLICA`, archivo, causa y
+  qué hacer. Y la corrida termina con **código 1**, aunque escriba el
+  manifiesto: `npm run fotos && git commit` tiene que frenar si falta una foto
+  que alguien puso en la carpeta.
+
+Verificado con un HEIC sano, uno truncado a propósito y un JPEG truncado, en una
+carpeta de originales aparte.
+
+**La receta**, una sola, que corre el script y que se corre a mano para
+rescatar:
+
+```
+ffmpeg -i entrada.HEIC -frames:v 1 -update 1 -q:v 2 -map_metadata -1 salida.jpg
+```
+
+**Lo que la receta pierde, anotado:** el perfil de color. Un HEIC de iPhone trae
+Display P3 y el JPEG sale sin perfil, así que `sharp` lo interpreta como sRGB y
+los colores quedan un poco más apagados. Pasa igual con las seis fotos del
+cowork, rescatadas a mano. La diferencia es chica y no justifica sumar
+dependencias; si algún día importa, la salida es un `sharp` compilado con
+libde265, no otra receta.
+
+---
+
 ## Decisiones abiertas
+
+**Los videos no responden a pedidos por rango, y Safari puede no
+reproducirlos.** Encontrado al cerrar la Fase 4.3. Un pedido con
+`Range: bytes=0-1023` a `/videos/roller/motorizado.mp4` en producción devuelve
+**200 con el archivo entero** y sin `Accept-Ranges`, no 206. No pasa por el
+Worker —no hay `x-opennext`—: lo sirve la capa de assets de Cloudflare, desde
+caché. Safari, en iPhone y en Mac, pide los videos por rango y es conocido que
+no los reproduce si el servidor no contesta 206. **No está comprobado en un
+iPhone real**, y afecta a los cuatro videos del sitio, no solo a los de la 4.3.
+Resolverlo implica cambiar cómo se sirven los videos, así que se decide aparte.
 
 **Falta el logo en vector, y una versión para fondo oscuro.** Hoy hay un JPG de
 524 px en `fotos-originales/logo.jpg`. Alcanza para el encabezado —160 px a

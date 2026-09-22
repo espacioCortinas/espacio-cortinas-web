@@ -91,9 +91,11 @@ contenido/
 └── index.ts                     une contenido y medios; es lo que leen las páginas
 components/
 ├── foto.tsx                     el <img> con srcset, proporción y recorte
-├── galeria.tsx                  la galería de dos módulos, apaisada y vertical
-├── video-variante.tsx           el video en bucle. "use client" (uno de dos)
-├── tarjeta-producto.tsx         la portada y el nombre; el elemento de grilla
+├── galeria.tsx                  la tira que se desliza, con fotos y videos
+├── video-mudo.tsx               el video mudo, en bucle. "use client" (uno de dos)
+├── tarjeta-producto.tsx         la portada y el nombre; la grilla de Inicio
+├── tarjeta-proyecto.tsx         el proyecto en fila o en tarjeta
+├── listado-proyectos.tsx        el primero en fila y el resto en grilla
 ├── logo.tsx                     el logo del encabezado
 ├── encabezado.tsx               logo y navegación
 ├── navegacion.tsx               los cuatro enlaces. "use client" (uno de dos)
@@ -232,12 +234,16 @@ al servir.
 1. Los originales van en fotos-originales/<entidad>/<slug>/, numerados.
    El orden alfabético es el de la galería y el primero es la portada.
    Un nivel más adentro, una carpeta por variante; y su video al lado,
-   con el mismo nombre que la carpeta
+   con el mismo nombre que la carpeta. En un proyecto, los videos van
+   entre las fotos, numerados como ellas
         ↓
 2. npm run fotos
+   ffmpeg: pasa cada HEIC a JPEG antes, porque sharp no decodifica HEVC;
+   uno truncado NO se publica y la corrida termina con error
    sharp: aplica la orientación del EXIF, recorta la portada a 4:5 si hace
    falta, genera un WebP por cada medida y BORRA TODOS LOS METADATOS
-   ffprobe/ffmpeg: mide cada video y le saca el primer cuadro de cartel
+   ffprobe/ffmpeg: convierte cada video nuevo, lo mide y le saca el primer
+   cuadro de cartel
         ↓
 3. Escribe public/fotos/, public/videos/ y los manifiestos
    contenido/fotos.ts y contenido/videos.ts
@@ -261,7 +267,16 @@ listados usan siempre la portada del producto.
 `public/videos/` está en git y reencodearlo duplicaría su peso en la historia.
 Los parámetros de la conversión, para lo que entre de ahora en adelante, están
 en `convertirVideo()`; `-map_metadata -1` es la línea que borra las coordenadas,
-que un video de celular trae igual que una foto.
+que un video de celular trae igual que una foto. El lado mayor va a 1280 —no el
+ancho: un vertical saldría agrandado— y un video de más de 25 MiB no se publica
+(decisión 51).
+
+**Los videos de un proyecto van en su galería**, en el lugar que les da el orden
+de la carpeta, y el manifiesto registra ese lugar en `posicion`. Decisión 51.
+
+**Un HEIC de iPhone no lo lee `sharp`**: su binario no trae decodificador HEVC.
+El script lo convierte con ffmpeg a un JPEG temporal si está sano, y **se niega**
+si está truncado, diciendo cuál es y cómo rescatarlo. Decisión 53.
 
 **Por qué acá y no en el navegador.** Hasta la Fase 3 esto lo hacía el navegador
 de quien subía, y no por gusto: el runtime de Workers no ejecuta módulos nativos

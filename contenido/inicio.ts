@@ -92,6 +92,31 @@ export const inicio = {
   },
 
   /**
+   * El sector de proyectos. Entró en la Fase 4.3, con el primero cargado —
+   * decisión 52—, y se compone con la misma regla que `/proyectos`: el primero
+   * en fila y el resto en grilla, así que con uno no se ve como una grilla a la
+   * que le faltan tarjetas.
+   *
+   * PROVISORIO — lo reemplaza el texto de la empresa. **No afirma cuántos
+   * trabajos hay**: el número real es el del listado, y cualquier cifra escrita
+   * acá quedaría vieja con el próximo que se cargue.
+   */
+  proyectos: {
+    /**
+     * No «Trabajos terminados»: sugería que los proyectos son los únicos
+     * trabajos terminados, cuando las fotos del catálogo también lo son. Esta
+     * sección muestra los proyectos grandes, y «integral» es el cuarto valor
+     * de `docs/producto.md` —asesoran y colocan—: un espacio resuelto entero,
+     * no una ventana.
+     */
+    titulo: "Proyectos integrales",
+    bajada:
+      "Espacios completos que resolvimos de principio a fin: asesoramiento, " +
+      "medición y colocación propias.",
+    enlace: "Ver todos los proyectos",
+  },
+
+  /**
    * Los otros dos públicos de `docs/producto.md`. El texto dice lo que las
    * fotos muestran y nada más: las cinco de bandas verticales son oficinas
    * reales, y cuatro fotos del archivo son casas entregadas y todavía sin

@@ -48,7 +48,7 @@ cualquier texto.
 
 ```
 INICIO      Apertura, productos destacados, cómo trabajamos,
-            arquitectos y oficinas, cierre
+            proyectos destacados, arquitectos y oficinas, cierre
 
 PROYECTOS   Listado de trabajos realizados
             Proyecto → título, ubicación, descripción, galería
@@ -65,9 +65,11 @@ hay con qué: ni foto de equipo, ni taller, ni años documentados. Lo que la
 empresa es se dice en la bajada del titular y en «cómo trabajamos», que es donde
 vive el diferencial de verdad: la colocación es propia.
 
-**El sector de proyectos no está mientras no haya proyectos cargados.** Una
-página de inicio no promete lo que no existe. Entra solo cuando se cargue el
-primero.
+**El sector de proyectos está solo si hay proyectos destacados.** Una página de
+inicio no promete lo que no existe. Entró en la Fase 4.3 con el primero, y se
+compone igual que `/proyectos` —el primero en fila, el resto en grilla— para
+que con uno no parezca una grilla incompleta. Si todos quedan inactivos,
+desaparece solo — decisión 52.
 
 **Los textos de Inicio son provisorios y los redacta la empresa.** Viven en
 `contenido/inicio.ts`, en un solo archivo, y ahí está escrito qué no se puede

@@ -1,4 +1,4 @@
-import type { Foto, Video } from "@/contenido/tipos";
+import type { Foto, Medio, Video } from "@/contenido/tipos";
 import { DENSIDAD_DE_REFERENCIA } from "@/lib/constantes";
 
 /**
@@ -168,6 +168,16 @@ export function sizesConTope(
  * dos lugares donde una constante del código puede dejar de coincidir con el
  * manifiesto.
  */
+/**
+ * ¿Este elemento de galería es un video?
+ *
+ * Por la forma: un video tiene `archivo` y una foto tiene `carpeta`, los dos
+ * obligatorios en su tipo. Ver `Medio` en `contenido/tipos.ts`.
+ */
+export function esVideo(medio: Medio): medio is Video {
+  return "archivo" in medio;
+}
+
 export function rutaDeVideo(video: Video): string {
   return `/videos/${video.archivo}.${video.formato}`;
 }

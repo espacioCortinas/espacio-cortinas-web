@@ -2,13 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { FotoImg } from "@/components/foto";
+import { ListadoProyectos } from "@/components/listado-proyectos";
 import { TarjetaProducto } from "@/components/tarjeta-producto";
 import { EnlaceWhatsapp } from "@/components/whatsapp";
 import { clasesDeBoton } from "@/components/ui/boton";
 import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
-import { fotoDe, productosDestacados } from "@/contenido";
+import { fotoDe, productosDestacados, proyectosDestacados } from "@/contenido";
 import { inicio } from "@/contenido/inicio";
-import { PRODUCTOS_DESTACADOS_HOME } from "@/lib/constantes";
+import {
+  PRODUCTOS_DESTACADOS_HOME,
+  PROYECTOS_DESTACADOS_HOME,
+} from "@/lib/constantes";
 import { entornoPublico } from "@/lib/entorno";
 import { DESCRIPCION_SITIO, metadataDePagina } from "@/lib/metadata";
 import { altAutomatico } from "@/lib/texto";
@@ -21,8 +25,9 @@ import { altAutomatico } from "@/lib/texto";
  *     1  APERTURA                  la frase, la foto, una acción
  *     2  QUÉ HACEMOS               los cuatro productos destacados
  *     3  CÓMO TRABAJAMOS           asesoramiento, medición, fabricación, colocación
- *     4  ARQUITECTOS Y OFICINAS    los otros dos públicos
- *     5  CIERRE                    una sola acción
+ *     4  PROYECTOS INTEGRALES      los proyectos destacados — solo si hay alguno
+ *     5  ARQUITECTOS Y OFICINAS    los otros dos públicos
+ *     6  CIERRE                    una sola acción
  *
  * Se decidió mirando cuatro sitios profesionales del rubro —Silent Gliss, The
  * Shade Store, Dino Conte y un estudio de interiorismo— y **lo único que las
@@ -40,10 +45,16 @@ import { altAutomatico } from "@/lib/texto";
  *
  * # Lo que NO está, y es a propósito
  *
- * **No hay sección de proyectos.** `contenido/proyectos.ts` está vacío, y una
- * página de inicio no promete lo que no existe. `/proyectos` sigue en el menú
- * con su bloque de vacío, así que un enlace ya compartido no cae en el aire.
- * El día que se cargue el primer proyecto, esta página suma su sector.
+ * **El sector de proyectos existe solo si hay alguno destacado.** Una página
+ * de inicio no promete lo que no existe (decisión 47): si mañana todos quedan
+ * inactivos, el sector desaparece solo y `/proyectos` muestra su estado vacío.
+ * Entró en la Fase 4.3 con un solo proyecto, a pedido, y se compone con la
+ * misma regla que el listado —el primero en fila, el resto en grilla— para que
+ * con uno no parezca una grilla incompleta (decisión 52).
+ *
+ * **Va después de «cómo trabajamos» y antes de «arquitectos y oficinas»**: el
+ * sector 3 dice cómo se trabaja y este muestra el resultado; y el primer
+ * proyecto es una oficina, que es la evidencia que el sector 5 no tenía.
  *
  * **No hay grilla de tres columnas con ícono, título y párrafo** para explicar
  * el servicio, que es exactamente lo que hace The Shade Store en ese lugar y
@@ -70,6 +81,7 @@ const SECTOR = "mt-16 md:mt-28";
 
 export default function Inicio() {
   const destacados = productosDestacados(PRODUCTOS_DESTACADOS_HOME);
+  const proyectos = proyectosDestacados(PROYECTOS_DESTACADOS_HOME);
   const hayWhatsapp = entornoPublico.whatsapp !== null;
 
   /*
@@ -206,7 +218,27 @@ export default function Inicio() {
         </ol>
       </section>
 
-      {/* 4 — ARQUITECTOS Y OFICINAS ---------------------------------- */}
+      {/* 4 — PROYECTOS INTEGRALES ----------------------------------- */}
+      {proyectos.length > 0 && (
+        <section className={SECTOR}>
+          <h2 className="text-titulo">{inicio.proyectos.titulo}</h2>
+          <p className="max-w-lectura text-texto-suave mt-4">
+            {inicio.proyectos.bajada}
+          </p>
+
+          <div className="mt-10">
+            <ListadoProyectos proyectos={proyectos} nivel={3} />
+          </div>
+
+          <p className="mt-10">
+            <Link href="/proyectos" className={clasesDeBoton("enlace")}>
+              {inicio.proyectos.enlace}
+            </Link>
+          </p>
+        </section>
+      )}
+
+      {/* 5 — ARQUITECTOS Y OFICINAS ---------------------------------- */}
       <section className={SECTOR}>
         <div className="md:grid md:grid-cols-2 md:items-start md:gap-12">
           <div>
@@ -228,7 +260,7 @@ export default function Inicio() {
         </div>
       </section>
 
-      {/* 5 — CIERRE --------------------------------------------------- */}
+      {/* 6 — CIERRE --------------------------------------------------- */}
       <section
         className={`${SECTOR} bg-superficie -mx-5 px-5 py-12 md:-mx-12 md:px-12 md:py-20`}
       >

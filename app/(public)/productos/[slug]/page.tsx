@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { FotoImg } from "@/components/foto";
 import { Galeria } from "@/components/galeria";
-import { VideoVariante } from "@/components/video-variante";
+import { VideoMudo } from "@/components/video-mudo";
 import { EnlaceWhatsapp } from "@/components/whatsapp";
 import { clasesDeBoton } from "@/components/ui/boton";
 import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
@@ -173,7 +173,7 @@ export default async function Producto({ params }: Props) {
                   {variante.fotos.length > 0 && (
                     <div className="mt-8">
                       <Galeria
-                        fotos={variante.fotos}
+                        medios={variante.fotos}
                         nombre={`${producto.nombre} ${variante.nombre}`}
                       />
                     </div>
@@ -181,9 +181,9 @@ export default async function Producto({ params }: Props) {
 
                   {variante.video && (
                     <div className="mt-8">
-                      <VideoVariante
+                      <VideoMudo
                         video={variante.video}
-                        titulo={`${producto.nombre} ${variante.nombre}`}
+                        etiqueta={`${producto.nombre} ${variante.nombre}: la cortina abriéndose y cerrándose sola`}
                       />
                     </div>
                   )}
@@ -202,7 +202,7 @@ export default async function Producto({ params }: Props) {
             </p>
             <div className="mt-8">
               <Galeria
-                fotos={galeria}
+                medios={galeria}
                 nombre={producto.nombre}
                 // La portada es la foto 1 y se muestra arriba: esta galería
                 // empieza en la 2.

@@ -65,15 +65,28 @@ export const PORTADA_RELACION = 4 / 5;
 export const DENSIDAD_DE_REFERENCIA = 2;
 
 /**
- * Ancho al que se publica un video, en píxeles.
+ * El lado MAYOR al que se publica un video, en píxeles: el ancho si es
+ * apaisado, el alto si es vertical. No se agranda nunca.
  *
- * Los dos que hay ya estaban convertidos a 1280 cuando se escribió esto
- * (decisión 48), así que este número describe lo que hay y fija lo que va a
- * salir del script la próxima vez. Con `DENSIDAD_DE_REFERENCIA`, 1280 es una
- * caja de 640 px de CSS: el video no puede ser grande y por eso no puede ser
- * el protagonista de una página — `docs/diseno.md`.
+ * **Se llamaba `VIDEO_ANCHO` y convertía todo a 1280 de ancho**, que con los
+ * dos videos de la Fase 4.4 —apaisados— daba lo mismo. Con el primer video
+ * vertical (`proyectos/cowork-nordelta/8`, 1080 × 1920) esa regla lo habría
+ * AGRANDADO a 1280 × 2276: más bytes y ningún detalle — decisión 51. Para un
+ * apaisado de 1280 o más, el resultado es idéntico al de antes.
+ *
+ * Con `DENSIDAD_DE_REFERENCIA`, 1280 de lado mayor es una caja de 640 px de
+ * CSS: el video no puede ser grande y por eso no puede ser el protagonista de
+ * una página — `docs/diseno.md`.
  */
-export const VIDEO_ANCHO = 1280;
+export const VIDEO_LADO_MAYOR = 1280;
+
+/**
+ * El tope de peso de un archivo publicado: 25 MiB, el máximo que Workers
+ * acepta por asset (`docs/infraestructura.md`, «Límites de los assets del
+ * Worker»). `scripts/preparar-fotos.mjs` se niega a publicar un video que lo
+ * pase, porque el que falla después es el despliegue, no el script.
+ */
+export const TOPE_BYTES_POR_ARCHIVO = 25 * 1024 * 1024;
 
 /**
  * Calidad del H.264, en la escala CRF de x264: más bajo es mejor y más pesado.

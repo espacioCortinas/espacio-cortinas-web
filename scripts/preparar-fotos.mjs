@@ -29,8 +29,13 @@
  *     │       │   └── …
  *     │       └── motorizado.mp4 ← el VIDEO de la variante «motorizado»
  *     └── proyectos/
- *         └── casa-en-nordelta/
- *             └── 1.jpg
+ *         └── cowork-nordelta/
+ *             ├── 1.jpg ... 6.jpg
+ *             ├── 7.mp4          ← un proyecto no tiene variantes: sus videos
+ *             └── 8.mp4            van en la galería, en el orden de la carpeta
+ *
+ * Los HEIC pasan por ffmpeg antes de `sharp`, que no decodifica HEVC — ver
+ * `originalLegible()` y la decisión 53.
  *
  * Y el resultado:
  *
@@ -59,15 +64,18 @@
  * metadatos, y de ahí no se recupera el original.
  */
 
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import {
   existsSync,
   readdirSync,
   mkdirSync,
+  mkdtempSync,
+  statSync,
   writeFileSync,
   rmSync,
 } from "node:fs";
-import { basename, dirname, extname, join } from "node:path";
+import { tmpdir } from "node:os";
+import { basename, dirname, extname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import prettier from "prettier";
@@ -79,8 +87,9 @@ import {
   IMAGEN_LADO_MAXIMO,
   MEDIDAS_IMAGEN,
   PORTADA_RELACION,
-  VIDEO_ANCHO,
+  TOPE_BYTES_POR_ARCHIVO,
   VIDEO_CRF,
+  VIDEO_LADO_MAYOR,
 } from "../lib/constantes.ts";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -90,9 +99,11 @@ const DESTINO_VIDEOS = join(RAIZ, "public", "videos");
 const MANIFIESTO = join(RAIZ, "contenido", "fotos.ts");
 const MANIFIESTO_VIDEOS = join(RAIZ, "contenido", "videos.ts");
 
-// HEIC incluido: es lo que sacan los iPhone por defecto, y `sharp` lo lee.
-// Sin esto, una carpeta entera de fotos sin convertir se saltearía en silencio,
-// que es la peor forma de fallar.
+// HEIC incluido: es lo que sacan los iPhone por defecto. **`sharp` NO lo
+// decodifica** —su binario no trae decodificador HEVC, solo AV1— así que pasa
+// por ffmpeg antes: ver `originalLegible()`. Sin esta lista, una carpeta entera
+// de fotos sin convertir se saltearía en silencio, que es la peor forma de
+// fallar.
 const EXTENSIONES = new Set([
   ".jpg",
   ".jpeg",
@@ -135,6 +146,191 @@ const aviso = (t) => {
 };
 
 /**
+ * Cuántos originales quedaron sin publicar. Si hay alguno, la corrida termina
+ * con código 1 aunque haya escrito el manifiesto: `npm run fotos && git commit`
+ * tiene que frenar, porque falta una foto que alguien puso en la carpeta.
+ */
+let noPublicados = 0;
+
+/**
+ * Un original que no se pudo usar, con lo que hace falta para resolverlo:
+ * **cuál es, qué le pasa y qué hacer**. Un «no se pudo preparar» a secas
+ * obliga a quien lo lee a investigar lo que el script ya sabía.
+ */
+class OriginalInutilizable extends Error {
+  /**
+   * @param {string} causa qué le pasa, en una línea
+   * @param {string[]} salida qué hacer, una línea por paso
+   */
+  constructor(causa, salida) {
+    super(causa);
+    this.salida = salida;
+  }
+}
+
+/** La ruta como la ve quien corre el script: relativa al repositorio. */
+const legible = (ruta) => relative(RAIZ, ruta).replaceAll("\\", "/");
+
+/** «1,2 MB», para decir cuánto pesa un original que falló. */
+const peso = (ruta) =>
+  `${(statSync(ruta).size / 1024 / 1024).toLocaleString("es-AR", { maximumFractionDigits: 1 })} MB`;
+
+/**
+ * Los errores que ffmpeg encuentra al decodificar un archivo ENTERO, o una
+ * lista vacía si lo leyó limpio.
+ *
+ * Es la prueba que separa un HEIC sano de uno truncado: un archivo cortado a
+ * mitad de la transferencia da `partial file` o `Invalid NAL unit size`, y uno
+ * sano no da nada. Con `-v error` no aparece el aviso del mapa de ganancia HDR
+ * (`tmap`) que traen los iPhone recientes, que es de nivel advertencia y no es
+ * un daño.
+ */
+function erroresDeDecodificacion(ruta) {
+  const r = spawnSync(
+    "ffmpeg",
+    ["-v", "error", "-i", ruta, "-f", "null", "-"],
+    {
+      encoding: "utf8",
+    },
+  );
+  if (r.error) {
+    throw new OriginalInutilizable(
+      "es un HEIC y para leerlo hace falta ffmpeg, que no está instalado.",
+      ["Instalá ffmpeg y corré de nuevo `npm run fotos`."],
+    );
+  }
+  const lineas = r.stderr
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+  return r.status === 0 && lineas.length === 0
+    ? []
+    : lineas.length > 0
+      ? lineas
+      : [`ffmpeg terminó con código ${r.status}`];
+}
+
+/**
+ * La receta para pasar un HEIC a JPEG. **Es una sola y está escrita en
+ * `docs/publicar-fotos.md`**: la corre este script con un HEIC sano, y la
+ * corre a mano quien tenga que rescatar uno truncado.
+ *
+ * `-map_metadata -1` borra el EXIF —con las coordenadas— ya en el JPEG
+ * intermedio. `-update 1` le dice a ffmpeg que escribe UN archivo y no una
+ * secuencia numerada. `-q:v 2` es la calidad más alta que se usa en la
+ * práctica: el JPEG es intermedio y `sharp` lo recomprime después.
+ */
+const recetaHeic = (entrada, salida) => [
+  "-i",
+  entrada,
+  "-frames:v",
+  "1",
+  "-update",
+  "1",
+  "-q:v",
+  "2",
+  "-map_metadata",
+  "-1",
+  salida,
+];
+
+/** Dónde deja este script los JPEG que saca de un HEIC. Se borra al terminar. */
+let carpetaTemporal = null;
+
+/**
+ * La ruta de un archivo que `sharp` pueda leer: el original tal cual, o —si es
+ * un HEIC— un JPEG temporal sacado con ffmpeg.
+ *
+ * # Por qué el script convierte solo un HEIC sano, y se niega con uno truncado
+ *
+ * **Se había diagnosticado mal el problema.** Dos tandas de HEIC llegaron,
+ * fallaron en `sharp`, se rescataron a mano con ffmpeg y se anotaron como
+ * «truncadas». Medido en la Fase 4.3: **`sharp` no decodifica ningún HEIC de
+ * iPhone**, esté sano o no —su binario precompilado trae libheif con AV1 y sin
+ * HEVC—, y el mensaje con que falla, «Decoder plugin generated an error», se
+ * lee como un archivo dañado aunque no lo sea. Un HEIC sano sacado de un
+ * iPhone falla igual y ffmpeg lo decodifica sin un solo error. Decisión 53.
+ *
+ * Así que hay dos casos, y se tratan distinto a propósito:
+ *
+ * - **Sano**: se convierte solo, con la receta, **y se avisa con `!`** —
+ *   cuenta como aviso en el resumen—. No hay nada que arreglar: es solo que
+ *   `sharp` no lee ese formato, y pedirle a una persona que convierta a mano
+ *   cada foto de iPhone es un paso que alguien va a olvidar.
+ * - **Truncado**: **no se publica.** Se dice cuál es, qué encontró ffmpeg y
+ *   cómo rescatarlo a mano. Un archivo cortado es un problema de transferencia
+ *   —el Drive, un cable, un envío por WhatsApp— y arreglarlo en silencio
+ *   escondería justo eso. Además el rescate puede salir con una franja gris
+ *   donde faltaban datos, y eso solo se ve mirándolo.
+ *
+ * El original **no se toca** en ningún caso: el JPEG va a una carpeta temporal.
+ */
+async function originalLegible(ruta) {
+  let meta;
+  try {
+    meta = await sharp(ruta).metadata();
+  } catch (fallo) {
+    throw new OriginalInutilizable(
+      `no se reconoce como imagen (${fallo instanceof Error ? fallo.message : fallo}).`,
+      [
+        "Abrilo en la computadora. Si no abre, o abre cortado, pedí el archivo de nuevo.",
+        "Si es una captura, un PDF o un video con la extensión equivocada, sacalo de la carpeta.",
+      ],
+    );
+  }
+
+  if (meta.format !== "heif" || meta.compression !== "hevc") return ruta;
+
+  const errores = erroresDeDecodificacion(ruta);
+  if (errores.length > 0) {
+    const rescate = join(dirname(ruta), `${basename(ruta, extname(ruta))}.jpg`);
+    // «partial file» es la firma de un archivo cortado; cualquier otro error
+    // de decodificación es daño a secas. El prefijo `[hevc @ 0x…]` es para
+    // quien depura ffmpeg, no para quien carga fotos.
+    const truncado = errores.some((l) => /partial file/i.test(l));
+    const detalle = errores[0].replace(/^\[[^\]]*\]\s*/, "");
+    // Comillas si la ruta tiene espacios: el comando se copia y se pega.
+    const citar = (r) => (/\s/.test(r) ? `"${r}"` : r);
+    throw new OriginalInutilizable(
+      truncado
+        ? `es un HEIC TRUNCADO: le faltan datos (ffmpeg: «${detalle}»).`
+        : `es un HEIC DAÑADO: ffmpeg no lo lee entero («${detalle}»).`,
+      [
+        "No se publica. Suele ser una copia que se cortó: lo mejor es pedirlo de nuevo.",
+        "Si no hay otra copia, rescatá lo que tiene con:",
+        `  ffmpeg ${recetaHeic(citar(legible(ruta)), citar(legible(rescate))).join(" ")}`,
+        `Mirá el JPEG a ojo —puede salir con una franja gris— y si sirve, borrá ${basename(ruta)}.`,
+      ],
+    );
+  }
+
+  carpetaTemporal ??= mkdtempSync(join(tmpdir(), "preparar-fotos-"));
+  const jpeg = join(
+    carpetaTemporal,
+    `${legible(ruta).replaceAll("/", "__")}.jpg`,
+  );
+  const r = spawnSync(
+    "ffmpeg",
+    ["-v", "error", "-y", ...recetaHeic(ruta, jpeg)],
+    {
+      encoding: "utf8",
+    },
+  );
+  if (r.status !== 0 || !existsSync(jpeg)) {
+    throw new OriginalInutilizable(
+      `es un HEIC y ffmpeg no pudo convertirlo (${r.stderr.trim() || `código ${r.status}`}).`,
+      ["Pedí el archivo de nuevo, o exportalo como JPEG desde el teléfono."],
+    );
+  }
+
+  aviso(
+    `${basename(ruta)} es un HEIC: sharp no decodifica HEVC, así que se convirtió ` +
+      `con ffmpeg antes de prepararlo. El archivo está sano; es solo el formato.`,
+  );
+  return jpeg;
+}
+
+/**
  * Qué anchos se generan para una foto de este ancho.
  *
  * **No se agranda nunca**: agrandar no agrega detalle, solo bytes, y además
@@ -164,7 +360,12 @@ function medidasPara(anchoOriginal) {
  * traen las coordenadas del domicilio— así que igual se verifica con
  * `npm run fotos:revisar`, no se da por sentado. Ver docs/seguridad.md.
  */
-async function prepararFoto(rutaOriginal, carpetaDestino, esPortada) {
+async function prepararFoto(
+  rutaOriginal,
+  carpetaDestino,
+  esPortada,
+  nombre = basename(rutaOriginal),
+) {
   const meta = await sharp(rutaOriginal).metadata();
 
   if (!meta.width || !meta.height) {
@@ -191,7 +392,7 @@ async function prepararFoto(rutaOriginal, carpetaDestino, esPortada) {
 
   if (recortar) {
     aviso(
-      `${basename(rutaOriginal)} es la portada y está apaisada (${width}×${height}): ` +
+      `${nombre} es la portada y está apaisada (${width}×${height}): ` +
         `se recorta a ${anchoUtil}×${altoUtil} por el centro. ` +
         `Si el recorte corta algo importante, poné otra foto primero.`,
     );
@@ -232,7 +433,7 @@ async function prepararFoto(rutaOriginal, carpetaDestino, esPortada) {
     // tamaño equivocado en silencio, así que se comprueba en vez de confiar.
     if (info.width !== ancho) {
       throw new Error(
-        `${basename(rutaOriginal)}: se pidió ${ancho} px de ancho y salió ${info.width}. ` +
+        `${nombre}: se pidió ${ancho} px de ancho y salió ${info.width}. ` +
           `El nombre del archivo mentiría en el srcset.`,
       );
     }
@@ -241,9 +442,7 @@ async function prepararFoto(rutaOriginal, carpetaDestino, esPortada) {
     // sitio va a pedir `${ancho}.${info.format}`. Si eso no coincide con el
     // archivo escrito, la foto no carga.
     if (info.format !== FORMATO) {
-      throw new Error(
-        `${basename(rutaOriginal)}: se pidió ${FORMATO} y salió ${info.format}.`,
-      );
+      throw new Error(`${nombre}: se pidió ${FORMATO} y salió ${info.format}.`);
     }
 
     escrito = info;
@@ -359,9 +558,14 @@ function convertirVideo(origen, destino) {
     "-map_metadata",
     "-1",
     "-vf",
-    // `-2` deja que el alto salga de la proporción y caiga en un número par,
-    // que es lo que H.264 necesita.
-    `scale=${VIDEO_ANCHO}:-2`,
+    // **El lado MAYOR a `VIDEO_LADO_MAYOR`, y sin agrandar.** Un apaisado
+    // queda a 1280 de ancho, igual que antes; un vertical, a 1280 de alto. Con
+    // la regla anterior —`scale=1280:-2`, siempre el ancho— el vertical del
+    // cowork, 1080 × 1920, se habría AGRANDADO a 1280 × 2276 (decisión 51).
+    // `-2` deja que el otro lado salga de la proporción y caiga en un número
+    // par, que es lo que H.264 necesita.
+    `scale=w='if(gte(iw,ih),min(${VIDEO_LADO_MAYOR},iw),-2)':` +
+      `h='if(gte(iw,ih),-2,min(${VIDEO_LADO_MAYOR},ih))'`,
     "-c:v",
     "libx264",
     "-crf",
@@ -423,31 +627,46 @@ async function prepararCartel(rutaVideo, destino) {
 }
 
 /**
- * Publica el video de una variante y devuelve su entrada del manifiesto.
+ * Publica un video —de una variante o de la galería de un proyecto— y
+ * devuelve su entrada del manifiesto.
+ *
+ * `archivo` es la ruta dentro de `public/videos/` sin extensión:
+ * `roller/motorizado` para una variante, `proyectos/cowork-nordelta/7` para un
+ * proyecto. La asimetría está explicada en `Video.archivo`.
  *
  * **Si el video ya está publicado no se vuelve a convertir**, y eso es
  * deliberado: `public/videos/` está en git, así que reencodear el mismo video
  * con otros bytes suma su peso otra vez a la historia del repositorio, para
- * siempre. Los dos que hay se convirtieron a mano antes de que existiera esta
- * función y con parámetros que nadie anotó (decisión 48), así que se los deja
- * como están y solo se los mide. Lo que entre de ahora en adelante sí sale de
- * `convertirVideo()`.
+ * siempre. Los dos de variante se convirtieron a mano antes de que existiera
+ * esta función y con parámetros que nadie anotó (decisión 48), así que se los
+ * deja como están y solo se los mide. Lo que entre de ahora en adelante sí sale
+ * de `convertirVideo()`.
  */
-async function prepararVideo(origen, slug, clave) {
-  const archivo = `${slug}/${clave}`;
-  const destino = join(DESTINO_VIDEOS, slug, `${clave}.${FORMATO_VIDEO}`);
-  const destinoCartel = join(
-    DESTINO_VIDEOS,
-    slug,
-    `${clave}.${FORMATO_CARTEL}`,
-  );
+async function prepararVideo(origen, archivo) {
+  const destino = join(DESTINO_VIDEOS, `${archivo}.${FORMATO_VIDEO}`);
+  const destinoCartel = join(DESTINO_VIDEOS, `${archivo}.${FORMATO_CARTEL}`);
 
   if (existsSync(destino)) {
     console.log(
-      `  ▸ ${clave}${FORMATO_VIDEO === "mp4" ? ".mp4" : ""} ya publicado — no se reconvierte`,
+      `  ▸ ${archivo}.${FORMATO_VIDEO} ya publicado — no se reconvierte`,
     );
   } else if (origen) {
     convertirVideo(origen, destino);
+
+    // El tope de Workers es por archivo y lo que falla es el DESPLIEGUE, no
+    // esto: un video de 30 MB se commitea, se sube, y el sitio entero deja de
+    // desplegar. Se frena acá, y se borra lo escrito para que no quede en el
+    // árbol esperando que alguien lo commitee igual.
+    const bytes = statSync(destino).size;
+    if (bytes > TOPE_BYTES_POR_ARCHIVO) {
+      rmSync(destino);
+      throw new OriginalInutilizable(
+        `convertido pesa ${(bytes / 1024 / 1024).toFixed(1)} MiB y el tope de un archivo en Workers es 25 MiB.`,
+        [
+          "Acortalo antes de ponerlo en la carpeta. Un video de galería no necesita más de medio minuto.",
+        ],
+      );
+    }
   } else {
     throw new Error(
       `no hay ni original ni archivo publicado para el video ${archivo}.`,
@@ -502,11 +721,13 @@ async function prepararGaleria(carpetaOrigen, archivos, prefijo, conPortada) {
     // Una foto que falla no corta la corrida: se avisa y se sigue con las
     // demás. Cortar en la primera obligaría a descubrir los problemas de
     // a uno, y una tanda de treinta fotos son treinta corridas.
+    const ruta = join(carpetaOrigen, archivo);
     try {
       const datos = await prepararFoto(
-        join(carpetaOrigen, archivo),
+        await originalLegible(ruta),
         join(DESTINO, carpeta),
         conPortada && i === 0,
+        archivo,
       );
       fotos.push({ carpeta, ...datos });
       console.log(
@@ -514,8 +735,24 @@ async function prepararGaleria(carpetaOrigen, archivos, prefijo, conPortada) {
           `medidas: ${datos.medidas.join(" · ")}`,
       );
     } catch (fallo) {
+      noPublicados += 1;
+      // Cuál es, qué le pasa y qué hacer. Lo que la corrida anterior decía era
+      // «no se pudo preparar — <el mensaje de libvips>», y con un HEIC ese
+      // mensaje era el mismo estuviera sano o cortado.
+      const salida =
+        fallo instanceof OriginalInutilizable
+          ? fallo.salida
+          : [
+              "Abrilo en la computadora. Si no abre, o abre cortado, pedí el archivo de nuevo.",
+            ];
       aviso(
-        `${archivo}: no se pudo preparar — ${fallo instanceof Error ? fallo.message : fallo}`,
+        `${archivo}: NO SE PUBLICA\n` +
+          `      archivo  ${legible(ruta)} (${peso(ruta)})\n` +
+          `      causa    ${fallo instanceof Error ? fallo.message : fallo}\n` +
+          salida
+            .map((l, n) => `      ${n === 0 ? "qué hacer" : "         "} ${l}`)
+            .join("\n") +
+          `\n      Las demás fotos se procesaron igual.`,
       );
     }
   }
@@ -664,43 +901,72 @@ async function main() {
       }
 
       /*
-       * Y el video de cada variante motorizada, que es lo único que muestra lo
-       * que una foto no puede — decisión 40.
+       * Los videos sueltos en la carpeta. Qué son depende de la entidad:
+       *
+       * - En un PRODUCTO, cada uno es el video de la variante que se llama
+       *   igual —`motorizado.mp4` es de la variante con clave `motorizado`—,
+       *   que es lo único que muestra lo que una foto no puede (decisión 40).
+       * - En un PROYECTO, que no tiene variantes, es un elemento más de la
+       *   galería, **en el lugar que le da el orden alfabético de la carpeta
+       *   contando fotos y videos juntos**: `7.mp4` después de `6.jpg`. Es la
+       *   misma regla que ya vale para las fotos, así que quien carga no tiene
+       *   que aprender otra — decisión 51.
        */
+      const orden = [...archivos, ...videos].sort((a, b) =>
+        a.localeCompare(b, "es", { numeric: true }),
+      );
+
+      if (entidad === "proyectos" && videos.includes(orden[0])) {
+        aviso(
+          `${slug}: el primer archivo de la carpeta es un video (${orden[0]}), y la ` +
+            `portada tiene que ser una foto. La portada va a ser ${archivos[0] ?? "ninguna"} ` +
+            `y el video, el segundo. Si no es lo que querías, renumerá.`,
+        );
+      }
+
       for (const archivoVideo of videos) {
         const clave = basename(archivoVideo, extname(archivoVideo));
         vistas.add(clave);
 
-        if (entidad !== "productos") {
-          aviso(
-            `${entidad}/${slug}/${archivoVideo}: los videos son de variantes, y las ` +
-              `variantes son solo de productos. Se saltea.`,
-          );
-          continue;
-        }
-
-        if (declaradas && !declaradas.has(clave)) {
+        if (entidad === "productos" && declaradas && !declaradas.has(clave)) {
           aviso(
             `${slug}: hay un video "${archivoVideo}" y ninguna variante de ` +
               `contenido/productos.ts lo reclama con la clave "${clave}". No se va a ver.`,
           );
         }
 
+        // Los de variante no llevan la entidad en la ruta y los de proyecto sí:
+        // ver `Video.archivo` en `contenido/tipos.ts`.
+        const archivo =
+          entidad === "productos"
+            ? `${slug}/${clave}`
+            : `${entidad}/${slug}/${clave}`;
+
         try {
           const datos = await prepararVideo(
             join(carpetaSlug, archivoVideo),
-            slug,
-            clave,
+            archivo,
           );
+          if (entidad === "proyectos") {
+            datos.posicion = orden.indexOf(archivoVideo) + 1;
+          }
           manifiestoVideos[`${entidad}/${slug}/${clave}`] = datos;
           cuantosVideos += 1;
           console.log(
             `  ${`${entidad}/${slug}/${clave}`.padEnd(34)} ${datos.ancho}×${datos.alto}  ` +
-              `${datos.duracion} s  + cartel`,
+              `${datos.duracion} s  + cartel` +
+              (datos.posicion ? `  lugar ${datos.posicion} de la galería` : ""),
           );
         } catch (fallo) {
+          const ruta = join(carpetaSlug, archivoVideo);
+          noPublicados += 1;
           aviso(
-            `${archivoVideo}: no se pudo preparar — ${fallo instanceof Error ? fallo.message : fallo}`,
+            `${archivoVideo}: NO SE PUBLICA\n` +
+              `      archivo  ${legible(ruta)} (${peso(ruta)})\n` +
+              `      causa    ${fallo instanceof Error ? fallo.message : fallo}` +
+              (fallo instanceof OriginalInutilizable
+                ? `\n      qué hacer ${fallo.salida.join("\n                ")}`
+                : ""),
           );
         }
       }
@@ -753,7 +1019,9 @@ async function main() {
       ([clave, v]) =>
         `  ${JSON.stringify(clave)}: { archivo: ${JSON.stringify(v.archivo)}, ` +
         `formato: ${JSON.stringify(v.formato)}, formatoPoster: ${JSON.stringify(v.formatoPoster)}, ` +
-        `ancho: ${v.ancho}, alto: ${v.alto}, duracion: ${v.duracion} },`,
+        `ancho: ${v.ancho}, alto: ${v.alto}, duracion: ${v.duracion}` +
+        (v.posicion ? `, posicion: ${v.posicion}` : "") +
+        ` },`,
     )
     .join("\n");
 
@@ -764,8 +1032,10 @@ async function main() {
     ` * ARCHIVO GENERADO — no editar a mano.\n` +
     ` *\n` +
     ` * Lo escribe \`scripts/preparar-fotos.mjs\` y se pisa entero en cada corrida.\n` +
-    ` * La clave es \`<entidad>/<slug>/<clave de la variante>\`: un video documenta\n` +
-    ` * una variante motorizada y no un producto — decisión 40.\n` +
+    ` * Dos clases de clave. \`productos/<slug>/<clave de la variante>\`: el video\n` +
+    ` * documenta una variante motorizada — decisión 40.\n` +
+    ` * \`proyectos/<slug>/<nombre del archivo>\`: es un elemento de la galería del\n` +
+    ` * proyecto, y \`posicion\` dice en qué lugar va entre las fotos — decisión 51.\n` +
     ` *\n` +
     ` * Va aparte de \`fotos.ts\` porque la forma es otra y porque quien busca un\n` +
     ` * video tiene que encontrarlo en un archivo que se llame así.\n` +
@@ -801,9 +1071,17 @@ async function main() {
       (avisos > 0
         ? `\n  con ${avisos} aviso${avisos === 1 ? "" : "s"} más arriba`
         : "") +
+      (noPublicados > 0
+        ? `\n\n✗ ${noPublicados === 1 ? "1 original NO se publicó" : `${noPublicados} originales NO se publicaron`}: ` +
+          `buscá «NO SE PUBLICA» más arriba.`
+        : "") +
       `\n\n  Verificá que ninguno conserve metadatos antes de publicar:\n` +
       `    npm run fotos:revisar\n`,
   );
+
+  if (carpetaTemporal)
+    rmSync(carpetaTemporal, { recursive: true, force: true });
+  if (noPublicados > 0) process.exitCode = 1;
 }
 
 await main();

@@ -2,7 +2,13 @@ import { fotos } from "./fotos";
 import { productos } from "./productos";
 import { proyectos } from "./proyectos";
 import { videos } from "./videos";
-import type { ConFotos, Producto, ProductoConMedios, Proyecto } from "./tipos";
+import type {
+  ConFotos,
+  Medio,
+  Producto,
+  ProductoConMedios,
+  ProyectoConMedios,
+} from "./tipos";
 
 /**
  * El contenido del sitio, con las fotos ya unidas.
@@ -60,8 +66,39 @@ export const todosLosProductos = (): ProductoConMedios[] =>
     variantes: unirVariantes(producto),
   }));
 
-export const todosLosProyectos = (): ConFotos<Proyecto>[] =>
-  unir("proyectos", proyectos);
+/**
+ * La galería de un proyecto: sus fotos, con los videos intercalados en el lugar
+ * que ocupaban en la carpeta de originales — decisión 51.
+ *
+ * Las fotos vienen en el orden de `fotos.ts` y cada video trae su `posicion`,
+ * contada sobre fotos y videos juntos. Se insertan de menor a mayor, así que
+ * cuando un video entra en su lugar todo lo anterior ya está en el suyo.
+ *
+ * **La portada queda primera aunque la carpeta empiece con un video**: una
+ * portada es una foto 4:5 por definición (decisión 14), y es la que abre la
+ * página y viaja en la miniatura de WhatsApp. El script avisa de ese caso; acá
+ * solo se garantiza que no rompa nada, poniendo el video en el lugar 2.
+ */
+function galeriaDeProyecto(slug: string, fotosDelProyecto: Medio[]): Medio[] {
+  const prefijo = `proyectos/${slug}/`;
+  const suyos = Object.entries(videos)
+    .filter(([clave]) => clave.startsWith(prefijo))
+    .map(([, video]) => video)
+    .sort((a, b) => (a.posicion ?? Infinity) - (b.posicion ?? Infinity));
+
+  const galeria = [...fotosDelProyecto];
+  for (const video of suyos) {
+    const lugar = Math.max(1, (video.posicion ?? Infinity) - 1);
+    galeria.splice(Math.min(lugar, galeria.length), 0, video);
+  }
+  return galeria;
+}
+
+export const todosLosProyectos = (): ProyectoConMedios[] =>
+  unir("proyectos", proyectos).map((proyecto) => ({
+    ...proyecto,
+    galeria: galeriaDeProyecto(proyecto.slug, proyecto.fotos),
+  }));
 
 /**
  * Lo que se muestra en el sitio.
@@ -72,7 +109,7 @@ export const todosLosProyectos = (): ConFotos<Proyecto>[] =>
 export const productosPublicados = (): ProductoConMedios[] =>
   todosLosProductos().filter((p) => p.activo);
 
-export const proyectosPublicados = (): ConFotos<Proyecto>[] =>
+export const proyectosPublicados = (): ProyectoConMedios[] =>
   todosLosProyectos().filter((p) => p.activo);
 
 /**
@@ -88,7 +125,7 @@ export const productosDestacados = (tope: number): ProductoConMedios[] =>
     .filter((p) => p.destacado)
     .slice(0, tope);
 
-export const proyectosDestacados = (tope: number): ConFotos<Proyecto>[] =>
+export const proyectosDestacados = (tope: number): ProyectoConMedios[] =>
   proyectosPublicados()
     .filter((p) => p.destacado)
     .slice(0, tope);

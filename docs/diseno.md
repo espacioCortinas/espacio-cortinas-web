@@ -20,9 +20,16 @@ una, con el manifiesto al lado. **Todo lo visual que sigue está justificado ac�
 
 ### Qué hay
 
-23 fotos de 7 productos, más 2 videos. No hay proyectos cargados todavía, así que
-el archivo de portfolio —el que va a ser el grueso del sitio— **no existe y no se
-puede diseñar contra él**. Lo que hay es catálogo.
+23 fotos de 7 productos, más 2 videos. No había proyectos cargados cuando se
+escribió esta sección, así que el archivo de portfolio —el que va a ser el grueso
+del sitio— **no existía y no se podía diseñar contra él**. Lo que había era
+catálogo.
+
+**Desde la Fase 4.3 hay uno**, `cowork-nordelta`: seis fotos —dos 4:5 y cuatro
+3:2, todas de 2560 px— y dos videos que son recorridos de cámara por la
+oficina, uno apaisado de 15 s y el primer vertical del sitio, de 22 s. Es un
+juego más parejo que el de productos y es **el primer material corporativo**:
+fachada vidriada curva, rollers screen, puestos de trabajo — decisiones 51 y 52.
 
 | Proporción  | Cuántas | Cuáles                                                    |
 | ----------- | ------: | --------------------------------------------------------- |
@@ -454,20 +461,22 @@ fondo. Las tarjetas flotantes con sombra difusa son la otra marca reconocible.
 componente que se agrega es uno que hay que mantener coherente con todos los
 demás.
 
-| Componente          | Archivo                                           | Variantes                            |
-| ------------------- | ------------------------------------------------- | ------------------------------------ |
-| Botón               | `components/ui/boton.tsx`                         | principal, secundario, enlace — tres |
-| Chip                | `components/ui/chip.tsx`                          | una                                  |
-| Campo               | `components/ui/campo.tsx`                         | una, con dos controles               |
-| Aviso               | `components/ui/aviso.tsx`                         | error y nota                         |
-| Estado vacío        | `components/ui/vacio.tsx`                         | una                                  |
-| Columna de página   | `components/ui/contenedor.tsx`                    | una                                  |
-| Foto                | `components/foto.tsx`                             | cinco proporciones, tres recortes    |
-| Galería             | `components/galeria.tsx`                          | tira que se desliza de costado       |
-| Video de variante   | `components/video-variante.tsx`                   | una                                  |
-| Tarjeta de producto | `components/tarjeta-producto.tsx`                 | una — solo Inicio                    |
-| Logo                | `components/logo.tsx`                             | una                                  |
-| Encabezado y pie    | `components/encabezado.tsx`, `components/pie.tsx` | una                                  |
+| Componente           | Archivo                                           | Variantes                                   |
+| -------------------- | ------------------------------------------------- | ------------------------------------------- |
+| Botón                | `components/ui/boton.tsx`                         | principal, secundario, enlace — tres        |
+| Chip                 | `components/ui/chip.tsx`                          | una                                         |
+| Campo                | `components/ui/campo.tsx`                         | una, con dos controles                      |
+| Aviso                | `components/ui/aviso.tsx`                         | error y nota                                |
+| Estado vacío         | `components/ui/vacio.tsx`                         | una                                         |
+| Columna de página    | `components/ui/contenedor.tsx`                    | una                                         |
+| Foto                 | `components/foto.tsx`                             | cinco proporciones, tres recortes           |
+| Galería              | `components/galeria.tsx`                          | tira que se desliza de costado              |
+| Video mudo           | `components/video-mudo.tsx`                       | una: en bucle, en su lugar o en la galería  |
+| Tarjeta de producto  | `components/tarjeta-producto.tsx`                 | una — solo Inicio                           |
+| Tarjeta de proyecto  | `components/tarjeta-proyecto.tsx`                 | fila y tarjeta — dos                        |
+| Listado de proyectos | `components/listado-proyectos.tsx`                | una: el primero en fila, el resto en grilla |
+| Logo                 | `components/logo.tsx`                             | una                                         |
+| Encabezado y pie     | `components/encabezado.tsx`, `components/pie.tsx` | una                                         |
 
 Botones: **uno principal sólido, uno secundario con línea, y enlaces de texto.
 Tres variantes, no siete.** El principal es negro, no amarillo — decisión 43.
@@ -483,9 +492,10 @@ da 1,29:1 contra el papel: alcanza para un filete decorativo y no para el borde 
 un campo, que es lo único que dice dónde empieza y dónde termina. WCAG pide 3:1;
 el texto suave da 5,23:1.
 
-**El estado vacío se dice, no se tapa.** Un listado sin contenido —hoy,
-`/proyectos`— lleva un bloque de superficie con el mismo ritmo vertical que una
-sección de verdad, alineado al margen de la columna, que explica por qué está
+**El estado vacío se dice, no se tapa.** Un listado sin contenido —`/proyectos`
+hasta la Fase 4.3, y de nuevo si algún día todos quedan inactivos— lleva un
+bloque de superficie con el mismo ritmo vertical que una sección de verdad,
+alineado al margen de la columna, que explica por qué está
 vacío y ofrece a dónde seguir. Sin ícono y sin centrar: un bloque centrado con un
 ícono arriba es el estado vacío de plantilla que la regla 4 existe para evitar.
 
@@ -532,6 +542,12 @@ control para iniciarlo.
 **Acá el movimiento ES el contenido y no un adorno**, y es la única excepción a
 «escaso y con función» de arriba. Cableados en la Fase 4.4 — decisión 48, que
 además anota qué muestra cada archivo, porque no es lo que dice su nombre.
+
+**Los videos de proyecto se comportan igual** — decisión 51: mudos, en bucle,
+sin botón, arrancando cuando quedan a la vista. Van intercalados en la galería,
+en el lugar que les da la carpeta, y uno que está más allá en la tira no se
+descarga hasta que alguien desliza hasta él. Sin la barra de controles nativa
+en ningún caso: se dibuja encima de la imagen.
 
 Respetar `prefers-reduced-motion` en todo lo demás también.
 

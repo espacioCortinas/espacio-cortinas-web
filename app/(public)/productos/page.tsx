@@ -149,8 +149,8 @@ export default function Productos() {
       {productos.length === 0 ? (
         // Un listado vacío se dice, no se tapa: es información sobre el estado
         // del contenido, no un problema a esconder. Hoy este camino no se
-        // recorre —hay siete productos— pero es el mismo componente que sí se
-        // ve en `/proyectos`.
+        // recorre —hay siete productos— pero es el mismo componente que usa
+        // `/proyectos` cuando no hay ninguno publicado.
         <div className="mt-12 md:mt-16">
           <Vacio
             etiqueta="Todavía sin productos publicados"

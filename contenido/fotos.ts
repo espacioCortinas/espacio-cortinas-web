@@ -247,4 +247,48 @@ export const fotos: Record<string, Foto[]> = {
       alto: 1920,
     },
   ],
+  "proyectos/cowork-nordelta": [
+    {
+      carpeta: "proyectos/cowork-nordelta/1",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3200,
+    },
+    {
+      carpeta: "proyectos/cowork-nordelta/2",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1706,
+    },
+    {
+      carpeta: "proyectos/cowork-nordelta/3",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1707,
+    },
+    {
+      carpeta: "proyectos/cowork-nordelta/4",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1706,
+    },
+    {
+      carpeta: "proyectos/cowork-nordelta/5",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1707,
+    },
+    {
+      carpeta: "proyectos/cowork-nordelta/6",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3200,
+    },
+  ],
 };

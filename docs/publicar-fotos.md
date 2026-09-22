@@ -51,8 +51,33 @@ fotos-originales/
 | El **orden alfabético** es el de la galería              | `1, 2, 10` ordena bien; `a, b, c` también      |
 | **La primera es la portada** y conviene que sea vertical | los listados del sitio usan siempre la portada |
 
-Se aceptan `.jpg`, `.png`, `.webp`, `.tif` y **`.heic`** — no hace falta
-convertir las del iPhone.
+Se aceptan `.jpg`, `.png`, `.webp`, `.tif` y **`.heic`**. Las del iPhone no
+hace falta convertirlas a mano, **pero no es que `sharp` las lea**: no sabe
+decodificar HEVC, así que el script las pasa por ffmpeg antes y lo avisa con un
+`!` — decisión 53. Hace falta tener ffmpeg instalado, que ya hacía falta para
+los videos.
+
+### Si hay videos en un proyecto
+
+Van **en la misma carpeta que las fotos, numerados como ellas**: el orden
+alfabético es el de la galería contando fotos y videos juntos, así que `7.mp4`
+va después de `6.jpg` — decisión 51.
+
+```
+fotos-originales/proyectos/cowork-nordelta/
+├── 1.jpg ... 6.jpg     las fotos; la 1 es la portada
+├── 7.mp4               entra en la galería después de la foto 6
+└── 8.mp4
+```
+
+**La portada tiene que ser una foto.** Si el primer archivo de la carpeta es un
+video, el script lo avisa y lo pone segundo.
+
+En el sitio, un video de proyecto se ve como el de un producto: mudo, en bucle
+y arrancando solo cuando queda a la vista. El script lo convierte sin audio, sin metadatos y con
+el lado mayor a 1280 px, y **se niega a publicarlo si pasa de 25 MiB**, que es
+el tope por archivo de Cloudflare. Un recorrido de medio minuto queda muy por
+debajo: los dos del cowork pesan 2,4 y 3,6 MB.
 
 ### Si las fotos son de una variante
 
@@ -94,8 +119,10 @@ Eso hace, para cada foto:
 - genera un archivo por cada medida, en WebP
 - reescribe `contenido/fotos.ts` con los datos de cada foto
 
-Y para cada video:
+Y para cada video —el de una variante, o uno de la galería de un proyecto—:
 
+- lo convierte sin audio, sin metadatos y con el lado mayor a 1280 px, sin
+  agrandarlo nunca
 - lo mide —ancho, alto y duración— y le saca el primer cuadro como cartel
 - comprueba que no haya quedado con pista de audio
 - reescribe `contenido/videos.ts`
@@ -205,10 +232,50 @@ renombrala a `0.jpg`, o renumerá.
 
 El recorte no alcanzó a hacerla vertical. Va a verse despareja en los listados.
 
-### `no se pudo preparar — Input file contains unsupported image format`
+### `… es un HEIC: sharp no decodifica HEVC, así que se convirtió con ffmpeg`
 
-Ese archivo no es una imagen que `sharp` pueda leer, o está dañado. **Las demás
-se procesaron igual**: solo hay que resolver esa.
+Nada que hacer: el archivo está sano y se publicó. Es un aviso y no un silencio
+porque la foto pasó por un paso más que las otras — decisión 53.
+
+### `NO SE PUBLICA`
+
+Un original que no se pudo usar. El aviso dice **cuál es, cuánto pesa, qué le
+pasa y qué hacer**, y la corrida termina con error aunque las demás fotos se
+hayan procesado, para que nadie commitee sin darse cuenta de que falta una:
+
+```
+  ! 3.HEIC: NO SE PUBLICA
+      archivo  fotos-originales/proyectos/casa-x/3.HEIC (1,1 MB)
+      causa    es un HEIC TRUNCADO: le faltan datos (ffmpeg: «… partial file»).
+      qué hacer No se publica. Suele ser una copia que se cortó: lo mejor es pedirlo de nuevo.
+                Si no hay otra copia, rescatá lo que tiene con:
+                  ffmpeg -i fotos-originales/proyectos/casa-x/3.HEIC … 3.jpg
+                Mirá el JPEG a ojo —puede salir con una franja gris— y si sirve, borrá 3.HEIC.
+```
+
+Las causas que dice:
+
+- **HEIC truncado o dañado.** Casi siempre, una copia que se cortó —del Drive, de
+  un envío por WhatsApp, de un cable—. Lo mejor es pedir el archivo de nuevo. Si
+  no hay otra copia, se rescata lo que tiene con la receta de abajo, se mira a
+  ojo y, si sirve, se reemplaza el HEIC por el JPEG en la carpeta.
+- **JPEG cortado** (`premature end of JPEG image`). Lo mismo: pedirlo de nuevo.
+- **No se reconoce como imagen.** Una captura, un PDF o un video con la
+  extensión equivocada: sacarlo de la carpeta.
+- **Un video de más de 25 MiB.** Acortarlo antes de ponerlo en la carpeta.
+
+**La receta para rescatar un HEIC**, que es la misma que el script usa con los
+sanos:
+
+```bash
+ffmpeg -i entrada.HEIC -frames:v 1 -update 1 -q:v 2 -map_metadata -1 salida.jpg
+```
+
+`-map_metadata -1` ya borra el EXIF con las coordenadas; de todos modos, el
+JPEG vuelve a pasar por `npm run fotos` y por `npm run fotos:revisar` como
+cualquier otra foto. **No se arregla solo a propósito**: un archivo cortado es
+un problema de transferencia que conviene saber, y un rescate puede salir con
+una franja gris que solo se ve mirándolo.
 
 ### `quedó sin ninguna foto utilizable`
 

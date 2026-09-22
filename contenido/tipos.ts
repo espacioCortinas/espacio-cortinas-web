@@ -78,11 +78,14 @@ type Publicable = {
 };
 
 /**
- * Un video corto, mudo y en bucle.
+ * Un video corto y mudo. Viene de dos lugares, y cada uno lo usa distinto:
  *
- * **Existe porque hay una cosa que una foto no puede mostrar**, que es que la
- * cortina se mueve sola — decisión 40. Por eso cuelga de una variante
- * motorizada y no de un producto: es la variante lo que documenta.
+ * - **De una variante motorizada**, en bucle: hay una cosa que una foto no
+ *   puede mostrar, que es que la cortina se mueve sola — decisión 40. Es la
+ *   variante lo que documenta, y por eso cuelga de ella.
+ * - **De la galería de un proyecto**, intercalado entre las fotos en el orden
+ *   de la carpeta, y en bucle como los de variante — decisión 51. Los proyectos no
+ *   tienen variantes, así que el video no puede colgar de ninguna.
  *
  * **Esto tampoco se carga a mano**, y por la misma razón que `Foto`: lo escribe
  * `scripts/preparar-fotos.mjs` leyendo con `ffprobe` el archivo que se publica,
@@ -90,14 +93,29 @@ type Publicable = {
  */
 export type Video = {
   /**
-   * Dentro de `public/videos/`, sin extensión: `"roller/motorizado"`. El video
-   * y su cuadro de cartel se llaman igual y solo cambian de extensión.
+   * Dentro de `public/videos/`, sin extensión. El video y su cuadro de cartel
+   * se llaman igual y solo cambian de extensión.
    *
-   * **No lleva la entidad adelante**, a diferencia de `Foto.carpeta`: los
-   * videos son de variantes y las variantes son solo de productos. Si algún día
-   * un proyecto llevara video, esto gana un nivel.
+   * **Los de variante no llevan la entidad adelante** —`"roller/motorizado"`—
+   * y **los de proyecto sí** —`"proyectos/cowork-nordelta/7"`—. Es una
+   * asimetría heredada y a propósito: los de variante ya estaban publicados
+   * cuando llegó el primer proyecto con video, y moverlos sería reescribirlos
+   * en git, que lo publicado no permite (decisión 48). El comentario de acá
+   * mismo ya lo preveía: «si algún día un proyecto llevara video, esto gana un
+   * nivel».
    */
   archivo: string;
+
+  /**
+   * **Solo en los videos de proyecto:** el lugar que ocupa en la galería,
+   * contando fotos y videos juntos desde 1, que es el orden alfabético de la
+   * carpeta de originales. Los de variante no lo llevan porque no se mezclan
+   * con nada: van solos, debajo de su variante.
+   *
+   * Se registra en vez de deducirse del nombre del archivo porque el nombre
+   * no tiene por qué ser un número: `recorrido.mp4` también ordena.
+   */
+  posicion?: number;
 
   /** La extensión del video, sin el punto: `"mp4"`. */
   formato: string;
@@ -219,3 +237,25 @@ export type VarianteConMedios = Variante & {
 export type ProductoConMedios = ConFotos<Omit<Producto, "variantes">> & {
   variantes: VarianteConMedios[];
 };
+
+/**
+ * Un elemento de galería: una foto o un video.
+ *
+ * **Se distinguen por su forma y no por una etiqueta**: una foto tiene
+ * `carpeta` y un video tiene `archivo`, y los dos campos son obligatorios en
+ * su tipo. `esVideo()` de `lib/fotos.ts` lo pregunta, y TypeScript estrecha el
+ * tipo con eso. Agregar un `tipo: "foto"` a cada entrada de `fotos.ts` habría
+ * cambiado un manifiesto que funciona para decir algo que ya dice su forma.
+ */
+export type Medio = Foto | Video;
+
+/**
+ * Un proyecto listo para su página: con `fotos` —que siguen siendo solo fotos,
+ * porque de ahí salen la portada, el listado y la miniatura de WhatsApp— y con
+ * `galeria`, que es la secuencia entera tal como está en la carpeta, con los
+ * videos intercalados en su lugar. Decisión 51.
+ *
+ * La primera de `galeria` es siempre la portada: el script avisa si el primer
+ * archivo de la carpeta es un video, porque una portada no puede serlo.
+ */
+export type ProyectoConMedios = ConFotos<Proyecto> & { galeria: Medio[] };

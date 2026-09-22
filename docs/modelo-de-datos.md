@@ -89,6 +89,26 @@ nada.
 sin superficie, sin qué productos se usaron. Cada campo agregado es un campo que
 hay que completar en cada carga.
 
+**El primero del arreglo abre el listado**: va en fila, con la portada al
+costado, y el resto en grilla — decisión 52. No hay un campo que lo marque:
+cuál abre se cambia moviendo el bloque, como todo el orden del sitio.
+
+**Las descripciones las redacta la empresa.** Mientras no llegan, la de cada
+proyecto lleva un comentario `PROVISORIO` y dice solo lo que se ve en las fotos
+—nunca metros, cantidad de ventanas, cliente ni plazos—, con la misma
+convención que `contenido/inicio.ts`.
+
+### Lo que la página recibe: `fotos` y `galeria`
+
+`contenido/index.ts` le da a cada proyecto dos listas, y no es redundante:
+
+| Campo     | Qué tiene                                     | Quién lo usa                                  |
+| --------- | --------------------------------------------- | --------------------------------------------- |
+| `fotos`   | solo fotos, en orden; la primera, portada     | listados, Open Graph, la apertura del detalle |
+| `galeria` | fotos **y videos**, en el orden de la carpeta | la galería del detalle                        |
+
+`galeria` se arma insertando cada video de proyecto en su `posicion` — decisión 51. La portada queda primera aunque la carpeta empiece con un video.
+
 ## Fotos
 
 `contenido/fotos.ts` es un mapa a una lista de fotos. La clave es
@@ -191,10 +211,16 @@ trabajo hecho — decisión 25. `next.config.ts` lo apaga con
 
 ## Videos
 
-`contenido/videos.ts` es un mapa de `<entidad>/<slug>/<clave de la variante>` a
-**un** video. Cuelgan de una variante y no de un producto: lo que un video
-documenta es la motorización, que es lo único que una foto no puede mostrar —
-decisión 40.
+`contenido/videos.ts` es un mapa de clave a **un** video, y hay dos clases de
+clave:
+
+- `productos/<slug>/<clave de la variante>` — el video de una variante
+  motorizada. Cuelga de la variante y no del producto: lo que documenta es la
+  motorización, que es lo único que una foto no puede mostrar — decisión 40. Se
+  reproduce en bucle.
+- `proyectos/<slug>/<nombre del archivo>` — un elemento de la galería de un
+  proyecto, que no tiene variantes. Lleva `posicion` y va en bucle, como los de variante —
+  decisión 51.
 
 ```ts
 "productos/roller/motorizado": {
@@ -207,16 +233,23 @@ decisión 40.
 }
 ```
 
-| Campo           | Notas                                                 |
-| --------------- | ----------------------------------------------------- |
-| `archivo`       | dentro de `public/videos/`, sin extensión             |
-| `formato`       | la extensión del video, sin el punto                  |
-| `formatoPoster` | la del cuadro de cartel, que se llama igual           |
-| `ancho`, `alto` | del archivo que se publica, no del original           |
-| `duracion`      | en segundos, redondeada. Se escribe al lado del video |
+| Campo           | Notas                                                                                 |
+| --------------- | ------------------------------------------------------------------------------------- |
+| `archivo`       | dentro de `public/videos/`, sin extensión                                             |
+| `formato`       | la extensión del video, sin el punto                                                  |
+| `formatoPoster` | la del cuadro de cartel, que se llama igual                                           |
+| `ancho`, `alto` | del archivo que se publica, no del original                                           |
+| `duracion`      | en segundos, redondeada. Se escribe al lado del video                                 |
+| `posicion`      | **solo de proyecto**: el lugar en la galería, desde 1, contando fotos y videos juntos |
 
-`archivo` no lleva la entidad adelante, a diferencia de `Foto.carpeta`: los
-videos son de variantes y las variantes son solo de productos.
+`archivo` **no lleva la entidad adelante en los de variante**
+(`roller/motorizado`) **y sí en los de proyecto**
+(`proyectos/cowork-nordelta/7`). Es heredado y a propósito: los de variante ya
+estaban publicados cuando llegó el primer video de proyecto, y moverlos sería
+reescribirlos en git — decisión 51.
+
+Un vertical se publica con el **lado mayor** a 1280 px, no el ancho: sale a
+720 × 1280 y no se agranda. Ver `VIDEO_LADO_MAYOR` en `lib/constantes.ts`.
 
 **Tampoco se carga a mano**, y por la misma razón que las fotos: lo mide
 `ffprobe` sobre el archivo publicado, y el cartel lo extrae el script del primer
@@ -269,6 +302,10 @@ sale en la portada moviendo un bloque de lugar, sin desmarcar nada.
    ```
 
    **Ninguna foto de variante es portada**, así que ninguna se recorta a 4:5.
+
+   En un **proyecto**, que no tiene variantes, los videos van en la misma
+   carpeta que las fotos y numerados como ellas: `7.mp4` entra en la galería
+   después de `6.jpg` — decisión 51.
 
 2. `npm run fotos` — recorta, redimensiona, borra los metadatos y reescribe
    `contenido/fotos.ts`.

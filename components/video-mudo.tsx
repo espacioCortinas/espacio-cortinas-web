@@ -7,18 +7,19 @@ import type { Video } from "@/contenido/tipos";
 import { rutaDePosterDeVideo, rutaDeVideo, topeDeAncho } from "@/lib/fotos";
 
 /**
- * El video de una variante motorizada.
+ * Un video corto y sin sonido. Se llamaba `VideoVariante` y se generalizó en
+ * la Fase 4.3, cuando llegaron los primeros videos de proyecto — decisión 51.
  *
- * # Por qué hay un video, y por qué se mueve solo
+ * # Siempre en bucle, los de variante y los de proyecto
  *
- * Es lo único que muestra lo que una foto no puede: que la cortina se mueve
- * sola — decisión 40. **Acá el movimiento ES el contenido y no un adorno**, así
- * que es la única excepción razonable a «animaciones escasas y con función» de
- * `docs/diseno.md`, y está razonada ahí mismo: «se presentan como un ítem más
- * de la galería, en la posición de la variante motorizada que documentan, con
- * `muted`, `loop` y `playsinline`».
+ * El de una variante documenta un gesto —la cortina que sube y baja sola—; el
+ * de un proyecto es un recorrido por el lugar. **Los dos arrancan solos al
+ * entrar en pantalla, mudos y en bucle, sin botón**, y es una decisión de quien
+ * desarrolla después de probarlo: la Fase 4.3 los había hecho a pedido, con un
+ * botón para iniciarlos, y se revirtió para que se comporten igual que en
+ * productos — decisión 51.
  *
- * # Por qué es el segundo "use client" del sitio público
+ * # Por qué es "use client"
  *
  * **No hay forma declarativa de no reproducir con `prefers-reduced-motion`.**
  * El CSS puede parar una animación pero no un `<video autoplay>`, y el atributo
@@ -31,8 +32,9 @@ import { rutaDePosterDeVideo, rutaDeVideo, topeDeAncho } from "@/lib/fotos";
  *
  * - **No gasta datos hasta que alguien llega.** `preload="none"` más un
  *   `IntersectionObserver`: el archivo no se pide hasta que el video está por
- *   entrar en pantalla, y se pausa al salir. Con `autoplay` a secas el
- *   navegador decide solo, y cada uno decide distinto.
+ *   entrar en pantalla, y se pausa al salir. Dentro de la galería, «en
+ *   pantalla» quiere decir en la diapositiva visible: uno que está más allá en
+ *   la tira no se descarga hasta que alguien desliza hasta él.
  * - **Si la reproducción automática está bloqueada, aparece el control.** En
  *   iOS con el modo de bajo consumo, `play()` es rechazado aunque el video esté
  *   mudo y en línea. Sin esto quedaría un cuadro fijo sin ninguna forma de
@@ -43,13 +45,13 @@ import { rutaDePosterDeVideo, rutaDeVideo, topeDeAncho } from "@/lib/fotos";
  *     muted        hace falta para que un navegador acepte reproducir solo.
  *                  Además los archivos NO TIENEN pista de audio: el script lo
  *                  comprueba y avisa si alguno la conserva
- *     loop         once segundos que se repiten
+ *     loop         el video se repite
  *     playsInline  sin esto, un iPhone se lo lleva a pantalla completa
  *     preload      "none": el archivo se pide cuando hace falta y no antes
- *     sin controls una barra de controles sobre un bucle de once segundos sin
- *                  sonido es interfaz que no hace falta. Cuando SÍ hace falta
- *                  —movimiento reducido, o reproducción bloqueada— aparece un
- *                  botón del sistema, debajo del video y nunca encima
+ *     sin controls la barra nativa se dibuja ENCIMA del video, y en este sitio
+ *                  no va nada sobre una imagen, nunca. Cuando hace falta un
+ *                  control —movimiento reducido o reproducción bloqueada—
+ *                  es un botón del sistema, debajo del video
  */
 
 const MENOS_MOVIMIENTO = "(prefers-reduced-motion: reduce)";
@@ -77,13 +79,31 @@ function useMenosMovimiento(): boolean {
   );
 }
 
-export function VideoVariante({
+export function VideoMudo({
   video,
-  titulo,
+  etiqueta,
+  caja,
 }: {
   video: Video;
-  /** El nombre de la variante: «Motorizado». Va al texto alternativo. */
-  titulo: string;
+  /**
+   * El nombre accesible del video, entero: «Roller Motorizado: la cortina
+   * abriéndose y cerrándose sola», «Cowork en Nordelta — video 1». Lo arma
+   * quien lo usa porque es quien sabe qué muestra.
+   */
+  etiqueta: string;
+  /**
+   * La proporción de la caja donde tiene que entrar, en `ancho / alto`, cuando
+   * el video vive dentro de una diapositiva de `components/galeria.tsx`.
+   *
+   * **Es lo que hace que el vertical no tenga barras.** El `<video>` se
+   * dimensiona a SU proporción dentro de la caja —al alto si es más alto que
+   * ella, al ancho si no— en vez de estirarse a la caja entera y dejar el
+   * relleno adentro del elemento, que es donde aparecerían las franjas.
+   *
+   * Sin `caja`, el video ocupa el ancho disponible con el tope de píxeles, que
+   * es como lo muestra la página de producto.
+   */
+  caja?: number;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const menosMovimiento = useMenosMovimiento();
@@ -97,14 +117,15 @@ export function VideoVariante({
    * **Lo maneja el propio `<video>` con sus eventos `play` y `pause`**, y no
    * cada lugar del código que lo arranca o lo frena. Es la única forma de que
    * el botón no mienta: el elemento también se pausa solo —al salir de
-   * pantalla, o cuando alguien enciende la preferencia de menos movimiento— y
-   * un estado que cada llamada tiene que acordarse de actualizar se
-   * desincroniza en el primer caso que alguien no previó.
+   * pantalla, al terminar si no está en bucle, o cuando alguien enciende la
+   * preferencia de menos movimiento— y un estado que cada llamada tiene que
+   * acordarse de actualizar se desincroniza en el primer caso que nadie previó.
    */
   const [reproduciendo, setReproduciendo] = useState(false);
 
-  // Hay que ofrecer un control en los dos casos, y por el mismo motivo: el
-  // video no va a arrancar solo y sin un botón nadie podría iniciarlo.
+  // Hay que ofrecer un control cuando el video no va a arrancar solo: porque
+  // se pidió menos movimiento o porque el navegador no deja. Sin un botón
+  // nadie podría iniciarlo.
   const aMano = menosMovimiento || bloqueado;
 
   useEffect(() => {
@@ -125,13 +146,15 @@ export function VideoVariante({
     const observador = new IntersectionObserver(
       (entradas) => {
         for (const entrada of entradas) {
-          if (entrada.isIntersecting) {
+          if (!entrada.isIntersecting) {
+            // Lo que no se ve no se reproduce. En la
+            // galería eso incluye deslizar la tira hasta que el video sale.
+            el.pause();
+          } else {
             // Rechazado: el navegador no deja reproducir solo —modo de bajo
             // consumo en iOS, o una preferencia del usuario—. Se ofrece el
             // control en vez de dejar un cuadro fijo sin explicación.
             el.play().catch(() => setBloqueado(true));
-          } else {
-            el.pause();
           }
         }
       },
@@ -154,35 +177,70 @@ export function VideoVariante({
   /*
    * El mismo tope que las fotos, y por la misma cuenta: 1280 px de archivo a
    * doble densidad son 640 px de CSS. **El video no puede ser grande**, así que
-   * tampoco puede ser el protagonista de la página — `docs/diseno.md`.
+   * tampoco puede ser el protagonista de la página — `docs/diseno.md`. Dentro
+   * de una galería el tope lo pone la diapositiva, no esto.
    */
   const tope = topeDeAncho(video);
 
+  // ¿Es más alto que la caja? Entonces manda el alto, y el ancho sale de su
+  // proporción; si no, al revés. Las dos proporciones en alto / ancho.
+  const masAltoQueLaCaja =
+    caja !== undefined && video.alto / video.ancho > 1 / caja;
+
+  const elemento = (
+    <video
+      ref={ref}
+      src={rutaDeVideo(video)}
+      poster={rutaDePosterDeVideo(video)}
+      width={video.ancho}
+      height={video.alto}
+      muted
+      loop
+      playsInline
+      preload="none"
+      onPlay={() => setReproduciendo(true)}
+      onPause={() => setReproduciendo(false)}
+      aria-label={etiqueta}
+      // `bg-superficie` es lo que se ve mientras el cartel carga: un paso del
+      // papel, no un gris. Un recuadro gris sobre papel cálido es un agujero.
+      // Como la caja del elemento mide exactamente lo que el video, esto no
+      // aparece nunca como franja al costado.
+      className={
+        "bg-superficie " +
+        (caja === undefined
+          ? "h-auto w-full"
+          : masAltoQueLaCaja
+            ? "h-full w-auto max-w-full"
+            : "h-auto max-h-full w-full")
+      }
+      style={
+        caja === undefined
+          ? undefined
+          : { aspectRatio: `${video.ancho} / ${video.alto}` }
+      }
+    />
+  );
+
   return (
-    <figure className="m-0" style={{ maxWidth: `${tope}px` }}>
-      <video
-        ref={ref}
-        src={rutaDeVideo(video)}
-        poster={rutaDePosterDeVideo(video)}
-        width={video.ancho}
-        height={video.alto}
-        muted
-        loop
-        playsInline
-        preload="none"
-        onPlay={() => setReproduciendo(true)}
-        onPause={() => setReproduciendo(false)}
-        aria-label={`${titulo}: la cortina abriéndose y cerrándose sola`}
-        // `bg-superficie` es lo que se ve mientras el cartel carga: un paso del
-        // papel, no un gris. Un recuadro gris sobre papel cálido es un agujero.
-        className="bg-superficie h-auto w-full"
-      />
+    <figure
+      className="m-0"
+      style={caja === undefined ? { maxWidth: `${tope}px` } : undefined}
+    >
+      {caja === undefined ? (
+        elemento
+      ) : (
+        <div
+          className="flex items-center justify-center"
+          style={{ aspectRatio: caja }}
+        >
+          {elemento}
+        </div>
+      )}
 
       <figcaption className="text-texto-suave mt-3 text-meta">
         {/*
-          Un video que arranca solo, sin controles y sin sonido no da ninguna
-          forma de saber cuánto dura ni que no hay audio que encender. Se dice,
-          y el número sale del manifiesto y no de acá.
+          Un video sin controles no da ninguna forma de saber cuánto dura ni que
+          no hay audio que encender. Se dice, y el número sale del manifiesto.
         */}
         Video de {video.duracion} segundos, en bucle y sin sonido.
       </figcaption>
