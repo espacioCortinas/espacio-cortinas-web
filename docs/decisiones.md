@@ -2388,6 +2388,39 @@ copió—, con una sola novedad: `caja`, para entrar en una diapositiva de la
 galería con su propia proporción. El modo «a pedido» que tuvo durante la fase
 se sacó al revertir: no lo usaba nadie.
 
+#### El botón «Pausar» que apareció en un iPhone
+
+Probado en un iPhone real después del despliegue, los dos videos del cowork se
+reproducían, pero **debajo del segundo aparecía un botón «Pausar el video»**,
+sobre un video que andaba solo. El código venía de la 4.4, pero en productos
+el video no está en una tira que se desliza y el caso es mucho menos frecuente,
+así que no se había visto.
+
+**La causa:** el componente tomaba **cualquier** rechazo de `play()` como
+«reproducción bloqueada» y mostraba el control. Pero `play()` también se
+rechaza, con `AbortError`, cuando el video sale de la vista antes de arrancar y
+el propio componente lo pausa. En la tira eso pasa cada vez que alguien desliza:
+el video asoma, empieza a cargar y se va. Quedaba marcado como bloqueado, y al
+volver a entrar arrancaba igual, así que el botón pasaba a decir «Pausar».
+
+**Lo que cambió:**
+
+- Solo `NotAllowedError` cuenta como bloqueo, que es el del modo de bajo
+  consumo de iOS o el de una preferencia del navegador. Cualquier otro rechazo
+  se ignora: cuando el video vuelve a entrar, el observador llama a `play()`
+  otra vez.
+- En un bloqueo real, el botón se va apenas el video arranca: existe para
+  iniciar lo que no pudo arrancar, no para controlarlo.
+- **Con `prefers-reduced-motion` el control se queda**, «Reproducir» y
+  «Pausar», porque ahí es de quien pidió que las cosas no se muevan solas.
+
+**Verificado** con un observador falso que imita el deslizamiento —entra, sale
+antes de arrancar, vuelve—: con el código anterior aparece el botón, y con el
+nuevo no. Con un bloqueo real simulado aparece «Reproducir el video», y al
+iniciarlo el video anda y el botón desaparece. Con menos movimiento simulado se
+queda el control, que pasa a «Pausar el video». Lo que confirma el caso real es
+volver a probarlo en el iPhone.
+
 #### El vertical, sin barras
 
 Dentro de la tira, el `<video>` **se dimensiona a su propia proporción** dentro
@@ -2550,15 +2583,17 @@ libde265, no otra receta.
 
 ## Decisiones abiertas
 
-**Los videos no responden a pedidos por rango, y Safari puede no
-reproducirlos.** Encontrado al cerrar la Fase 4.3. Un pedido con
-`Range: bytes=0-1023` a `/videos/roller/motorizado.mp4` en producción devuelve
-**200 con el archivo entero** y sin `Accept-Ranges`, no 206. No pasa por el
-Worker —no hay `x-opennext`—: lo sirve la capa de assets de Cloudflare, desde
-caché. Safari, en iPhone y en Mac, pide los videos por rango y es conocido que
-no los reproduce si el servidor no contesta 206. **No está comprobado en un
-iPhone real**, y afecta a los cuatro videos del sitio, no solo a los de la 4.3.
-Resolverlo implica cambiar cómo se sirven los videos, así que se decide aparte.
+~~**Los videos no responden a pedidos por rango, y Safari puede no
+reproducirlos.**~~ **Descartado como problema: en un iPhone real se reproducen.**
+Encontrado al cerrar la Fase 4.3: un pedido con `Range: bytes=0-1023` a
+`/videos/roller/motorizado.mp4` en producción devuelve **200 con el archivo
+entero** y sin `Accept-Ranges`, no 206. No pasa por el Worker —no hay
+`x-opennext`—: lo sirve la capa de assets de Cloudflare, desde caché. Como
+Safari pide los videos por rango, se temía que no los reprodujera. Probado en un
+iPhone después del despliegue: los videos del cowork se reproducen. El 200 sin
+rango queda anotado como dato, por si algún día un video largo necesita saltar
+a la mitad sin descargarlo entero; hoy, con archivos de 1 a 4 MB en bucle, no
+importa.
 
 **Falta el logo en vector, y una versión para fondo oscuro.** Hoy hay un JPG de
 524 px en `fotos-originales/logo.jpg`. Alcanza para el encabezado —160 px a

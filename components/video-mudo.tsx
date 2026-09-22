@@ -40,6 +40,15 @@ import { rutaDePosterDeVideo, rutaDeVideo, topeDeAncho } from "@/lib/fotos";
  *   mudo y en línea. Sin esto quedaría un cuadro fijo sin ninguna forma de
  *   iniciarlo, y quien mira no tendría manera de saber que es un video.
  *
+ *   **Y solo si está bloqueada de verdad**, que es un `NotAllowedError`. Un
+ *   `play()` también se rechaza —con `AbortError`— cuando el video sale de la
+ *   vista antes de arrancar y este mismo componente lo pausa, y en la galería
+ *   eso pasa cada vez que alguien desliza la tira. Tomar ese rechazo como un
+ *   bloqueo era lo que dejaba, en un iPhone, un botón «Pausar» debajo de un
+ *   video que andaba solo — decisión 51. **Y el botón se va apenas el video
+ *   arranca**: existe para iniciar lo que no pudo arrancar, no para
+ *   controlarlo, y un video en marcha se ve igual que todos los demás.
+ *
  * # Lo que el `<video>` lleva y por qué
  *
  *     muted        hace falta para que un navegador acepte reproducir solo.
@@ -108,7 +117,11 @@ export function VideoMudo({
   const ref = useRef<HTMLVideoElement>(null);
   const menosMovimiento = useMenosMovimiento();
 
-  /** El navegador rechazó reproducir solo: modo de bajo consumo, o una preferencia. */
+  /**
+   * El navegador no deja reproducir solo —modo de bajo consumo, o una
+   * preferencia— y el video todavía no arrancó. Vuelve a `false` en cuanto
+   * arranca, por el botón o por el observador.
+   */
   const [bloqueado, setBloqueado] = useState(false);
 
   /**
@@ -117,9 +130,9 @@ export function VideoMudo({
    * **Lo maneja el propio `<video>` con sus eventos `play` y `pause`**, y no
    * cada lugar del código que lo arranca o lo frena. Es la única forma de que
    * el botón no mienta: el elemento también se pausa solo —al salir de
-   * pantalla, al terminar si no está en bucle, o cuando alguien enciende la
-   * preferencia de menos movimiento— y un estado que cada llamada tiene que
-   * acordarse de actualizar se desincroniza en el primer caso que nadie previó.
+   * pantalla, o cuando alguien enciende la preferencia de menos movimiento— y
+   * un estado que cada llamada tiene que acordarse de actualizar se
+   * desincroniza en el primer caso que nadie previó.
    */
   const [reproduciendo, setReproduciendo] = useState(false);
 
@@ -147,14 +160,28 @@ export function VideoMudo({
       (entradas) => {
         for (const entrada of entradas) {
           if (!entrada.isIntersecting) {
-            // Lo que no se ve no se reproduce. En la
-            // galería eso incluye deslizar la tira hasta que el video sale.
+            // Lo que no se ve no se reproduce. En la galería eso incluye
+            // deslizar la tira hasta que el video sale.
             el.pause();
           } else {
-            // Rechazado: el navegador no deja reproducir solo —modo de bajo
-            // consumo en iOS, o una preferencia del usuario—. Se ofrece el
-            // control en vez de dejar un cuadro fijo sin explicación.
-            el.play().catch(() => setBloqueado(true));
+            el.play().catch((rechazo: unknown) => {
+              // **Solo `NotAllowedError` es un bloqueo**: el navegador no deja
+              // reproducir solo —modo de bajo consumo en iOS, o una preferencia
+              // del usuario— y hay que ofrecer el control en vez de dejar un
+              // cuadro fijo sin explicación.
+              //
+              // Cualquier otro rechazo se ignora a propósito. El común es
+              // `AbortError`: el `pause()` de arriba interrumpió este `play()`
+              // porque el video salió de la vista antes de arrancar. No hay
+              // nada que ofrecer: cuando vuelva a entrar, el observador llama a
+              // `play()` otra vez.
+              if (
+                rechazo instanceof DOMException &&
+                rechazo.name === "NotAllowedError"
+              ) {
+                setBloqueado(true);
+              }
+            });
           }
         }
       },
@@ -198,7 +225,13 @@ export function VideoMudo({
       loop
       playsInline
       preload="none"
-      onPlay={() => setReproduciendo(true)}
+      onPlay={() => {
+        setReproduciendo(true);
+        // Arrancó, así que no estaba bloqueado o dejó de estarlo: el botón se
+        // va y el video queda como cualquier otro. Con menos movimiento el
+        // botón sigue, porque ahí es de quien lo pidió quieto.
+        setBloqueado(false);
+      }}
       onPause={() => setReproduciendo(false)}
       aria-label={etiqueta}
       // `bg-superficie` es lo que se ve mientras el cartel carga: un paso del
