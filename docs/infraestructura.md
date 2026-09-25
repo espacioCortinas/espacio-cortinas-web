@@ -837,6 +837,26 @@ npx wrangler tail
 que no pudo enviar y ofrece WhatsApp con el texto ya escrito. El resto del sitio
 no se entera.
 
+**Verificado en producción el 25/09/2026**, después del despliegue, con
+`wrangler tail` mirando el Worker:
+
+```
+POST /contacto  200  ok  cpu 38 ms  [contacto] consulta enviada (Resend 01a0d922-…)
+POST /contacto  200  ok  cpu  6 ms  [contacto] descartada: el campo trampa llegó completo.
+```
+
+El primero es un envío real desde el formulario, que Resend aceptó con ese
+identificador; el segundo, uno con el campo trampa lleno, que no llegó a
+llamar a Resend. Los registros no dicen ni el nombre, ni el email, ni el
+mensaje.
+
+**Llegaron a `ventas@` los dos envíos reales de prueba** —el del preview y el
+de producción—, confirmado en la bandeja. Los del campo trampa no se enviaron:
+el registro del Worker muestra el descarte y ninguna llamada a Resend.
+
+El costo de CPU, y por qué pasa los 10 ms, está en `docs/arquitectura.md`,
+«Formulario de contacto».
+
 ## Límite de envíos del formulario — regla de rate limiting
 
 Sin base ni KV no hay un contador compartido entre instancias del Worker, así
@@ -871,6 +891,16 @@ misma IP tienen que empezar a devolver 429.
 ```bash
 for i in $(seq 1 8); do curl -s -o /dev/null -w "%{http_code} " https://espaciocortinas.com.ar/contacto; done
 ```
+
+Verificado el 25/09/2026, antes y después de desplegar la Fase 4.6:
+
+```
+200 200 200 200 200 429 429 429
+HTTP/1.1 429 Too Many Requests    Retry-After: 9    error code: 1015
+```
+
+Mientras dura el bloqueo, otras rutas desde la misma IP siguen respondiendo
+200: la regla es solo para `/contacto`.
 
 ## Pendiente de dar de alta
 

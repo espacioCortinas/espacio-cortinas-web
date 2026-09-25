@@ -73,9 +73,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     titulo: producto.nombre,
     descripcion: producto.descripcion,
     ruta: `/productos/${producto.slug}`,
-    // Su imagen de Open Graph: la portada dentro de la composición de la
-    // marca, apaisada para que WhatsApp la muestre grande (decisión 59).
-    clave: `productos/${producto.slug}`,
   });
 }
 

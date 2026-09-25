@@ -273,7 +273,8 @@ propio logo y el amarillo es un color de superficie con reglas de uso propias.
 
 ~~**Queda para la 4.2 la imagen de Open Graph de reserva**~~ — hecha:
 `public/marca/og.jpg`, 1200×630, con el logo sobre el papel y `cortinas-tela/1`
-dentro de su margen. Sin texto sobre la foto.
+dentro de su margen. Sin texto sobre la foto. Reemplazada en la 4.6 por el logo
+solo, centrado: WhatsApp recortaba esta composición — decisión 62.
 
 **4.2 Sistema y estructura — HECHA.** Los tokens de la 4.1 se volvieron
 componentes: botón con tres variantes, chip, campo, aviso, estado vacío y la
@@ -384,9 +385,9 @@ sitio es que alguien termine escribiendo por WhatsApp.
   el plan gratuito — decisión 58.
 - **WhatsApp obligatorio y encendido en todo el sitio**, y el mensaje de
   producto corregido: decía «el Venecianas de PVC» — decisión 61.
-- **Una imagen de Open Graph apaisada por producto y por proyecto**, con la
-  composición de la de reserva, para que el enlace compartido salga como tarjeta
-  grande — decisión 59.
+- **La imagen para compartir es una sola: el logo centrado sobre el papel**,
+  1200 × 630 y 16 kB. Primero hubo una por producto y por proyecto, con su
+  portada al lado del logo, y WhatsApp la recortaba — decisiones 59 y 62.
 - **La ficha de negocio local**, con zonas, teléfono, email y redes, desde
   `contenido/contacto.ts` — decisión 60.
 - Las variables del correo ya no pueden tirar el sitio: el build exige las

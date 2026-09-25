@@ -63,11 +63,10 @@ Recorre `public/fotos/` **y `public/videos/`** enteros, dice qué metadatos tien
 cada archivo, imprime las coordenadas si las hay y **devuelve 1 si alguno las
 conserva**. Se corre sobre todas las medidas, no solo sobre la más grande.
 
-**Desde la Fase 4.6 recorre también `public/marca/` y `public/og/`.** Las
-imágenes para compartir llevan adentro la portada de cada producto y cada
-proyecto, que son fotos de casas de clientes. Salen de fotos ya publicadas y
-limpias, y `sharp` no copia metadatos; igual se comprueban, por la misma regla
-de siempre. Verificado: ninguna trae ni el perfil de color.
+**Desde la Fase 4.6 recorre también `public/marca/`**, el logo y la imagen
+para compartir. Hoy ninguna de las dos tiene una foto de un cliente adentro
+—decisión 62—, pero todo lo que se publica se revisa: el día que una lleve una
+foto, el control ya la mira.
 
 **Los videos también.** Un video de celular guarda las coordenadas igual que una
 foto, en una de dos cajas del contenedor MP4: `©xyz`, la de QuickTime que pone
@@ -204,9 +203,14 @@ este código.
 - [ ] Ninguna foto muestra personas, documentos ni el número de la casa
 - [ ] `fotos-originales/` sigue en `.gitignore`
 - [ ] El repositorio sigue siendo privado, verificado sin autenticar
-- [ ] `RESEND_API_KEY` cargada como Secret y ausente del paquete del navegador
-- [ ] El formulario resiste un envío automatizado básico: campo trampa,
-      validación en el servidor y regla de rate limiting
-- [ ] El SPF de la raíz sigue siendo uno solo y el MX sigue siendo
-      `smtp.google.com` (`docs/infraestructura.md`)
+- [x] `RESEND_API_KEY` cargada como Secret y ausente del paquete del navegador
+      — verificado el 25/09/2026: `wrangler secret list` devuelve solo esa, y
+      en el JavaScript del navegador no aparece ni el nombre ni el valor
+- [x] El formulario resiste un envío automatizado básico — verificado en
+      producción el 25/09/2026: el campo trampa se descarta sin enviar, la
+      validación rechaza un pedido armado a mano, y el sexto pedido seguido a
+      `/contacto` recibe 429
+- [x] El SPF de la raíz sigue siendo uno solo y el MX sigue siendo
+      `smtp.google.com` (`docs/infraestructura.md`) — verificado el 25/09/2026,
+      con los registros de Resend ya cargados
 - [ ] Next en la última versión estable

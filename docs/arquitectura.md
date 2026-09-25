@@ -94,7 +94,7 @@ contenido/
 ├── fotos.ts                     GENERADO por scripts/preparar-fotos.mjs
 ├── videos.ts                    GENERADO por scripts/preparar-fotos.mjs
 ├── marca.ts                     GENERADO por scripts/preparar-marca.mjs: el logo
-│                                y las imágenes de Open Graph
+│                                y la imagen para compartir
 ├── tipos.ts
 └── index.ts                     une contenido y medios; es lo que leen las páginas
 components/
@@ -129,13 +129,11 @@ lib/
 └── constantes.ts
 scripts/
 ├── preparar-fotos.mjs           recorta, redimensiona y borra los metadatos
-├── preparar-marca.mjs           el logo sin fondo y las imágenes de Open Graph
+├── preparar-marca.mjs           el logo sin fondo y la imagen para compartir
 └── revisar-metadatos.mjs        comprueba que ninguna publicada conserve GPS
 public/fotos/                    las imágenes generadas
 public/videos/                   los videos publicados y su cuadro de cartel
-public/marca/                    logo.png y og.jpg, GENERADOS
-public/og/                       la imagen de Open Graph de cada producto y
-                                 proyecto, 1200 × 630, GENERADAS
+public/marca/                    logo.png y og-logo.jpg, GENERADOS
 fotos-originales/                los originales. NO se versiona
 docs/
 next.config.ts
@@ -206,14 +204,14 @@ cambie sin build, hay que enchufar **las dos** piezas, no una: sin el
 
 ### Comandos
 
-| Comando            | Qué hace                                                                                       |
-| ------------------ | ---------------------------------------------------------------------------------------------- |
-| `npm run dev`      | Next en local. Es el de todos los días                                                         |
-| `npm run marca`    | rehace el logo, las imágenes de Open Graph y `contenido/marca.ts`. Lo encadena `npm run fotos` |
-| `npm run build`    | solo `next build`. Es el que verifica que el código compila                                    |
-| `npm run build:cf` | además arma el Worker. Lo que corre el despliegue                                              |
-| `npm run preview`  | levanta el Worker real en local, sobre `workerd`                                               |
-| `npm run deploy`   | despliega a mano. Normalmente no se usa: despliega `main`                                      |
+| Comando            | Qué hace                                                        |
+| ------------------ | --------------------------------------------------------------- |
+| `npm run dev`      | Next en local. Es el de todos los días                          |
+| `npm run marca`    | rehace el logo, la imagen para compartir y `contenido/marca.ts` |
+| `npm run build`    | solo `next build`. Es el que verifica que el código compila     |
+| `npm run build:cf` | además arma el Worker. Lo que corre el despliegue               |
+| `npm run preview`  | levanta el Worker real en local, sobre `workerd`                |
+| `npm run deploy`   | despliega a mano. Normalmente no se usa: despliega `main`       |
 
 `npm run preview` es lo que hay que correr antes de dar por buena cualquier cosa
 que dependa del servidor: es el único que ejecuta el código en el mismo runtime
@@ -261,12 +259,10 @@ al servir.
    cuadro de cartel
         ↓
 3. Escribe public/fotos/, public/videos/ y los manifiestos
-   contenido/fotos.ts y contenido/videos.ts. Y encadena preparar-marca.mjs,
-   que arma con cada portada la imagen de Open Graph de su página, en
-   public/og/, y la anota en contenido/marca.ts — decisión 59
+   contenido/fotos.ts y contenido/videos.ts
         ↓
-4. npm run fotos:revisar  — comprueba que ninguna conserve GPS, también las
-   de public/marca/ y public/og/, que salen de fotos de casas de clientes
+4. npm run fotos:revisar  — comprueba que ninguna conserve GPS, y revisa
+   también public/marca/: todo lo que se publica se revisa
         ↓
 5. git push. El sitio se reconstruye con las fotos adentro
 ```
@@ -395,9 +391,30 @@ WhatsApp con el texto ya puesto. El detalle está en las decisiones 54 a 58.
 **Sin SDK de Resend y sin librería de formularios**: enviar es un `fetch` con un
 JSON, y el formulario son cinco campos del sistema de componentes.
 
-**Lo que cuesta en el Worker es poco, y es a propósito.** El plan gratuito da
-10 ms de CPU por pedido: la acción lee el formulario, valida y arma dos textos
-de un par de kilobytes. Esperar a Resend es espera de red, que no cuenta.
+**Lo que hace la acción es poco, y el tope de CPU igual se pasa: medido.** El
+plan gratuito da 10 ms de CPU por pedido. La acción lee el formulario, valida y
+arma dos textos de un par de kilobytes, y esperar a Resend es espera de red, que
+no cuenta. Pero medido en producción con `wrangler tail` el 25/09/2026:
+
+| Pedido                                                 |      CPU |
+| ------------------------------------------------------ | -------: |
+| una página cualquiera, servida del caché de assets     | 11–12 ms |
+| la acción, la primera vez en esa instancia del Worker  | 31–55 ms |
+| la acción, con la instancia ya caliente (campo trampa) |     6 ms |
+
+**Lo caro no es el código nuestro, es el arranque en frío**: la primera acción
+que corre una instancia carga los módulos del manejador de acciones de Next y
+del contenido, y eso es lo que suma. Con pocas consultas por día, casi todas van
+a ser la primera de su instancia.
+
+**Por qué igual anda, y qué pasa si deja de andar.** Cloudflare documenta que
+cada instancia tiene flexibilidad para pasarse del tope _de vez en cuando_, y
+que corta con el error 1102 —«Worker exceeded resource limits»— si se pasa _de
+forma consistente_. Las páginas ya estaban en 11–12 ms antes de esta fase y
+nunca cortaron. Si el formulario cortara, el navegador recibe un error, y el
+formulario lo trata como cualquier envío fallido: conserva lo escrito y ofrece
+WhatsApp. Si pasara seguido, lo que lo resuelve es el plan pago de Workers,
+que tiene otro tope, no achicar la acción, que ya hace lo mínimo.
 
 La casilla se resuelve agregando `espaciocortinas.com.ar` como **alias de dominio**
 en el Google Workspace existente (`conceptoespacio.com`): sin costo, y los mensajes

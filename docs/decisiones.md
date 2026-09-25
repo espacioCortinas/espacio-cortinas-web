@@ -2858,9 +2858,12 @@ Se revisa si aparece abuso real.
 
 ---
 
-### 59. Cada producto y cada proyecto tiene su imagen de Open Graph apaisada
+### 59. Cada producto y cada proyecto tiene su imagen de Open Graph apaisada ~~— SUPERADA por la decisión 62~~
 
-**Fecha:** septiembre de 2026, Fase 4.6.
+**Fecha:** septiembre de 2026, Fase 4.6. **Se publicó, se probó en WhatsApp y
+se reemplazó en la misma fase**: WhatsApp recortaba esta composición. Queda
+escrita porque el análisis del recorte y de los pesos sigue valiendo, y porque
+el código está en el historial —commit `08bb1a9`— por si algún día vuelve.
 
 **El problema.** Un producto compartido por WhatsApp llevaba su portada: un WebP
 vertical 4:5 de 1600 × 2001. Los generadores de previsualización muestran la
@@ -2936,8 +2939,8 @@ carácter `<`, así que no escapaba nada. Nunca importó porque ningún dato ten
 **Obligatorio.** Hasta la 4.6, sin número cargado el enlace no se dibujaba, y
 cada página tenía un camino de reserva que mandaba a `/contacto`. Con
 `NEXT_PUBLIC_WHATSAPP` exigida por el build, esos caminos no se recorrían nunca
-y se fueron: el enlace está siempre, en la apertura y el cierre de cada página y
-en el pie.
+y se fueron: el enlace está siempre, en el cierre de cada página, en la
+apertura de Inicio, de Contacto y de cada producto y proyecto, y en el pie.
 
 **El mensaje de producto estaba mal escrito, y no se había visto.** Decía
 «vi en su página web el X», que sirve para «el Roller» y sale mal en el resto
@@ -2952,6 +2955,47 @@ qué vendemos y qué hicimos (`docs/producto.md`).
 nombre del producto o del proyecto es el del cierre de cada una, que está justo
 arriba; hacer contextual el del pie habría pedido un componente de cliente más
 solo para leer la ruta.
+
+---
+
+### 62. La imagen para compartir es una sola: el logo centrado sobre el papel
+
+**Fecha:** septiembre de 2026, Fase 4.6. **Reemplaza a la decisión 59** y a la
+imagen de reserva de la Fase 4.2.
+
+**Cómo apareció.** Con la Fase 4.6 publicada, los enlaces de un producto y de un
+proyecto se pegaron en WhatsApp: salía la tarjeta grande, pero **cortada**.
+WhatsApp recorta desde el centro cuando la imagen no coincide con el recuadro
+que muestra, y la composición tenía el logo contra el borde izquierdo y la foto
+contra el derecho: se perdía un pedazo de cada uno. Pasaba igual con la de
+reserva, que tenía la misma composición.
+
+**Lo decidido, a pedido de quien desarrolla:** una sola imagen para todo el
+sitio, el logo a su tamaño —504 × 145, sin agrandarlo— centrado sobre el papel
+de cal, en un JPEG de 1200 × 630. Centrado y con aire alrededor, entra en
+cualquier recorte razonable: hasta en uno cuadrado de 630 × 630 desde el centro
+queda entero. Pesa **16 kB**.
+
+**Lo que se pierde, y está asumido:** todos los enlaces del sitio muestran la
+misma imagen al compartirlos. Lo que distingue el de un producto del de otro
+son el título y la descripción, que siguen siendo de cada página. La decisión 1
+eligió Next para que cada página tuviera su vista previa propia, y la tiene: lo
+que dejó de ser propio es la imagen.
+
+**Lo que se sacó:** las ocho imágenes por página de `public/og/`,
+`ogPorPagina` del manifiesto, el parámetro `clave` de `metadataDePagina` y el
+encadenamiento de `npm run fotos` con el script de marca, que existía para que
+cada portada nueva trajera su imagen. El script de marca ya no depende de las
+fotos. Las ocho imágenes quedan en la historia de git —448 kB, ya subidos—, y el
+código que las armaba, en el commit `08bb1a9`.
+
+**Con otro nombre, `og-logo.jpg`, y no pisando `og.jpg`.** Los que arman las
+vistas previas —Facebook, WhatsApp y el resto— guardan la imagen por su
+dirección durante días; con el mismo nombre, un enlace compartido de nuevo
+podía seguir mostrando la composición vieja. `og.jpg` se borró.
+
+`npm run fotos:revisar` sigue revisando `public/marca`: la imagen ya no tiene
+ninguna foto de un cliente adentro, pero todo lo que se publica se revisa.
 
 ---
 
@@ -3004,11 +3048,10 @@ resultado enriquecido. Falta saber si hay una dirección publicable —la empres
 trabaja a domicilio— y con qué horario. Se resuelve junto con el alta del Perfil
 de Empresa de Google, que es donde ese dato importa de verdad (Fase 5).
 
-~~**Falta una imagen de Open Graph de reserva.**~~ Resuelto en la Fase 4.2:
-`public/marca/og.jpg`, que arma `scripts/preparar-marca.mjs` con el logo y
-`cortinas-tela/1`. La usan Inicio, los dos listados, Contacto y cualquier
-página que todavía no tenga la suya: desde la Fase 4.6 cada producto y cada
-proyecto tiene una propia, con la misma composición (decisión 59).
+~~**Falta una imagen de Open Graph de reserva.**~~ Resuelto en la Fase 4.2, y
+reemplazado en la 4.6: desde la decisión 62 hay una sola imagen para todo el
+sitio, `public/marca/og-logo.jpg`, el logo centrado sobre el papel. La
+composición anterior —el logo y `cortinas-tela/1`— la recortaba WhatsApp.
 
 Cuando aparezca una decisión no contemplada durante la implementación: preguntar,
 decidir, y anotarla acá antes de seguir.

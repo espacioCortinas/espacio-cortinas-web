@@ -23,7 +23,6 @@ contenido/
 
 public/fotos/         las imágenes ya recomprimidas, generadas
 public/videos/        los videos publicados y su cuadro de cartel, generados
-public/og/            la imagen de Open Graph de cada producto y proyecto, generada
 fotos-originales/     los originales. NO se versiona
 ```
 
@@ -47,18 +46,16 @@ variable salen el enlace y el número que se lee en la página.
 agregan acá el día que los dé; inventarlos para completar un formato sería
 publicar un dato falso sobre la empresa.
 
-## Imágenes de Open Graph
+## Archivos de marca
 
-`contenido/marca.ts`, que escribe `scripts/preparar-marca.mjs` — decisión 59:
+`contenido/marca.ts`, que escribe `scripts/preparar-marca.mjs`:
 
-| Exporta       | Qué es                                                                         |
-| ------------- | ------------------------------------------------------------------------------ |
-| `logo`        | el logo sin fondo del encabezado                                               |
-| `og`          | la imagen de reserva: Inicio, los listados, Contacto                           |
-| `ogPorPagina` | la de cada producto y proyecto, con la clave de `fotos.ts`: `productos/roller` |
+| Exporta | Qué es                                                                  |
+| ------- | ----------------------------------------------------------------------- |
+| `logo`  | el logo sin fondo del encabezado                                        |
+| `og`    | la imagen para compartir, la misma para todas las páginas — decisión 62 |
 
-Las tres con `ruta`, `ancho` y `alto` del archivo escrito. Una página que no
-está en `ogPorPagina` usa `og`.
+Los dos con `ruta`, `ancho` y `alto` del archivo escrito.
 
 **Lo escrito a mano y lo generado nunca comparten archivo.** Si estuvieran
 juntos, regenerar las fotos pisaría los textos. Se juntan al leer, en

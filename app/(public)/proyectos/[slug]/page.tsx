@@ -66,9 +66,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // de WhatsApp, «Nordelta» dice tanto como el título.
     descripcion: `${proyecto.ubicacion}. ${proyecto.descripcion}`,
     ruta: `/proyectos/${proyecto.slug}`,
-    // Su imagen de Open Graph: la portada —siempre una foto, nunca un video—
-    // dentro de la composición de la marca, apaisada (decisión 59).
-    clave: `proyectos/${proyecto.slug}`,
   });
 }
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { og, ogPorPagina, type ArchivoDeMarca } from "@/contenido/marca";
+import { og } from "@/contenido/marca";
 import { entornoPublico } from "@/lib/entorno";
 
 /**
@@ -48,22 +48,12 @@ type Entrada = {
   descripcion: string;
   /** Empezando con barra: `/productos/roller-blackout`. */
   ruta: string;
-  /**
-   * De quién es la página, con la clave de `contenido/fotos.ts`:
-   * `productos/roller`. Es lo que busca su imagen de Open Graph. Sin clave, o
-   * si esa página todavía no tiene la suya, va la de reserva.
-   */
-  clave?: string;
-  /** Para el `alt` de la imagen de Open Graph propia. */
-  altImagen?: string;
 };
 
 export function metadataDePagina({
   titulo,
   descripcion,
   ruta,
-  clave,
-  altImagen,
 }: Entrada): Metadata {
   const descripcionCorta = paraMeta(descripcion);
 
@@ -73,41 +63,29 @@ export function metadataDePagina({
   const canonica = ruta;
 
   /*
-   * La imagen que se ve al compartir el enlace.
+   * La imagen que se ve al compartir el enlace: **el logo centrado sobre el
+   * papel, la misma para todas las páginas** — decisión 62. Lo que distingue
+   * un enlace de otro al compartirlo son el título y la descripción, que sí son
+   * de cada página.
    *
-   * **Cada producto y cada proyecto tiene la suya desde la Fase 4.6**: su
-   * portada dentro de la composición de la de reserva —papel, el logo a la
-   * izquierda y la foto a la derecha— en un JPEG de 1200 × 630 que arma
-   * `scripts/preparar-marca.mjs`. Antes se usaba la portada tal cual, un WebP
-   * vertical 4:5, y los generadores de previsualización muestran la imagen
-   * grande solo cuando es apaisada: salía como miniatura chica al costado del
-   * texto. Decisión 59.
+   * Es apaisada, 1200 × 630, que es lo que hace que WhatsApp la muestre grande
+   * y no como miniatura al costado del texto. Hubo dos versiones antes —el logo
+   * a la izquierda con una foto a la derecha, y en la Fase 4.6 una por producto
+   * y proyecto con su portada— y **WhatsApp las recortaba**: corta desde el
+   * centro cuando la imagen no coincide con su recuadro, y se perdía un pedazo
+   * del logo y otro de la foto. El logo solo, centrado, entra en cualquier
+   * recorte.
    *
-   * **La de reserva**, `public/marca/og.jpg`, es la misma composición con
-   * `cortinas-tela/1`, la mejor foto del archivo. La usan Inicio, los dos
-   * listados, Contacto y cualquier página que todavía no tenga la suya.
-   *
-   * Las dos salen del manifiesto generado, con su ancho y su alto: si algún
-   * día cambian de tamaño, esto las sigue solo.
+   * Sale del manifiesto generado, con su ancho y su alto: si algún día cambia
+   * de tamaño, esto la sigue sola.
    */
-  const propia: ArchivoDeMarca | undefined = clave
-    ? ogPorPagina[clave]
-    : undefined;
-  const imagen = propia
-    ? {
-        url: propia.ruta,
-        width: propia.ancho,
-        height: propia.alto,
-        alt: altImagen ?? `${titulo} — ${MARCA}`,
-        type: "image/jpeg",
-      }
-    : {
-        url: og.ruta,
-        width: og.ancho,
-        height: og.alto,
-        alt: `${MARCA} — cortinas de tela en una casa de Buenos Aires`,
-        type: "image/jpeg",
-      };
+  const imagen = {
+    url: og.ruta,
+    width: og.ancho,
+    height: og.alto,
+    alt: MARCA,
+    type: "image/jpeg",
+  };
 
   return {
     title: titulo,
@@ -123,8 +101,8 @@ export function metadataDePagina({
       images: [imagen],
     },
     twitter: {
-      // Todas las imágenes son apaisadas, 1200 × 630, así que siempre es la
-      // tarjeta grande.
+      // La imagen es apaisada, 1200 × 630, así que siempre es la tarjeta
+      // grande.
       card: "summary_large_image",
       title: `${titulo} · ${MARCA}`,
       description: descripcionCorta,

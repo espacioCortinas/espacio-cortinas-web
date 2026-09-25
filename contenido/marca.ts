@@ -23,59 +23,11 @@ export const logo: ArchivoDeMarca = {
 };
 
 /**
- * La imagen que se ve al pegar en WhatsApp un enlace que no tiene imagen
- * propia: Inicio, los dos listados y Contacto.
+ * La imagen que se ve al pegar un enlace del sitio en WhatsApp: el logo
+ * centrado sobre el papel. Una sola para todas las páginas — decisión 62.
  */
 export const og: ArchivoDeMarca = {
-  ruta: "/marca/og.jpg",
+  ruta: "/marca/og-logo.jpg",
   ancho: 1200,
   alto: 630,
-};
-
-/**
- * La imagen de Open Graph de cada producto y cada proyecto: la misma
- * composición que `og`, con su portada. La clave es la de `fotos.ts`,
- * `<entidad>/<slug>`. Una página que no está acá usa `og` — decisión 59.
- */
-export const ogPorPagina: Record<string, ArchivoDeMarca> = {
-  "productos/bandas-verticales": {
-    ruta: "/og/productos/bandas-verticales.jpg",
-    ancho: 1200,
-    alto: 630,
-  },
-  "productos/compacta-blackout": {
-    ruta: "/og/productos/compacta-blackout.jpg",
-    ancho: 1200,
-    alto: 630,
-  },
-  "productos/cortinas-tela": {
-    ruta: "/og/productos/cortinas-tela.jpg",
-    ancho: 1200,
-    alto: 630,
-  },
-  "productos/roller": {
-    ruta: "/og/productos/roller.jpg",
-    ancho: 1200,
-    alto: 630,
-  },
-  "productos/toldos": {
-    ruta: "/og/productos/toldos.jpg",
-    ancho: 1200,
-    alto: 630,
-  },
-  "productos/venecianas-madera": {
-    ruta: "/og/productos/venecianas-madera.jpg",
-    ancho: 1200,
-    alto: 630,
-  },
-  "productos/venecianas-pvc": {
-    ruta: "/og/productos/venecianas-pvc.jpg",
-    ancho: 1200,
-    alto: 630,
-  },
-  "proyectos/cowork-nordelta": {
-    ruta: "/og/proyectos/cowork-nordelta.jpg",
-    ancho: 1200,
-    alto: 630,
-  },
 };
