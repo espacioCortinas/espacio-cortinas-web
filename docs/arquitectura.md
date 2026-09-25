@@ -57,7 +57,9 @@ compartido, que se sacó con sus dos recursos — decisión 36.
 
 **Lo único que ejecuta código en respuesta a un visitante** es la Server Action
 del formulario de contacto (Fase 4.6). Por eso el sitio sigue siendo un Worker
-y no un montón de archivos estáticos.
+y no un montón de archivos estáticos. **`/contacto` sigue siendo estática**: la
+página se genera en el build, y lo que corre en el servidor es el envío, cuando
+alguien lo pide — un `POST` a la misma ruta.
 
 ## Estructura
 
@@ -71,7 +73,10 @@ app/
 │   ├── proyectos/
 │   │   ├── page.tsx
 │   │   └── [slug]/page.tsx
-│   ├── contacto/page.tsx
+│   ├── contacto/
+│   │   ├── page.tsx
+│   │   └── acciones.ts          la Server Action del formulario. Lo único que
+│   │                            corre en respuesta a un visitante
 │   ├── layout.tsx               encabezado, salto al contenido y pie
 │   ├── loading.tsx              mientras llega la página siguiente
 │   └── error.tsx                si se corta la navegación. "use client"
@@ -84,43 +89,53 @@ app/
 contenido/
 ├── productos.ts                 se edita a mano
 ├── proyectos.ts                 se edita a mano
+├── contacto.ts                  se edita a mano: casilla, redes y zonas donde trabaja
+├── inicio.ts                    se edita a mano: los textos de Inicio
 ├── fotos.ts                     GENERADO por scripts/preparar-fotos.mjs
 ├── videos.ts                    GENERADO por scripts/preparar-fotos.mjs
-├── marca.ts                     GENERADO por scripts/preparar-marca.mjs
+├── marca.ts                     GENERADO por scripts/preparar-marca.mjs: el logo
+│                                y las imágenes de Open Graph
 ├── tipos.ts
 └── index.ts                     une contenido y medios; es lo que leen las páginas
 components/
 ├── foto.tsx                     el <img> con srcset, proporción y recorte
 ├── galeria.tsx                  la tira que se desliza, con fotos y videos
-├── video-mudo.tsx               el video mudo, en bucle. "use client" (uno de dos)
+├── video-mudo.tsx               el video mudo, en bucle. "use client" (uno de tres)
 ├── tarjeta-producto.tsx         la portada y el nombre; la grilla de Inicio
 ├── tarjeta-proyecto.tsx         el proyecto en fila o en tarjeta
 ├── listado-proyectos.tsx        el primero en fila y el resto en grilla
 ├── logo.tsx                     el logo del encabezado
 ├── encabezado.tsx               logo y navegación
-├── navegacion.tsx               los cuatro enlaces. "use client" (uno de dos)
+├── navegacion.tsx               los cuatro enlaces. "use client" (uno de tres)
+├── formulario-contacto.tsx      el formulario y sus estados. "use client" (uno de tres)
 ├── pie.tsx
 ├── whatsapp.tsx                 el enlace, con el mensaje según la página
 ├── datos-estructurados.tsx      JSON-LD del negocio local
 └── ui/                          botón, chip, campo, aviso, vacío, contenedor
 lib/
 ├── entorno.ts                   variables públicas
-├── entorno-servidor.ts          variables secretas — SOLO servidor
-├── entorno-validacion.ts        qué es obligatorio y desde qué fase
+├── entorno-servidor.ts          las del correo — SOLO servidor
+├── entorno-validacion.ts        qué es obligatorio, en el build y al arrancar
+├── consulta.ts                  los campos del formulario y su validación, la
+│                                misma en el navegador y en el servidor
+├── correo.ts                    el correo de la consulta y su envío por Resend
+│                                — SOLO servidor
 ├── fotos.ts                     rutas, srcset y el tope de ancho de cada medio.
 │                                Lo ÚNICO que arma rutas de fotos y de videos
 ├── metadata.ts                  title, description, canonical y Open Graph
-├── whatsapp.ts                  el mensaje contextual y el enlace
+├── whatsapp.ts                  el mensaje contextual, el enlace y el número
 ├── texto.ts                     slugs y textos derivados
 ├── navegacion.ts                los enlaces del menú, en un solo lugar
 └── constantes.ts
 scripts/
 ├── preparar-fotos.mjs           recorta, redimensiona y borra los metadatos
-├── preparar-marca.mjs           el logo sin fondo y la imagen de Open Graph
+├── preparar-marca.mjs           el logo sin fondo y las imágenes de Open Graph
 └── revisar-metadatos.mjs        comprueba que ninguna publicada conserve GPS
 public/fotos/                    las imágenes generadas
 public/videos/                   los videos publicados y su cuadro de cartel
 public/marca/                    logo.png y og.jpg, GENERADOS
+public/og/                       la imagen de Open Graph de cada producto y
+                                 proyecto, 1200 × 630, GENERADAS
 fotos-originales/                los originales. NO se versiona
 docs/
 next.config.ts
@@ -191,14 +206,14 @@ cambie sin build, hay que enchufar **las dos** piezas, no una: sin el
 
 ### Comandos
 
-| Comando            | Qué hace                                                    |
-| ------------------ | ----------------------------------------------------------- |
-| `npm run dev`      | Next en local. Es el de todos los días                      |
-| `npm run marca`    | rehace `public/marca/` y `contenido/marca.ts` desde el logo |
-| `npm run build`    | solo `next build`. Es el que verifica que el código compila |
-| `npm run build:cf` | además arma el Worker. Lo que corre el despliegue           |
-| `npm run preview`  | levanta el Worker real en local, sobre `workerd`            |
-| `npm run deploy`   | despliega a mano. Normalmente no se usa: despliega `main`   |
+| Comando            | Qué hace                                                                                       |
+| ------------------ | ---------------------------------------------------------------------------------------------- |
+| `npm run dev`      | Next en local. Es el de todos los días                                                         |
+| `npm run marca`    | rehace el logo, las imágenes de Open Graph y `contenido/marca.ts`. Lo encadena `npm run fotos` |
+| `npm run build`    | solo `next build`. Es el que verifica que el código compila                                    |
+| `npm run build:cf` | además arma el Worker. Lo que corre el despliegue                                              |
+| `npm run preview`  | levanta el Worker real en local, sobre `workerd`                                               |
+| `npm run deploy`   | despliega a mano. Normalmente no se usa: despliega `main`                                      |
 
 `npm run preview` es lo que hay que correr antes de dar por buena cualquier cosa
 que dependa del servidor: es el único que ejecuta el código en el mismo runtime
@@ -246,9 +261,12 @@ al servir.
    cuadro de cartel
         ↓
 3. Escribe public/fotos/, public/videos/ y los manifiestos
-   contenido/fotos.ts y contenido/videos.ts
+   contenido/fotos.ts y contenido/videos.ts. Y encadena preparar-marca.mjs,
+   que arma con cada portada la imagen de Open Graph de su página, en
+   public/og/, y la anota en contenido/marca.ts — decisión 59
         ↓
-4. npm run fotos:revisar  — comprueba que ninguna conserve GPS
+4. npm run fotos:revisar  — comprueba que ninguna conserve GPS, también las
+   de public/marca/ y public/og/, que salen de fotos de casas de clientes
         ↓
 5. git push. El sitio se reconstruye con las fotos adentro
 ```
@@ -354,18 +372,37 @@ Implementación: Fase 4.0.
 ## Formulario de contacto
 
 ```
-Formulario → Server Action → validación → Resend → contacto@espaciocortinas.com.ar
+components/formulario-contacto.tsx   valida en el navegador (lib/consulta.ts)
+        │  onSubmit, sin <form action>: lo escrito no se pierde nunca
+        ▼
+Cloudflare, en el borde              rate limiting de /contacto: 5 cada 10 s
+        │
+        ▼
+app/(public)/contacto/acciones.ts    campo trampa → la MISMA validación otra vez
+        │
+        ▼
+lib/correo.ts                        texto y HTML escapado → fetch a Resend
+        │
+        ▼
+Resend → ventas@espaciocortinas.com.ar, con Reply-To de quien escribió
 ```
 
-Sin bandeja en el panel. Los mensajes viven en el correo.
+No hay bandeja: los mensajes viven en el correo y no se guardan en ningún otro
+lado (decisión 12). Si el envío falla por cualquier razón —la red, el 429 del
+borde, Resend, una clave que falta— el formulario conserva lo escrito y ofrece
+WhatsApp con el texto ya puesto. El detalle está en las decisiones 54 a 58.
+
+**Sin SDK de Resend y sin librería de formularios**: enviar es un `fetch` con un
+JSON, y el formulario son cinco campos del sistema de componentes.
+
+**Lo que cuesta en el Worker es poco, y es a propósito.** El plan gratuito da
+10 ms de CPU por pedido: la acción lee el formulario, valida y arma dos textos
+de un par de kilobytes. Esperar a Resend es espera de red, que no cuenta.
 
 La casilla se resuelve agregando `espaciocortinas.com.ar` como **alias de dominio**
 en el Google Workspace existente (`conceptoespacio.com`): sin costo, y los mensajes
 caen en la casilla que ya usa. No hace falta cambiar el dominio principal del
 Workspace para que el sitio funcione.
-
-Protección contra spam: campo trampa oculto más límite por IP. Sin captcha —
-agrega fricción y hay poco volumen.
 
 ## Dominio y DNS
 
@@ -378,7 +415,10 @@ NIC Argentina  →  nameservers de Cloudflare  →  registros
                                                  │         solo para redirigir)
                                                  ├── MX  → Google Workspace
                                                  ├── TXT → SPF, DKIM, verificación
-                                                 └── TXT → verificación de Resend
+                                                 └── sitio → Resend: CNAME en
+                                                             send.sitio y rsend.sitio,
+                                                             DKIM en
+                                                             resend._domainkey.sitio
 ```
 
 **El tráfico HTTP va proxeado por Cloudflare**, que es la única forma posible:
@@ -399,14 +439,13 @@ es sobre el dominio nuevo.
 
 ```
 NEXT_PUBLIC_SITE_URL               para canonical, sitemap y Open Graph
-NEXT_PUBLIC_WHATSAPP               número en formato internacional
-RESEND_API_KEY                     SOLO SERVIDOR
-EMAIL_CONTACTO                     destino del formulario
+NEXT_PUBLIC_WHATSAPP               número en formato internacional, solo cifras
+RESEND_API_KEY                     SOLO SERVIDOR, y la única secreta
+EMAIL_CONTACTO                     destino del formulario. No es secreta
 ```
 
-Quedaron cuatro, y solo la primera es obligatoria hoy: las tres restantes se
-cargan en la Fase 4.6 con el formulario de contacto. Las cuatro de Supabase se
-fueron con la base — decisión 36.
+Son cuatro, y desde la Fase 4.6 el build exige las cuatro. Las cuatro de
+Supabase se fueron con la base — decisión 36.
 
 Cualquier variable con `NEXT_PUBLIC_` termina en el navegador. Antes de agregar
 una, verificar que sea información pública.
@@ -424,12 +463,12 @@ pasar por alto al venir de Vercel, donde había una sola lista:
 
 Y en la de runtime **no todas se administran igual**:
 
-- las `NEXT_PUBLIC_*` van en el bloque `vars` de `wrangler.jsonc`, en el
-  repositorio. Terminan en el navegador de todas formas, así que no hay nada que
+- las que no son secretas —las dos `NEXT_PUBLIC_*` y `EMAIL_CONTACTO`— van en
+  el bloque `vars` de `wrangler.jsonc`, en el repositorio. No hay nada que
   proteger y sí algo que ganar: el valor de producción se lee en un diff, con
-  historial, en vez de ser un Secret ilegible — decisión 30;
-- las secretas se cargan con `npx wrangler secret put NOMBRE` y **nunca** van al
-  archivo.
+  historial, en vez de ser un Secret ilegible — decisiones 30 y 55;
+- la secreta, `RESEND_API_KEY`, se carga con `npx wrangler secret put` y
+  **nunca** va al archivo.
 
 **Cargar una variable de texto a mano en el panel del Worker sin declararla en
 `wrangler.jsonc` no sirve:** la borra el próximo despliegue. El archivo manda.
@@ -438,6 +477,13 @@ Y en la de runtime **no todas se administran igual**:
 curso ya usa; la lista vive en `lib/entorno-validacion.ts` y cada fase suma la
 suya (decisión 21). La verificación corre en el build y al arrancar el servidor:
 si falta alguna, corta con la lista completa en vez de fallar más tarde.
+
+**Y el arranque no exige lo mismo que el build** — decisión 56. El build exige
+las cuatro; el arranque, solo lo que usan las páginas. Las dos del correo las
+comprueba el envío del formulario: si falta la clave en el Worker, falla ese
+envío y no el sitio entero. Las dos validan además la **forma**: el número solo
+con cifras y empezando por 54, la casilla con forma de dirección, la clave
+empezando por `re_`.
 
 ## Constantes
 

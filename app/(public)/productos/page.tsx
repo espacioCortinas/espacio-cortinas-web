@@ -9,7 +9,6 @@ import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
 import { Vacio } from "@/components/ui/vacio";
 import { productosPublicados } from "@/contenido";
 import type { ProductoConMedios } from "@/contenido/tipos";
-import { entornoPublico } from "@/lib/entorno";
 import { portadaDe } from "@/lib/fotos";
 import { metadataDePagina } from "@/lib/metadata";
 import { altAutomatico } from "@/lib/texto";
@@ -98,7 +97,6 @@ const SIZES_PORTADA =
 
 export default function Productos() {
   const productos = productosPublicados();
-  const hayWhatsapp = entornoPublico.whatsapp !== null;
 
   return (
     <main className={`${CLASES_CONTENEDOR} py-16 md:py-28`}>
@@ -182,21 +180,10 @@ export default function Productos() {
         </p>
 
         <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
-          {hayWhatsapp ? (
-            <>
-              <EnlaceWhatsapp contexto={{ tipo: "general" }} />
-              <Link href="/contacto" className={clasesDeBoton("enlace")}>
-                Otras formas de contacto
-              </Link>
-            </>
-          ) : (
-            // Sin número cargado el botón de WhatsApp no se dibuja (Fase 4.6),
-            // y un cierre sin ninguna acción no cierra nada. Es el mismo camino
-            // que toma Inicio.
-            <Link href="/contacto" className={clasesDeBoton("principal")}>
-              Escribinos
-            </Link>
-          )}
+          <EnlaceWhatsapp contexto={{ tipo: "general" }} />
+          <Link href="/contacto" className={clasesDeBoton("enlace")}>
+            Otras formas de contacto
+          </Link>
         </div>
       </section>
     </main>

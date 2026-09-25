@@ -14,7 +14,8 @@ import { ENLACES } from "@/lib/navegacion";
  * teléfono los enlaces bajan a su propia fila debajo del logo, que es lo que
  * les da los 44 px de alto sin apretar el encabezado.
  *
- * **Es el único componente de cliente del sitio público.** Existe por una sola
+ * **Es uno de los tres componentes de cliente del sitio público**, con el video
+ * y el formulario de contacto. Existe por una sola
  * razón: marcar en qué página está el visitante, que necesita saber la ruta
  * actual. Se marca con `aria-current="page"`, subrayado y peso — tres señales,
  * ninguna de color, porque el amarillo no puede marcar un estado (1,06:1

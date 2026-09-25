@@ -344,6 +344,11 @@ avisa nada y falla en producción.
 La lista vive en `lib/entorno-validacion.ts`. **Cada fase suma la suya**, y está
 escrito ahí mismo cuál le toca a cada una.
 
+**Matizada por la decisión 56:** desde la Fase 4.6 el build y el arranque ya no
+exigen la misma lista. El build exige las cuatro; el arranque, solo lo que usan
+las páginas. Las dos del correo las comprueba el envío del formulario, para que
+una clave faltante no tire el sitio entero.
+
 ---
 
 ### 22. El dominio principal es el apex, y `www` redirige
@@ -878,6 +883,11 @@ despliegue en vez de borrarlas.
 Secret viejo con el mismo nombre que una `var`, y hay dos valores para el mismo
 nombre. Las otras tres se leen con `npx wrangler deploy --dry-run`, que lista
 los bindings con su valor sin desplegar nada.
+
+**Desde la Fase 4.6** son tres `vars` —`NEXT_PUBLIC_SITE_URL`,
+`NEXT_PUBLIC_WHATSAPP` y `EMAIL_CONTACTO`— y **un solo** Secret,
+`RESEND_API_KEY`. `EMAIL_CONTACTO` no lleva el prefijo público pero tampoco es
+secreta, y va a la vista por la misma razón que las demás — decisión 55.
 
 ---
 
@@ -2581,6 +2591,370 @@ libde265, no otra receta.
 
 ---
 
+### 54. El formulario sale de un subdominio verificado en Resend, no del dominio principal
+
+**Fecha:** septiembre de 2026, Fase 4.6.
+
+**El planteo.** Resend solo envía desde un dominio cuya propiedad se demostró
+cargando registros DNS. El dominio tiene funcionando el correo de Google
+Workspace —MX, SPF, DKIM y DMARC, verificados— y es lo que no se puede romper:
+dos registros SPF en el mismo nombre invalidan los dos, y el correo de la
+empresa empieza a rebotar o a caer en spam.
+
+**Lo decidido:** se verifica `sitio.espaciocortinas.com.ar` y el correo sale de
+`formulario@sitio.espaciocortinas.com.ar`, con el nombre «Formulario web».
+
+**Por qué un subdominio, si con el dominio principal tampoco se pisaba nada.**
+Resend nunca pide un SPF en la raíz: el suyo va en el subdominio del
+Return-Path, `send.` por defecto, y la clave DKIM en `resend._domainkey.`.
+Verificando el principal, ninguno de los dos nombres existía, así que el
+correo de Google no se tocaba en ninguno de los dos casos. La diferencia está
+en la **reputación**: con el principal, el formulario y el correo de la empresa
+comparten la misma fama ante Gmail, y un abuso del formulario —alguien que lo
+use para mandar basura— podría hacer desconfiar también de los mails de
+`ventas@`. Con el subdominio, la mala fama se queda en `sitio`. Es lo que
+recomienda la propia documentación de Resend.
+
+**Por qué `sitio.` y no `send.`**, que fue la primera idea: Resend pone el
+Return-Path en `send.` del dominio que se verifica, así que verificar
+`send.espaciocortinas.com.ar` habría dejado un `send.send.…`. Funciona igual,
+pero es la clase de nombre que dentro de un año nadie entiende.
+
+**Nadie responde a esa dirección.** El correo lleva `Reply-To` con el email de
+quien escribió, así que «Responder» va directo a esa persona. El remitente es
+una etiqueta técnica: lo único que se ve de él es «Formulario web» en la
+bandeja.
+
+**DMARC no se toca.** El de la raíz está en `p=none` y sin `sp=`, así que cubre
+al subdominio con la misma política. La alineación da bien: la firma DKIM es
+de `sitio.espaciocortinas.com.ar`, el mismo dominio del remitente.
+
+**La cuenta de Resend es de la empresa**, a nombre de
+`ventas@conceptoespacio.com`, como todas las cuentas de servicios
+(`docs/infraestructura.md`, «Titularidad»). La clave tiene permiso **solo de
+envío** y **solo sobre ese dominio**: si se filtrara, no sirve para leer nada
+ni para mandar desde otra dirección.
+
+Los registros cargados, y cómo se comprueba que el correo de Google sigue
+intacto, están en `docs/infraestructura.md`, «Resend».
+
+---
+
+### 55. `EMAIL_CONTACTO` va en el bloque `vars`, no como Secret
+
+**Fecha:** septiembre de 2026, Fase 4.6. Corrige la tabla de variables de
+`docs/infraestructura.md`, que la tenía como Secret.
+
+**No es secreta:** la casilla se publica en `/contacto`. Y la decisión 36 ya
+había dejado escrito el principio que sobrevivía de la 30: **lo que no es
+secreto se declara en `wrangler.jsonc`, a la vista**.
+
+**El caso concreto que lo decide.** Si esta variable se carga con un error de
+tipeo, el formulario manda cada consulta a una casilla que no existe, y nadie
+se entera: la persona ve «Recibimos tu mensaje» y la empresa no recibe nada.
+Como Secret, el valor cargado **no se puede volver a leer**; es exactamente la
+trampa de `NEXT_PUBLIC_SUPABASE_URL` del 14/08, que estaba mal y era invisible.
+En `vars` se lee en el repositorio, con historial.
+
+**Lo que sigue siendo Secret:** `RESEND_API_KEY`, la única secreta de verdad.
+`npx wrangler secret list` tiene que devolver exactamente esa y ninguna más.
+
+---
+
+### 56. Las claves del correo no pueden tirar el sitio: el build exige las cuatro, el arranque no
+
+**Fecha:** septiembre de 2026, Fase 4.6. **Matiza la decisión 21.**
+
+La decisión 21 hace correr la validación de entorno dos veces, en el build y al
+arrancar el servidor, con la misma lista. Tenía sentido mientras las variables
+eran las de Supabase: sin ellas no había página que servir, y el 29/07 un
+arranque sin variables dejó el sitio entero en 500.
+
+**`RESEND_API_KEY` y `EMAIL_CONTACTO` son de otra clase.** Las usa una sola
+cosa, el envío del formulario, y el sitio entero se sirve sin ellas. Con la
+misma lista en los dos momentos, un Secret que faltara en el Worker tiraría
+Inicio, el catálogo, los proyectos y el botón de WhatsApp —el canal
+principal— para proteger un formulario que ya tiene salida propia.
+
+**Lo decidido:**
+
+| Momento                  | Exige                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| build (`next.config.ts`) | las cuatro: faltar ahí no cuesta nada, porque corta antes de publicar            |
+| arranque                 | solo `NEXT_PUBLIC_SITE_URL`, que es lo que usan las páginas                      |
+| el envío del formulario  | sus dos, al enviar: si falta una, falla ese envío, lo registra y ofrece WhatsApp |
+
+`NEXT_PUBLIC_WHATSAPP` tampoco la exige el arranque: Next la incrusta en el
+build y las páginas ya salen con el enlace escrito.
+
+**Lo que se pierde es ruido.** Con la lista única, una clave faltante se notaba
+porque se caía todo. Ahora se nota en el formulario, que dice que no pudo
+enviar, y en los registros del Worker, con el nombre de lo que falta. Por eso
+la comprobación después de cada despliegue incluye `npx wrangler secret list`
+(`docs/infraestructura.md`).
+
+**La validación de forma sigue en los dos momentos**, y ahora cubre las cuatro:
+el número de WhatsApp tiene que ser solo cifras y empezar con 54, la casilla
+tiene que tener forma de dirección, y la clave tiene que empezar con `re_`.
+Del valor de la clave nunca se imprime nada.
+
+---
+
+### 57. El formulario: cinco campos, tres obligatorios, y lo escrito no se pierde nunca
+
+**Fecha:** septiembre de 2026, Fase 4.6.
+
+#### Los campos
+
+Nombre, email, teléfono, qué está buscando y el mensaje. Nada más: ni
+presupuesto, ni cómo nos conoció, ni metros. Cada campo cuesta consultas.
+
+**Obligatorios son tres: nombre, email y mensaje.** El email lo es por una razón
+concreta: es el `Reply-To` del correo, lo que permite contestar con un toque.
+El teléfono es opcional —para quien prefiere que lo llamen— y «qué está
+buscando» también.
+
+**«Qué está buscando» es una lista y no un texto**: elegir entre siete
+productos es un toque, y escribirlo son veinte. Sale del mismo arreglo que
+`/productos`, con «Todavía no lo sé» primero —es la respuesta honesta de mucha
+gente antes de que la asesoren— y «Otra cosa» al final. Es el selector nativo
+del sistema: en un teléfono abre la rueda que ya conoce todo el mundo.
+`components/ui/campo.tsx` suma ese tercer control; hasta acá tenía dos.
+
+#### La validación es una sola, y corre dos veces
+
+`lib/consulta.ts` limpia y valida. Lo usa el navegador —para decir enseguida
+que falta el email, sin ir al servidor— y **lo vuelve a correr entero la Server
+Action** sobre lo que llegó. Verificado mandándole a la acción pedidos armados a
+mano, sin pasar por la página: un pedido con los cinco campos mal devuelve los
+cinco errores, un mensaje de 3.500 caracteres se rechaza, y un nombre con un
+salto de línea adentro llega como texto plano, sin partir el asunto.
+
+#### Por qué no usa `<form action>`
+
+Es la forma que Next propone para una Server Action, y falla justo en lo que
+este formulario no puede fallar:
+
+- **React vacía el formulario al terminar la acción.** Un envío fallido
+  borraría lo que la persona escribió.
+- **Si el pedido no llega a la acción, lanza.** Un corte de red, el 429 de la
+  regla de rate limiting o un error del Worker suben hasta `error.tsx` y
+  reemplazan la página entera, formulario incluido.
+
+Así que el envío lo maneja `onSubmit`, y la acción se llama como una función,
+dentro de un `try`. Los campos no son controlados y nadie los vacía. Verificado
+en el navegador con los tres casos: Resend rechazando la clave, la acción
+devolviendo un error, y un 429 simulado en la respuesta — en los tres, el texto
+sigue escrito y aparece el aviso.
+
+**Lo que se resigna es que funcione sin JavaScript.** Sin JavaScript la página
+ofrece todo lo demás, que son enlaces comunes: WhatsApp, el teléfono y el
+email.
+
+#### Antes de hidratar, el botón está apagado — y por qué
+
+**Se encontró probando el envío real, y no estaba previsto.** Hasta que React
+toma el formulario, el formulario es HTML pelado, y enviarlo es el envío nativo
+del navegador. Sin `method`, eso es un **GET con los datos en la URL**: una
+prueba terminó en `/contacto?nombre=…&email=…&telefono=…&mensaje=…`. Ahí
+quedan en el historial del navegador y **en los registros del Worker**, que
+guardan la dirección de cada pedido, y la consulta no llega a ningún lado. Es
+lo contrario de «los mensajes no se guardan en ningún lado».
+
+**La ventana es más larga de lo que parece.** El contenido de `/contacto` llega
+en diferido dentro del mismo HTML —un límite de Suspense que se completa al
+final del documento— y React 19.2 lo revela y lo hidrata en el cuadro
+siguiente. En un teléfono con una conexión lenta, el formulario se ve segundos
+antes de responder; en una pestaña abierta en segundo plano no se revela hasta
+que alguien la mira.
+
+**Lo que se hizo:**
+
+- el botón nace **apagado** y se enciende al hidratar (`useSyncExternalStore`,
+  que da el valor del servidor durante la hidratación y el del cliente después).
+  Un botón de enviar apagado bloquea también el Enter desde un campo, así que no
+  hay forma humana de disparar el envío nativo;
+- el formulario lleva **`method="post"`** como segunda red: si algo lo
+  disparara igual, los datos van en el cuerpo y nunca en la URL. Next no lo toma
+  como acción —no lleva `Next-Action`— y vuelve a dibujar la página;
+- sin JavaScript, un `<noscript>` dice que el formulario no se puede enviar y
+  que WhatsApp, el teléfono y el email están en la misma página.
+
+**Verificado en el preview:** antes de hidratar, el botón está apagado y el
+formulario es POST; forzado a enviarse, el pedido llega como
+`POST /contacto`, sin nada en la dirección. Después de hidratar, el envío real
+sale por la Server Action.
+
+#### Los estados, sin color
+
+Siguen la decisión 46: palabras, peso y filete.
+
+- **Enviando:** el botón dice «Enviando…» con la rueda, no se puede volver a
+  tocar y **no se apaga al 50 %**: al 50 % el texto quedaría en 3,12:1, y en
+  ese momento es lo único que dice qué está pasando.
+- **Enviada:** el formulario se reemplaza por la confirmación, que recibe el
+  foco y dice adónde va a llegar la respuesta.
+- **Fallida:** un aviso en negrita con filete de 3 px, y **WhatsApp como
+  salida, con lo que escribió ya puesto en el mensaje**. El texto dice además
+  que el formulario falló, así que quien atiende se entera de que hay algo roto
+  sin que nadie le avise.
+
+#### El correo
+
+El asunto dice de qué se trata sin abrirlo —«Consulta web: Roller · María
+Gómez»—, va en texto plano y en HTML, y **todo lo que escribió la persona pasa
+por `escaparHtml()`**: un `<img onerror>` en el mensaje llega como texto, que es
+lo que era. Sin el SDK de Resend: enviar es un pedido HTTP, y lo único que el
+SDK hacía solo es mandar `User-Agent`, sin la cual Resend responde 403.
+
+#### El campo trampa
+
+`comentario_adicional`: fuera de la pantalla, fuera del orden de tabulación y
+del árbol de accesibilidad. Si llega lleno, la acción **contesta «enviada» sin
+enviar nada** —avisarle al robot es enseñarle a esquivarlo— y lo deja escrito
+en los registros. El nombre está elegido para que ningún autocompletado lo
+llene: un campo «empresa» o «sitio web» lo podría completar Safari con la
+tarjeta de contacto de una persona real, que perdería su consulta sin enterarse.
+
+**Sin captcha**, a propósito: agrega fricción justo en el lugar donde no hay que
+agregarla, en un sitio que recibe pocas consultas.
+
+---
+
+### 58. El límite de envíos va en el borde, y el plan gratuito lo deja corto
+
+**Fecha:** septiembre de 2026, Fase 4.6.
+
+**Por qué no está en el código.** Sin base ni KV no hay un contador que
+compartan las instancias del Worker, y uno en memoria lo reinicia cualquier
+instancia nueva: contaría de a pedazos y no limitaría nada. Lo que corresponde
+es una regla de rate limiting de Cloudflare, que corta **antes** de que el
+pedido llegue al Worker.
+
+**Lo que el plan gratuito permite**, verificado contra la documentación de
+Cloudflare en septiembre de 2026: **una sola regla**, que filtra **solo por la
+ruta** —no por el método—, cuenta **por IP**, en un período de **10 segundos**,
+y bloquea durante **10 segundos**.
+
+**La regla:** ruta igual a `/contacto`, 5 pedidos cada 10 segundos por IP →
+bloquear con 429 durante 10 segundos. Cuenta también las visitas a la página,
+porque el plan no deja filtrar por método; 5 en 10 segundos no lo alcanza nadie
+navegando, y sí un programa que manda en ráfaga. La configuración exacta está
+en `docs/infraestructura.md`.
+
+**Lo que no hace, y hay que saberlo:** frena ráfagas, no un goteo. Un robot que
+mande uno cada tres segundos no la toca nunca. Contra eso las defensas son las
+otras dos —el campo trampa, que descarta a los robots que llenan todo, y la
+validación— y un techo que no depende de nosotros: el plan gratuito de Resend
+manda 100 correos por día. **El peor caso es que un abuso agote la cuota del
+día**: el formulario deja de enviar hasta el siguiente, y cada intento ofrece
+WhatsApp con el texto ya escrito. El canal principal no se toca.
+
+**Lo que se evaluó y no se hizo:** el binding de rate limiting de Workers, que
+cuenta en código con períodos de hasta 60 segundos. Es por ubicación de
+Cloudflare y de consistencia eventual, su propia documentación desaconseja usar
+la IP como clave, y su disponibilidad en el plan gratuito no está documentada.
+Se revisa si aparece abuso real.
+
+---
+
+### 59. Cada producto y cada proyecto tiene su imagen de Open Graph apaisada
+
+**Fecha:** septiembre de 2026, Fase 4.6.
+
+**El problema.** Un producto compartido por WhatsApp llevaba su portada: un WebP
+vertical 4:5 de 1600 × 2001. Los generadores de previsualización muestran la
+imagen grande solo cuando es apaisada, cerca de 1,91:1; una vertical sale como
+miniatura chica al costado del texto. Es justo lo que motivó elegir Next
+(decisión 1), así que tiene que funcionar.
+
+**Lo decidido:** `scripts/preparar-marca.mjs` arma un JPEG de 1200 × 630 por
+producto y por proyecto, **con la misma composición que la de reserva**: papel,
+el logo a la izquierda y la portada a la derecha, dentro del margen. Es la que
+ya se compartía bien, y así cada enlace se reconoce como de la marca. La
+portada se recorta a 656 × 534 desde arriba —el piso es la zona desordenada— y
+conserva el 65 % de su alto. **Se descartó la portada a sangre**: en 1,91:1
+conserva el 42 % y se pierde la caída de la cortina, que es lo que muestra una
+foto vertical.
+
+**JPEG y no WebP**: es el formato que lee cualquier bot de previsualización.
+
+**Pesos medidos:** entre 46 y 99 kB cada una —la más pesada es
+`venecianas-madera`, por la textura de las lamas—, 506 kB las ocho. La de
+Cortinas de tela sale **idéntica byte a byte** a la de reserva, porque es la
+misma foto con la misma composición, y git la guarda una sola vez: lo que
+suman al repositorio son 448 kB.
+
+**La de reserva no cambió ni un byte**, y está comprobado: la composición pasó a
+una función que usan las dos, y el hash de `og.jpg` y de `logo.png` es el mismo
+de antes. Es la regla de lo publicado _append-only_ (decisión 48).
+
+**Se regeneran solas.** `npm run fotos` encadena el script de marca, así que
+una portada nueva trae su imagen de Open Graph sin un segundo comando que
+alguien tenga que recordar. El manifiesto es `contenido/marca.ts`
+(`ogPorPagina`), y `lib/metadata.ts` la busca por la clave de la página: la que
+no está usa la de reserva. `npm run fotos:revisar` revisa también `public/marca`
+y `public/og`: son derivadas de fotos de casas de clientes, y lo que no se
+comprueba no se aprueba.
+
+---
+
+### 60. Los datos de contacto viven en `contenido/contacto.ts`, y de ahí sale la ficha de negocio local
+
+**Fecha:** septiembre de 2026, Fase 4.6.
+
+La casilla, el teléfono si es distinto del de WhatsApp, las redes, el Perfil
+de Empresa de Google y **las zonas donde trabaja la empresa** están en un solo
+archivo de contenido. Los leen `/contacto`, el pie de todas las páginas y la
+ficha JSON-LD: los tres dicen siempre lo mismo. El número de WhatsApp sigue
+siendo `NEXT_PUBLIC_WHATSAPP`, y el que se lee en la página sale de la misma
+variable que arma el enlace.
+
+**La ficha pasa a `HomeAndConstructionBusiness`**, el tipo de `LocalBusiness`
+que schema.org define para quien presta servicios en casas y edificios: la
+colocación propia es lo que distingue a este negocio. Suma `telephone`,
+`email`, `sameAs`, `logo`, `knowsAbout` —el catálogo, del mismo arreglo que
+`/productos`— y sobre todo **`areaServed` con zonas concretas**, que es lo que
+necesita un buscador o un asistente de IA para contestar «¿a quién le compro
+cortinas en zona norte?».
+
+**Sigue sin dirección ni horario**, y es a propósito: la empresa no dio
+ninguno de los dos para publicar. Sin `address`, Google lee la ficha pero no la
+muestra como resultado enriquecido; eso es preferible a publicar un dato falso.
+
+De paso se corrigió un error de la Fase 4.0 en el escape del JSON-LD: el
+reemplazo de `<` escribía `"<"` en el código, que en JavaScript **es** el
+carácter `<`, así que no escapaba nada. Nunca importó porque ningún dato tenía
+`<`; ahora escribe la secuencia de verdad.
+
+---
+
+### 61. WhatsApp pasa a ser obligatorio, y el mensaje de producto dice «el producto X»
+
+**Fecha:** septiembre de 2026, Fase 4.6.
+
+**Obligatorio.** Hasta la 4.6, sin número cargado el enlace no se dibujaba, y
+cada página tenía un camino de reserva que mandaba a `/contacto`. Con
+`NEXT_PUBLIC_WHATSAPP` exigida por el build, esos caminos no se recorrían nunca
+y se fueron: el enlace está siempre, en la apertura y el cierre de cada página y
+en el pie.
+
+**El mensaje de producto estaba mal escrito, y no se había visto.** Decía
+«vi en su página web el X», que sirve para «el Roller» y sale mal en el resto
+del catálogo: «el Venecianas de PVC», «el Toldos», «el Compacta Blackout».
+Nunca se había dibujado, así que nadie lo leyó. Ahora dice «el producto X»,
+igual que el de proyecto dice «el proyecto X»: el artículo es el de la palabra
+de adelante y el nombre entra tal cual, con su mayúscula, sin un campo nuevo en
+el contenido para decir su género. Hace además explícita la distinción entre
+qué vendemos y qué hicimos (`docs/producto.md`).
+
+**El pie lleva el mensaje general** en todas las páginas. El que lleva el
+nombre del producto o del proyecto es el del cierre de cada una, que está justo
+arriba; hacer contextual el del pie habría pedido un componente de cliente más
+solo para leer la ruta.
+
+---
+
 ## Decisiones abiertas
 
 ~~**Los videos no responden a pedidos por rango, y Safari puede no
@@ -2623,17 +2997,18 @@ del Worker»). El que aprieta es el repositorio, y hay que decidirlo **antes** d
 cargar el archivo: sacar archivos grandes de la historia de git después obliga a
 reescribirla.
 
-**La ficha de negocio local está incompleta y no se puede completar con datos
-inventados.** `LocalBusiness` sin `address` es JSON-LD válido pero Google no lo
-muestra como resultado enriquecido. Falta saber si hay una dirección publicable
-—la empresa trabaja a domicilio— y con qué horario. Se resuelve junto con el
-alta del Perfil de Empresa de Google, que es donde ese dato importa de verdad
-(Fase 5).
+**La ficha de negocio local no tiene dirección ni horario, y no se completan con
+datos inventados.** Desde la Fase 4.6 tiene zonas, teléfono, email y redes
+(decisión 60). Sin `address` es JSON-LD válido pero Google no lo muestra como
+resultado enriquecido. Falta saber si hay una dirección publicable —la empresa
+trabaja a domicilio— y con qué horario. Se resuelve junto con el alta del Perfil
+de Empresa de Google, que es donde ese dato importa de verdad (Fase 5).
 
 ~~**Falta una imagen de Open Graph de reserva.**~~ Resuelto en la Fase 4.2:
 `public/marca/og.jpg`, que arma `scripts/preparar-marca.mjs` con el logo y
 `cortinas-tela/1`. La usan Inicio, los dos listados, Contacto y cualquier
-producto que todavía no tenga fotos.
+página que todavía no tenga la suya: desde la Fase 4.6 cada producto y cada
+proyecto tiene una propia, con la misma composición (decisión 59).
 
 Cuando aparezca una decisión no contemplada durante la implementación: preguntar,
 decidir, y anotarla acá antes de seguir.

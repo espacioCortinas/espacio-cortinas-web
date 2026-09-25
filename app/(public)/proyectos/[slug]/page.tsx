@@ -9,7 +9,6 @@ import { clasesDeBoton } from "@/components/ui/boton";
 import { Chip } from "@/components/ui/chip";
 import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
 import { proyectoPorSlug, proyectosPublicados } from "@/contenido";
-import { entornoPublico } from "@/lib/entorno";
 import { esVideo, portadaDe } from "@/lib/fotos";
 import { metadataDePagina } from "@/lib/metadata";
 import { altAutomatico } from "@/lib/texto";
@@ -67,10 +66,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // de WhatsApp, «Nordelta» dice tanto como el título.
     descripcion: `${proyecto.ubicacion}. ${proyecto.descripcion}`,
     ruta: `/proyectos/${proyecto.slug}`,
-    // La portada es lo que se ve al pegar el enlace en WhatsApp. Es siempre una
-    // foto, nunca un video: sale de `fotos`, no de `galeria`.
-    foto: portadaDe(proyecto.fotos),
-    altFoto: altAutomatico(proyecto.titulo, 1),
+    // Su imagen de Open Graph: la portada —siempre una foto, nunca un video—
+    // dentro de la composición de la marca, apaisada (decisión 59).
+    clave: `proyectos/${proyecto.slug}`,
   });
 }
 
@@ -82,7 +80,6 @@ export default async function Proyecto({ params }: Props) {
   const proyecto = proyectoPorSlug(slug);
   if (!proyecto) notFound();
 
-  const hayWhatsapp = entornoPublico.whatsapp !== null;
   const portada = portadaDe(proyecto.fotos);
 
   // La galería empieza después de la portada, que ya se muestra arriba.
@@ -107,9 +104,7 @@ export default async function Proyecto({ params }: Props) {
           {proyecto.descripcion}
         </p>
 
-        {/* `empty:hidden`: sin `NEXT_PUBLIC_WHATSAPP` no se dibuja nada, y un
-            bloque vacío con su margen deja un hueco (Fase 4.6). */}
-        <div className="empty:hidden mt-8">
+        <div className="mt-8">
           <EnlaceWhatsapp contexto={contexto} variante="secundario" />
         </div>
 
@@ -165,23 +160,10 @@ export default async function Proyecto({ params }: Props) {
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
-            {hayWhatsapp ? (
-              <>
-                <EnlaceWhatsapp contexto={contexto} />
-                <Link href="/proyectos" className={clasesDeBoton("enlace")}>
-                  Ver todos los proyectos
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/contacto" className={clasesDeBoton("principal")}>
-                  Escribinos
-                </Link>
-                <Link href="/proyectos" className={clasesDeBoton("enlace")}>
-                  Ver todos los proyectos
-                </Link>
-              </>
-            )}
+            <EnlaceWhatsapp contexto={contexto} />
+            <Link href="/proyectos" className={clasesDeBoton("enlace")}>
+              Ver todos los proyectos
+            </Link>
           </div>
         </section>
       </article>

@@ -5,7 +5,9 @@ import { validarEntorno } from "./lib/entorno-validacion";
 // Next carga los archivos `.env` antes de leer esta configuración, así que acá
 // ya están disponibles. Si falta alguna variable obligatoria, el build corta
 // con la lista completa en vez de publicar un sitio que falla en cada visita.
-validarEntorno();
+// Acá se exigen las cuatro, incluidas las del correo: es el único momento en
+// que faltar no cuesta nada (decisión 56).
+validarEntorno("build");
 
 const nextConfig: NextConfig = {
   // La raíz del proyecto se fija a mano: hay un `package-lock.json` suelto en

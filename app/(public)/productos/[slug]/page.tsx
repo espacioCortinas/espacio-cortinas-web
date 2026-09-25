@@ -9,7 +9,6 @@ import { EnlaceWhatsapp } from "@/components/whatsapp";
 import { clasesDeBoton } from "@/components/ui/boton";
 import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
 import { productoPorSlug, productosPublicados } from "@/contenido";
-import { entornoPublico } from "@/lib/entorno";
 import { portadaDe } from "@/lib/fotos";
 import { metadataDePagina } from "@/lib/metadata";
 import { altAutomatico } from "@/lib/texto";
@@ -46,10 +45,6 @@ import { altAutomatico } from "@/lib/texto";
  * (`docs/diseno.md`, mobile-first); el principal, que va una vez por página,
  * está en el cierre. Los dos llevan el nombre de este producto en el mensaje,
  * así que quien atiende sabe de qué le hablan sin preguntarlo.
- *
- * Mientras no haya `NEXT_PUBLIC_WHATSAPP` cargada —entra en la Fase 4.6— el
- * enlace no se dibuja y el cierre ofrece `/contacto`, que es el mismo camino
- * que ya toma Inicio.
  */
 
 type Props = { params: Promise<{ slug: string }> };
@@ -78,10 +73,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     titulo: producto.nombre,
     descripcion: producto.descripcion,
     ruta: `/productos/${producto.slug}`,
-    // La portada es lo que se ve al pegar el enlace en WhatsApp, que es por
-    // donde se comparte este sitio.
-    foto: portadaDe(producto.fotos),
-    altFoto: altAutomatico(producto.nombre, 1),
+    // Su imagen de Open Graph: la portada dentro de la composición de la
+    // marca, apaisada para que WhatsApp la muestre grande (decisión 59).
+    clave: `productos/${producto.slug}`,
   });
 }
 
@@ -93,7 +87,6 @@ export default async function Producto({ params }: Props) {
   const producto = productoPorSlug(slug);
   if (!producto) notFound();
 
-  const hayWhatsapp = entornoPublico.whatsapp !== null;
   const portada = portadaDe(producto.fotos);
 
   // La galería del producto empieza después de la portada, que ya se muestra
@@ -112,9 +105,7 @@ export default async function Producto({ params }: Props) {
           {producto.descripcion}
         </p>
 
-        {/* `empty:hidden`: sin `NEXT_PUBLIC_WHATSAPP` no se dibuja nada, y un
-            bloque vacío con su margen deja un hueco (Fase 4.6). */}
-        <div className="empty:hidden mt-8">
+        <div className="mt-8">
           <EnlaceWhatsapp contexto={contexto} variante="secundario" />
         </div>
 
@@ -236,18 +227,10 @@ export default async function Producto({ params }: Props) {
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
-            {hayWhatsapp ? (
-              <>
-                <EnlaceWhatsapp contexto={contexto} />
-                <Link href="/contacto" className={clasesDeBoton("enlace")}>
-                  Otras formas de contacto
-                </Link>
-              </>
-            ) : (
-              <Link href="/contacto" className={clasesDeBoton("principal")}>
-                Escribinos
-              </Link>
-            )}
+            <EnlaceWhatsapp contexto={contexto} />
+            <Link href="/contacto" className={clasesDeBoton("enlace")}>
+              Otras formas de contacto
+            </Link>
           </div>
         </section>
       </article>

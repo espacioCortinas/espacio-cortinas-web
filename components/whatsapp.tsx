@@ -12,10 +12,8 @@ import { enlaceWhatsapp, type ContextoWhatsapp } from "@/lib/whatsapp";
  * Es un `<a>` y no un `<button>` porque es una navegación: así se puede abrir
  * en otra pestaña, copiar y compartir.
  *
- * **No se dibuja nada mientras no haya número cargado.** `NEXT_PUBLIC_WHATSAPP`
- * entra en la Fase 4.6; hasta entonces, un enlace a `wa.me/` sin número abre
- * WhatsApp y no lleva a ninguna conversación, que es peor que no ofrecerlo.
- * Todo lo que lo envuelva tiene que aguantar que no dibuje nada.
+ * Hasta la Fase 4.6 no dibujaba nada, porque no había número cargado. Desde
+ * entonces el número es obligatorio y el enlace está siempre.
  */
 export function EnlaceWhatsapp({
   contexto,
@@ -26,12 +24,9 @@ export function EnlaceWhatsapp({
   variante?: "principal" | "secundario" | "enlace";
   children?: React.ReactNode;
 }) {
-  const href = enlaceWhatsapp(contexto);
-  if (!href) return null;
-
   return (
     <BotonEnlace
-      href={href}
+      href={enlaceWhatsapp(contexto)}
       variante={variante}
       // `noopener` va implícito con `_blank` en los navegadores actuales, pero
       // se escribe igual: es una línea y cubre a los que no.

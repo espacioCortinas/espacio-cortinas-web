@@ -13,7 +13,6 @@ import {
   PRODUCTOS_DESTACADOS_HOME,
   PROYECTOS_DESTACADOS_HOME,
 } from "@/lib/constantes";
-import { entornoPublico } from "@/lib/entorno";
 import { DESCRIPCION_SITIO, metadataDePagina } from "@/lib/metadata";
 import { altAutomatico } from "@/lib/texto";
 
@@ -82,7 +81,6 @@ const SECTOR = "mt-16 md:mt-28";
 export default function Inicio() {
   const destacados = productosDestacados(PRODUCTOS_DESTACADOS_HOME);
   const proyectos = proyectosDestacados(PROYECTOS_DESTACADOS_HOME);
-  const hayWhatsapp = entornoPublico.whatsapp !== null;
 
   /*
    * La foto que abre. Es `venecianas-madera/2`, una de las cuatro que
@@ -122,10 +120,7 @@ export default function Inicio() {
 
         <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3">
           <EnlaceWhatsapp contexto={{ tipo: "general" }} />
-          <Link
-            href="/productos"
-            className={clasesDeBoton(hayWhatsapp ? "secundario" : "principal")}
-          >
+          <Link href="/productos" className={clasesDeBoton("secundario")}>
             Ver los productos
           </Link>
         </div>
@@ -270,20 +265,10 @@ export default function Inicio() {
         </p>
 
         <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
-          {hayWhatsapp ? (
-            <>
-              <EnlaceWhatsapp contexto={{ tipo: "general" }} />
-              <Link href="/contacto" className={clasesDeBoton("enlace")}>
-                Otras formas de contacto
-              </Link>
-            </>
-          ) : (
-            // Sin número cargado el botón de WhatsApp no se dibuja (Fase 4.6),
-            // y un cierre sin ninguna acción no cierra nada.
-            <Link href="/contacto" className={clasesDeBoton("principal")}>
-              Escribinos
-            </Link>
-          )}
+          <EnlaceWhatsapp contexto={{ tipo: "general" }} />
+          <Link href="/contacto" className={clasesDeBoton("enlace")}>
+            Otras formas de contacto
+          </Link>
         </div>
       </section>
     </main>

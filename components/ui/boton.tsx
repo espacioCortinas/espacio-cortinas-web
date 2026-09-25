@@ -48,14 +48,25 @@ const ESTILOS: Record<Variante, string> = {
 
 const BASE =
   "inline-flex items-center justify-center gap-2 text-cuerpo font-medium " +
-  "transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50";
+  "transition-colors duration-150";
+
+/**
+ * Apagado de verdad: más tenue y con el cursor de «no».
+ *
+ * **Un botón que está enviando no se apaga así**, aunque tampoco se pueda
+ * tocar. Al 50 % el texto del principal queda en 3,12:1 contra su propio fondo,
+ * y en ese momento el texto es lo único que dice qué está pasando —«Enviando…»
+ * con la rueda—. WCAG exime a los controles inactivos del contraste, pero este
+ * no está inactivo: está trabajando, y tiene que leerse.
+ */
+const APAGADO = "disabled:cursor-not-allowed disabled:opacity-50";
 
 /**
  * La rueda que gira mientras algo está en curso.
  *
- * **Queda una sola cosa que la usa**, y llega en la Fase 4.6: el botón de
- * enviar del formulario de contacto, que habla con Resend y tarda. Un botón que
- * se apaga y no hace nada más se lee como una página tildada.
+ * **Queda una sola cosa que la usa**: el botón de enviar del formulario de
+ * contacto, que habla con Resend y tarda. Un botón que se apaga y no hace nada
+ * más se lee como una página tildada.
  *
  * `aria-hidden` porque no aporta nada a un lector de pantalla: para eso están
  * el texto del botón y `aria-busy`, que sí se anuncian.
@@ -130,7 +141,7 @@ export function Boton({
       // mismo formulario mandarían dos correos.
       disabled={disabled || cargando}
       aria-busy={cargando || undefined}
-      className={`${BASE} ${ESTILOS[variante]} ${className}`.trim()}
+      className={`${BASE} ${ESTILOS[variante]} ${cargando ? "cursor-progress" : APAGADO} ${className}`.trim()}
     >
       {cargando && <Rueda />}
       {children}

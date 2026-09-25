@@ -165,17 +165,30 @@ cada corrección de texto pasan por quien desarrolla.
 WhatsApp es el canal principal. El mensaje se arma según de dónde salió el clic:
 
 ```
-Desde /productos/roller-blackout
-→ "Hola, vi en su página web el Roller Blackout y quisiera consultar..."
+Desde /productos/venecianas-pvc
+→ "Hola, vi en su página web el producto Venecianas de PVC y quisiera consultar..."
 
-Desde /proyectos/casa-nordelta
-→ "Hola, vi en su página web el proyecto Casa en Nordelta y quisiera consultar..."
+Desde /proyectos/cowork-nordelta
+→ "Hola, vi en su página web el proyecto Cowork en Nordelta y quisiera consultar..."
+
+Desde cualquier otra página
+→ "Hola, vi en su página web y quisiera consultar..."
 ```
 
-Eso permite saber que la consulta vino del sitio y sobre qué.
+Eso permite saber que la consulta vino del sitio y sobre qué. **«El producto
+X» y no «el X»**: con los nombres del catálogo, «el X» salía «el Venecianas de
+PVC» — decisión 61.
 
-Hay además un formulario que envía a `contacto@espaciocortinas.com.ar`. No hay
-bandeja de mensajes en el panel: los mensajes van por email.
+Hay además un formulario que envía a `ventas@espaciocortinas.com.ar`, para
+quien prefiere escribir con tiempo. Cinco campos —nombre, email, teléfono, qué
+está buscando y el mensaje—, tres obligatorios. El correo llega con `Reply-To`
+de quien escribió, así que se contesta con «Responder». No hay bandeja: los
+mensajes van por email y no se guardan en ningún otro lado. Si el envío falla,
+el formulario ofrece WhatsApp con lo escrito ya puesto — decisión 57.
+
+Los datos de contacto —casilla, redes y las zonas donde trabaja la empresa—
+viven en `contenido/contacto.ts` y los redacta la empresa, igual que los textos
+de Inicio.
 
 ## Fuera del alcance de V1
 

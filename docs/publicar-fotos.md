@@ -130,6 +130,12 @@ Y para cada video —el de una variante, o uno de la galería de un proyecto—:
   propósito: los archivos publicados viven en git y volver a escribirlos suma su
   peso otra vez a la historia del repositorio
 
+Y al terminar, **arma la imagen que se ve al compartir cada página por
+WhatsApp**: la portada de cada producto y de cada proyecto, apaisada, al lado
+del logo, en `public/og/` — decisión 59. No hay que hacer nada aparte: una
+portada nueva trae su imagen sola. Las que no cambiaron salen idénticas byte a
+byte, así que no suman nada al repositorio.
+
 Sale algo así:
 
 ```
@@ -150,12 +156,14 @@ npm run fotos:revisar
 ```
 
 **Este paso no es opcional.** Es el que confirma que ningún archivo publicado
-lleva la dirección de la casa de un cliente. Recorre `public/fotos/` **y
-`public/videos/`** y devuelve error si encuentra algo — un video de celular trae
-las coordenadas igual que una foto.
+lleva la dirección de la casa de un cliente. Recorre `public/fotos/`,
+`public/videos/`, **`public/marca/` y `public/og/`** —las dos últimas tienen
+fotos de casas de clientes adentro de las imágenes para compartir— y devuelve
+error si encuentra algo. Un video de celular trae las coordenadas igual que una
+foto.
 
 Si aparece un archivo que el control no sabe leer, **también da error**. No es
-un falso positivo que haya que ignorar: todo lo que hay en esas dos carpetas es
+un falso positivo que haya que ignorar: todo lo que hay en esas carpetas es
 material que se publica, y lo que no se puede comprobar no se da por bueno.
 
 Lo que tiene que decir de cada archivo:

@@ -69,6 +69,68 @@ Resolve-DnsName -Name espaciocortinas.com.ar -Type MX -Server leia.ns.cloudflare
 
 Tiene que devolver `smtp.google.com` con prioridad `1`. Nada más.
 
+Y el SPF tiene que seguir siendo **uno solo**. Dos registros `v=spf1` en el
+mismo nombre invalidan los dos, y el correo de la empresa empieza a rebotar o a
+caer en spam:
+
+```powershell
+Resolve-DnsName -Name espaciocortinas.com.ar -Type TXT -Server leia.ns.cloudflare.com
+```
+
+Tiene que devolver dos textos: el de `google-site-verification` y
+`v=spf1 include:_spf.google.com ~all`. Uno solo que empiece con `v=spf1`.
+
+### Resend — el formulario, en el subdominio `sitio`
+
+El formulario de contacto envía con Resend desde
+`formulario@sitio.espaciocortinas.com.ar` — decisión 54. Estos registros
+demuestran que el subdominio es nuestro y firman lo que sale de ahí. **Ninguno
+comparte nombre con los del correo de Google**: todos llevan `sitio` adentro, y
+el SPF de Resend no está en la raíz: vive del lado de Resend, detrás del
+`CNAME` de `send.sitio`.
+
+| Tipo  | Nombre                    | Contenido                   | Proxy       | Para qué                                   |
+| ----- | ------------------------- | --------------------------- | ----------- | ------------------------------------------ |
+| TXT   | `resend._domainkey.sitio` | `p=MIGfMA…wIDAQAB`          | —           | DKIM, la firma de cada correo              |
+| CNAME | `send.sitio`              | `send.forge.rmta.net`       | ⚪ solo DNS | el Return-Path: su SPF y los rebotes       |
+| CNAME | `rsend.sitio`             | `rsend-sae1.forge.rmta.net` | ⚪ solo DNS | el hermano del Return-Path que pide Resend |
+
+**La cuenta es de las que Resend configura con `CNAME`** y no con el `MX` y el
+`TXT` que describía la primera versión de este documento: en vez de pedir que
+publiquemos el SPF y el `MX` de rebotes, delega el nombre `send.sitio` a un
+dominio suyo, que los publica. Resend documenta que en ese caso el Return-Path
+lleva un hermano con `r` adelante —`rsend`— y que los dos hacen falta para que
+el dominio verifique. La región de envío es São Paulo (`sae1`).
+
+**Verificado el 25/09/2026**, después de cargarlos y de que Resend diera el
+dominio por verificado. Consultado al autoritativo y, para el Return-Path, a un
+resolver público, que es lo que ve el servidor que recibe:
+
+```
+resend._domainkey.sitio   TXT    p=MIGfMA0GCSqG…xiWwIDAQAB   (218 caracteres, termina en IDAQAB)
+send.sitio                CNAME  send.forge.rmta.net
+                          → TXT  v=spf1 ip4:52.3.252.119 ip4:44.222.39.36 ip4:199.249.231.0/24 ~all
+                          → MX   feedback.forge.rmta.net (prio 10)
+rsend.sitio               CNAME  rsend-sae1.forge.rmta.net
+
+@                         MX     smtp.google.com (prio 1)             ← sin cambios
+@                         TXT    v=spf1 include:_spf.google.com ~all  ← sigue siendo uno solo
+_dmarc                    TXT    v=DMARC1; p=none; rua=mailto:…       ← sin cambios
+google._domainkey         TXT    v=DKIM1;k=rsa;p=MIIB…dQIDAQAB        ← sin cambios
+```
+
+Los valores exactos los da Resend al agregar el dominio (Domains → el dominio →
+Records) y se cargan a mano en Cloudflare con el botón de copiar de cada uno:
+**no se usa la configuración automática** que ofrece Resend, que pide permiso
+para escribir en la zona entera. En Cloudflare el nombre se escribe sin el
+dominio —`send.sitio`— y Cloudflare lo completa. **Los `CNAME` van en solo DNS
+(nube gris)**: proxeados, Cloudflare respondería con sus propias direcciones en
+vez de la de Resend y el dominio no verificaría. Una clave DKIM completa termina
+en `IDAQAB`; si termina en otra cosa, se cortó al pegarla.
+
+No se agrega ningún `_dmarc` nuevo: el de la raíz cubre al subdominio con la
+misma política (`p=none`, sin `sp=`).
+
 ### Sitio
 
 | Tipo       | Nombre | Contenido                        | Proxy       | Para qué                    |
@@ -426,27 +488,36 @@ operación más fácil de cometer al venir de Vercel, donde había una sola.
 | Settings → Build → **Build variables and secrets** | el build. Acá se incrustan las `NEXT_PUBLIC_*` y acá valida `next.config.ts` |
 | Settings → **Variables and Secrets**               | el runtime, en cada petición que toque el servidor                           |
 
-Quedó **una sola** obligatoria al sacar el panel (decisión 36). Las tres que
-faltan se cargan en la Fase 4.6, con el formulario de contacto:
+Son **cuatro**, y desde la Fase 4.6 las cuatro son obligatorias en el build:
 
 | Variable               | Dónde vive el valor de runtime | Valor en producción              |
 | ---------------------- | ------------------------------ | -------------------------------- |
 | `NEXT_PUBLIC_SITE_URL` | `wrangler.jsonc` → `vars`      | `https://espaciocortinas.com.ar` |
-| `NEXT_PUBLIC_WHATSAPP` | `wrangler.jsonc` → `vars`      | Fase 4.6                         |
-| `RESEND_API_KEY`       | **Secret** del Worker          | Fase 4.6                         |
-| `EMAIL_CONTACTO`       | **Secret** del Worker          | Fase 4.6                         |
+| `NEXT_PUBLIC_WHATSAPP` | `wrangler.jsonc` → `vars`      | se lee en el archivo             |
+| `EMAIL_CONTACTO`       | `wrangler.jsonc` → `vars`      | `ventas@espaciocortinas.com.ar`  |
+| `RESEND_API_KEY`       | **Secret** del Worker          | —                                |
 
 `NEXT_PUBLIC_SITE_URL` es la única que difiere del archivo local, sin `www` y sin
 barra final — decisión 22.
 
-**Por qué las tres primeras están en el repositorio y no en el panel.** Llevan
-prefijo `NEXT_PUBLIC_`, así que Next las incrusta en el paquete que descarga el
-navegador: cualquiera que abra el sitio ya las tiene. No hay nada que proteger,
+**`EMAIL_CONTACTO` estaba acá como Secret, y se corrigió** — decisión 55. No es
+secreta, porque la casilla se publica en `/contacto`, y como Secret un error de
+tipeo mandaría cada consulta a una casilla inexistente sin que nadie pudiera
+leer qué valor estaba cargado.
+
+**Por qué las tres primeras están en el repositorio y no en el panel.** Ninguna
+es secreta: las dos `NEXT_PUBLIC_` las incrusta Next en el paquete que descarga
+el navegador, y la casilla está escrita en la página. No hay nada que proteger,
 y sí algo que ganar — hasta la Fase 2 estaban cargadas como Secret, y un Secret
 **no se puede volver a leer**. Eso dejaba la configuración de producción de
 solo escritura: cuando `NEXT_PUBLIC_SUPABASE_URL` se cargó con `/rest/v1`
 pegado y rompió el login, el valor que estaba puesto era invisible. Ahora se lee
 en un diff, con historial. Decisión 30.
+
+**Si falta `RESEND_API_KEY` en el Worker, el sitio anda igual** y lo único que
+falla es el envío del formulario, que lo registra con el nombre de lo que falta
+y ofrece WhatsApp — decisión 56. El arranque ya no la exige, a diferencia del
+29/07: una clave del correo no puede tirar todas las páginas.
 
 **Por qué eso además arregla el borrado.** `wrangler deploy` trata al bloque
 `vars` de `wrangler.jsonc` como la fuente de verdad: deja el Worker con esas
@@ -456,12 +527,12 @@ del 14/08— y el parche era cargarlas como Secret para que wrangler no las
 tocara. Declararlas en el archivo ataca la causa en vez del síntoma: ahora
 wrangler las escribe, no las borra.
 
-**Las dos secretas siguen siendo Secret y nunca van a `wrangler.jsonc`.** Se
-cargan con `npx wrangler secret put NOMBRE` y wrangler no las toca porque se
-administran fuera del archivo de configuración.
+**La secreta es Secret y nunca va a `wrangler.jsonc`.** Se carga con
+`npx wrangler secret put RESEND_API_KEY` y wrangler no la toca porque se
+administra fuera del archivo de configuración.
 
 En la lista de **build** el tipo sigue siendo indistinto (esa lista wrangler no
-la toca) y las cinco tienen que estar igual. Que una clave secreta haga falta
+la toca) y las cuatro tienen que estar igual. Que una clave secreta haga falta
 también en el build no es un descuido: es consecuencia de que `next.config.ts`
 valide el entorno antes de construir (decisión 21). Un despliegue al que le
 falte una variable corta el build y la versión anterior sigue sirviendo.
@@ -541,9 +612,9 @@ posterior era el que iba a romperlo, y fue el de la Fase 2.
 npx wrangler secret list
 ```
 
-Hoy tiene que devolver **una lista vacía**: las dos que había
-—`SUPABASE_SERVICE_ROLE_KEY` y `ADMIN_USER_ID`— se borraron con el panel, y las
-de la Fase 4.6 todavía no se cargaron.
+Tiene que devolver **exactamente una**, `RESEND_API_KEY`. Las dos que había
+—`SUPABASE_SERVICE_ROLE_KEY` y `ADMIN_USER_ID`— se borraron con el panel, y
+`EMAIL_CONTACTO` no es Secret sino `var` (decisión 55).
 
 Que aparezca un Secret con el mismo nombre que una variable declarada en
 `wrangler.jsonc` **no es tranquilizador, es un problema**: hay dos valores para
@@ -644,8 +715,14 @@ Worker.
 `NEXTJS_ENV` vale `development` en local y **`production` en el Worker**. Es el
 único valor que difiere a propósito entre los dos entornos.
 
-`NEXT_PUBLIC_SUPABASE_ANON_KEY` es pública por diseño y lo que se puede hacer con
-ella lo decide RLS. Ver `docs/seguridad.md`.
+**El adaptador copia los `.env*` locales dentro del paquete del Worker**, como
+valores de reserva: quedan en `.open-next/cloudflare/next-env.mjs`, que no se
+versiona. Lo que está cargado en el Worker —`vars` y Secrets— tiene prioridad,
+y el build de Cloudflare no tiene esos archivos, así que en producción no entra
+nada. Pero un `npm run deploy` hecho a mano desde una máquina con la clave de
+Resend en `.env.local` la sube adentro del script del Worker. No llega al
+navegador, y aun así es una copia más de la clave en un lugar que nadie mira:
+el despliegue normal es el de `main`. Comprobado en la Fase 4.6.
 
 ### Cloudflare Pages no, Workers sí
 
@@ -729,6 +806,71 @@ de un lugar donde no corresponde que siga.
 Si en algún momento aparece evidencia de que la clave se filtró, la decisión se
 revierte: se rota en Supabase y se actualiza en `.env.local`, en `.dev.vars` y en
 la lista de runtime del Worker, como Secret.
+
+## Resend — el correo del formulario
+
+El formulario de `/contacto` manda cada consulta a `ventas@espaciocortinas.com.ar`
+por Resend: es un alias de la casilla de siempre, `ventas@conceptoespacio.com`
+(«Titularidad», arriba), así que las consultas caen donde ya se lee el correo. No guarda nada: el mensaje va al correo y ahí queda (decisión 12).
+
+|           |                                                                          |
+| --------- | ------------------------------------------------------------------------ |
+| Cuenta    | a nombre de `ventas@conceptoespacio.com`, como todas                     |
+| Plan      | gratuito: **100 correos por día**, 3.000 por mes, 10 pedidos por segundo |
+| Dominio   | `sitio.espaciocortinas.com.ar` — decisión 54                             |
+| Remitente | `Formulario web <formulario@sitio.espaciocortinas.com.ar>`               |
+| Destino   | `EMAIL_CONTACTO`, en `vars` de `wrangler.jsonc`                          |
+| Clave     | permiso **solo de envío**, **solo sobre ese dominio**. Secret del Worker |
+| Responder | `Reply-To` con el email de quien escribió                                |
+
+**Cómo se diagnostica un envío.** El panel de Resend (Emails) lista cada correo
+con su estado: entregado, rebotado, marcado como spam. Del lado del sitio, cada
+envío deja una línea en los registros del Worker con el prefijo `[contacto]`
+—enviada, descartada por el campo trampa, o por qué falló—, **sin ningún dato de
+quien escribió**:
+
+```bash
+npx wrangler tail
+```
+
+**Si la cuota del día se agota**, Resend rechaza el envío, el formulario dice
+que no pudo enviar y ofrece WhatsApp con el texto ya escrito. El resto del sitio
+no se entera.
+
+## Límite de envíos del formulario — regla de rate limiting
+
+Sin base ni KV no hay un contador compartido entre instancias del Worker, así
+que el límite lo pone Cloudflare en el borde, antes de que el pedido llegue al
+código — decisión 58.
+
+**Va en el dominio, no en el Worker.** En el panel de Cloudflare se entra a
+`espaciocortinas.com.ar` —el dominio, el mismo lugar donde está el DNS— y ahí
+**Security → Security rules → Create rule → Rate limiting rules**:
+
+| Campo                                     | Valor                                         |
+| ----------------------------------------- | --------------------------------------------- |
+| Rule name                                 | `Formulario de contacto`                      |
+| Field / Operator / Value                  | `URI Path` · `equals` · `/contacto`           |
+| With the same characteristics             | IP (en el plan gratuito es la única)          |
+| When rate exceeds                         | **5** requests per **10 seconds**             |
+| Then take action                          | **Block**, con la respuesta por defecto (429) |
+| Duration                                  | 10 seconds (en el plan gratuito es fijo)      |
+| Also apply rate limiting to cached assets | sin marcar: el envío nunca sale de caché      |
+
+Y **Deploy**.
+
+**Lo que el plan gratuito permite**, verificado en septiembre de 2026: una sola
+regla, que filtra solo por la ruta —no por el método, así que cuenta también
+las visitas a la página—, por IP, en 10 segundos y con 10 segundos de bloqueo.
+Frena ráfagas; un goteo lento no lo frena, y para eso están el campo trampa y el
+techo de 100 correos por día de Resend.
+
+**Cómo se comprueba**: más de cinco pedidos seguidos a `/contacto` desde la
+misma IP tienen que empezar a devolver 429.
+
+```bash
+for i in $(seq 1 8); do curl -s -o /dev/null -w "%{http_code} " https://espaciocortinas.com.ar/contacto; done
+```
 
 ## Pendiente de dar de alta
 

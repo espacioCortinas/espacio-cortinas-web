@@ -2,8 +2,10 @@ import type { ComponentProps, ReactNode } from "react";
 
 /**
  * Un campo de formulario: etiqueta, ayuda, control y error. **Uno solo**, con
- * dos controles —una línea y un párrafo—, que es lo que el formulario de
- * contacto de la Fase 4.6 necesita y nada más.
+ * tres controles —una línea, un párrafo y una lista—, que es lo que el
+ * formulario de contacto necesita y nada más. La lista entró en la Fase 4.6,
+ * para «qué estás buscando»: elegir entre siete productos es un toque, y
+ * escribirlo son veinte (decisión 57).
  *
  * Lo que resuelve, y no es estético:
  *
@@ -163,6 +165,76 @@ export function CampoLargo({
         aria-describedby={descritoPor}
         className={`${CONTROL} min-h-32 ${className}`.trim()}
       />
+    </Envoltorio>
+  );
+}
+
+/**
+ * Una lista de opciones, con el selector del sistema.
+ *
+ * **El nativo y no uno dibujado a mano.** En un teléfono abre la rueda o la
+ * hoja del sistema, que se maneja con el pulgar y que conoce todo el mundo, y
+ * con teclado o lector de pantalla funciona sin una línea de JavaScript. Un
+ * desplegable propio tendría que reimplementar todo eso para verse un poco más
+ * a tono.
+ *
+ * Lo único que se le cambia es la caja cerrada —`appearance-none`— para que
+ * tenga el mismo borde, fondo y radio que los otros dos controles. La flecha la
+ * dibuja el componente, con el color del texto: sin ella, nada diría que la
+ * caja se abre.
+ */
+export function CampoSelector({
+  etiqueta,
+  ayuda,
+  error,
+  id,
+  opciones,
+  className = "",
+  ...resto
+}: ComponentProps<"select"> &
+  Comunes & { opciones: readonly { valor: string; texto: string }[] }) {
+  const { idAyuda, idError, descritoPor } = identificadores(id, {
+    etiqueta,
+    ayuda,
+    error,
+  });
+
+  return (
+    <Envoltorio
+      etiqueta={etiqueta}
+      ayuda={ayuda}
+      error={error}
+      id={id}
+      idAyuda={idAyuda}
+      idError={idError}
+    >
+      <div className="relative">
+        <select
+          {...resto}
+          id={id}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={descritoPor}
+          className={`${CONTROL} appearance-none pr-10 ${className}`.trim()}
+        >
+          {opciones.map(({ valor, texto }) => (
+            <option key={valor} value={valor}>
+              {texto}
+            </option>
+          ))}
+        </select>
+        <svg
+          aria-hidden
+          viewBox="0 0 12 8"
+          className="text-texto pointer-events-none absolute top-1/2 right-4 h-2 w-3 -translate-y-1/2"
+        >
+          <path
+            d="M1 1.5l5 5 5-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          />
+        </svg>
+      </div>
     </Envoltorio>
   );
 }

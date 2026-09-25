@@ -461,22 +461,23 @@ fondo. Las tarjetas flotantes con sombra difusa son la otra marca reconocible.
 componente que se agrega es uno que hay que mantener coherente con todos los
 demás.
 
-| Componente           | Archivo                                           | Variantes                                   |
-| -------------------- | ------------------------------------------------- | ------------------------------------------- |
-| Botón                | `components/ui/boton.tsx`                         | principal, secundario, enlace — tres        |
-| Chip                 | `components/ui/chip.tsx`                          | una                                         |
-| Campo                | `components/ui/campo.tsx`                         | una, con dos controles                      |
-| Aviso                | `components/ui/aviso.tsx`                         | error y nota                                |
-| Estado vacío         | `components/ui/vacio.tsx`                         | una                                         |
-| Columna de página    | `components/ui/contenedor.tsx`                    | una                                         |
-| Foto                 | `components/foto.tsx`                             | cinco proporciones, tres recortes           |
-| Galería              | `components/galeria.tsx`                          | tira que se desliza de costado              |
-| Video mudo           | `components/video-mudo.tsx`                       | una: en bucle, en su lugar o en la galería  |
-| Tarjeta de producto  | `components/tarjeta-producto.tsx`                 | una — solo Inicio                           |
-| Tarjeta de proyecto  | `components/tarjeta-proyecto.tsx`                 | fila y tarjeta — dos                        |
-| Listado de proyectos | `components/listado-proyectos.tsx`                | una: el primero en fila, el resto en grilla |
-| Logo                 | `components/logo.tsx`                             | una                                         |
-| Encabezado y pie     | `components/encabezado.tsx`, `components/pie.tsx` | una                                         |
+| Componente             | Archivo                                           | Variantes                                                  |
+| ---------------------- | ------------------------------------------------- | ---------------------------------------------------------- |
+| Botón                  | `components/ui/boton.tsx`                         | principal, secundario, enlace — tres                       |
+| Chip                   | `components/ui/chip.tsx`                          | una                                                        |
+| Campo                  | `components/ui/campo.tsx`                         | una, con tres controles: línea, párrafo y lista            |
+| Aviso                  | `components/ui/aviso.tsx`                         | error y nota                                               |
+| Estado vacío           | `components/ui/vacio.tsx`                         | una                                                        |
+| Columna de página      | `components/ui/contenedor.tsx`                    | una                                                        |
+| Foto                   | `components/foto.tsx`                             | cinco proporciones, tres recortes                          |
+| Galería                | `components/galeria.tsx`                          | tira que se desliza de costado                             |
+| Video mudo             | `components/video-mudo.tsx`                       | una: en bucle, en su lugar o en la galería                 |
+| Tarjeta de producto    | `components/tarjeta-producto.tsx`                 | una — solo Inicio                                          |
+| Tarjeta de proyecto    | `components/tarjeta-proyecto.tsx`                 | fila y tarjeta — dos                                       |
+| Listado de proyectos   | `components/listado-proyectos.tsx`                | una: el primero en fila, el resto en grilla                |
+| Formulario de contacto | `components/formulario-contacto.tsx`              | una: sin hidratar, escribiendo, enviando, enviada, fallida |
+| Logo                   | `components/logo.tsx`                             | una                                                        |
+| Encabezado y pie       | `components/encabezado.tsx`, `components/pie.tsx` | una                                                        |
 
 Botones: **uno principal sólido, uno secundario con línea, y enlaces de texto.
 Tres variantes, no siete.** El principal es negro, no amarillo — decisión 43.
@@ -486,6 +487,22 @@ un filete de 3 px al costado y la palabra escrita; un campo inválido engorda su
 borde. La paleta son tres colores y son los del logo: un rojo sería un cuarto, y
 el amarillo no puede marcar un estado (1,06:1 contra el papel, contra los 3:1 que
 hacen falta).
+
+**El formulario de contacto es el único lugar con estados, y los usa así** —
+decisión 57:
+
+| Estado       | Cómo se ve                                                                                             |
+| ------------ | ------------------------------------------------------------------------------------------------------ |
+| sin hidratar | el botón **apagado** al 50 %: hasta que React toma el formulario, enviarlo pondría los datos en la URL |
+| inválido     | el error debajo de cada campo, negro y en negrita con filete de 3 px; el foco va al primero            |
+| enviando     | «Enviando…» con la rueda. El botón no se puede tocar y **no se apaga al 50 %**: quedaría en 3,12:1     |
+| enviada      | el formulario se reemplaza por la confirmación, con filete de 1 px, y recibe el foco                   |
+| fallida      | el aviso de error y WhatsApp como salida, con lo escrito ya puesto en el mensaje                       |
+
+**Uno solo es principal en `/contacto`: el de WhatsApp.** El de enviar el
+formulario es el secundario, con filete: la jerarquía entre los dos canales la
+dice el propio dibujo. En el estado fallido aparece un segundo principal,
+«Mandarlo por WhatsApp», porque ahí es la única salida que queda.
 
 **El borde de un control es `--color-texto-suave`, no `--color-linea`.** La línea
 da 1,29:1 contra el papel: alcanza para un filete decorativo y no para el borde de
@@ -562,7 +579,12 @@ revés.
 - Zonas táctiles de 44 px como mínimo
 - La galería se recorre con el pulgar, gestos naturales — cumplido en la
   decisión 50, con `scroll-snap` y sin JavaScript
-- WhatsApp siempre alcanzable sin buscarlo
+- WhatsApp siempre alcanzable sin buscarlo — desde la Fase 4.6 está en el pie
+  de todas las páginas, en el cierre de cada una, y además en la apertura de
+  Inicio, de Contacto y de cada producto y proyecto (decisión 61). Los dos
+  listados lo tienen al final y no arriba: en el catálogo, en un teléfono, eso
+  es casi al final de una página de 6.674 px (decisión 49). Queda anotado como
+  pendiente; el menú sí lleva a Contacto desde arriba
 - Se verifica en 320, 375, 768, 1024 y 1440
 
 ---

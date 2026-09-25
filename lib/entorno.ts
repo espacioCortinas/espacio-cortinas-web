@@ -5,9 +5,9 @@
  * Antes de agregar una variable a este archivo, verificar que sea información
  * pública. Los secretos van en `lib/entorno-servidor.ts`.
  *
- * Quedó corto al sacar el panel: las tres variables de Supabase se fueron con
- * él (decisión 36). Sobrevive la dirección del sitio, que es de dónde salen las
- * URLs canónicas, el sitemap y el Open Graph.
+ * Son dos: la dirección del sitio, que es de dónde salen las URLs canónicas,
+ * el sitemap y el Open Graph, y el número de WhatsApp, que es el canal
+ * principal del negocio y está en todas las páginas.
  */
 
 // Next reemplaza `process.env.NEXT_PUBLIC_*` por su valor literal en tiempo de
@@ -24,7 +24,7 @@ function exigir(nombre: string): string {
     throw new Error(
       `Falta la variable de entorno ${nombre}. ` +
         `Completala en .env.local (local) o en el bloque \`vars\` de ` +
-        `wrangler.jsonc (producción).`,
+        `wrangler.jsonc y en «Build variables and secrets» (producción).`,
     );
   }
   return valor;
@@ -41,8 +41,16 @@ export const entornoPublico = {
   get urlSitio(): string {
     return exigir("NEXT_PUBLIC_SITE_URL").replace(/\/+$/, "");
   },
-  /** Número en formato internacional. `null` hasta la Fase 4.6. */
-  get whatsapp(): string | null {
-    return CRUDAS.NEXT_PUBLIC_WHATSAPP?.trim() || null;
+  /**
+   * El número de WhatsApp, en formato internacional y solo con cifras:
+   * `5491122334455`.
+   *
+   * **Es obligatorio desde la Fase 4.6.** Hasta entonces devolvía `null` y cada
+   * página tenía un camino de reserva que mandaba a `/contacto`; esos caminos
+   * se fueron con esta línea. Si faltara, el build corta antes de publicar
+   * (`lib/entorno-validacion.ts`), así que ninguna página se construye sin él.
+   */
+  get whatsapp(): string {
+    return exigir("NEXT_PUBLIC_WHATSAPP");
   },
 };

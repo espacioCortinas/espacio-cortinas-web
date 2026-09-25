@@ -29,8 +29,8 @@ arquitectura. Varias cosas que parecen mejorables fueron descartadas a propósit
 
 ## Stack
 
-Next.js (App Router) · TypeScript · Tailwind CSS · Supabase (Postgres, Auth,
-Storage) · Cloudflare (Workers, DNS) · Resend
+Next.js (App Router) · TypeScript · Tailwind CSS · Cloudflare (Workers, DNS) ·
+Resend. Sin base de datos: Supabase se fue con el panel — decisión 36.
 
 El sitio corre en Cloudflare Workers con el adaptador `@opennextjs/cloudflare`.
 Se mudó desde Vercel en julio de 2026 — decisión 24 de `docs/decisiones.md`.

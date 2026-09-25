@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 
-import { og } from "@/contenido/marca";
-import type { Foto } from "@/contenido/tipos";
+import { og, ogPorPagina, type ArchivoDeMarca } from "@/contenido/marca";
 import { entornoPublico } from "@/lib/entorno";
-import { medidaPredeterminada, rutaDeFoto } from "@/lib/fotos";
 
 /**
  * La metadata de cada página pública: título, descripción, canónica y Open
@@ -50,18 +48,22 @@ type Entrada = {
   descripcion: string;
   /** Empezando con barra: `/productos/roller-blackout`. */
   ruta: string;
-  /** La portada. `null` mientras la entidad no tenga fotos. */
-  foto?: Foto | null;
-  /** Para el `alt` de la imagen de Open Graph. */
-  altFoto?: string;
+  /**
+   * De quién es la página, con la clave de `contenido/fotos.ts`:
+   * `productos/roller`. Es lo que busca su imagen de Open Graph. Sin clave, o
+   * si esa página todavía no tiene la suya, va la de reserva.
+   */
+  clave?: string;
+  /** Para el `alt` de la imagen de Open Graph propia. */
+  altImagen?: string;
 };
 
 export function metadataDePagina({
   titulo,
   descripcion,
   ruta,
-  foto = null,
-  altFoto,
+  clave,
+  altImagen,
 }: Entrada): Metadata {
   const descripcionCorta = paraMeta(descripcion);
 
@@ -71,43 +73,41 @@ export function metadataDePagina({
   const canonica = ruta;
 
   /*
-   * La miniatura. Si la página tiene foto propia va esa; si no, la de reserva.
+   * La imagen que se ve al compartir el enlace.
    *
-   * **La de reserva es de la Fase 4.2 y antes no existía a propósito.** Hasta
-   * la 4.1 no había paleta, ni tipografía, ni logo procesado, así que cualquier
-   * imagen habría sido una decisión visual tomada antes de tiempo. Ahora existe:
-   * `public/marca/og.jpg`, que arma `scripts/preparar-marca.mjs` con el logo y
-   * `cortinas-tela/1`, la mejor foto del archivo. Es una foto real de un trabajo
-   * real, no un gráfico inventado, y el texto va sobre el papel y no sobre la
-   * foto — que en esta dirección no se hace nunca.
+   * **Cada producto y cada proyecto tiene la suya desde la Fase 4.6**: su
+   * portada dentro de la composición de la de reserva —papel, el logo a la
+   * izquierda y la foto a la derecha— en un JPEG de 1200 × 630 que arma
+   * `scripts/preparar-marca.mjs`. Antes se usaba la portada tal cual, un WebP
+   * vertical 4:5, y los generadores de previsualización muestran la imagen
+   * grande solo cuando es apaisada: salía como miniatura chica al costado del
+   * texto. Decisión 59.
    *
-   * Sin esto, Inicio, los dos listados y Contacto se comparten por WhatsApp sin
-   * ninguna imagen, que en un negocio visual es medio mensaje.
+   * **La de reserva**, `public/marca/og.jpg`, es la misma composición con
+   * `cortinas-tela/1`, la mejor foto del archivo. La usan Inicio, los dos
+   * listados, Contacto y cualquier página que todavía no tenga la suya.
+   *
+   * Las dos salen del manifiesto generado, con su ancho y su alto: si algún
+   * día cambian de tamaño, esto las sigue solo.
    */
-  const imagenes = foto
-    ? [
-        {
-          url: rutaDeFoto(foto, medidaPredeterminada(foto)),
-          // Es la medida elegida: el ancho es el nombre del archivo y el alto
-          // sale de la proporción de la foto, que la conocemos por `ancho` y
-          // `alto` del manifiesto.
-          width: medidaPredeterminada(foto),
-          height: Math.round(
-            (medidaPredeterminada(foto) * foto.alto) / foto.ancho,
-          ),
-          alt: altFoto ?? titulo,
-        },
-      ]
-    : [
-        {
-          url: og.ruta,
-          // Del manifiesto generado, no de dos números escritos acá: si algún
-          // día la imagen cambia de tamaño, esto la sigue solo.
-          width: og.ancho,
-          height: og.alto,
-          alt: `${MARCA} — cortinas de tela en una casa de Buenos Aires`,
-        },
-      ];
+  const propia: ArchivoDeMarca | undefined = clave
+    ? ogPorPagina[clave]
+    : undefined;
+  const imagen = propia
+    ? {
+        url: propia.ruta,
+        width: propia.ancho,
+        height: propia.alto,
+        alt: altImagen ?? `${titulo} — ${MARCA}`,
+        type: "image/jpeg",
+      }
+    : {
+        url: og.ruta,
+        width: og.ancho,
+        height: og.alto,
+        alt: `${MARCA} — cortinas de tela en una casa de Buenos Aires`,
+        type: "image/jpeg",
+      };
 
   return {
     title: titulo,
@@ -120,15 +120,15 @@ export function metadataDePagina({
       url: canonica,
       title: `${titulo} · ${MARCA}`,
       description: descripcionCorta,
-      images: imagenes,
+      images: [imagen],
     },
     twitter: {
-      // Siempre hay imagen —propia o de reserva— así que siempre es la tarjeta
-      // grande.
+      // Todas las imágenes son apaisadas, 1200 × 630, así que siempre es la
+      // tarjeta grande.
       card: "summary_large_image",
       title: `${titulo} · ${MARCA}`,
       description: descripcionCorta,
-      images: imagenes.map((i) => i.url),
+      images: [imagen.url],
     },
   };
 }

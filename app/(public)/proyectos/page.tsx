@@ -7,7 +7,6 @@ import { clasesDeBoton } from "@/components/ui/boton";
 import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
 import { Vacio } from "@/components/ui/vacio";
 import { proyectosPublicados } from "@/contenido";
-import { entornoPublico } from "@/lib/entorno";
 import { metadataDePagina } from "@/lib/metadata";
 
 /**
@@ -46,7 +45,6 @@ export const metadata: Metadata = metadataDePagina({
 
 export default function Proyectos() {
   const proyectos = proyectosPublicados();
-  const hayWhatsapp = entornoPublico.whatsapp !== null;
 
   return (
     <main className={`${CLASES_CONTENEDOR} py-16 md:py-28`}>
@@ -109,20 +107,10 @@ export default function Proyectos() {
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
-            {hayWhatsapp ? (
-              <>
-                <EnlaceWhatsapp contexto={{ tipo: "general" }} />
-                <Link href="/contacto" className={clasesDeBoton("enlace")}>
-                  Otras formas de contacto
-                </Link>
-              </>
-            ) : (
-              // Sin número cargado el botón de WhatsApp no se dibuja (Fase
-              // 4.6), y un cierre sin ninguna acción no cierra nada.
-              <Link href="/contacto" className={clasesDeBoton("principal")}>
-                Escribinos
-              </Link>
-            )}
+            <EnlaceWhatsapp contexto={{ tipo: "general" }} />
+            <Link href="/contacto" className={clasesDeBoton("enlace")}>
+              Otras formas de contacto
+            </Link>
           </div>
         </section>
       )}

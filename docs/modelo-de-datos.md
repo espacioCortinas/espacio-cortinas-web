@@ -13,15 +13,52 @@ historia está en la decisión 36 y el código, en el historial de git.
 contenido/
 ├── productos.ts      se edita a mano
 ├── proyectos.ts      se edita a mano
+├── inicio.ts         se edita a mano: los textos de Inicio
+├── contacto.ts       se edita a mano: casilla, redes y zonas donde trabaja
 ├── fotos.ts          GENERADO por scripts/preparar-fotos.mjs
 ├── videos.ts         GENERADO por scripts/preparar-fotos.mjs
+├── marca.ts          GENERADO por scripts/preparar-marca.mjs
 ├── tipos.ts          la forma de todo lo anterior
 └── index.ts          une el contenido con sus fotos, y es lo que leen las páginas
 
 public/fotos/         las imágenes ya recomprimidas, generadas
 public/videos/        los videos publicados y su cuadro de cartel, generados
+public/og/            la imagen de Open Graph de cada producto y proyecto, generada
 fotos-originales/     los originales. NO se versiona
 ```
+
+## Datos de contacto
+
+`contenido/contacto.ts` — decisión 60. Lo leen `/contacto`, el pie y la ficha
+de negocio local (JSON-LD), así que los tres dicen siempre lo mismo.
+
+| Campo            | Tipo                                 | Notas                                                                                              |
+| ---------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `email`          | `string`                             | la casilla que se publica; la misma del formulario                                                 |
+| `telefono`       | `{ visible, internacional } \| null` | solo si es otro número que el de WhatsApp. `null`: se llama al mismo                               |
+| `redes`          | `Red[]`                              | nombre, usuario y URL. Van al pie, a la página y al `sameAs`                                       |
+| `perfilDeGoogle` | `string \| null`                     | cuando se dé de alta                                                                               |
+| `zonas`          | `string[]`                           | **dónde trabaja**, con nombres concretos: es lo que responde «¿quién hace cortinas en zona norte?» |
+
+**El número de WhatsApp no está acá**: es `NEXT_PUBLIC_WHATSAPP`, y de esa misma
+variable salen el enlace y el número que se lee en la página.
+
+**Ni dirección ni horario**, porque la empresa no dio ninguno para publicar. Se
+agregan acá el día que los dé; inventarlos para completar un formato sería
+publicar un dato falso sobre la empresa.
+
+## Imágenes de Open Graph
+
+`contenido/marca.ts`, que escribe `scripts/preparar-marca.mjs` — decisión 59:
+
+| Exporta       | Qué es                                                                         |
+| ------------- | ------------------------------------------------------------------------------ |
+| `logo`        | el logo sin fondo del encabezado                                               |
+| `og`          | la imagen de reserva: Inicio, los listados, Contacto                           |
+| `ogPorPagina` | la de cada producto y proyecto, con la clave de `fotos.ts`: `productos/roller` |
+
+Las tres con `ruta`, `ancho` y `alto` del archivo escrito. Una página que no
+está en `ogPorPagina` usa `og`.
 
 **Lo escrito a mano y lo generado nunca comparten archivo.** Si estuvieran
 juntos, regenerar las fotos pisaría los textos. Se juntan al leer, en

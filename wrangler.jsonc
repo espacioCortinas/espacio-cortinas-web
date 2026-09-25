@@ -33,19 +33,33 @@
   // panel. Eso tumbó el sitio el 14/08/2026, y declararlas acá ataca la causa
   // en vez del síntoma — decisión 30.
   //
-  // Quedó una sola al sacar el panel (decisión 36): las tres de Supabase se
-  // fueron con la base. Esta lleva prefijo `NEXT_PUBLIC_`, así que Next la
-  // incrusta en el paquete que descarga el navegador — no hay nada que
-  // proteger, y sí algo que ganar: el valor de producción se lee en un diff,
-  // con historial, en vez de ser un Secret que nadie puede volver a leer.
+  // Van acá las que NO son secretas. Ninguna tiene nada que proteger —las
+  // `NEXT_PUBLIC_` las incrusta Next en el paquete del navegador, y la casilla
+  // está escrita en /contacto— y sí algo que ganar: el valor de producción se
+  // lee en un diff, con historial, en vez de ser un Secret que nadie puede
+  // volver a leer. Decisiones 30 y 55.
   //
-  // Sin `www` y sin barra final — decisión 22. Es el único valor que difiere a
-  // propósito de `.env.local`, donde en local es http://localhost:3000.
+  // La única secreta, RESEND_API_KEY, es un Secret del Worker y NUNCA va acá:
+  // `npx wrangler secret put RESEND_API_KEY`.
+  //
+  // `NEXT_PUBLIC_SITE_URL`, sin `www` y sin barra final — decisión 22. Es el
+  // único valor que difiere a propósito de `.env.local`, donde en local es
+  // http://localhost:3000.
+  //
+  // `EMAIL_CONTACTO` es adonde llegan las consultas del formulario: un alias
+  // de ventas@conceptoespacio.com, la casilla que ya se lee.
   //
   // Ojo: esto es la lista de RUNTIME. La de build («Build variables and
-  // secrets», en el panel) es otra y este archivo no la toca.
+  // secrets», en el panel) es otra, este archivo no la toca, y tiene que tener
+  // los mismos valores: `NEXT_PUBLIC_WHATSAPP` sale del BUILD, que es cuando Next
+  // la escribe en las páginas. Cambiar el número es cambiarlo en los dos lados.
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://espaciocortinas.com.ar",
+    // PROVISORIO: es el número de quien desarrolla, para comprobar que todo
+    // anda. Se reemplaza por el de la empresa acá Y en la lista de build, en
+    // el mismo movimiento.
+    "NEXT_PUBLIC_WHATSAPP": "5491133111686",
+    "EMAIL_CONTACTO": "ventas@espaciocortinas.com.ar",
   },
 
   // Los estáticos los sirve Cloudflare directamente, sin ejecutar el Worker.

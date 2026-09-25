@@ -18,7 +18,8 @@ Sin esto, las fases siguientes trabajan a ciegas.
       definitivo y no contra el archivo histórico
 - [ ] Delegar `espaciocortinas.com.ar` a Cloudflare desde NIC Argentina
 - [ ] Agregar el dominio como alias en Google Workspace y verificar que
-      `contacto@espaciocortinas.com.ar` recibe
+      `contacto@espaciocortinas.com.ar` recibe — el formulario terminó yendo a
+      `ventas@espaciocortinas.com.ar`, que ya recibía (Fase 4.6)
 - [ ] Crear el proyecto en Supabase y desactivar el registro público
 - [ ] Crear el repositorio en GitHub
 
@@ -366,7 +367,30 @@ tipografías— más `public/muestra-logo.png`. Era para elegir la dirección vi
 y deja de tener sentido apenas el sitio está compuesto. Ninguna otra ruta los
 importa. Decisión 41.
 
-**4.6 Contacto.** Formulario con Resend, y WhatsApp contextual en todo el sitio.
+**4.6 Contacto — HECHA.** Es la página que importa: el objetivo comercial del
+sitio es que alguien termine escribiendo por WhatsApp.
+
+- **`/contacto` compuesta**: WhatsApp como único botón principal, los otros
+  medios —teléfono, email, redes y dónde trabaja la empresa— en una lista con
+  filetes, y el formulario para quien prefiere escribir con tiempo. Sigue siendo
+  estática.
+- **El formulario**: cinco campos, tres obligatorios, validación en el
+  navegador y **otra vez en el servidor**, correo en texto y HTML escapado con
+  `Reply-To`, campo trampa, y lo escrito no se pierde nunca: si el envío falla,
+  ofrece WhatsApp con el texto ya puesto — decisión 57.
+- **Resend sobre `sitio.espaciocortinas.com.ar`**, sin tocar un solo registro
+  del correo de Google — decisión 54.
+- **El límite de envíos**, una regla de rate limiting en el borde, con lo que da
+  el plan gratuito — decisión 58.
+- **WhatsApp obligatorio y encendido en todo el sitio**, y el mensaje de
+  producto corregido: decía «el Venecianas de PVC» — decisión 61.
+- **Una imagen de Open Graph apaisada por producto y por proyecto**, con la
+  composición de la de reserva, para que el enlace compartido salga como tarjeta
+  grande — decisión 59.
+- **La ficha de negocio local**, con zonas, teléfono, email y redes, desde
+  `contenido/contacto.ts` — decisión 60.
+- Las variables del correo ya no pueden tirar el sitio: el build exige las
+  cuatro, el arranque solo lo que usan las páginas — decisiones 55 y 56.
 
 **Terminado cuando:**
 
@@ -383,11 +407,13 @@ Los cuatro primeros puntos se adelantaron a la Fase 4.0 — decisión 38. Quedan
 tachados acá para que no se hagan dos veces, y con lo que sí falta de cada uno:
 
 - ~~Metadata y Open Graph por página, con imagen propia~~ — y la **imagen de
-  reserva**, hecha en la Fase 4.2
+  reserva**, hecha en la Fase 4.2, y la **apaisada de cada producto y
+  proyecto**, en la 4.6
 - ~~`sitemap.ts` y `robots.ts`~~
 - ~~URLs canónicas~~
-- ~~Datos estructurados de negocio local~~ — falta `address` y horario, que no
-  se pueden inventar; sale junto con el Perfil de Empresa de Google
+- ~~Datos estructurados de negocio local~~ — completados en la Fase 4.6 con
+  zonas, teléfono, email y redes (decisión 60). Falta `address` y horario, que
+  no se pueden inventar; sale junto con el Perfil de Empresa de Google
 - Cloudflare Web Analytics activado, con evento propio para los clics a WhatsApp
 - Revisión de Core Web Vitals en móvil
 - Alta en Google Search Console

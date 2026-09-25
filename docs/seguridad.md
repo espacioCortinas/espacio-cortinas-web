@@ -15,14 +15,17 @@ siendo cierto.
 Navegador
     │
     ▼
-Cloudflare Workers   sirve HTML y archivos estáticos, generados en el build
+Cloudflare, en el borde    la regla de rate limiting de /contacto
     │
     ▼
-(nada más)           sin base, sin sesión, sin API, sin escritura
+Cloudflare Workers         sirve HTML y archivos estáticos, generados en el build
+    │                      y ejecuta UNA cosa: la Server Action del formulario
+    ▼
+Resend                     el correo sale hacia ventas@. Nada se guarda
 ```
 
 La única parte que ejecuta código en respuesta a algo que manda un visitante es
-el **formulario de contacto** de la Fase 4.6. Todo lo demás es contenido
+el **formulario de contacto**, desde la Fase 4.6. Todo lo demás es contenido
 generado al construir.
 
 **Lo que esto elimina de raíz**, y conviene tenerlo presente antes de
@@ -60,6 +63,12 @@ Recorre `public/fotos/` **y `public/videos/`** enteros, dice qué metadatos tien
 cada archivo, imprime las coordenadas si las hay y **devuelve 1 si alguno las
 conserva**. Se corre sobre todas las medidas, no solo sobre la más grande.
 
+**Desde la Fase 4.6 recorre también `public/marca/` y `public/og/`.** Las
+imágenes para compartir llevan adentro la portada de cada producto y cada
+proyecto, que son fotos de casas de clientes. Salen de fotos ya publicadas y
+limpias, y `sharp` no copia metadatos; igual se comprueban, por la misma regla
+de siempre. Verificado: ninguna trae ni el perfil de color.
+
 **Los videos también.** Un video de celular guarda las coordenadas igual que una
 foto, en una de dos cajas del contenedor MP4: `©xyz`, la de QuickTime que pone
 un iPhone, y `loci`, la de 3GPP que ponen Android y ffmpeg. El script lee las
@@ -92,14 +101,30 @@ este documento existe para evitar. Viven en el Drive de la empresa — decisión
 
 ## Claves
 
-Queda una sola, y todavía no se usa:
+Queda una sola:
 
-| Clave            | Dónde puede estar                                   |
-| ---------------- | --------------------------------------------------- |
-| `RESEND_API_KEY` | **solo servidor**, como Secret del Worker. Fase 4.6 |
+| Clave            | Dónde puede estar                                                |
+| ---------------- | ---------------------------------------------------------------- |
+| `RESEND_API_KEY` | **solo servidor**: Secret del Worker, `.env.local` y `.dev.vars` |
 
-`lib/entorno-servidor.ts` lleva `import "server-only"` en la primera línea, para
-que el build falle si alguien lo importa desde un componente cliente.
+Es de Resend, con permiso **solo de envío** y **solo sobre el dominio
+`sitio.espaciocortinas.com.ar`**: si se filtrara, no sirve para leer los
+correos enviados ni para mandar desde otra dirección. Se revoca y se crea otra
+desde el panel de Resend, y se actualiza en esos tres lugares.
+
+`lib/entorno-servidor.ts` y `lib/correo.ts` llevan `import "server-only"` en la
+primera línea, para que el build falle si alguien los importa desde un
+componente cliente. **Comprobado en la Fase 4.6**: en los archivos JavaScript
+que descarga el navegador no aparece ni el nombre de la variable, ni su valor,
+ni la dirección de la API de Resend.
+
+`EMAIL_CONTACTO` no es una clave: es la casilla, que se publica en la página, y
+va en `vars` a la vista — decisión 55.
+
+**Un despliegue a mano puede subir la clave dentro del Worker.** El adaptador
+copia los `.env*` locales en el paquete como valores de reserva; ver
+`docs/infraestructura.md`, «`.dev.vars` y el preview local». El despliegue
+normal, el de `main`, no la lleva.
 
 Cualquier cosa con prefijo `NEXT_PUBLIC_` termina en el paquete que descarga el
 navegador. No hay excepciones ni forma de ocultarlo, y por eso
@@ -127,17 +152,38 @@ Invoke-RestMethod -Uri 'https://api.github.com/repos/espacioCortinas/espacio-cor
 Si responde con datos, es público. Si devuelve 404, es privado. Mirar la página
 en el navegador no sirve: la sesión propia la muestra igual en los dos casos.
 
-## Formulario de contacto — Fase 4.6
+## Formulario de contacto
 
-Es lo único que va a aceptar datos de un desconocido, así que es donde hay que
-poner el cuidado:
+Es lo único que acepta datos de un desconocido, así que es donde está el
+cuidado. Hecho en la Fase 4.6 — decisiones 54 a 58.
 
-- Validación de entrada en el servidor
-- Escape del contenido en el email: nada de HTML del usuario
-- Campo trampa oculto contra bots
-- Límite por IP
-- Los mensajes no se guardan en ningún lado: van al correo y ahí quedan
-  (decisión 12)
+- **Validación en el servidor.** `lib/consulta.ts` limpia y valida, y la Server
+  Action la vuelve a correr entera sobre lo que llegó, sin confiar en lo que el
+  navegador dijo que validó. Comprobado mandándole a la acción pedidos armados a
+  mano, sin pasar por la página: con los cinco campos mal devuelve los cinco
+  errores, y un mensaje de más de 3.000 caracteres se rechaza.
+- **Nada de HTML de quien escribe.** Todo lo que viene del formulario pasa por
+  `escaparHtml()` antes de entrar al correo, y los caracteres de control se
+  sacan de los campos de una línea: un nombre con un salto de línea adentro no
+  puede partir el asunto ni agregar cabeceras.
+- **Campo trampa.** Si llega lleno, la acción contesta «enviada» sin enviar
+  nada, y lo registra.
+- **Ningún dato en una URL.** Antes de que React tome el formulario, enviarlo
+  era un GET nativo con el nombre, el email y el mensaje en la dirección —que
+  guardan el historial y los registros del Worker—. Se encontró probando: el
+  botón nace apagado hasta la hidratación y el formulario es `method="post"`
+  por si algo lo dispara igual — decisión 57.
+- **Límite por IP, en el borde.** Una regla de rate limiting de Cloudflare
+  sobre `/contacto`: 5 pedidos cada 10 segundos. Frena ráfagas; el plan
+  gratuito no da para más. El techo de lo que un abuso puede costar son los 100
+  correos por día del plan de Resend — decisión 58.
+- **Sin captcha**, a propósito: fricción justo donde no tiene que haberla.
+- **Los mensajes no se guardan en ningún lado**: van al correo y ahí quedan
+  (decisión 12). **Tampoco se registran**: los registros del Worker dicen si se
+  envió o por qué no, nunca el nombre, el email ni el mensaje.
+- **El correo de Google no se toca.** Resend envía desde un subdominio propio,
+  `sitio.espaciocortinas.com.ar`, con sus registros aparte; el SPF de la raíz
+  sigue siendo uno solo.
 
 ## Cabeceras — Fase 5
 
@@ -159,5 +205,8 @@ este código.
 - [ ] `fotos-originales/` sigue en `.gitignore`
 - [ ] El repositorio sigue siendo privado, verificado sin autenticar
 - [ ] `RESEND_API_KEY` cargada como Secret y ausente del paquete del navegador
-- [ ] El formulario resiste un envío automatizado básico
+- [ ] El formulario resiste un envío automatizado básico: campo trampa,
+      validación en el servidor y regla de rate limiting
+- [ ] El SPF de la raíz sigue siendo uno solo y el MX sigue siendo
+      `smtp.google.com` (`docs/infraestructura.md`)
 - [ ] Next en la última versión estable
