@@ -76,7 +76,7 @@ export const todosLosProductos = (): ProductoConMedios[] =>
  *
  * **La portada queda primera aunque la carpeta empiece con un video**: una
  * portada es una foto 4:5 por definición (decisión 14), y es la que abre la
- * página y viaja en la miniatura de WhatsApp. El script avisa de ese caso; acá
+ * página y la que usan los listados. El script avisa de ese caso; acá
  * solo se garantiza que no rompa nada, poniendo el video en el lugar 2.
  */
 function galeriaDeProyecto(slug: string, fotosDelProyecto: Medio[]): Medio[] {

@@ -15,14 +15,17 @@ contenido/
 ├── proyectos.ts      se edita a mano
 ├── inicio.ts         se edita a mano: los textos de Inicio
 ├── contacto.ts       se edita a mano: casilla, redes y zonas donde trabaja
+├── compartir.ts      se edita a mano: qué foto lleva cada página al compartirla
 ├── fotos.ts          GENERADO por scripts/preparar-fotos.mjs
 ├── videos.ts         GENERADO por scripts/preparar-fotos.mjs
 ├── marca.ts          GENERADO por scripts/preparar-marca.mjs
+├── imagenes-para-compartir.ts   GENERADO por scripts/preparar-compartir.mjs
 ├── tipos.ts          la forma de todo lo anterior
 └── index.ts          une el contenido con sus fotos, y es lo que leen las páginas
 
 public/fotos/         las imágenes ya recomprimidas, generadas
 public/videos/        los videos publicados y su cuadro de cartel, generados
+public/compartir/     la imagen para compartir de cada página, generada
 fotos-originales/     los originales. NO se versiona
 ```
 
@@ -48,14 +51,47 @@ publicar un dato falso sobre la empresa.
 
 ## Archivos de marca
 
-`contenido/marca.ts`, que escribe `scripts/preparar-marca.mjs`:
+`contenido/marca.ts`, que escribe `scripts/preparar-marca.mjs`, exporta uno
+solo: `logo`, el logo sin fondo del encabezado, con `ruta`, `ancho` y `alto`
+del archivo escrito.
 
-| Exporta | Qué es                                                                  |
-| ------- | ----------------------------------------------------------------------- |
-| `logo`  | el logo sin fondo del encabezado                                        |
-| `og`    | la imagen para compartir, la misma para todas las páginas — decisión 62 |
+Hasta la decisión 63 exportaba también `og`, la imagen para compartir, que era
+el logo sobre el papel y la misma para todas las páginas. Ya no es de la marca:
+es una foto por página, y tiene su propio par de archivos, abajo.
 
-Los dos con `ruta`, `ancho` y `alto` del archivo escrito.
+## La imagen para compartir
+
+La que se ve al pegar el enlace de una página en WhatsApp: **una foto a
+sangre, distinta en cada página** — decisión 63. Son dos archivos, uno a mano
+y uno generado:
+
+`contenido/compartir.ts`, **a mano**: qué foto lleva cada página, por su ruta.
+
+| Campo     | Tipo                           | Notas                                                                              |
+| --------- | ------------------------------ | ---------------------------------------------------------------------------------- |
+| `foto`    | `string`                       | la carpeta de la foto en `contenido/fotos.ts`: `productos/roller/blackout/2`       |
+| `enfoque` | `"alto" \| "centro" \| "bajo"` | por dónde pasa el corte a 1,91:1. Sin decir nada, `alto`, el mismo sesgo del sitio |
+
+**La foto va por su nombre, no por su lugar en la galería.** Un índice seguiría
+apuntando al mismo lugar aunque la galería se reordenara, y la página
+cambiaría de foto sin que nadie la eligiera. Al lado de cada línea está escrito
+por qué esa foto. La de un producto o un proyecto tiene que ser de su propia
+galería —la del producto o la de una de sus variantes—: el script corta si no.
+
+`contenido/imagenes-para-compartir.ts`, **generado**: el archivo que salió para
+cada página.
+
+| Campo   | Notas                                                                              |
+| ------- | ---------------------------------------------------------------------------------- |
+| `ruta`  | `/compartir/productos-roller.a034f2fa.jpg`: el nombre lleva la huella de los bytes |
+| `ancho` | 1200, leído del archivo escrito                                                    |
+| `alto`  | 630, ídem                                                                          |
+| `alt`   | el mismo texto que la foto tiene en el sitio: «Roller Blackout — foto 2»           |
+| `foto`  | de qué foto salió                                                                  |
+
+`lib/metadata.ts` la busca por la ruta de la página. Una página que no tiene la
+suya —un producto recién agregado, antes de correr `npm run compartir`— usa la
+de Inicio.
 
 **Lo escrito a mano y lo generado nunca comparten archivo.** Si estuvieran
 juntos, regenerar las fotos pisaría los textos. Se juntan al leer, en
@@ -136,10 +172,10 @@ convención que `contenido/inicio.ts`.
 
 `contenido/index.ts` le da a cada proyecto dos listas, y no es redundante:
 
-| Campo     | Qué tiene                                     | Quién lo usa                                  |
-| --------- | --------------------------------------------- | --------------------------------------------- |
-| `fotos`   | solo fotos, en orden; la primera, portada     | listados, Open Graph, la apertura del detalle |
-| `galeria` | fotos **y videos**, en el orden de la carpeta | la galería del detalle                        |
+| Campo     | Qué tiene                                     | Quién lo usa                      |
+| --------- | --------------------------------------------- | --------------------------------- |
+| `fotos`   | solo fotos, en orden; la primera, portada     | listados, la apertura del detalle |
+| `galeria` | fotos **y videos**, en el orden de la carpeta | la galería del detalle            |
 
 `galeria` se arma insertando cada video de proyecto en su `posicion` — decisión 51. La portada queda primera aunque la carpeta empiece con un video.
 
@@ -342,7 +378,7 @@ sale en la portada moviendo un bloque de lugar, sin desmarcar nada.
    después de `6.jpg` — decisión 51.
 
 2. `npm run fotos` — recorta, redimensiona, borra los metadatos y reescribe
-   `contenido/fotos.ts`.
+   `contenido/fotos.ts`. Al terminar rehace las imágenes para compartir.
 3. `npm run fotos:revisar` — comprueba que ninguna foto **ni ningún video**
    conserve GPS. **No es opcional**: son casas de clientes. Ver
    `docs/seguridad.md`.
@@ -350,7 +386,10 @@ sale en la portada moviendo un bloque de lugar, sin desmarcar nada.
    Si se cargaron fotos o un video de variante, la variante necesita su
    `clave`. El script avisa si una carpeta quedó sin variante que la reclame, o
    una clave sin carpeta.
-5. `npm run build` para que `tsc` valide, y `git push`.
+5. Si la página es nueva, `npm run compartir`: le arma su imagen para compartir
+   con la regla —la primera apaisada de su galería, o la portada— y lo avisa.
+   **Mirala**, y anotá la foto en `contenido/compartir.ts`, con el porqué.
+6. `npm run build` para que `tsc` valide, y `git push`.
 
 El cambio tarda lo que tarde el build: entre 2 y 9 minutos.
 
@@ -370,6 +409,14 @@ números cambie, deja de serlo, y hay que decidir el costo antes.
 
 Con los videos es más directo: un video que ya está en `public/videos/` no se
 reconvierte, y el script lo dice en pantalla — decisión 48.
+
+Las imágenes para compartir siguen la misma regla con sus propios números,
+congelados en `scripts/preparar-compartir.mjs`: medida, sesgos del recorte y
+calidad. Correr `npm run compartir` de nuevo no cambia ningún byte —verificado
+dos veces seguidas con los SHA-256—; cambiar uno de esos números cambia las
+doce imágenes y su peso se suma a la historia. Y como el nombre de cada una
+lleva la huella de sus bytes, una imagen que cambia sale siempre con otro
+nombre: es lo que hace que WhatsApp la vuelva a pedir — decisión 63.
 
 ## Copias de seguridad
 

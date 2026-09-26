@@ -15,19 +15,14 @@ export type ArchivoDeMarca = {
   alto: number;
 };
 
-/** El logo, sin fondo, para el encabezado. */
+/**
+ * El logo, sin fondo, para el encabezado.
+ *
+ * La imagen para compartir ya no está acá: es una foto por página, en
+ * `contenido/imagenes-para-compartir.ts` — decisión 63.
+ */
 export const logo: ArchivoDeMarca = {
   ruta: "/marca/logo.png",
   ancho: 504,
   alto: 145,
-};
-
-/**
- * La imagen que se ve al pegar un enlace del sitio en WhatsApp: el logo
- * centrado sobre el papel. Una sola para todas las páginas — decisión 62.
- */
-export const og: ArchivoDeMarca = {
-  ruta: "/marca/og-logo.jpg",
-  ancho: 1200,
-  alto: 630,
 };

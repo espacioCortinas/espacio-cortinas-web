@@ -251,7 +251,7 @@ export type Medio = Foto | Video;
 
 /**
  * Un proyecto listo para su página: con `fotos` —que siguen siendo solo fotos,
- * porque de ahí salen la portada, el listado y la miniatura de WhatsApp— y con
+ * porque de ahí salen la portada, el listado y la imagen para compartir— y con
  * `galeria`, que es la secuencia entera tal como está en la carpeta, con los
  * videos intercalados en su lugar. Decisión 51.
  *
@@ -259,3 +259,57 @@ export type Medio = Foto | Video;
  * archivo de la carpeta es un video, porque una portada no puede serlo.
  */
 export type ProyectoConMedios = ConFotos<Proyecto> & { galeria: Medio[] };
+
+/**
+ * Qué foto lleva una página cuando alguien comparte su enlace — decisión 63.
+ * Se escribe a mano, en `contenido/compartir.ts`.
+ */
+export type FotoParaCompartir = {
+  /**
+   * La foto, por su carpeta en `contenido/fotos.ts`:
+   * `"productos/roller/blackout/2"`.
+   *
+   * **Es su nombre, no su lugar en un arreglo.** Un índice seguiría apuntando
+   * al mismo lugar aunque la galería se reordenara, y ahí la página cambiaría
+   * de foto sin que nadie la eligiera.
+   */
+  foto: string;
+
+  /**
+   * Por dónde pasa el corte a 1,91:1. Es el mismo vocabulario que el `enfoque`
+   * de `components/foto.tsx`, con los mismos valores.
+   *
+   * Sin decir nada es `"alto"`, `50% 15%`: el piso es la zona más oscura y más
+   * desordenada de casi todas las fotos (`docs/diseno.md`). Los otros dos son
+   * para la foto donde lo que importa no está arriba.
+   */
+  enfoque?: "alto" | "centro" | "bajo";
+};
+
+/**
+ * La imagen para compartir ya armada.
+ *
+ * **Esto no se carga a mano**: lo escribe `scripts/preparar-compartir.mjs` en
+ * `contenido/imagenes-para-compartir.ts`, a partir del archivo que
+ * efectivamente escribió.
+ */
+export type ImagenParaCompartir = {
+  /**
+   * Ruta pública, para usar tal cual en `og:image`. **El nombre lleva la
+   * huella de los bytes**: si la imagen cambia, cambia la dirección, que es lo
+   * único que hace que WhatsApp y Facebook la vuelvan a pedir.
+   */
+  ruta: string;
+  ancho: number;
+  alto: number;
+
+  /**
+   * El mismo texto que esa foto tiene en el sitio —«Roller Blackout — foto
+   * 2»—, armado con `altAutomatico()`. No hay campo `alt` que alguien escriba,
+   * por la misma razón que no lo hay en `Foto`.
+   */
+  alt: string;
+
+  /** De qué foto sale, como en `FotoParaCompartir.foto`. */
+  foto: string;
+};

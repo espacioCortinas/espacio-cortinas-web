@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
-import { og } from "@/contenido/marca";
+import { imagenesParaCompartir } from "@/contenido/imagenes-para-compartir";
+import type { ImagenParaCompartir } from "@/contenido/tipos";
 import { entornoPublico } from "@/lib/entorno";
 
 /**
@@ -42,11 +43,35 @@ function paraMeta(texto: string): string {
   return `${(ultimoEspacio > 100 ? corte.slice(0, ultimoEspacio) : corte).trimEnd()}…`;
 }
 
+/**
+ * La imagen que se ve al compartir una página: **una foto a sangre, la suya**
+ * — decisión 63. Qué foto lleva cada una se elige en `contenido/compartir.ts`;
+ * los archivos los arma `scripts/preparar-compartir.mjs`.
+ *
+ * Una página que todavía no tiene la suya —un producto recién agregado, antes
+ * de correr `npm run compartir`— sale con la de Inicio: una foto de cortina es
+ * mejor tarjeta que ninguna. Y si falta hasta la de Inicio, **el build se
+ * corta** acá y no publica un sitio entero sin vista previa.
+ */
+export function imagenParaCompartir(ruta: string): ImagenParaCompartir {
+  const imagen = imagenesParaCompartir[ruta] ?? imagenesParaCompartir["/"];
+  if (!imagen) {
+    throw new Error(
+      "contenido/imagenes-para-compartir.ts no tiene la imagen de Inicio. " +
+        "Corré npm run compartir.",
+    );
+  }
+  return imagen;
+}
+
 type Entrada = {
   /** Sin la marca: la agrega la plantilla de `app/layout.tsx`. */
   titulo: string;
   descripcion: string;
-  /** Empezando con barra: `/productos/roller-blackout`. */
+  /**
+   * Empezando con barra: `/productos/roller`. Es también la clave con la que
+   * se busca su imagen para compartir.
+   */
   ruta: string;
 };
 
@@ -63,27 +88,29 @@ export function metadataDePagina({
   const canonica = ruta;
 
   /*
-   * La imagen que se ve al compartir el enlace: **el logo centrado sobre el
-   * papel, la misma para todas las páginas** — decisión 62. Lo que distingue
-   * un enlace de otro al compartirlo son el título y la descripción, que sí son
-   * de cada página.
+   * La imagen que se ve al compartir el enlace: **una foto de cortina, a
+   * sangre, distinta en cada página** — decisión 63. Es lo que motivó elegir
+   * Next y no un SPA (decisión 1): el negocio se difunde reenviando mensajes, y
+   * una foto de cortina se abre y un logo no.
    *
    * Es apaisada, 1200 × 630, que es lo que hace que WhatsApp la muestre grande
-   * y no como miniatura al costado del texto. Hubo dos versiones antes —el logo
-   * a la izquierda con una foto a la derecha, y en la Fase 4.6 una por producto
-   * y proyecto con su portada— y **WhatsApp las recortaba**: corta desde el
-   * centro cuando la imagen no coincide con su recuadro, y se perdía un pedazo
-   * del logo y otro de la foto. El logo solo, centrado, entra en cualquier
-   * recorte.
+   * y no como miniatura al costado del texto. **Y no lleva nada encima**: ni
+   * logo ni texto. Las dos versiones anteriores eran composiciones —el logo
+   * contra un borde y la foto contra el otro, decisión 59; el logo solo en el
+   * centro, decisión 62— y WhatsApp, que recorta desde el centro cuando la
+   * imagen no coincide con su recuadro, cortaba la primera. Una foto a sangre
+   * no se corta mal: cualquier recorte sigue siendo la cortina. La marca va en
+   * el título.
    *
    * Sale del manifiesto generado, con su ancho y su alto: si algún día cambia
    * de tamaño, esto la sigue sola.
    */
+  const propia = imagenParaCompartir(ruta);
   const imagen = {
-    url: og.ruta,
-    width: og.ancho,
-    height: og.alto,
-    alt: MARCA,
+    url: propia.ruta,
+    width: propia.ancho,
+    height: propia.alto,
+    alt: propia.alt,
     type: "image/jpeg",
   };
 
@@ -101,8 +128,8 @@ export function metadataDePagina({
       images: [imagen],
     },
     twitter: {
-      // La imagen es apaisada, 1200 × 630, así que siempre es la tarjeta
-      // grande.
+      // Las imágenes son todas apaisadas, 1200 × 630, así que siempre es la
+      // tarjeta grande.
       card: "summary_large_image",
       title: `${titulo} · ${MARCA}`,
       description: descripcionCorta,

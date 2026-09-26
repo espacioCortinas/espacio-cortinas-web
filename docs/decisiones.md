@@ -2958,7 +2958,16 @@ solo para leer la ruta.
 
 ---
 
-### 62. La imagen para compartir es una sola: el logo centrado sobre el papel
+### 62. La imagen para compartir es una sola: el logo centrado sobre el papel ~~— SUPERADA por la decisión 63~~
+
+**Por qué quedó superada.** El diagnóstico de abajo es correcto —WhatsApp
+recorta desde el centro y la composición de la 59 perdía un pedazo de cada
+lado—, pero la conclusión que se sacó, «volver a una sola imagen», no era la
+que se seguía de él. Lo que se cortaba mal era **la composición**, con
+elementos contra los bordes, no la idea de una imagen por página: una foto a
+sangre no se puede cortar mal. Y una sola imagen para todo el sitio deshacía
+justo lo que motivó la decisión 1. El razonamiento queda escrito tal cual,
+porque es el que llevó a la 63.
 
 **Fecha:** septiembre de 2026, Fase 4.6. **Reemplaza a la decisión 59** y a la
 imagen de reserva de la Fase 4.2.
@@ -2996,6 +3005,181 @@ podía seguir mostrando la composición vieja. `og.jpg` se borró.
 
 `npm run fotos:revisar` sigue revisando `public/marca`: la imagen ya no tiene
 ninguna foto de un cliente adentro, pero todo lo que se publica se revisa.
+
+---
+
+### 63. La imagen para compartir es una foto a sangre, distinta en cada página
+
+**Fecha:** septiembre de 2026. **Reemplaza a la decisión 62** y vuelve a lo que
+pedía la decisión 1.
+
+**El problema.** Desde la 62, todas las páginas compartían
+`/marca/og-logo.jpg`, el logo centrado sobre el papel: compartir un producto,
+un proyecto o Inicio daba la misma tarjeta, sin ninguna cortina. Es lo
+contrario de la primera decisión del proyecto. Se eligió Next y no un SPA
+para que cada producto y cada proyecto tuvieran **su foto** en la vista
+previa, porque el negocio se difunde reenviando mensajes, y una foto de
+cortina se abre y un logo no.
+
+**La conclusión que corrige.** La 59 hizo una imagen por página, WhatsApp la
+cortó, y la 62 concluyó «volver a una sola imagen». La correcta era otra: lo
+que se cortaba mal era una **composición** con elementos contra los bordes.
+**Una foto a sangre no se puede cortar mal**: cualquier recorte de una foto
+sigue siendo una foto de la cortina.
+
+**Lo decidido:** la imagen de cada página es **una foto, a sangre**, sin logo,
+sin texto y sin composición. La marca ya va en el título —«Roller · Espacio
+Cortinas»—, así que la imagen no tiene que cargarla.
+
+#### Qué foto: la regla, y después mirarla
+
+1. **Una apaisada de la galería de la página.** Recortada a 1,91:1 pierde
+   poco: una 4:3 conserva el 70 % del alto, una 3:2 el 79 %.
+2. **Si no tiene, la portada**, con el recorte alto del sitio (`50% 15%`). Una
+   4:5 conserva el 42 % del alto y puede dejar una cortina sin techo ni piso,
+   que se lee como una pared de tela: por eso va segunda.
+3. **Y se mira.** La pregunta es una sola: ¿se entiende que es una foto de una
+   cortina?
+
+**La elección está escrita, no calculada**: `contenido/compartir.ts` tiene una
+línea por página con la carpeta de la foto —su nombre, no su lugar en un
+arreglo— y, al lado, por qué esa. La regla queda para lo que todavía no tiene
+línea: un producto nuevo sale con la primera apaisada de su galería y el
+script lo avisa, para que alguien la mire y la anote.
+
+#### Las doce, una por una
+
+| Página               | Foto                   | Recorte | Por qué                                                                                       |
+| -------------------- | ---------------------- | ------- | --------------------------------------------------------------------------------------------- |
+| Inicio               | `venecianas-madera/2`  | centro  | la foto que abre Inicio: el que toca el enlace llega a la misma imagen                        |
+| Productos            | `roller/screen/1`      | centro  | un roller screen y una veneciana en el mismo cuadro: el catálogo es más de un producto        |
+| Roller               | `roller/blackout/2`    | alto    | ver abajo                                                                                     |
+| Compacta Blackout    | `compacta-blackout/3`  | alto    | ver abajo                                                                                     |
+| Cortinas de tela     | `cortinas-tela/riel/2` | alto    | ver abajo                                                                                     |
+| Venecianas de madera | `venecianas-madera/1`  | alto    | **la regla**: no tiene apaisada, y la portada recortada alta es todo lamas                    |
+| Venecianas de PVC    | `venecianas-pvc/3`     | alto    | ver abajo                                                                                     |
+| Toldos               | `toldos/1`             | centro  | ver abajo                                                                                     |
+| Bandas verticales    | `bandas-verticales/2`  | alto    | **la regla**: la primera apaisada, las bandas negras en una oficina                           |
+| Proyectos            | `cowork-nordelta/4`    | alto    | la oficina curva con todos los rollers; otra que la del proyecto, para que no den igual       |
+| Cowork en Nordelta   | `cowork-nordelta/3`    | alto    | ver abajo                                                                                     |
+| Contacto             | `cortinas-tela/1`      | alto    | la mejor foto del archivo (`docs/diseno.md`); Contacto no muestra fotos y la tarjeta la lleva |
+
+**Las que no se resolvían solas**, contra la regla literal —la primera
+apaisada, recortada alta—:
+
+- **Roller.** `roller/2` no se lee como un roller: los screen a media altura
+  parecen vidrio polarizado, la protagonista es la lámpara, y en el medio queda
+  la ropa tendida del patio, que `docs/diseno.md` ya pedía no mostrar grande
+  (decisión 42). Va la apaisada de su variante Blackout.
+- **Compacta Blackout.** En `/2`, el recorte alto se llena de techo de madera y
+  ventilador, y el roller queda chico en una esquina. `/3` es la otra apaisada:
+  dos ventanas con el roller a media altura.
+- **Cortinas de tela.** `/3` se lee bien, pero contra el borde izquierdo tiene
+  el pelo y el hombro de una persona, cortados por el cuadro. No se la
+  reconoce; igual, ninguna tarjeta lleva ni un pedazo de alguien. Va la
+  apaisada de su variante Riel.
+- **Venecianas de PVC.** `/2` se entiende, pero es la obra en curso: la caja de
+  herramientas y los trapos quedan adentro aun con el recorte alto. `/3` es la
+  misma veneciana en una casa habitada.
+- **Toldos**, la única que va a la portada teniendo apaisada. `toldos/3` tiene
+  una persona justo en el centro del cuadro, y `docs/diseno.md` pide no
+  mostrarla grande (decisión 42). Y la portada, con el recorte alto, corta el
+  brazo del toldo: al centro entra entero contra el cielo.
+- **Cowork en Nordelta.** En `/2` los screen se leen como vidrio polarizado:
+  parece una oficina con ventanales. En `/3` son tela a la vista, a distintas
+  alturas.
+
+**Lo que dice esto de la regla:** de las ocho, se resolvieron solas dos. La
+«primera apaisada» no mira qué hay en la foto, y en este archivo las apaisadas
+mezclan cortinas que casi no se ven, obra en curso y personas. Por eso la
+elección se escribe a mano y la regla queda solo como punto de partida.
+
+**Recorte al centro en tres**: Inicio y `/productos`, porque el alto era todo
+cielorraso, y Toldos, porque lo que importa —el toldo— está arriba y el alto
+lo cortaba. `enfoque` usa el mismo vocabulario que `components/foto.tsx`.
+
+#### Técnico
+
+- **1200 × 630, JPEG base**: no progresivo, 4:2:0, sin perfil de color ni
+  metadatos. **No WebP**: el soporte en los que arman las vistas previas es
+  desparejo, y es parte de por qué se llegó hasta acá.
+- **Parte de la medida más grande publicada** de esa foto, la que dice
+  `medidas` en el manifiesto —2560 en casi todas—, **y no de
+  `fotos-originales/`**, que no se versiona: así cualquiera que clone rehace
+  los mismos bytes. De 2560 a 1200 no hay diferencia visible con el original.
+- **Nunca agranda.** Si el recorte a 1,91:1 mide menos de 1200 × 630, el
+  script se niega. Por eso `cortinas-tela/barral/2`, de 1028 px, no puede ser
+  imagen para compartir de nada.
+- **Calidad: la más alta, hasta 85, con la que entra en 150 kB.** Una fija no
+  alcanzaba: a 82, las doce iban de 70 kB —un screen liso— a 162 —lamas
+  contra el pasto—. Con las opciones de trellis y la tabla 3 de `mozjpeg`, que
+  achican cerca de un 20 % y siguen dando un JPEG base estándar.
+- **El nombre lleva la huella de los bytes**: `productos-roller.a034f2fa.jpg`,
+  los primeros ocho caracteres del SHA-256. WhatsApp y Facebook guardan cada
+  vista previa por su dirección y no vuelven a pedir una que ya tienen: una
+  imagen distinta tiene que ser una dirección nueva, y así lo es sola. La 62
+  tuvo que renombrar a mano por eso mismo.
+- **Determinista.** Corrido dos veces, los doce JPEG y el manifiesto dan los
+  mismos SHA-256, y `git status` no marca nada. Lo que no cambia de contenido
+  no cambia de nombre: cuando Cortinas de tela pasó a usar la foto que antes
+  tenía `/productos`, salió con la huella que ya tenía.
+- **`npm run fotos` lo encadena**, como hacía la 59: si se reemplaza una foto
+  elegida, su imagen para compartir cambia con ella sin un segundo comando.
+  Suelto es `npm run compartir`, que es el que hace falta después de escribir
+  el bloque de un producto nuevo: hasta ahí, su página no existe.
+- **`lib/metadata.ts` la busca por la ruta** de la página. Sin imagen propia,
+  usa la de Inicio —una foto es mejor tarjeta que ninguna—; sin la de Inicio,
+  corta el build.
+
+**Lo que se sacó:** `/marca/og-logo.jpg` y su generación en
+`scripts/preparar-marca.mjs`, que vuelve a hacer solo el logo, y el `og` de
+`contenido/marca.ts`. Antes de borrarlo se buscó quién lo usaba: ninguna
+página como Open Graph, pero sí **la ficha JSON-LD**, en `image`. Ahí va ahora
+la foto de Inicio: schema.org pide en `image` una imagen del negocio, y el
+logo ya viaja en `logo`. `logo.png` no cambió ni un byte.
+
+#### Los pesos
+
+| Página               | Calidad |     Peso |
+| -------------------- | ------: | -------: |
+| Inicio               |      79 | 147,2 kB |
+| Productos            |      85 |  77,9 kB |
+| Roller               |      85 | 118,2 kB |
+| Compacta Blackout    |      85 |  89,4 kB |
+| Cortinas de tela     |      85 |  98,4 kB |
+| Venecianas de madera |      82 | 146,3 kB |
+| Venecianas de PVC    |      85 |  95,5 kB |
+| Toldos               |      85 | 103,6 kB |
+| Bandas verticales    |      85 | 125,1 kB |
+| Proyectos            |      85 | 116,2 kB |
+| Cowork en Nordelta   |      85 | 109,3 kB |
+| Contacto             |      85 |  87,5 kB |
+
+**1,3 MB las doce.** La de Productos queda debajo de los 80 kB que se
+buscaban: es la foto más lisa del juego —una tela screen beige contra paredes
+lisas— y ya está en la calidad más alta. Subirla solo sumaría bytes.
+
+#### Verificado
+
+Con `npm run preview`, sobre el Worker: las doce páginas pedidas con el
+user-agent de WhatsApp, de Facebook y de Twitter dan 200 y una `og:image`
+distinta cada una, y cada imagen, pedida con el mismo user-agent, da 200,
+`image/jpeg` y un JPEG base de 1200 × 630. `/marca/og-logo.jpg` da 404.
+`npm run fotos:revisar` revisa también `public/compartir/`: son fotos de casas
+de clientes, aunque salgan de archivos que ya estaban limpios.
+
+#### Lo que cuesta, anotado
+
+- **Cambiar la foto de una página suma su peso a la historia de git**, unos
+  100 kB. Es a propósito: es una dirección nueva, que es lo único que hace que
+  WhatsApp la vuelva a pedir.
+- **Dos detalles de contenido, ya publicados en las galerías**, que no estaban
+  anotados en ningún lado: el pelo y el hombro de una persona contra el borde
+  izquierdo de `cortinas-tela/3` —ahora sí, en `docs/diseno.md`—, y un nombre
+  bordado en un almohadón en `roller/blackout/2`, que va en la tarjeta de
+  Roller. Ninguno identifica a nadie —el criterio de la decisión 42—; si la
+  empresa prefiere que el nombre no viaje en cada enlace, se cambia esa línea
+  de `contenido/compartir.ts`.
 
 ---
 
@@ -3048,10 +3232,12 @@ resultado enriquecido. Falta saber si hay una dirección publicable —la empres
 trabaja a domicilio— y con qué horario. Se resuelve junto con el alta del Perfil
 de Empresa de Google, que es donde ese dato importa de verdad (Fase 5).
 
-~~**Falta una imagen de Open Graph de reserva.**~~ Resuelto en la Fase 4.2, y
-reemplazado en la 4.6: desde la decisión 62 hay una sola imagen para todo el
-sitio, `public/marca/og-logo.jpg`, el logo centrado sobre el papel. La
-composición anterior —el logo y `cortinas-tela/1`— la recortaba WhatsApp.
+~~**Falta una imagen de Open Graph de reserva.**~~ Resuelto en la Fase 4.2,
+reemplazado en la 4.6 por una sola imagen para todo el sitio —el logo centrado
+sobre el papel, decisión 62— y reemplazado otra vez por la decisión 63: **cada
+página tiene la suya, una foto a sangre**, en `public/compartir/`. Ya no hay
+imagen de reserva como archivo aparte: una página sin la suya usa la de
+Inicio.
 
 Cuando aparezca una decisión no contemplada durante la implementación: preguntar,
 decidir, y anotarla acá antes de seguir.

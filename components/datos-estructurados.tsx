@@ -1,8 +1,12 @@
 import { productosPublicados } from "@/contenido";
 import { contacto } from "@/contenido/contacto";
-import { logo, og } from "@/contenido/marca";
+import { logo } from "@/contenido/marca";
 import { entornoPublico } from "@/lib/entorno";
-import { DESCRIPCION_SITIO, urlAbsoluta } from "@/lib/metadata";
+import {
+  DESCRIPCION_SITIO,
+  imagenParaCompartir,
+  urlAbsoluta,
+} from "@/lib/metadata";
 import { numeroInternacional } from "@/lib/whatsapp";
 
 /**
@@ -31,6 +35,9 @@ import { numeroInternacional } from "@/lib/whatsapp";
  * - `knowsAbout` lista el catálogo, sacado del mismo arreglo que `/productos`:
  *   «cortinas» sola no dice si hacen rollers, venecianas o toldos.
  * - `sameAs` son las redes y el Perfil de Empresa, cuando exista.
+ * - `image` es **una foto**, la misma que se ve al compartir Inicio: schema.org
+ *   pide ahí una imagen del negocio, y el logo ya va en `logo`. Hasta la
+ *   decisión 63 era el logo sobre el papel.
  *
  * # Lo que NO tiene, a propósito
  *
@@ -55,7 +62,7 @@ export function DatosEstructurados() {
     description: DESCRIPCION_SITIO,
     url: entornoPublico.urlSitio,
     logo: urlAbsoluta(logo.ruta),
-    image: urlAbsoluta(og.ruta),
+    image: urlAbsoluta(imagenParaCompartir("/").ruta),
     telephone: telefono,
     email: contacto.email,
     areaServed: contacto.zonas.map((zona) => ({

@@ -91,10 +91,12 @@ contenido/
 ├── proyectos.ts                 se edita a mano
 ├── contacto.ts                  se edita a mano: casilla, redes y zonas donde trabaja
 ├── inicio.ts                    se edita a mano: los textos de Inicio
+├── compartir.ts                 se edita a mano: qué foto lleva cada página al
+│                                compartirla
 ├── fotos.ts                     GENERADO por scripts/preparar-fotos.mjs
 ├── videos.ts                    GENERADO por scripts/preparar-fotos.mjs
 ├── marca.ts                     GENERADO por scripts/preparar-marca.mjs: el logo
-│                                y la imagen para compartir
+├── imagenes-para-compartir.ts   GENERADO por scripts/preparar-compartir.mjs
 ├── tipos.ts
 └── index.ts                     une contenido y medios; es lo que leen las páginas
 components/
@@ -122,18 +124,22 @@ lib/
 │                                — SOLO servidor
 ├── fotos.ts                     rutas, srcset y el tope de ancho de cada medio.
 │                                Lo ÚNICO que arma rutas de fotos y de videos
-├── metadata.ts                  title, description, canonical y Open Graph
+├── metadata.ts                  title, description, canonical y Open Graph, con la
+│                                imagen para compartir de cada página
 ├── whatsapp.ts                  el mensaje contextual, el enlace y el número
 ├── texto.ts                     slugs y textos derivados
 ├── navegacion.ts                los enlaces del menú, en un solo lugar
 └── constantes.ts
 scripts/
 ├── preparar-fotos.mjs           recorta, redimensiona y borra los metadatos
-├── preparar-marca.mjs           el logo sin fondo y la imagen para compartir
+├── preparar-compartir.mjs       la imagen para compartir de cada página, desde
+│                                las fotos publicadas
+├── preparar-marca.mjs           el logo sin fondo
 └── revisar-metadatos.mjs        comprueba que ninguna publicada conserve GPS
 public/fotos/                    las imágenes generadas
 public/videos/                   los videos publicados y su cuadro de cartel
-public/marca/                    logo.png y og-logo.jpg, GENERADOS
+public/compartir/                una imagen por página, 1200 × 630, GENERADAS
+public/marca/                    logo.png, GENERADO
 fotos-originales/                los originales. NO se versiona
 docs/
 next.config.ts
@@ -204,14 +210,15 @@ cambie sin build, hay que enchufar **las dos** piezas, no una: sin el
 
 ### Comandos
 
-| Comando            | Qué hace                                                        |
-| ------------------ | --------------------------------------------------------------- |
-| `npm run dev`      | Next en local. Es el de todos los días                          |
-| `npm run marca`    | rehace el logo, la imagen para compartir y `contenido/marca.ts` |
-| `npm run build`    | solo `next build`. Es el que verifica que el código compila     |
-| `npm run build:cf` | además arma el Worker. Lo que corre el despliegue               |
-| `npm run preview`  | levanta el Worker real en local, sobre `workerd`                |
-| `npm run deploy`   | despliega a mano. Normalmente no se usa: despliega `main`       |
+| Comando             | Qué hace                                                                                |
+| ------------------- | --------------------------------------------------------------------------------------- |
+| `npm run dev`       | Next en local. Es el de todos los días                                                  |
+| `npm run marca`     | rehace el logo y `contenido/marca.ts`                                                   |
+| `npm run compartir` | rehace la imagen para compartir de cada página. `npm run fotos` ya lo corre al terminar |
+| `npm run build`     | solo `next build`. Es el que verifica que el código compila                             |
+| `npm run build:cf`  | además arma el Worker. Lo que corre el despliegue                                       |
+| `npm run preview`   | levanta el Worker real en local, sobre `workerd`                                        |
+| `npm run deploy`    | despliega a mano. Normalmente no se usa: despliega `main`                               |
 
 `npm run preview` es lo que hay que correr antes de dar por buena cualquier cosa
 que dependa del servidor: es el único que ejecuta el código en el mismo runtime
@@ -257,15 +264,26 @@ al servir.
    falta, genera un WebP por cada medida y BORRA TODOS LOS METADATOS
    ffprobe/ffmpeg: convierte cada video nuevo, lo mide y le saca el primer
    cuadro de cartel
+   y al terminar, preparar-compartir.mjs: la imagen para compartir de cada
+   página, con la foto que dice contenido/compartir.ts
         ↓
-3. Escribe public/fotos/, public/videos/ y los manifiestos
-   contenido/fotos.ts y contenido/videos.ts
+3. Escribe public/fotos/, public/videos/, public/compartir/ y los manifiestos
+   contenido/fotos.ts, contenido/videos.ts y contenido/imagenes-para-compartir.ts
         ↓
 4. npm run fotos:revisar  — comprueba que ninguna conserve GPS, y revisa
-   también public/marca/: todo lo que se publica se revisa
+   también public/marca/ y public/compartir/: todo lo que se publica se revisa
         ↓
 5. git push. El sitio se reconstruye con las fotos adentro
 ```
+
+**La imagen para compartir es una foto a sangre, una por página**, según la
+decisión 63. Qué foto lleva cada página se escribe a mano en
+`contenido/compartir.ts`, por la carpeta de la foto; el script la recorta a
+1,91:1 desde la medida más grande publicada, sin agrandar nunca, y la guarda
+como JPEG de 1200 × 630 con la huella de sus bytes en el nombre. Una imagen
+distinta es siempre una dirección nueva, que es lo único que hace que WhatsApp
+la vuelva a pedir. Un producto nuevo sin su línea sale con la primera apaisada
+de su galería, y el script lo avisa para que alguien la mire.
 
 **Las variantes entran un nivel más abajo.** La carpeta de una variante se llama
 como su `clave` en `contenido/productos.ts`, y su clave en el manifiesto cuelga

@@ -1,26 +1,24 @@
 #!/usr/bin/env node
 /**
- * Prepara los dos archivos de marca que el sitio necesita y que no son fotos:
- * el logo del encabezado y la imagen que se ve al compartir un enlace.
+ * Prepara el archivo de marca que el sitio necesita y que no es una foto: el
+ * logo del encabezado.
  *
  *     node scripts/preparar-marca.mjs
  *
- *     fotos-originales/logo.jpg  ─┬─→  public/marca/logo.png      transparente
- *                                 └─→  public/marca/og-logo.jpg   1200×630
+ *     fotos-originales/logo.jpg  ──→  public/marca/logo.png   transparente
  *
- *                                      contenido/marca.ts         el manifiesto
+ *                                     contenido/marca.ts      el manifiesto
  *
  * Es hermano de `preparar-fotos.mjs` y sigue sus mismas reglas:
  *
  * - **los datos técnicos los calcula el script**, no una persona: el ancho y el
- *   alto de los dos archivos se escriben en `contenido/marca.ts` y de ahí los
- *   leen los componentes, igual que `contenido/fotos.ts` (CLAUDE.md, regla 4);
+ *   alto del logo se escriben en `contenido/marca.ts` y de ahí los lee el
+ *   componente, igual que `contenido/fotos.ts` (CLAUDE.md, regla 4);
  * - **no se versiona el original.** `fotos-originales/logo.jpg` es el archivo
  *   que mandó la empresa; lo que se publica sale de acá;
  * - **lo publicado no se reescribe con otros bytes.** `sharp` es determinista:
  *   con la misma entrada y los mismos parámetros da el mismo archivo, así que
- *   correr esto de nuevo no toca nada. Si alguien cambia la composición, el
- *   archivo nuevo va **con otro nombre** — ver abajo por qué.
+ *   correr esto de nuevo no toca nada.
  *
  * ## Por qué hay que recortar el fondo blanco
  *
@@ -30,26 +28,14 @@
  * `sacarElFondoBlanco()`, que explica por qué no alcanza con «hacer
  * transparente lo blanco».
  *
- * ## La imagen para compartir es el logo solo, centrado — decisión 62
+ * ## La imagen para compartir ya no sale de acá — decisión 63
  *
- * Fue primero el logo a la izquierda y una foto a la derecha, y en la Fase 4.6
- * además una por producto y por proyecto con su portada. **WhatsApp las
- * recortaba**: cuando la imagen no coincide con el recuadro que muestra, corta
- * desde el centro, y con el logo contra un borde y la foto contra el otro se
- * perdía un pedazo de cada uno. El logo solo, centrado y con aire alrededor,
- * sobrevive a cualquier recorte razonable.
- *
- * Es una sola imagen para todo el sitio: lo que distingue un enlace de otro al
- * compartirlo son el título y la descripción.
- *
- * **El logo va a su tamaño, sin escalar**: el original tiene 524 px y el
- * recortado 504, que es lo que hay (`docs/diseno.md`, «Lo que falta pedirle a
- * la empresa»). Agrandarlo lo dejaría blando.
- *
- * **Por qué otro nombre y no pisar `og.jpg`.** Los que arman las vistas previas
- * —Facebook, WhatsApp y el resto— guardan la imagen por su dirección durante
- * días. Con el mismo nombre, un enlace compartido de nuevo podía seguir
- * mostrando la composición vieja; con uno nuevo la piden otra vez.
+ * Salió de acá dos veces, y las dos eran composiciones con el logo: el logo a
+ * la izquierda y una foto a la derecha (decisión 59), que WhatsApp recortaba
+ * desde el centro, y después el logo solo, centrado sobre el papel (decisión
+ * 62), igual para todas las páginas. **Ahora es una foto de cortina a sangre,
+ * una por página**, sin logo: la marca va en el título. La arma
+ * `scripts/preparar-compartir.mjs`, que parte de las fotos y no del logo.
  *
  * ## Lo que este script NO hace
  *
@@ -57,11 +43,6 @@
  * logo viene cortado por el borde superior del archivo fuente y la «e» lo pisa,
  * así que un recorte literal sale sucio, y cualquier otra cosa sería un lockup
  * nuevo que la empresa no autorizó. Decisión 45.
- *
- * **No dibuja texto.** Componer texto acá significaría resolver fuentes con
- * `fontconfig` desde `sharp`, que da un resultado distinto en cada máquina; y
- * el título y la descripción ya viajan en las etiquetas de Open Graph, que es
- * donde WhatsApp los lee.
  */
 
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
@@ -71,20 +52,10 @@ import { fileURLToPath } from "node:url";
 import prettier from "prettier";
 import sharp from "sharp";
 
-import { IMAGEN_CALIDAD } from "../lib/constantes.ts";
-
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const LOGO_ORIGINAL = join(RAIZ, "fotos-originales", "logo.jpg");
 const DESTINO = join(RAIZ, "public", "marca");
 const MANIFIESTO = join(RAIZ, "contenido", "marca.ts");
-
-/** El papel de cal de `app/globals.css`. Los dos valores son el mismo token. */
-const PAPEL = "#f6f2ec";
-
-/** Lo que piden WhatsApp, Facebook y Twitter para la vista previa grande: 1,91:1. */
-const OG_ANCHO = 1200;
-const OG_ALTO = 630;
-const OG_ARCHIVO = "og-logo.jpg";
 
 /**
  * Le saca el fondo blanco al logo, dejando los bordes limpios sobre cualquier
@@ -197,37 +168,6 @@ async function main() {
     );
   }
 
-  /* --- La imagen para compartir ---------------------------------------- */
-
-  /*
-   * El logo a su tamaño, centrado sobre el papel. Centrado es lo que lo salva
-   * del recorte de WhatsApp, que corta desde el centro hacia afuera: con 504 de
-   * ancho en 1200, entra entero hasta en un recorte cuadrado de 630.
-   */
-  const rutaOg = join(DESTINO, OG_ARCHIVO);
-  const infoOg = await sharp({
-    create: {
-      width: OG_ANCHO,
-      height: OG_ALTO,
-      channels: 4,
-      background: PAPEL,
-    },
-  })
-    .composite([
-      {
-        input: await logo.clone().png().toBuffer(),
-        left: Math.round((OG_ANCHO - infoLogo.width) / 2),
-        top: Math.round((OG_ALTO - infoLogo.height) / 2),
-      },
-    ])
-    .flatten({ background: PAPEL })
-    .jpeg({ quality: Math.round(IMAGEN_CALIDAD * 100) })
-    .toFile(rutaOg);
-
-  console.log(
-    `  ${OG_ARCHIVO}  ${infoOg.width}×${infoOg.height}  ${kB(infoOg.size)}`,
-  );
-
   /* --- El manifiesto -------------------------------------------------- */
 
   const fuente = `/**
@@ -247,21 +187,16 @@ export type ArchivoDeMarca = {
   alto: number;
 };
 
-/** El logo, sin fondo, para el encabezado. */
+/**
+ * El logo, sin fondo, para el encabezado.
+ *
+ * La imagen para compartir ya no está acá: es una foto por página, en
+ * \`contenido/imagenes-para-compartir.ts\` — decisión 63.
+ */
 export const logo: ArchivoDeMarca = {
   ruta: "/marca/logo.png",
   ancho: ${infoLogo.width},
   alto: ${infoLogo.height},
-};
-
-/**
- * La imagen que se ve al pegar un enlace del sitio en WhatsApp: el logo
- * centrado sobre el papel. Una sola para todas las páginas — decisión 62.
- */
-export const og: ArchivoDeMarca = {
-  ruta: "/marca/${OG_ARCHIVO}",
-  ancho: ${infoOg.width},
-  alto: ${infoOg.height},
 };
 `;
 

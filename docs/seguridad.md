@@ -63,10 +63,17 @@ Recorre `public/fotos/` **y `public/videos/`** enteros, dice qué metadatos tien
 cada archivo, imprime las coordenadas si las hay y **devuelve 1 si alguno las
 conserva**. Se corre sobre todas las medidas, no solo sobre la más grande.
 
-**Desde la Fase 4.6 recorre también `public/marca/`**, el logo y la imagen
-para compartir. Hoy ninguna de las dos tiene una foto de un cliente adentro
-—decisión 62—, pero todo lo que se publica se revisa: el día que una lleve una
-foto, el control ya la mira.
+**Recorre también `public/marca/` y `public/compartir/`.** En `marca` está
+solo el logo. En `compartir` está la imagen que se ve al compartir cada
+página, y **esas sí son fotos de casas de clientes**: un recorte de una foto
+publicada, una por página — decisión 63. Salen de archivos que ya estaban
+limpios y `sharp` no copia metadatos, pero todo lo que se publica se revisa.
+
+Lo que el control no mira es qué se ve en la foto, y una tarjeta de WhatsApp
+muestra la foto más grande y a más gente que la galería. Por eso las doce se
+miraron una por una: ninguna lleva una persona, ni un pedazo de una —una de
+las apaisadas de Cortinas de tela tenía un hombro contra el borde, y se
+cambió—.
 
 **Los videos también.** Un video de celular guarda las coordenadas igual que una
 foto, en una de dos cajas del contenedor MP4: `©xyz`, la de QuickTime que pone

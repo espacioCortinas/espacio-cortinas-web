@@ -161,7 +161,7 @@ la empresa va a instalar. Va a volver a pasar, así que el diseño tiene que
 convivir con eso: **el recorte alto, que deja el piso afuera, es lo que salva a
 esas cuatro**.
 
-### Tres fotos con problemas de privacidad, ya resueltas
+### Cuatro fotos con problemas de privacidad, ya resueltas
 
 **`roller/3` y `toldos/3` tienen personas visibles** y **`roller/2` tiene ropa
 tendida** en el patio vecino. `docs/fotografia.md` dice «nada de personas».
@@ -173,6 +173,12 @@ mira caso por caso y el criterio es la identificabilidad, no la presencia.
 
 Esto no cambia nada de lo visual, pero sí baja a las tres de categoría: ninguna
 de las tres se muestra grande.
+
+**Una cuarta, encontrada al elegir las imágenes para compartir** — decisión
+63: `cortinas-tela/3` tiene, contra el borde izquierdo, el pelo y el hombro de
+una persona, cortados por el cuadro. No se la reconoce y la foto se queda,
+con el mismo criterio; pero ninguna imagen para compartir lleva ni un pedazo
+de alguien, así que esa no es la de Cortinas de tela.
 
 ### El motivo formal que sí sirve
 

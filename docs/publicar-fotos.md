@@ -130,6 +130,11 @@ Y para cada video —el de una variante, o uno de la galería de un proyecto—:
   propósito: los archivos publicados viven en git y volver a escribirlos suma su
   peso otra vez a la historia del repositorio
 
+Y al terminar, **la imagen para compartir de cada página** —la que se ve al
+pegar el enlace en WhatsApp—: una foto a sangre de 1200 × 630, con la foto que
+dice `contenido/compartir.ts` para esa página — decisión 63. Si no cambió
+ninguna foto elegida, no cambia ningún archivo. Suelto es `npm run compartir`.
+
 Sale algo así:
 
 ```
@@ -151,8 +156,8 @@ npm run fotos:revisar
 
 **Este paso no es opcional.** Es el que confirma que ningún archivo publicado
 lleva la dirección de la casa de un cliente. Recorre `public/fotos/`,
-`public/videos/` y `public/marca/`, y devuelve error si encuentra algo. Un
-video de celular trae las coordenadas igual que una foto.
+`public/videos/`, `public/marca/` y `public/compartir/`, y devuelve error si
+encuentra algo. Un video de celular trae las coordenadas igual que una foto.
 
 Si aparece un archivo que el control no sabe leer, **también da error**. No es
 un falso positivo que haya que ignorar: todo lo que hay en esas carpetas es
@@ -201,6 +206,23 @@ Tres cosas que conviene tener claras:
 - **El orden del arreglo es el orden del catálogo**, y decide cuáles de los
   destacados entran en la portada: entran los primeros. Para reordenar, movés el
   bloque.
+
+### La imagen para compartir de una página nueva
+
+Con el bloque escrito, corré:
+
+```bash
+npm run compartir
+```
+
+Una página nueva todavía no tiene su línea en `contenido/compartir.ts`, así
+que el script le elige la foto con la regla —la primera apaisada de su
+galería, o la portada si no tiene— y lo avisa con un `!`. **Abrí la imagen**
+que dice el aviso, en `public/compartir/`, y preguntate una sola cosa: ¿se
+entiende que es una foto de una cortina? Si sí, anotá esa foto en
+`contenido/compartir.ts`; si no, elegí otra de su galería y corré el comando
+de nuevo. Que no se vea nadie, ni un pedazo de alguien: la tarjeta la ve más
+gente que la galería.
 
 ---
 
@@ -277,6 +299,16 @@ cualquier otra foto. **No se arregla solo a propósito**: un archivo cortado es
 un problema de transferencia que conviene saber, y un rescate puede salir con
 una franja gris que solo se ve mirándolo.
 
+### `… no está en contenido/compartir.ts: se usó … por la regla`
+
+Es una página nueva, y su imagen para compartir la eligió la regla. Mirala y
+anotala: ver «La imagen para compartir de una página nueva», más arriba.
+
+### `… el recorte a 1,91:1 queda en …, menos que 1200×630`
+
+La foto elegida para compartir es demasiado chica: habría que agrandarla, y no
+se agranda nunca. Elegí otra en `contenido/compartir.ts`.
+
 ### `quedó sin ninguna foto utilizable`
 
 Ninguna foto de esa carpeta se pudo leer. Suele ser una carpeta con capturas de
@@ -314,11 +346,13 @@ No tiene que ver con las fotos: falta `NEXT_PUBLIC_SITE_URL` en `.env.local`.
 
 ## Dónde queda cada cosa
 
-| Ruta                 | Qué es                              | ¿Se versiona? |
-| -------------------- | ----------------------------------- | ------------- |
-| `fotos-originales/`  | los originales, con su EXIF intacto | **no**        |
-| `public/fotos/`      | lo que se publica, ya limpio        | sí            |
-| `contenido/fotos.ts` | el manifiesto, generado             | sí            |
+| Ruta                     | Qué es                                    | ¿Se versiona? |
+| ------------------------ | ----------------------------------------- | ------------- |
+| `fotos-originales/`      | los originales, con su EXIF intacto       | **no**        |
+| `public/fotos/`          | lo que se publica, ya limpio              | sí            |
+| `contenido/fotos.ts`     | el manifiesto, generado                   | sí            |
+| `contenido/compartir.ts` | qué foto lleva cada página al compartirla | sí            |
+| `public/compartir/`      | la imagen para compartir de cada página   | sí            |
 
 **Los originales no se versionan a propósito:** tienen las coordenadas adentro,
 así que commitearlos publicaría justo lo que todo esto evita. Guardalos en el
