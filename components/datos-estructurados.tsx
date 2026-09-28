@@ -35,9 +35,9 @@ import { numeroInternacional } from "@/lib/whatsapp";
  * - `knowsAbout` lista el catálogo, sacado del mismo arreglo que `/productos`:
  *   «cortinas» sola no dice si hacen rollers, venecianas o toldos.
  * - `sameAs` son las redes y el Perfil de Empresa, cuando exista.
- * - `image` es **una foto**, la misma que se ve al compartir Inicio: schema.org
- *   pide ahí una imagen del negocio, y el logo ya va en `logo`. Hasta la
- *   decisión 63 era el logo sobre el papel.
+ * - `image` es la imagen que se ve al compartir Inicio: **una foto**, con el
+ *   logo en una banda abajo. schema.org pide ahí una imagen del negocio, y el
+ *   logo solo ya va en `logo`. Hasta la decisión 63 era el logo sobre el papel.
  *
  * # Lo que NO tiene, a propósito
  *

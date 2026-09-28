@@ -28,14 +28,15 @@
  * `sacarElFondoBlanco()`, que explica por qué no alcanza con «hacer
  * transparente lo blanco».
  *
- * ## La imagen para compartir ya no sale de acá — decisión 63
+ * ## La imagen para compartir ya no sale de acá — decisiones 63 y 64
  *
- * Salió de acá dos veces, y las dos eran composiciones con el logo: el logo a
- * la izquierda y una foto a la derecha (decisión 59), que WhatsApp recortaba
- * desde el centro, y después el logo solo, centrado sobre el papel (decisión
- * 62), igual para todas las páginas. **Ahora es una foto de cortina a sangre,
- * una por página**, sin logo: la marca va en el título. La arma
- * `scripts/preparar-compartir.mjs`, que parte de las fotos y no del logo.
+ * Salió de acá dos veces: el logo a la izquierda y una foto a la derecha
+ * (decisión 59), que WhatsApp recortaba desde el centro, y después el logo
+ * solo, centrado sobre el papel (decisión 62), igual para todas las páginas.
+ * **Ahora es una foto por página, con este logo centrado en una banda de
+ * papel abajo.** La arma `scripts/preparar-compartir.mjs`, que parte de las
+ * fotos y usa el `logo.png` que escribe este script. Por eso `npm run marca`
+ * la vuelve a armar al terminar: si el logo cambia, las doce cambian con él.
  *
  * ## Lo que este script NO hace
  *

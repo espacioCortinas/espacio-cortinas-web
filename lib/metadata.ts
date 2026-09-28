@@ -44,9 +44,10 @@ function paraMeta(texto: string): string {
 }
 
 /**
- * La imagen que se ve al compartir una página: **una foto a sangre, la suya**
- * — decisión 63. Qué foto lleva cada una se elige en `contenido/compartir.ts`;
- * los archivos los arma `scripts/preparar-compartir.mjs`.
+ * La imagen que se ve al compartir una página: **una foto suya, con el logo
+ * abajo** — decisiones 63 y 64. Qué foto lleva cada una se elige en
+ * `contenido/compartir.ts`; los archivos los arma
+ * `scripts/preparar-compartir.mjs`.
  *
  * Una página que todavía no tiene la suya —un producto recién agregado, antes
  * de correr `npm run compartir`— sale con la de Inicio: una foto de cortina es
@@ -88,19 +89,18 @@ export function metadataDePagina({
   const canonica = ruta;
 
   /*
-   * La imagen que se ve al compartir el enlace: **una foto de cortina, a
-   * sangre, distinta en cada página** — decisión 63. Es lo que motivó elegir
-   * Next y no un SPA (decisión 1): el negocio se difunde reenviando mensajes, y
-   * una foto de cortina se abre y un logo no.
+   * La imagen que se ve al compartir el enlace: **una foto de cortina,
+   * distinta en cada página, con el logo en una banda de papel abajo** —
+   * decisiones 63 y 64. Es lo que motivó elegir Next y no un SPA (decisión 1):
+   * el negocio se difunde reenviando mensajes, y una foto de cortina se abre y
+   * un logo solo no.
    *
    * Es apaisada, 1200 × 630, que es lo que hace que WhatsApp la muestre grande
-   * y no como miniatura al costado del texto. **Y no lleva nada encima**: ni
-   * logo ni texto. Las dos versiones anteriores eran composiciones —el logo
-   * contra un borde y la foto contra el otro, decisión 59; el logo solo en el
-   * centro, decisión 62— y WhatsApp, que recorta desde el centro cuando la
-   * imagen no coincide con su recuadro, cortaba la primera. Una foto a sangre
-   * no se corta mal: cualquier recorte sigue siendo la cortina. La marca va en
-   * el título.
+   * y no como miniatura al costado del texto. **Y el logo va centrado.**
+   * WhatsApp recorta desde el centro cuando la imagen no coincide con su
+   * recuadro, y lo que cortaba en la decisión 59 era un logo contra un borde y
+   * una foto contra el otro. Centrado entra entero hasta en la miniatura
+   * cuadrada; la foto, recortada, sigue siendo la cortina.
    *
    * Sale del manifiesto generado, con su ancho y su alto: si algún día cambia
    * de tamaño, esto la sigue sola.

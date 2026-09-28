@@ -16,7 +16,7 @@
     "typecheck": "tsc --noEmit",
     "fotos": "node scripts/preparar-fotos.mjs && node scripts/preparar-compartir.mjs",
     "compartir": "node scripts/preparar-compartir.mjs",
-    "marca": "node scripts/preparar-marca.mjs",
+    "marca": "node scripts/preparar-marca.mjs && node scripts/preparar-compartir.mjs",
     "fotos:revisar": "node scripts/revisar-metadatos.mjs public/fotos public/videos public/marca public/compartir"
   },
   "dependencies": {

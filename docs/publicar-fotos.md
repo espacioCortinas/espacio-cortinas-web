@@ -131,9 +131,10 @@ Y para cada video —el de una variante, o uno de la galería de un proyecto—:
   peso otra vez a la historia del repositorio
 
 Y al terminar, **la imagen para compartir de cada página** —la que se ve al
-pegar el enlace en WhatsApp—: una foto a sangre de 1200 × 630, con la foto que
-dice `contenido/compartir.ts` para esa página — decisión 63. Si no cambió
-ninguna foto elegida, no cambia ningún archivo. Suelto es `npm run compartir`.
+pegar el enlace en WhatsApp—: la foto que dice `contenido/compartir.ts` para
+esa página, con el logo en una banda de papel abajo, en 1200 × 630 —
+decisiones 63 y 64. Si no cambió ninguna foto elegida, no cambia ningún
+archivo. Suelto es `npm run compartir`.
 
 Sale algo así:
 
@@ -304,7 +305,7 @@ una franja gris que solo se ve mirándolo.
 Es una página nueva, y su imagen para compartir la eligió la regla. Mirala y
 anotala: ver «La imagen para compartir de una página nueva», más arriba.
 
-### `… el recorte a 1,91:1 queda en …, menos que 1200×630`
+### `… el recorte a 2,5:1 queda en …, menos que 1200×480`
 
 La foto elegida para compartir es demasiado chica: habría que agrandarla, y no
 se agranda nunca. Elegí otra en `contenido/compartir.ts`.

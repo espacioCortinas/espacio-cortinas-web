@@ -276,8 +276,9 @@ export type FotoParaCompartir = {
   foto: string;
 
   /**
-   * Por dónde pasa el corte a 1,91:1. Es el mismo vocabulario que el `enfoque`
-   * de `components/foto.tsx`, con los mismos valores.
+   * Por dónde pasa el corte de la foto, que en la tarjeta ocupa 1200 × 480
+   * arriba de la banda del logo. Es el mismo vocabulario que el `enfoque` de
+   * `components/foto.tsx`, con los mismos valores.
    *
    * Sin decir nada es `"alto"`, `50% 15%`: el piso es la zona más oscura y más
    * desordenada de casi todas las fotos (`docs/diseno.md`). Los otros dos son

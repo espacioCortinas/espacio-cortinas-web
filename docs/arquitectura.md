@@ -210,15 +210,15 @@ cambie sin build, hay que enchufar **las dos** piezas, no una: sin el
 
 ### Comandos
 
-| Comando             | Qué hace                                                                                |
-| ------------------- | --------------------------------------------------------------------------------------- |
-| `npm run dev`       | Next en local. Es el de todos los días                                                  |
-| `npm run marca`     | rehace el logo y `contenido/marca.ts`                                                   |
-| `npm run compartir` | rehace la imagen para compartir de cada página. `npm run fotos` ya lo corre al terminar |
-| `npm run build`     | solo `next build`. Es el que verifica que el código compila                             |
-| `npm run build:cf`  | además arma el Worker. Lo que corre el despliegue                                       |
-| `npm run preview`   | levanta el Worker real en local, sobre `workerd`                                        |
-| `npm run deploy`    | despliega a mano. Normalmente no se usa: despliega `main`                               |
+| Comando             | Qué hace                                                                                    |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| `npm run dev`       | Next en local. Es el de todos los días                                                      |
+| `npm run marca`     | rehace el logo y `contenido/marca.ts`, y después las imágenes para compartir, que lo llevan |
+| `npm run compartir` | rehace la imagen para compartir de cada página. `npm run fotos` ya lo corre al terminar     |
+| `npm run build`     | solo `next build`. Es el que verifica que el código compila                                 |
+| `npm run build:cf`  | además arma el Worker. Lo que corre el despliegue                                           |
+| `npm run preview`   | levanta el Worker real en local, sobre `workerd`                                            |
+| `npm run deploy`    | despliega a mano. Normalmente no se usa: despliega `main`                                   |
 
 `npm run preview` es lo que hay que correr antes de dar por buena cualquier cosa
 que dependa del servidor: es el único que ejecuta el código en el mismo runtime
@@ -276,14 +276,16 @@ al servir.
 5. git push. El sitio se reconstruye con las fotos adentro
 ```
 
-**La imagen para compartir es una foto a sangre, una por página**, según la
-decisión 63. Qué foto lleva cada página se escribe a mano en
-`contenido/compartir.ts`, por la carpeta de la foto; el script la recorta a
-1,91:1 desde la medida más grande publicada, sin agrandar nunca, y la guarda
-como JPEG de 1200 × 630 con la huella de sus bytes en el nombre. Una imagen
-distinta es siempre una dirección nueva, que es lo único que hace que WhatsApp
-la vuelva a pedir. Un producto nuevo sin su línea sale con la primera apaisada
-de su galería, y el script lo avisa para que alguien la mire.
+**La imagen para compartir es una foto por página, con el logo abajo**, según
+las decisiones 63 y 64. Qué foto lleva cada página se escribe a mano en
+`contenido/compartir.ts`, por la carpeta de la foto. El script la recorta a
+1200 × 480 desde la medida más grande publicada, sin agrandar nunca, le pone
+debajo una banda de papel de 150 px con el logo centrado, y la guarda como JPEG
+de 1200 × 630 con la huella de sus bytes en el nombre. Centrado, el logo entra
+entero aunque WhatsApp recorte desde el centro. Una imagen distinta es siempre
+una dirección nueva, que es lo único que hace que WhatsApp la vuelva a pedir.
+Un producto nuevo sin su línea sale con la primera apaisada de su galería, y el
+script lo avisa para que alguien la mire.
 
 **Las variantes entran un nivel más abajo.** La carpeta de una variante se llama
 como su `clave` en `contenido/productos.ts`, y su clave en el manifiesto cuelga

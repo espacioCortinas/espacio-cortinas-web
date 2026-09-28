@@ -3,15 +3,15 @@ import type { FotoParaCompartir } from "./tipos";
 /**
  * La foto que lleva cada página cuando alguien pega su enlace en WhatsApp.
  *
- * **Es una foto, a sangre, y nada más** — decisión 63, que reemplaza a la 62:
- * sin logo, sin texto y sin composición. La marca ya va en el título —«Roller ·
- * Espacio Cortinas»—, así que la imagen no tiene que cargarla.
+ * **Es una foto de la página, y abajo el logo** — decisiones 63 y 64. La foto
+ * va arriba, a todo el ancho; el logo, centrado en una banda de papel de 150
+ * px, igual que en el encabezado del sitio. Nada más: ni texto ni nada encima
+ * de la foto.
  *
- * Y una foto a sangre no se puede cortar mal. WhatsApp recorta desde el centro
- * cuando la imagen no coincide con su recuadro, y cualquier recorte de una
- * foto sigue siendo una foto de la cortina. Lo que se cortaba mal en la
- * decisión 59 era la composición: el logo contra un borde y la foto contra el
- * otro.
+ * WhatsApp recorta desde el centro cuando la imagen no coincide con su
+ * recuadro. Lo que se cortaba mal en la decisión 59 era un logo contra un
+ * borde y una foto contra el otro; un logo centrado entra entero hasta en la
+ * miniatura cuadrada, y cualquier recorte de una foto sigue siendo la cortina.
  *
  * `scripts/preparar-compartir.mjs` lee esto y arma un JPEG de 1200 × 630 por
  * página, desde el archivo más grande que hay de esa foto: bajando, nunca
@@ -19,9 +19,10 @@ import type { FotoParaCompartir } from "./tipos";
  *
  * # Cómo se elige
  *
- * 1. **Una apaisada de la galería de la página.** Recortada a 1,91:1 pierde
- *    poco: una 4:3 conserva el 70 % del alto.
- * 2. **Si no tiene ninguna, la portada.** Una 4:5 conserva el 42 % del alto y
+ * 1. **Una apaisada de la galería de la página.** Su lugar en la tarjeta es
+ *    1200 × 480, o sea 2,5:1: una 4:3 conserva el 53 % del alto, una 3:2 el
+ *    60 %.
+ * 2. **Si no tiene ninguna, la portada.** Una 4:5 conserva el 32 % del alto y
  *    puede dejar una cortina sin techo ni piso, que se lee como una pared de
  *    tela. Por eso va segunda.
  * 3. **Recorte alto**, el mismo del sitio (`50% 15%`), salvo que la línea diga
@@ -66,8 +67,8 @@ export const fotosParaCompartir: Record<string, FotoParaCompartir> = {
    * lámpara, y en el medio queda la ropa tendida del patio, que
    * `docs/diseno.md` ya pide no mostrar grande (decisión 42). La de su
    * variante Blackout es un roller blanco a media altura entre dos voiles.
-   * Abajo a la izquierda se lee un nombre bordado en un almohadón: es un nombre
-   * de pila, ya publicado en la galería, y no identifica a nadie.
+   * Tiene un nombre bordado en un almohadón, abajo a la izquierda, que la
+   * banda del logo deja afuera.
    */
   "/productos/roller": { foto: "productos/roller/blackout/2" },
 
@@ -96,9 +97,8 @@ export const fotosParaCompartir: Record<string, FotoParaCompartir> = {
 
   /*
    * Tiene dos apaisadas. La primera, `venecianas-pvc/2`, se entiende, pero es
-   * la obra en curso: la caja de herramientas y los trapos quedan adentro del
-   * cuadro aun con el recorte alto. Esta es la misma veneciana en una casa
-   * habitada.
+   * la obra en curso: una caja de herramientas y trapos en el piso, y un
+   * colchón embalado. Esta es la misma veneciana en una casa habitada.
    */
   "/productos/venecianas-pvc": { foto: "productos/venecianas-pvc/3" },
 

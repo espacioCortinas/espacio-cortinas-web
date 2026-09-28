@@ -3010,6 +3010,10 @@ ninguna foto de un cliente adentro, pero todo lo que se publica se revisa.
 
 ### 63. La imagen para compartir es una foto a sangre, distinta en cada página
 
+**Matizada por la decisión 64**: la foto sigue siendo la de cada página, pero
+desde ahí lleva el logo, centrado en una banda de papel abajo. Los recortes, los
+pesos y los nombres de archivo de esta entrada son los de antes de la banda.
+
 **Fecha:** septiembre de 2026. **Reemplaza a la decisión 62** y vuelve a lo que
 pedía la decisión 1.
 
@@ -3183,6 +3187,96 @@ de clientes, aunque salgan de archivos que ya estaban limpios.
 
 ---
 
+### 64. La imagen para compartir lleva el logo, centrado en una banda de papel abajo
+
+**Fecha:** septiembre de 2026. **Matiza la decisión 63**, que la dejaba sin
+logo.
+
+**El planteo.** Con la 63 publicada, quien desarrolla pidió los enlaces para
+mirar las tarjetas en WhatsApp y planteó que el logo es obligatorio para la
+marca: la foto dice «cortina», pero no dice de quién. La marca iba en el título
+y en el dominio; en la imagen, que es lo que más se ve, no estaba.
+
+**Lo que no había que repetir.** La 59 ya había puesto el logo en la imagen, y
+WhatsApp lo cortaba: recorta desde el centro, y el logo iba contra el borde
+izquierdo. Lo que se sigue de eso no es «sin logo», sino **el logo centrado**.
+
+**Se probaron cuatro formas con las fotos reales**, en Roller, Toldos e Inicio,
+y se eligió mirándolas:
+
+- **una banda de papel abajo**, a todo el ancho, con el logo centrado, en dos
+  tamaños;
+- **la misma banda arriba**: descartada, porque tapa el riel o el cabezal, que
+  es lo que muestra cómo está colgada la cortina;
+- **una pestaña de papel abajo al centro**: descartada, porque se ve como una
+  calcomanía pegada sobre la foto, que es lo que la decisión 44 descartó para el
+  logo en el sitio.
+
+**Lo decidido: la banda abajo, la grande.** 1200 × 150 del papel de cal, con
+el logo a 340 px de ancho, centrado. La foto ocupa arriba 1200 × 480, recortada
+como antes, cada una con su enfoque.
+
+**Por qué funciona:**
+
+- **Centrado, sobrevive al recorte.** En la miniatura cuadrada, que es el peor
+  caso —630 × 630 desde el centro—, el logo entra entero, y también en un
+  recorte a 2:1.
+- **Tapa el piso**, la peor parte de casi todas las fotos. De paso deja afuera
+  el almohadón con el nombre en Roller, el auto rojo detrás de las lamas en
+  Venecianas de madera y las sillas embaladas del cowork.
+- **Es lo que el sitio ya hace**: el logo directo sobre el papel, sin campo
+  propio (decisión 44). Y nada va encima de la foto: la única forma de poner
+  algo al lado de una foto que admite `docs/diseno.md` es una banda opaca, del
+  color del papel.
+- **El logo se achica y no se agranda.** El archivo mide 504 px y va a 340; en
+  un teléfono se ve de unos 90 px de ancho. Visto a 3× no tiene halos alrededor
+  del amarillo.
+
+**Lo que cuesta:** la foto pierde alto. Su lugar pasa de 1,91:1 a 2,5:1: una
+4:3 conserva el 53 % del alto en vez del 70 %, y una portada 4:5 el 32 %. **Las
+doce se volvieron a mirar con la banda** y todas se siguen leyendo como una
+cortina: ninguna elección de `contenido/compartir.ts` cambió.
+
+#### Los pesos, con la banda
+
+| Página               | Calidad |     Peso |
+| -------------------- | ------: | -------: |
+| Inicio               |      84 | 148,6 kB |
+| Productos            |      85 |  67,9 kB |
+| Roller               |      85 |  96,2 kB |
+| Compacta Blackout    |      85 |  72,0 kB |
+| Cortinas de tela     |      85 |  76,6 kB |
+| Venecianas de madera |      85 | 121,2 kB |
+| Venecianas de PVC    |      85 |  85,2 kB |
+| Toldos               |      85 |  77,6 kB |
+| Bandas verticales    |      85 | 103,7 kB |
+| Proyectos            |      85 |  92,3 kB |
+| Cowork en Nordelta   |      85 |  83,6 kB |
+| Contacto             |      85 |  74,5 kB |
+
+**1,1 MB las doce.** Cinco quedan debajo de los 80 kB que se buscaban, y no es
+menos calidad: es la misma, 85, sobre menos foto. La banda es papel liso y casi
+no pesa. Subir la calidad solo para llegar a 80 sumaría bytes sin que se vea.
+
+#### Lo que cambió en el código
+
+- `scripts/preparar-compartir.mjs` arma la tarjeta: papel entero, la foto
+  arriba y el logo centrado en la banda, sin pérdida entre un paso y otro; la
+  única compresión es la del JPEG final. La banda, el ancho del logo y el papel
+  son parámetros congelados, como los demás.
+- **`npm run marca` ahora también lo corre**: las imágenes llevan `logo.png`, y
+  si el logo cambia —el día que llegue el vector— tienen que cambiar con él.
+- **Las doce cambiaron de bytes, y por eso de nombre**: WhatsApp las vuelve a
+  pedir sola. Es el caso para el que la 63 puso la huella en el nombre. Las de
+  antes quedan en la historia de git.
+
+**Verificado:** corrido dos veces seguidas, encadenado desde `npm run marca` y
+regenerado desde cero, da los mismos 13 SHA-256. `logo.png` no cambió. Con
+`npm run preview`, las doce páginas con los user-agent de WhatsApp, Facebook y
+Twitter dan 200, `og:image` distinta, `image/jpeg` y 1200 × 630.
+
+---
+
 ## Decisiones abiertas
 
 ~~**Los videos no responden a pedidos por rango, y Safari puede no
@@ -3235,9 +3329,9 @@ de Empresa de Google, que es donde ese dato importa de verdad (Fase 5).
 ~~**Falta una imagen de Open Graph de reserva.**~~ Resuelto en la Fase 4.2,
 reemplazado en la 4.6 por una sola imagen para todo el sitio —el logo centrado
 sobre el papel, decisión 62— y reemplazado otra vez por la decisión 63: **cada
-página tiene la suya, una foto a sangre**, en `public/compartir/`. Ya no hay
-imagen de reserva como archivo aparte: una página sin la suya usa la de
-Inicio.
+página tiene la suya, una foto**, en `public/compartir/`, con el logo en una
+banda de papel abajo desde la 64. Ya no hay imagen de reserva como archivo
+aparte: una página sin la suya usa la de Inicio.
 
 Cuando aparezca una decisión no contemplada durante la implementación: preguntar,
 decidir, y anotarla acá antes de seguir.

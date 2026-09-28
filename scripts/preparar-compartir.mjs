@@ -6,29 +6,43 @@
  *
  *     contenido/compartir.ts   qué foto lleva cada página    (se edita a mano)
  *     contenido/fotos.ts       de qué archivo sale           (generado)
+ *     public/marca/logo.png    el logo de la banda           (generado)
  *              │
  *              ▼
  *     public/compartir/<página>.<huella>.jpg           1200 × 630, uno por página
  *     contenido/imagenes-para-compartir.ts             el manifiesto
  *
- * Corre solo después de `npm run fotos`, que lo encadena: si se reemplaza una
- * foto elegida, su imagen cambia con ella sin un segundo comando que alguien
- * tenga que recordar. Suelto es `npm run compartir`, que es el que hace falta
- * después de escribir el bloque de un producto nuevo: hasta ahí, su página no
- * existe y no hay a quién armarle imagen.
+ * Corre solo después de `npm run fotos` y de `npm run marca`, que lo
+ * encadenan: si se reemplaza una foto elegida o el logo, la imagen cambia con
+ * ellos sin un segundo comando que alguien tenga que recordar. Suelto es
+ * `npm run compartir`, que es el que hace falta después de escribir el bloque
+ * de un producto nuevo: hasta ahí, su página no existe y no hay a quién
+ * armarle imagen.
  *
- * ## Qué hace, y qué no — decisión 63
+ * ## Qué hace, y qué no — decisiones 63 y 64
  *
- * **Una foto, a sangre, recortada a 1,91:1 y achicada.** Sin logo, sin texto,
- * sin composición: la marca ya viaja en el título. Una composición con
- * elementos contra los bordes es lo que WhatsApp cortaba mal (decisiones 59 y
- * 62); una foto recortada sigue siendo una foto.
+ *     ┌────────────────────────────────────────┐
+ *     │                                        │
+ *     │   la foto, recortada: 1200 × 480       │
+ *     │                                        │
+ *     ├────────────────────────────────────────┤
+ *     │           ● espacio  (papel)           │  la banda: 1200 × 150
+ *     └────────────────────────────────────────┘
+ *
+ * **Una foto recortada y achicada, y abajo una banda de papel con el logo,
+ * centrado.** Nada más: ni texto, ni nada sobre la foto. Lo que WhatsApp
+ * cortaba mal en la decisión 59 eran elementos contra los bordes; WhatsApp
+ * recorta desde el centro, así que lo que va centrado sobrevive, hasta en la
+ * miniatura cuadrada. Y la banda tapa el piso, que es la peor parte de casi
+ * todas las fotos. Es la única forma de poner algo sobre una foto que admite
+ * `docs/diseno.md`: una banda opaca, del color del papel.
  *
  * **Parte del archivo más grande publicado de esa foto**, el que dice
  * `medidas` en el manifiesto, y **nunca agranda**: si el recorte mide menos de
- * 1200 × 630, esa foto no sirve y el script se niega. No lee
+ * 1200 × 480, esa foto no sirve y el script se niega. No lee
  * `fotos-originales/`, que no se versiona: así cualquiera que clone el
- * repositorio rehace los mismos bytes.
+ * repositorio rehace los mismos bytes. El logo tampoco se agranda: el archivo
+ * mide 504 px de ancho y en la banda va a 340.
  *
  * **JPEG, y no WebP**: el soporte de WebP en los que arman las vistas previas
  * es desparejo. Y JPEG **base, no progresivo**, por la misma razón.
@@ -77,6 +91,7 @@ import { altAutomatico } from "../lib/texto.ts";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const FOTOS_PUBLICADAS = join(RAIZ, "public", "fotos");
+const LOGO = join(RAIZ, "public", "marca", "logo.png");
 const DESTINO = join(RAIZ, "public", "compartir");
 const MANIFIESTO = join(RAIZ, "contenido", "imagenes-para-compartir.ts");
 
@@ -87,6 +102,25 @@ const MANIFIESTO = join(RAIZ, "contenido", "imagenes-para-compartir.ts");
 /** 1,91:1: lo que WhatsApp, Facebook y X muestran como vista previa grande. */
 const ANCHO = 1200;
 const ALTO = 630;
+
+/**
+ * La banda del logo, abajo, y el ancho del logo adentro — decisión 64.
+ *
+ * Se eligieron mirando dos tamaños con las fotos reales. Con 340 px de logo
+ * en 1200, en un teléfono el logo se ve de unos 90 px de ancho: se lee. La
+ * banda de 150 le deja aire arriba y abajo y todavía entra en un recorte a 2:1
+ * desde el centro. La foto se queda con el resto: 1200 × 480.
+ */
+const BANDA_ALTO = 150;
+const LOGO_ANCHO = 340;
+const FOTO_ALTO = ALTO - BANDA_ALTO;
+
+/**
+ * El papel de cal de `app/globals.css` (`--color-fondo`). Copiado a propósito,
+ * por la misma razón que `SESGO`: lo publicado cambia solo cuando alguien lo
+ * decide acá.
+ */
+const PAPEL = "#f6f2ec";
 
 /**
  * Por dónde pasa el corte, como el `object-position` del sitio: la misma
@@ -102,11 +136,11 @@ const SESGO = { alto: 0.15, centro: 0.5, bajo: 0.85 };
 /**
  * La calidad más alta, hasta 85, con la que la imagen entra en 150 kB.
  *
- * Una sola calidad fija no alcanza: el peso depende de la foto. A calidad 82,
- * un screen liso pesa 70 kB y las lamas de una veneciana contra el pasto, 162.
- * Así las de menos textura salen a 85 —con 150 kB de techo no hay nada que
+ * Una sola calidad fija no alcanza: el peso depende de la foto, y las lamas
+ * de una veneciana contra el pasto pesan más del doble que un screen liso. Así
+ * las de menos textura salen a 85 —con 150 kB de techo no hay nada que
  * ahorrar— y las de mucha bajan lo justo, que es donde menos se nota porque la
- * textura misma lo esconde.
+ * textura misma lo esconde. La banda del logo es papel liso y casi no pesa.
  *
  * 150 kB es el techo que se buscó a propósito: es lo que se descarga en un
  * teléfono cada vez que la tarjeta aparece en un chat.
@@ -215,14 +249,15 @@ function indiceDeFotos() {
 }
 
 /**
- * La región de la foto que entra en 1,91:1, a su tamaño completo.
+ * La región de la foto que entra en su lugar de la tarjeta —1200 × 480, o sea
+ * 2,5:1—, a su tamaño completo.
  *
- * Todas las fotos del archivo son menos apaisadas que 1,91:1, así que el corte
+ * Todas las fotos del archivo son menos apaisadas que eso, así que el corte
  * toma el ancho entero y elige la franja de alto con el sesgo. Si algún día
  * llega una más apaisada —una panorámica—, toma el alto entero y el centro.
  */
 function region(foto, enfoque) {
-  const proporcion = ANCHO / ALTO;
+  const proporcion = ANCHO / FOTO_ALTO;
 
   if (foto.ancho / foto.alto > proporcion) {
     const width = Math.round(foto.alto * proporcion);
@@ -243,17 +278,17 @@ function region(foto, enfoque) {
   };
 }
 
-/** ¿Alcanzan los píxeles para 1200 × 630 sin agrandar? */
+/** ¿Alcanzan los píxeles para el lugar de la foto sin agrandar? */
 function alcanza(foto) {
   const { width, height } = region(foto, "alto");
-  return width >= ANCHO && height >= ALTO;
+  return width >= ANCHO && height >= FOTO_ALTO;
 }
 
 /**
  * La regla, para una página que todavía no tiene su línea en
  * `contenido/compartir.ts`: **la primera apaisada de su galería** que tenga
- * píxeles para 1200 × 630, y si no hay ninguna, **la portada**. Siempre con el
- * recorte alto.
+ * píxeles para su lugar sin agrandar, y si no hay ninguna, **la portada**.
+ * Siempre con el recorte alto.
  *
  * Es la misma regla con la que se eligieron las de `compartir.ts`, pero sin
  * nadie mirando: por eso el que la llama lo avisa.
@@ -268,12 +303,15 @@ function fotoPorLaRegla(galeria) {
  */
 
 /**
- * Recorta, achica y codifica. Devuelve el JPEG y la calidad con la que salió.
+ * Recorta, achica, arma la tarjeta y codifica. Devuelve el JPEG y la calidad
+ * con la que salió.
  *
- * El recorte y la reducción se hacen una vez; lo que se repite es solo la
- * codificación, bajando de a un punto hasta que entra en el peso.
+ * El recorte, la reducción y la composición se hacen una vez; lo que se repite
+ * es solo la codificación, bajando de a un punto hasta que entra en el peso.
+ * Entre un paso y otro la imagen viaja en PNG o cruda, sin pérdida: la única
+ * compresión con pérdida es la del JPEG final.
  */
-async function armar(foto, enfoque) {
+async function armar(foto, enfoque, logo) {
   const medida = Math.max(...foto.medidas);
   const origen = join(
     FOTOS_PUBLICADAS,
@@ -293,19 +331,42 @@ async function armar(foto, enfoque) {
   }
 
   const corte = region(foto, enfoque);
-  if (corte.width < ANCHO || corte.height < ALTO) {
+  if (corte.width < ANCHO || corte.height < FOTO_ALTO) {
     throw new Error(
-      `${foto.carpeta} mide ${foto.ancho}×${foto.alto}: el recorte a 1,91:1 ` +
-        `queda en ${corte.width}×${corte.height}, menos que ${ANCHO}×${ALTO}, ` +
+      `${foto.carpeta} mide ${foto.ancho}×${foto.alto}: el recorte a 2,5:1 ` +
+        `queda en ${corte.width}×${corte.height}, menos que ${ANCHO}×${FOTO_ALTO}, ` +
         `y habría que agrandarla. Elegí otra foto en contenido/compartir.ts.`,
     );
   }
 
-  const { data, info } = await sharp(origen)
+  const recortada = await sharp(origen)
     .extract(corte)
     // `fill` y no `cover`: la región ya tiene la proporción, salvo el redondeo
     // de un píxel, y así no se recorta nada más de lo que se eligió.
-    .resize(ANCHO, ALTO, { fit: "fill" })
+    .resize(ANCHO, FOTO_ALTO, { fit: "fill" })
+    .removeAlpha()
+    .png()
+    .toBuffer();
+
+  // La tarjeta: papel entero, la foto arriba y el logo centrado en la banda.
+  const tarjeta = await sharp({
+    create: { width: ANCHO, height: ALTO, channels: 3, background: PAPEL },
+  })
+    .composite([
+      { input: recortada, left: 0, top: 0 },
+      {
+        input: logo.png,
+        left: Math.round((ANCHO - logo.ancho) / 2),
+        top: FOTO_ALTO + Math.round((BANDA_ALTO - logo.alto) / 2),
+      },
+    ])
+    .png()
+    .toBuffer();
+
+  // El logo trae transparencia: se aplana contra el papel antes de codificar,
+  // que un JPEG no tiene canal alfa.
+  const { data, info } = await sharp(tarjeta)
+    .flatten({ background: PAPEL })
     .removeAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
@@ -343,6 +404,22 @@ async function main() {
 
   const lista = paginas();
   const indice = indiceDeFotos();
+
+  // El logo, una sola vez para las doce. Es el mismo archivo del encabezado,
+  // sin fondo; se achica y nunca se agranda: sin el vector que se le sigue
+  // pidiendo a la empresa, 504 px es todo lo que hay (decisión 44).
+  const metaLogo = await sharp(LOGO).metadata();
+  if (metaLogo.width < LOGO_ANCHO) {
+    throw new Error(
+      `public/marca/logo.png mide ${metaLogo.width} px de ancho y la banda lo ` +
+        `pide a ${LOGO_ANCHO}: habría que agrandarlo. Corré npm run marca.`,
+    );
+  }
+  const { data: pngLogo, info: infoLogo } = await sharp(LOGO)
+    .resize({ width: LOGO_ANCHO })
+    .png()
+    .toBuffer({ resolveWithObject: true });
+  const logo = { png: pngLogo, ancho: infoLogo.width, alto: infoLogo.height };
 
   // Una línea de compartir.ts que no es de ninguna página es casi siempre un
   // slug mal escrito, y esa página se quedaría con la regla sin que nadie lo
@@ -413,7 +490,11 @@ async function main() {
     }
     fotoDePagina.set(carpeta, pagina.ruta);
 
-    const { jpeg, calidad, medida, corte } = await armar(entrada.foto, enfoque);
+    const { jpeg, calidad, medida, corte } = await armar(
+      entrada.foto,
+      enfoque,
+      logo,
+    );
     const huella = createHash("sha256").update(jpeg).digest("hex").slice(0, 8);
     const archivo = `${nombreDeArchivo(pagina.ruta)}.${huella}.jpg`;
     const destino = join(DESTINO, archivo);

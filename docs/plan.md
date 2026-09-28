@@ -387,10 +387,11 @@ sitio es que alguien termine escribiendo por WhatsApp.
   producto corregido: decía «el Venecianas de PVC» — decisión 61.
 - ~~**La imagen para compartir es una sola: el logo centrado sobre el
   papel**~~ — decisiones 59 y 62. **Reemplazada después de la fase por la
-  decisión 63: una foto a sangre, distinta en cada página**, sin logo ni texto.
-  Lo que WhatsApp cortaba era la composición de la 59, no la idea de una imagen
-  por página. Doce imágenes de 1200 × 630, entre 78 y 147 kB, elegidas y
-  miradas una por una en `contenido/compartir.ts`.
+  decisión 63: una foto distinta en cada página**, y en la 64 se le sumó el
+  logo, centrado en una banda de papel abajo. Lo que WhatsApp cortaba era un
+  logo contra el borde en la 59, no la idea de una imagen por página. Doce
+  imágenes de 1200 × 630, entre 68 y 149 kB, elegidas y miradas una por una en
+  `contenido/compartir.ts`.
 - **La ficha de negocio local**, con zonas, teléfono, email y redes, desde
   `contenido/contacto.ts` — decisión 60.
 - Las variables del correo ya no pueden tirar el sitio: el build exige las
@@ -411,9 +412,9 @@ Los cuatro primeros puntos se adelantaron a la Fase 4.0 — decisión 38. Quedan
 tachados acá para que no se hagan dos veces, y con lo que sí falta de cada uno:
 
 - ~~Metadata y Open Graph por página, con imagen propia~~ — la imagen propia
-  de cada página es una foto a sangre desde la decisión 63. Falta verla en un
-  WhatsApp de verdad: los bots piden bien la imagen, pero la tarjeta la dibuja
-  la aplicación
+  de cada página es una foto con el logo abajo, desde las decisiones 63 y 64.
+  Falta confirmar en un WhatsApp de verdad cómo se ve la tarjeta con la banda:
+  los bots piden bien la imagen, pero la tarjeta la dibuja la aplicación
 - ~~`sitemap.ts` y `robots.ts`~~
 - ~~URLs canónicas~~
 - ~~Datos estructurados de negocio local~~ — completados en la Fase 4.6 con

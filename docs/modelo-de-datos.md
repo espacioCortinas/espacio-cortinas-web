@@ -61,16 +61,16 @@ es una foto por página, y tiene su propio par de archivos, abajo.
 
 ## La imagen para compartir
 
-La que se ve al pegar el enlace de una página en WhatsApp: **una foto a
-sangre, distinta en cada página** — decisión 63. Son dos archivos, uno a mano
-y uno generado:
+La que se ve al pegar el enlace de una página en WhatsApp: **una foto,
+distinta en cada página, con el logo centrado en una banda de papel abajo** —
+decisiones 63 y 64. Son dos archivos, uno a mano y uno generado:
 
 `contenido/compartir.ts`, **a mano**: qué foto lleva cada página, por su ruta.
 
-| Campo     | Tipo                           | Notas                                                                              |
-| --------- | ------------------------------ | ---------------------------------------------------------------------------------- |
-| `foto`    | `string`                       | la carpeta de la foto en `contenido/fotos.ts`: `productos/roller/blackout/2`       |
-| `enfoque` | `"alto" \| "centro" \| "bajo"` | por dónde pasa el corte a 1,91:1. Sin decir nada, `alto`, el mismo sesgo del sitio |
+| Campo     | Tipo                           | Notas                                                                                                      |
+| --------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `foto`    | `string`                       | la carpeta de la foto en `contenido/fotos.ts`: `productos/roller/blackout/2`                               |
+| `enfoque` | `"alto" \| "centro" \| "bajo"` | por dónde pasa el corte de la foto, que ocupa 1200 × 480. Sin decir nada, `alto`, el mismo sesgo del sitio |
 
 **La foto va por su nombre, no por su lugar en la galería.** Un índice seguiría
 apuntando al mismo lugar aunque la galería se reordenara, y la página
@@ -411,9 +411,10 @@ Con los videos es más directo: un video que ya está en `public/videos/` no se
 reconvierte, y el script lo dice en pantalla — decisión 48.
 
 Las imágenes para compartir siguen la misma regla con sus propios números,
-congelados en `scripts/preparar-compartir.mjs`: medida, sesgos del recorte y
-calidad. Correr `npm run compartir` de nuevo no cambia ningún byte —verificado
-dos veces seguidas con los SHA-256—; cambiar uno de esos números cambia las
+congelados en `scripts/preparar-compartir.mjs`: medida, banda, logo, papel,
+sesgos del recorte y calidad. Correr `npm run compartir` de nuevo no cambia
+ningún byte —verificado con los SHA-256—; cambiar uno de esos números, o el
+logo, cambia las
 doce imágenes y su peso se suma a la historia. Y como el nombre de cada una
 lleva la huella de sus bytes, una imagen que cambia sale siempre con otro
 nombre: es lo que hace que WhatsApp la vuelva a pedir — decisión 63.

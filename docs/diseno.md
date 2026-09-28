@@ -253,6 +253,10 @@ en todas las páginas. Por eso no hay amarillo en ningún otro lado del sitio: n
 en el botón principal, ni en los chips, ni en el foco, ni en el estado activo del
 menú, ni en los avisos — decisión 44.
 
+**Fuera del sitio, el logo va en la imagen para compartir** cada página, con las
+mismas reglas: una vez, directo sobre el papel y centrado en una banda debajo
+de la foto, nunca encima de ella — decisión 64.
+
 ### El logo sobre el papel: por qué va directo y sin campo propio
 
 Es el problema que la 4.2 tenía que resolver, porque el encabezado se ve en todas
