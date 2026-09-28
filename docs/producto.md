@@ -186,6 +186,13 @@ de quien escribió, así que se contesta con «Responder». No hay bandeja: los
 mensajes van por email y no se guardan en ningún otro lado. Si el envío falla,
 el formulario ofrece WhatsApp con lo escrito ya puesto — decisión 57.
 
+**Para arquitectos, estudios y oficinas hay además «Llamar»**, un enlace que
+llama al número, en la apertura de `/contacto` y en su sector de Inicio. No va
+en el resto del sitio: el canal sigue siendo WhatsApp, y la invitación a llamar
+va solo donde el sitio les habla a los profesionales, que suelen preferir
+hablarlo. En los demás lugares el número se lee completo, `+54 9 11 3311 1686`,
+con el logo de WhatsApp adelante, y tocarlo abre el chat — decisión 65.
+
 Los datos de contacto —casilla, redes y las zonas donde trabaja la empresa—
 viven en `contenido/contacto.ts` y los redacta la empresa, igual que los textos
 de Inicio.

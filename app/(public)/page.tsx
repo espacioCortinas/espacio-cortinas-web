@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { FotoImg } from "@/components/foto";
 import { ListadoProyectos } from "@/components/listado-proyectos";
+import { EnlaceLlamar } from "@/components/medios-de-contacto";
 import { TarjetaProducto } from "@/components/tarjeta-producto";
 import { EnlaceWhatsapp } from "@/components/whatsapp";
 import { clasesDeBoton } from "@/components/ui/boton";
@@ -240,6 +241,14 @@ export default function Inicio() {
             <h2 className="text-titulo">{inicio.profesionales.titulo}</h2>
             <p className="max-w-lectura text-texto-suave mt-4">
               {inicio.profesionales.texto}
+            </p>
+            {/*
+              Llamar, para los que prefieren hablarlo: este sector es el único
+              de Inicio que les habla a ellos, y no tenía ninguna acción —
+              decisión 65. WhatsApp está en el cierre, justo abajo.
+            */}
+            <p className="mt-6">
+              <EnlaceLlamar />
             </p>
           </div>
 

@@ -1,10 +1,10 @@
 /**
  * Los datos de contacto de la empresa, en un solo lugar.
  *
- * Los leen tres cosas: `/contacto`, el pie de todas las páginas y la ficha de
- * negocio local (`components/datos-estructurados.tsx`), que es lo que leen
- * Google y los asistentes de IA cuando alguien pregunta a quién comprarle
- * cortinas en tal zona. **Que estén en un solo archivo es lo que evita que el
+ * Los leen `/contacto`, el pie de todas las páginas, el «Llamar» de Inicio y la
+ * ficha de negocio local (`components/datos-estructurados.tsx`), que es lo que
+ * leen Google y los asistentes de IA cuando alguien pregunta a quién
+ * comprarle cortinas en tal zona. **Que estén en un solo archivo es lo que evita que el
  * pie diga un teléfono y la ficha otro.** Es la regla 2 de `CLAUDE.md`: el
  * contenido vive en `contenido/`, no en los componentes.
  *
@@ -21,7 +21,11 @@
  */
 
 export type Red = {
-  /** Como se lee en la página: «Instagram». */
+  /**
+   * «Instagram». Es la etiqueta del dato en `/contacto` y elige el logo del
+   * enlace (`components/medios-de-contacto.tsx`); en el pie no se lee: va el
+   * logo.
+   */
   nombre: string;
   /** Lo que se muestra como texto del enlace: «@espaciocortinas». */
   usuario: string;
@@ -38,8 +42,10 @@ export const contacto: {
 
   /**
    * Un teléfono para llamar, **solo si es otro número que el de WhatsApp**.
-   * `null` quiere decir que se llama al mismo: la página lo dice así, «teléfono
-   * y WhatsApp», con un solo número.
+   * `null` quiere decir que se llama al mismo. Lo usa «Llamar», la variante
+   * para arquitectos, estudios y oficinas (`components/medios-de-contacto.tsx`),
+   * y la ficha de negocio local. `visible` se escribe completo, con el país y
+   * sin guion, como el de WhatsApp: `+54 11 4455 6677`.
    */
   telefono: { visible: string; internacional: string } | null;
 

@@ -112,6 +112,8 @@ components/
 ├── formulario-contacto.tsx      el formulario y sus estados. "use client" (uno de tres)
 ├── pie.tsx
 ├── whatsapp.tsx                 el enlace, con el mensaje según la página
+├── medios-de-contacto.tsx       número, email, red y «Llamar», con su símbolo
+├── iconos-de-contacto.tsx       los logos de WhatsApp e Instagram, y el sobre
 ├── datos-estructurados.tsx      JSON-LD del negocio local
 └── ui/                          botón, chip, campo, aviso, vacío, contenedor
 lib/

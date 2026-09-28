@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { FormularioContacto } from "@/components/formulario-contacto";
+import {
+  EnlaceEmail,
+  EnlaceLlamar,
+  EnlaceRed,
+  NumeroWhatsapp,
+} from "@/components/medios-de-contacto";
 import { EnlaceWhatsapp } from "@/components/whatsapp";
 import { clasesDeBoton } from "@/components/ui/boton";
 import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
@@ -9,7 +15,6 @@ import { productosPublicados } from "@/contenido";
 import { contacto } from "@/contenido/contacto";
 import { INTERES_OTRO } from "@/lib/consulta";
 import { metadataDePagina } from "@/lib/metadata";
-import { numeroInternacional, numeroVisible } from "@/lib/whatsapp";
 
 import { enviarFormularioDeContacto } from "./acciones";
 
@@ -22,13 +27,15 @@ import { enviarFormularioDeContacto } from "./acciones";
  *
  * # Los sectores
  *
- *     1  APERTURA     antetítulo, titular, bajada y WhatsApp
- *     2  OTRAS FORMAS teléfono, email, redes y dónde trabajamos
+ *     1  APERTURA     antetítulo, titular, bajada, WhatsApp, y llamar para
+ *                     arquitectos, estudios y oficinas
+ *     2  OTRAS FORMAS WhatsApp, email, redes y dónde trabajamos
  *     3  MENSAJE      el formulario, para quien prefiere escribir con tiempo
  *
  * **WhatsApp va primero y es el único botón principal de la página.** El
  * formulario existe y funciona, pero es la segunda opción: su botón es el
- * secundario, con filete, para que la jerarquía la diga el propio dibujo.
+ * secundario, con filete, para que la jerarquía la diga el propio dibujo. Y
+ * llamar es un enlace de texto, dirigido a los profesionales — decisión 65.
  *
  * **Los datos no están escritos acá**: salen de `contenido/contacto.ts`, que
  * es también de donde los leen el pie y la ficha de negocio local. El número de
@@ -65,11 +72,6 @@ export default function Contacto() {
     { valor: INTERES_OTRO, texto: "Otra cosa" },
   ];
 
-  const telefono = contacto.telefono ?? {
-    visible: numeroVisible(),
-    internacional: numeroInternacional(),
-  };
-
   return (
     <main className={`${CLASES_CONTENEDOR} py-16 md:py-28`}>
       {/* 1 — APERTURA ------------------------------------------------ */}
@@ -93,14 +95,30 @@ export default function Contacto() {
         <div className="mt-10">
           <EnlaceWhatsapp contexto={{ tipo: "general" }} />
         </div>
+
+        {/*
+          La variante para los profesionales, que suelen preferir hablarlo:
+          quién es el destinatario en el tratamiento del antetítulo, y la
+          acción como enlace de texto, debajo del principal y sin competir con
+          él. Acá arriba y no en «Otras formas», que está a una pantalla de
+          distancia en un teléfono — decisión 65.
+        */}
+        <div className="mt-8">
+          <p className="text-texto-suave text-meta tracking-[0.12em] uppercase">
+            Arquitectos, estudios y oficinas
+          </p>
+          <p className="mt-1">
+            <EnlaceLlamar />
+          </p>
+        </div>
       </header>
 
       {/*
         Dos columnas desde 1024: los datos a la izquierda, angostos, y el
         formulario a la derecha, que es lo que necesita ancho. Abajo de eso,
         todo en una columna y en el orden en que se lee: primero lo que se
-        resuelve con un toque —llamar, escribir un mail— y después lo que pide
-        sentarse a escribir.
+        resuelve con un toque —abrir el chat, escribir un mail— y después lo
+        que pide sentarse a escribir.
       */}
       <div
         className={`${SECTOR} lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16`}
@@ -114,42 +132,27 @@ export default function Contacto() {
           {/*
             Una lista de definiciones con filetes, como las variantes de un
             producto: el filete de 1 px es el único recurso gráfico del sistema.
-            Sin íconos al lado de cada dato — la regla 4 de `docs/diseno.md`, y
-            además el nombre escrito dice más que un dibujo de un sobre.
+            Los tres medios directos llevan su símbolo —WhatsApp, el sobre e
+            Instagram—, que dice qué se abre al tocarlo; es la excepción a la
+            regla 4 de `docs/diseno.md`, y no se extiende a las zonas ni a
+            nada más — decisión 65.
           */}
           <dl className="border-linea mt-8 border-t">
-            <Dato
-              etiqueta={contacto.telefono ? "Teléfono" : "Teléfono y WhatsApp"}
-            >
-              <a
-                href={`tel:${telefono.internacional}`}
-                className={clasesDeBoton("enlace")}
-              >
-                {telefono.visible}
-              </a>
+            {/*
+              El número abre el chat, no llama: con el logo al lado es lo que
+              se espera. Llamar está arriba, en la apertura.
+            */}
+            <Dato etiqueta="WhatsApp">
+              <NumeroWhatsapp className={clasesDeBoton("enlace")} />
             </Dato>
 
             <Dato etiqueta="Email">
-              <a
-                href={`mailto:${contacto.email}`}
-                // Una dirección larga no tiene dónde partirse y en 320 px
-                // empujaría la página de costado.
-                className={`${clasesDeBoton("enlace")} break-all`}
-              >
-                {contacto.email}
-              </a>
+              <EnlaceEmail className={clasesDeBoton("enlace")} />
             </Dato>
 
             {contacto.redes.map((red) => (
               <Dato key={red.url} etiqueta={red.nombre}>
-                <a
-                  href={red.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={clasesDeBoton("enlace")}
-                >
-                  {red.usuario}
-                </a>
+                <EnlaceRed red={red} className={clasesDeBoton("enlace")} />
               </Dato>
             ))}
 

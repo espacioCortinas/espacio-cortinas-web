@@ -394,6 +394,10 @@ sitio es que alguien termine escribiendo por WhatsApp.
   `contenido/compartir.ts`.
 - **La ficha de negocio local**, con zonas, teléfono, email y redes, desde
   `contenido/contacto.ts` — decisión 60.
+- **Después de la fase, los medios directos** — decisión 65: el número
+  completo, `+54 9 11 3311 1686`; el logo de WhatsApp, el de Instagram y un
+  sobre al lado de cada medio; y «Llamar», la variante para arquitectos,
+  estudios y oficinas, en `/contacto` y en Inicio.
 - Las variables del correo ya no pueden tirar el sitio: el build exige las
   cuatro, el arranque solo lo que usan las páginas — decisiones 55 y 56.
 

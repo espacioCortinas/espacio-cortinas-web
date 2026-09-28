@@ -95,25 +95,36 @@ export function enlaceWhatsapp(contexto: ContextoWhatsapp): string {
 }
 
 /**
- * El número como lo lee una persona: `11 2233-4455`.
+ * El número como se lee, completo: `+54 9 11 2233 4455`.
  *
  * **Sale de la misma variable que el enlace**, así que no hay un segundo lugar
  * donde escribirlo que pueda dejar de coincidir con el primero: el número que
- * se lee en `/contacto` es siempre el que abre el chat.
+ * se lee es siempre el que abre el chat.
  *
- * Se sacan el 54 del país y el 9 que marca un celular, que adentro del país no
- * se escriben. Si la característica es la 11 —la de Buenos Aires— se agrupa
- * como se escribe en todos lados; si es otra, se deja en formato
- * internacional, porque el largo de las demás características varía y
- * adivinarlo sería partir mal el número.
+ * Con el país adelante y cada parte separada por un espacio: el 54 de la
+ * Argentina, el 9 que marca un celular, la característica y el número en dos
+ * grupos de cuatro. **Sin guion**, que es la forma internacional de escribirlo.
+ * Hasta la decisión 65 se mostraba sin el 54 ni el 9 —`11 2233-4455`, como se
+ * escribe adentro del país— y se leía pelado.
+ *
+ * **La característica se separa solo si es la 11**, la de Buenos Aires. Las
+ * demás tienen entre dos y cuatro cifras, y adivinar el largo sería partir mal
+ * el número: con otra, lo que sigue al 54 9 va junto. Sin el 9 —un fijo con
+ * WhatsApp Business— se escribe sin el 9.
  */
 export function numeroVisible(
   numero: string = entornoPublico.whatsapp,
 ): string {
-  const nacional = numero.replace(/^549?/, "");
-  return /^11\d{8}$/.test(nacional)
-    ? `11 ${nacional.slice(2, 6)}-${nacional.slice(6)}`
-    : `+${numero}`;
+  const partes = /^54(9?)(\d+)$/.exec(numero);
+  if (!partes) return `+${numero}`;
+
+  const [, celular, nacional] = partes;
+  const pais = celular ? "+54 9" : "+54";
+  const deBuenosAires = /^11(\d{4})(\d{4})$/.exec(nacional);
+
+  return deBuenosAires
+    ? `${pais} 11 ${deBuenosAires[1]} ${deBuenosAires[2]}`
+    : `${pais} ${nacional}`;
 }
 
 /** Para `tel:` y para la ficha de negocio local: con `+` y el código del país. */

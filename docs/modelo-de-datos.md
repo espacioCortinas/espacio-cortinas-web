@@ -37,13 +37,14 @@ de negocio local (JSON-LD), así que los tres dicen siempre lo mismo.
 | Campo            | Tipo                                 | Notas                                                                                              |
 | ---------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------- |
 | `email`          | `string`                             | la casilla que se publica; la misma del formulario                                                 |
-| `telefono`       | `{ visible, internacional } \| null` | solo si es otro número que el de WhatsApp. `null`: se llama al mismo                               |
-| `redes`          | `Red[]`                              | nombre, usuario y URL. Van al pie, a la página y al `sameAs`                                       |
+| `telefono`       | `{ visible, internacional } \| null` | solo si es otro número que el de WhatsApp. `null`: «Llamar» llama al mismo — decisión 65           |
+| `redes`          | `Red[]`                              | nombre, usuario y URL. Van al pie, a la página y al `sameAs`; el nombre elige el logo              |
 | `perfilDeGoogle` | `string \| null`                     | cuando se dé de alta                                                                               |
 | `zonas`          | `string[]`                           | **dónde trabaja**, con nombres concretos: es lo que responde «¿quién hace cortinas en zona norte?» |
 
 **El número de WhatsApp no está acá**: es `NEXT_PUBLIC_WHATSAPP`, y de esa misma
-variable salen el enlace y el número que se lee en la página.
+variable salen el enlace y el número que se lee en la página, escrito completo:
+`+54 9 11 3311 1686` — decisión 65.
 
 **Ni dirección ni horario**, porque la empresa no dio ninguno para publicar. Se
 agregan acá el día que los dé; inventarlos para completar un formato sería

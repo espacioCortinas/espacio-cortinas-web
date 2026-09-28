@@ -486,6 +486,8 @@ demás.
 | Tarjeta de proyecto    | `components/tarjeta-proyecto.tsx`                 | fila y tarjeta — dos                                       |
 | Listado de proyectos   | `components/listado-proyectos.tsx`                | una: el primero en fila, el resto en grilla                |
 | Formulario de contacto | `components/formulario-contacto.tsx`              | una: sin hidratar, escribiendo, enviando, enviada, fallida |
+| Medios de contacto     | `components/medios-de-contacto.tsx`               | número de WhatsApp, email, red y «Llamar» — cuatro         |
+| Símbolos de contacto   | `components/iconos-de-contacto.tsx`               | WhatsApp, Instagram y el sobre — tres, y ninguno más       |
 | Logo                   | `components/logo.tsx`                             | una                                                        |
 | Encabezado y pie       | `components/encabezado.tsx`, `components/pie.tsx` | una                                                        |
 
@@ -542,6 +544,13 @@ Prohibido, salvo justificación escrita en `docs/decisiones.md`:
 8. `fade-in` o `slide-up` al hacer scroll en secciones enteras
 9. Parallax, marquesinas, contadores animados
 10. Texto sobre foto sin capa que garantice contraste
+
+**La regla 4 tiene una excepción, y es una sola**: los medios directos de
+contacto —WhatsApp, el email e Instagram— llevan su símbolo al lado del enlace,
+en `/contacto` y en el pie. No son adorno: dicen qué se abre al tocarlo. Van en
+el negro del texto, nunca en el verde de WhatsApp ni en el degradé de
+Instagram, y no se extienden a ningún otro dato; «Llamar» no lleva, porque la
+palabra ya lo dice — decisión 65.
 
 La regla 10 se endurece con lo que muestra el archivo: **la capa tiene que ser opaca
 y del color de fondo**. Un velo translúcido o un gradiente sobre estas fotos no

@@ -3277,6 +3277,88 @@ Twitter dan 200, `og:image` distinta, `image/jpeg` y 1200 × 630.
 
 ---
 
+### 65. El número se escribe completo, los medios directos llevan su símbolo, y llamar es para los profesionales
+
+**Fecha:** septiembre de 2026, después de la Fase 4.6. **Abre una excepción a
+la regla 4 de `docs/diseno.md`.**
+
+**El planteo.** Mirando `/contacto` y el pie, quien desarrolla pidió tres
+cosas: el número se leía pelado —`11 3311-1686`—; el enlace a Instagram era la
+palabra «Instagram», que no decía qué cuenta; y faltaba una forma de llamar
+directo para los profesionales.
+
+**El número, completo y con espacios: `+54 9 11 3311 1686`.** El 54 del país,
+el 9 que marca un celular, la característica y el número en dos grupos de
+cuatro, sin guion: así lo pidió quien desarrolla, y es además la forma
+internacional de escribirlo. Sale de `NEXT_PUBLIC_WHATSAPP`, así que el número
+definitivo se va a escribir igual si es de la 11. Con otra característica, lo
+que sigue al 54 9 va junto: las características tienen entre dos y cuatro
+cifras, y adivinar el largo sería partir mal el número.
+
+**Los tres medios directos llevan su símbolo**, en `/contacto` y en el pie:
+
+- **WhatsApp**: el logo delante del número, y **el número abre el chat, no
+  llama**. Con el logo al lado, quien lo toca espera WhatsApp. Lleva el mensaje
+  general, igual que el botón.
+- **Instagram**: el logo y la cuenta, `@espaciocortinasarg`, en vez de la
+  palabra. La cuenta es lo que se tipea en el buscador de la app, y el logo
+  dice qué red es.
+- **El email**: un sobre, para que los tres se lean como una familia. Lo pidió
+  quien desarrolla después de ver los dos logos solos.
+
+**Es una excepción a la regla 4, y está acotada.** La regla prohíbe el ícono
+decorativo al lado de cada título. Estos van al lado de un enlace de contacto y
+dicen qué se abre al tocarlo, que es lo contrario de un adorno. No se extienden
+a las zonas, a los títulos ni a ningún otro dato. **Van en el negro del
+texto**: el verde de WhatsApp y el degradé de Instagram serían dos colores más
+en una paleta de tres (decisión 46), y el degradé rompe además la regla 1. Las
+dos marcas tienen versión de un solo color.
+
+Los dos logos son los de Simple Icons 16.33 (dominio público, CC0), que
+reproducen los oficiales, y no se tocan. El sobre es propio, dibujado a la
+medida de los otros dos: el mismo ancho de 24 y el mismo grosor de línea, 2 de
+24, que es lo que miden el anillo de WhatsApp y el marco de Instagram. Los tres
+van `aria-hidden`, y el nombre de la app está en el texto del enlace, oculto
+donde el texto solo no lo dice: un lector de pantalla lee «WhatsApp: +54 9 11
+3311 1686» e «Instagram: @espaciocortinasarg».
+
+**Llamar es la variante para los profesionales.** Un enlace de texto, «Llamar
+al +54 9 11 3311 1686», con `tel:`, en dos lugares: la apertura de `/contacto`,
+debajo del botón de WhatsApp y con el antetítulo «Arquitectos, estudios y
+oficinas»; y el sector de Inicio que les habla a ellos, que no tenía ninguna
+acción.
+
+- **No va en todas las páginas, a propósito.** El objetivo del sitio es que
+  alguien escriba por WhatsApp (`docs/producto.md`), y un «Llamar» al lado de
+  cada botón partiría las consultas en dos canales. La invitación va donde el
+  sitio les habla a los que más seguido prefieren hablarlo.
+- **Es texto y no botón**: el único principal de esas dos páginas sigue siendo
+  WhatsApp. Y no lleva símbolo, porque «Llamar» ya lo dice.
+- Llama a `contacto.telefono` si la empresa da una línea aparte para llamadas;
+  si no, al mismo número de WhatsApp.
+
+**Lo que cuesta:** fuera de esos dos enlaces, ninguno llama. El número se puede
+marcar igual, porque está escrito.
+
+**El email se parte después de la arroba.** A 320 px, con el sobre al lado,
+entra justo: ocupa la columna entera. Con zoom ya no entraría, y `break-all` lo
+partía donde cayera, que habría dejado una «r» sola abajo. Ahora queda
+«ventas@» arriba y el dominio abajo, medido a 300 y a 267 px.
+
+**En el código:** los símbolos en `components/iconos-de-contacto.tsx`, los
+cuatro enlaces en `components/medios-de-contacto.tsx`, y el formato del número
+en `numeroVisible()`, de `lib/whatsapp.ts`.
+
+**Verificado:** `npm run build`, `tsc`, eslint y prettier limpios. Inicio,
+Contacto, Productos, Roller y Proyectos, en 320, 375, 768, 1024 y 1440, sin
+scroll horizontal, y cada enlace de contacto de 44 px de alto o más. Con
+`npm run preview`: seis rutas en 200 y una inexistente en 404; en `/contacto`
+ningún número con guion; sus seis símbolos —tres en la lista y tres en el pie—
+en `#211F20`, 14,69:1 sobre el papel; y la ficha JSON-LD sigue diciendo
+`+5491133111686`.
+
+---
+
 ## Decisiones abiertas
 
 ~~**Los videos no responden a pedidos por rango, y Safari puede no

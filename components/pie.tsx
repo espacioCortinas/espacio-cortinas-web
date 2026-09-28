@@ -1,19 +1,31 @@
 import Link from "next/link";
 
+import {
+  EnlaceEmail,
+  EnlaceRed,
+  NumeroWhatsapp,
+} from "@/components/medios-de-contacto";
 import { EnlaceWhatsapp } from "@/components/whatsapp";
 import { Contenedor } from "@/components/ui/contenedor";
 import { contacto } from "@/contenido/contacto";
 import { DESCRIPCION_SITIO } from "@/lib/metadata";
 import { ENLACES } from "@/lib/navegacion";
-import { numeroInternacional, numeroVisible } from "@/lib/whatsapp";
+
+/**
+ * Negros y subrayados, que es la forma de un enlace en este sitio, y con 44 px
+ * de alto. El `gap` separa el símbolo del texto.
+ */
+const ENLACE_DIRECTO =
+  "text-texto inline-flex min-h-11 items-center gap-2 underline decoration-1 underline-offset-4 hover:decoration-2";
 
 /**
  * El pie del sitio.
  *
  * **Solo dice lo que es cierto.** No hay dirección —la empresa trabaja a
- * domicilio y no dio una para publicar—. El teléfono, la casilla y las redes
- * salen de `contenido/contacto.ts`, que es de donde los leen también
- * `/contacto` y la ficha de negocio local: los tres dicen siempre lo mismo.
+ * domicilio y no dio una para publicar—. El número sale de
+ * `NEXT_PUBLIC_WHATSAPP` y la casilla y las redes de `contenido/contacto.ts`,
+ * que es de donde los leen también `/contacto` y la ficha de negocio local: los
+ * tres dicen siempre lo mismo.
  *
  * **Y no repite el logo.** El amarillo va una vez por pantalla (`docs/diseno.md`,
  * «La marca»), y esa vez la gasta el encabezado. Acá el nombre va compuesto en
@@ -24,11 +36,6 @@ import { numeroInternacional, numeroVisible } from "@/lib/whatsapp";
  * silencio.
  */
 export function Pie() {
-  const telefono = contacto.telefono ?? {
-    visible: numeroVisible(),
-    internacional: numeroInternacional(),
-  };
-
   return (
     /*
      * Sin margen arriba: el aire que separa el pie del contenido lo pone el
@@ -49,38 +56,20 @@ export function Pie() {
             </p>
 
             {/*
-              Los medios directos, como enlaces de texto: se llama, se escribe
-              un mail o se abre la red con un toque, sin pasar por /contacto.
-              Negros y subrayados, que es la forma de un enlace en este sitio,
-              y con 44 px de alto cada uno.
+              Los medios directos, como enlaces de texto: se abre el chat, se
+              escribe un mail o se abre la red con un toque, sin pasar por
+              /contacto. Cada uno con su símbolo — decisión 65.
             */}
             <ul className="mt-4 flex flex-wrap gap-x-6">
               <li>
-                <a
-                  href={`tel:${telefono.internacional}`}
-                  className="text-texto inline-flex min-h-11 items-center underline decoration-1 underline-offset-4 hover:decoration-2"
-                >
-                  {telefono.visible}
-                </a>
+                <NumeroWhatsapp className={ENLACE_DIRECTO} />
               </li>
               <li className="min-w-0">
-                <a
-                  href={`mailto:${contacto.email}`}
-                  className="text-texto inline-flex min-h-11 items-center break-all underline decoration-1 underline-offset-4 hover:decoration-2"
-                >
-                  {contacto.email}
-                </a>
+                <EnlaceEmail className={ENLACE_DIRECTO} />
               </li>
               {contacto.redes.map((red) => (
                 <li key={red.url}>
-                  <a
-                    href={red.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-texto inline-flex min-h-11 items-center underline decoration-1 underline-offset-4 hover:decoration-2"
-                  >
-                    {red.nombre}
-                  </a>
+                  <EnlaceRed red={red} className={ENLACE_DIRECTO} />
                 </li>
               ))}
             </ul>
