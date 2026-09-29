@@ -37,10 +37,12 @@ import { altAutomatico } from "@/lib/texto";
  * la decisión 40 dice que la variante es lo que decide la compra. Ahora van como
  * chips, debajo de la descripción.
  *
- * **Lo que cuesta, y está asumido:** la página pasa de unos 1.300 px a unos
- * 3.600 px en escritorio, así que el séptimo producto queda a cuatro pantallas
- * del primero. Se aceptó porque es un catálogo de siete elementos y no de
- * setenta — decisión 49.
+ * **Lo que cuesta, y está asumido:** la página es mucho más larga que con la
+ * grilla. El andamio calculaba que pasaba de unos 1.300 px a unos 3.600 en
+ * escritorio, pero sin las descripciones ni los chips: medida sobre la página
+ * terminada ronda los 6.000, casi siete pantallas a 1440 × 900. Se
+ * aceptó porque es un catálogo de siete elementos y no de setenta —
+ * decisión 49.
  *
  * # La descripción vuelve al listado
  *

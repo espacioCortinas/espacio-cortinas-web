@@ -88,10 +88,11 @@ Del lado del pipeline, lo que borra los metadatos de un video es
 `-map_metadata -1`, y lo que le saca la pista de audio es `-an`. El script
 comprueba además que ningún video publicado conserve pista.
 
-Lo único que sobrevive a propósito es el **perfil de color ICC** (unos 480
-bytes). Describe el espacio de color y no dice nada del lugar, del equipo ni de
-la fecha; se conserva porque un iPhone saca en Display P3 y, sin declararlo, los
-navegadores asumen sRGB y los colores de las telas salen apagados.
+Lo único que queda es un **perfil de color ICC** (480 bytes), y no es el de la
+foto: es el sRGB genérico que el script adjunta con `.withIccProfile("srgb")`.
+No dice nada del lugar, del equipo ni de la fecha. Los colores de un iPhone, que
+saca en Display P3, no dependen de él: `sharp` los convierte a sRGB antes de
+escribir, con o sin esa línea —comprobado el 28/09/2026—.
 
 ### La regla de contenido, que no es de código
 
@@ -191,9 +192,10 @@ cuidado. Hecho en la Fase 4.6 — decisiones 54 a 58.
   `sitio.espaciocortinas.com.ar`, con sus registros aparte; el SPF de la raíz
   sigue siendo uno solo.
 
-## Cabeceras — Fase 5
+## Cabeceras — pendientes, Fase 5
 
-En `next.config.ts`:
+Todavía no están: producción no manda ninguna de las tres (verificado el
+28/09/2026). Van en `next.config.ts`:
 
 - `Content-Security-Policy` acotada a los orígenes propios
 - `X-Content-Type-Options: nosniff`

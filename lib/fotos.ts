@@ -62,62 +62,48 @@ export function urlAbsolutaDeFoto(
  * No hay campo que la marque. El orden del arreglo es el de la galería y el
  * primero es la portada — así, reordenar es mover un archivo de lugar en
  * `fotos-originales/` y no editar un dato. Devuelve `null` cuando la entidad
- * todavía no tiene fotos, que hoy es el caso de todas: la galería vacía es
- * información, no un error.
+ * todavía no tiene fotos: la galería vacía es información, no un error. Hoy no
+ * es el caso de ninguna —los siete productos y el proyecto tienen fotos—, pero
+ * sí el de un producto recién escrito hasta que se preparen las suyas.
  */
 export function portadaDe(fotos: Foto[]): Foto | null {
   return fotos[0] ?? null;
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
- * El tamaño del módulo sale de la foto, no de su posición — decisión 48
+ * El tamaño de cada foto sale de la foto, no de su posición — decisión 48
  * ──────────────────────────────────────────────────────────────────────────── */
-
-/**
- * ¿Es apaisada?
- *
- * Es lo que decide el **módulo** que le toca en la galería: las apaisadas van
- * al ancho de la columna y las verticales a media columna. No es una
- * preferencia estética sino una consecuencia de la proporción — una vertical a
- * 1024 px de ancho mide 1280 de alto y empuja todo lo demás fuera de la
- * pantalla, y una apaisada a media columna mide 500 × 375 y se lee como una
- * miniatura en vez de como una fotografía.
- *
- * El archivo es mitad y mitad —doce verticales y once apaisadas
- * (`docs/diseno.md`)— así que esto produce una galería de dos anchos de verdad
- * y no una columna disfrazada.
- */
-export function esApaisada(foto: Foto): boolean {
-  return foto.ancho > foto.alto;
-}
 
 /**
  * **El ancho máximo, en píxeles de CSS, al que este medio se puede mostrar sin
  * verse blando.**
  *
- * Es la idea que la dirección «Regla» dejó disponible —que el tamaño del módulo
- * de cada foto salga de una propiedad de la foto y no del orden en que
- * aparece— resuelta con el dato del manifiesto en vez de con la tabla de
- * calidad de `docs/diseno.md`. El porqué de esa elección está en la decisión 48;
- * lo corto es que la tabla es un juicio escrito a mano sobre 23 fotos concretas
- * y el archivo va camino a 300, mientras que esto lo calcula el script a partir
- * del archivo que efectivamente escribió.
+ * Es lo que sobrevivió de la idea que la dirección «Regla» dejó disponible —que
+ * el tamaño del módulo de cada foto salga de una propiedad de la foto y no del
+ * orden en que aparece—, resuelta con el dato del manifiesto en vez de con la
+ * tabla de calidad de `docs/diseno.md`. El porqué de esa elección está en la
+ * decisión 48; lo corto es que la tabla es un juicio escrito a mano sobre 23
+ * fotos concretas y el archivo va camino a 300, mientras que esto lo calcula el
+ * script a partir del archivo que efectivamente escribió.
  *
- * Hoy muerde en tres medios, y son exactamente los tres que la documentación
- * señala como problema:
+ * **Hoy solo muerde en los dos videos de variante** (1280 px → tope de 640 px
+ * de CSS), que la página de producto muestra sueltos, fuera de la tira: sin el
+ * tope ocuparían la columna entera, 1024 px (`components/video-mudo.tsx`).
  *
- *     toldos/3                  1600 px  →  tope de  800 px de CSS
- *     cortinas-tela/barral/2    1028 px  →  tope de  514 px de CSS
- *     los dos videos            1280 px  →  tope de  640 px de CSS
+ * `toldos/3` (1600 px → 800) y `cortinas-tela/barral/2` (1028 px → 514)
+ * también tienen un tope más angosto que la columna, pero van en la galería, y
+ * desde la decisión 50 la diapositiva no pasa de 480 px. Lo mismo los dos
+ * videos del cowork: el vertical tiene un tope de 360, pero se muestra al alto
+ * de la caja y no llega a usarlo (`topeDeDiapositiva()`, en la galería).
  *
- * Los tres son apaisados, o sea que el módulo que les toca es el ancho de la
- * columna —1024 px— y el tope los baja. **El aire que queda al lado es la
- * curaduría**: una foto mediana rodeada de papel se lee como una lámina, y la
- * misma foto estirada se lee como un error (`docs/diseno.md`, «La tesis»).
+ * **El aire que queda al lado es la curaduría**: una foto mediana rodeada de
+ * papel se lee como una lámina, y la misma foto estirada se lee como un error
+ * (`docs/diseno.md`, «La tesis»).
  *
  * Se aplica en dos lugares a la vez y los dos hacen falta: `max-width` en la
- * caja, para que no se estire, y el `sizes` del `<img>`, para que el navegador
- * no descargue un archivo más grande del que va a mostrar.
+ * caja —en la galería, la diapositiva—, para que no se estire, y el `sizes` del
+ * `<img>`, para que el navegador no descargue un archivo más grande del que va
+ * a mostrar.
  */
 export function topeDeAncho(medio: Pick<Foto, "ancho">): number {
   return Math.floor(medio.ancho / DENSIDAD_DE_REFERENCIA);

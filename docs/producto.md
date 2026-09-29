@@ -92,8 +92,8 @@ La distinción tiene que quedar clara para el visitante:
 
 - Nombre
 - Descripción breve
-- Variantes (ej. Cortinas → dos paños, rieles, barrales; Toldos → manuales,
-  motorizados)
+- Variantes (ej. Cortinas de tela → riel, riel motorizado, barral; Toldos → de
+  brazos, motorizado)
 - Galería de fotos, con una de portada
 - Activo / inactivo · Destacado / no destacado
 
@@ -118,7 +118,7 @@ En la tarjeta, el título es el trabajo y la ubicación va como chip:
 
 ```
 Casa en Nordelta
-[ Nordelta · Buenos Aires ]
+[ Nordelta, Buenos Aires ]
 ```
 
 ## Visibilidad
@@ -137,7 +137,8 @@ Los destacados        → Inicio (con tope)
 Así se puede rotar lo que aparece en Inicio sin borrar nada, y el tope de Inicio
 nunca limita el portfolio completo.
 
-**Desactivar no es eliminar.** Eliminar pide confirmación.
+**Desactivar no es eliminar.** Eliminar es borrar el bloque del archivo, y queda
+en el historial de git.
 
 ## Cómo se carga el contenido
 
@@ -148,8 +149,8 @@ prefiere editarlo a mano — decisión 36, que incluye lo que eso deja abierto.
 El contenido son archivos del repositorio:
 
 ```
-contenido/productos.ts     nombre, descripción, variantes, publicado, destacado
-contenido/proyectos.ts     título, ubicación, descripción, publicado, destacado
+contenido/productos.ts     nombre, descripción, variantes, activo, destacado
+contenido/proyectos.ts     título, ubicación, descripción, activo, destacado
 fotos-originales/          las fotos, que un script prepara y limpia
 ```
 

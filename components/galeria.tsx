@@ -41,8 +41,8 @@ import { altAutomatico } from "@/lib/texto";
  * material, no de la posición— aplicada a la caja en vez de al módulo.
  *
  * **El tope de píxeles sigue valiendo**: ninguna foto se muestra más ancha que
- * `topeDeAncho()`, así que `cortinas-tela/barral/2` no pasa de 514 px aunque la
- * diapositiva dé más.
+ * `topeDeAncho()`, así que `cortinas-tela/barral/2` no pasaría de 514 px aunque
+ * la diapositiva diera más. Hoy no da: no pasa de 480.
  *
  * # Fotos y videos, en el mismo orden
  *
@@ -103,13 +103,47 @@ const RELACION_MAXIMA = 5 / 4;
  */
 const ANCHO_DIAPOSITIVA = "w-[86%]";
 
-/** El tope de la diapositiva en escritorio. Ver `ANCHO_DIAPOSITIVA`. */
+/**
+ * El tope de la diapositiva. Ver `ANCHO_DIAPOSITIVA`.
+ *
+ * Vale en todos los anchos: en un teléfono no se nota, porque el 86 % de la
+ * columna queda por debajo, y desde unos 600 px de pantalla es el que manda.
+ */
 const ANCHO_MAXIMO = "30rem";
 
-/** El mismo dato que `ANCHO_DIAPOSITIVA`, del lado del navegador. */
+/**
+ * El mismo dato que `ANCHO_DIAPOSITIVA` y `ANCHO_MAXIMO`, del lado del
+ * navegador: el 86 % de la columna, con tope en 30rem.
+ *
+ * **El tope va en los dos tramos**, porque la diapositiva lo tiene en todos los
+ * anchos. El de abajo no lo llevaba, y entre unos 600 y 767 px de pantalla —una
+ * tablet chica en vertical— el `sizes` declaraba más ancho que la caja: a
+ * 700 px, 568 para una diapositiva de 480, y con densidad 2 el navegador bajaba
+ * `1600.webp` donde alcanzaba `960.webp`. Es el mismo error que la decisión 49
+ * corrigió en `/productos`.
+ */
 const TRAMOS = [
-  { desde: "768px", ancho: "30rem" },
-  { ancho: "calc((100vw - 2.5rem) * 0.86)" },
+  { desde: "768px", ancho: ANCHO_MAXIMO },
+  { ancho: `min(calc((100vw - 2.5rem) * 0.86), ${ANCHO_MAXIMO})` },
+];
+
+/**
+ * El ancho de la columna, del lado del navegador: es lo que ocupa una foto que
+ * va sola, sin tira. Sale de `CLASES_CONTENEDOR` —70rem con 3rem de margen a
+ * cada lado desde 768 px, 1,25rem por debajo—, y el tope de píxeles lo suma
+ * `sizesConTope()`.
+ *
+ * Una foto sola no puede usar `TRAMOS`: declararía el ancho de una diapositiva
+ * para una caja que llega a la columna entera, y el navegador bajaría un
+ * archivo más chico del que se muestra.
+ *
+ * Con barra de scroll clásica declara unos 15 px de más —`100vw` la incluye, y
+ * en `sizes` no hay otra unidad—: errar para arriba cuesta un archivo apenas
+ * más grande, nunca una foto blanda.
+ */
+const TRAMOS_COLUMNA = [
+  { desde: "768px", ancho: "min(calc(100vw - 6rem), 64rem)" },
+  { ancho: "calc(100vw - 2.5rem)" },
 ];
 
 export function Galeria({
@@ -170,7 +204,7 @@ export function Galeria({
         <FotoImg
           foto={medio}
           alt={altAutomatico(nombre, desde)}
-          sizes={sizesConTope(medio, TRAMOS)}
+          sizes={sizesConTope(medio, TRAMOS_COLUMNA)}
           prioridad={prioridad}
         />
       </div>

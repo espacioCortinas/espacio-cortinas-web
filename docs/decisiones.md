@@ -31,6 +31,9 @@ imágenes y la ejecución en servidor que necesita el panel.
 
 ### 2. Astro descartado
 
+**Su argumento cayó con la decisión 36** —ya no hay panel—, y se decidió no
+revisarla: el porqué está en la 36.
+
 Astro rinde mejor en un sitio de contenido puro. Pero acá el panel de
 administración vive en el mismo proyecto: login, formularios, subida de archivos,
 CRUD. Esa mezcla es exactamente para lo que existe Next. Astro puede, pero no es
@@ -38,7 +41,10 @@ donde brilla.
 
 ---
 
-### 3. Panel propio, no CMS headless
+### 3. Panel propio, no CMS headless ~~— SUPERADA por la decisión 36~~
+
+No hay panel, ni propio ni de terceros. Lo que eso le cuesta a la empresa está
+anotado en la 36.
 
 **Alternativas evaluadas:** Sanity, Payload, Strapi, Directus.
 
@@ -52,7 +58,9 @@ hace autónoma. Un estudio genérico en inglés, no.
 
 ---
 
-### 4. Un solo administrador, verificado por identidad
+### 4. Un solo administrador, verificado por identidad ~~— SUPERADA por la decisión 36~~
+
+No hay autenticación ni administrador.
 
 Sin roles, sin permisos, sin invitaciones. Una sola persona administra.
 
@@ -63,7 +71,10 @@ comprobación. Se desactiva el registro, se crea el usuario a mano y se verifica
 
 ---
 
-### 5. La compresión de imágenes ocurre en el navegador
+### 5. La compresión de imágenes ocurre en el navegador ~~— SUPERADA por la decisión 36~~
+
+Las fotos se preparan con `sharp` en la máquina de quien desarrolla
+(`scripts/preparar-fotos.mjs`): ningún navegador comprime nada.
 
 **Alternativa evaluada:** recibir el archivo en una Server Action y procesarlo en
 el servidor con `sharp`. Era el planteo original.
@@ -103,7 +114,9 @@ opcional y se verifica en QA.
 
 ---
 
-### 7. Dos tablas de imágenes, no una polimórfica
+### 7. Dos tablas de imágenes, no una polimórfica ~~— SUPERADA por la decisión 36~~
+
+No hay tablas: las fotos son `contenido/fotos.ts`.
 
 **Alternativa evaluada:** una sola tabla `imagenes` con `entidad` + `entidad_id`.
 
@@ -253,7 +266,10 @@ la Fase 5, junto con Search Console.
 
 ---
 
-### 18. Supabase se queda en el plan gratuito
+### 18. Supabase se queda en el plan gratuito ~~— SUPERADA por la decisión 36~~
+
+No hay Supabase. **Sigue vigente la regla de los originales en el Drive**, más
+abajo, que es la que citan `.gitignore`, los scripts y varios documentos.
 
 **Alternativa evaluada:** pagar el plan Pro por las copias de seguridad
 automáticas.
@@ -276,7 +292,9 @@ quieto una semana. Se despausa con un clic.
 
 ---
 
-### 19. Sin contenido inicial cargado por migración
+### 19. Sin contenido inicial cargado por migración ~~— SIN OBJETO desde la decisión 36~~
+
+No hay tablas ni panel: el contenido se escribe en `contenido/`.
 
 Las tablas arrancan vacías. La administradora carga todo desde el panel en la
 Fase 3, antes de la fase de diseño, para que el sitio público se diseñe contra
@@ -286,8 +304,12 @@ contenido y fotos reales.
 
 ### 20. Las dependencias de la Fase 1, una por una
 
-La regla 8 de `CLAUDE.md` pide justificar cada dependencia. Además de Next, React,
-TypeScript y Tailwind, la Fase 1 agrega cuatro paquetes y ninguno más:
+**Matizada por la decisión 36**: `@supabase/supabase-js` y `@supabase/ssr`
+salieron de `package.json` con el panel; `server-only` y `prettier` siguen.
+
+La regla 8 de `CLAUDE.md` —hoy la 7— pide justificar cada dependencia. Además
+de Next, React, TypeScript y Tailwind, la Fase 1 agrega cuatro paquetes y
+ninguno más:
 
 | Paquete                 | Por qué                                                                                                                                                                                                                              |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -347,7 +369,8 @@ escrito ahí mismo cuál le toca a cada una.
 **Matizada por la decisión 56:** desde la Fase 4.6 el build y el arranque ya no
 exigen la misma lista. El build exige las cuatro; el arranque, solo lo que usan
 las páginas. Las dos del correo las comprueba el envío del formulario, para que
-una clave faltante no tire el sitio entero.
+una clave faltante no tire el sitio entero. Las cuatro de Supabase de la tabla
+se fueron con la decisión 36.
 
 ---
 
@@ -380,7 +403,8 @@ direcciones, que es lo que castiga el buscador.
 
 **Consecuencia práctica:** `NEXT_PUBLIC_SITE_URL` en producción es
 `https://espaciocortinas.com.ar`, sin `www` y sin barra final. De ahí salen las
-URLs canónicas, el sitemap y el Open Graph en la Fase 5. Si alguna vez se
+URLs canónicas, el sitemap y el Open Graph, que se adelantaron de la Fase 5 a la
+4.0 (decisión 38). Si alguna vez se
 invierte, hay que cambiar la variable en el mismo movimiento.
 
 ---
@@ -449,11 +473,11 @@ proveedores que se contradicen — que era justamente lo que motivaba la decisi�
 Este ecosistema cambió varias veces y hay guías viejas circulando. Estado
 verificado contra la documentación de Cloudflare en julio de 2026:
 
-| Camino                      | Estado                                                                                  |
-| --------------------------- | --------------------------------------------------------------------------------------- |
-| `@opennextjs/cloudflare`    | **el vigente.** Adaptador oficial. Corre Next sobre el runtime de Node de Workers       |
-| `@cloudflare/next-on-pages` | anterior, sobre Cloudflare Pages. Solo soportaba el runtime "edge" de Next. **No usar** |
-| `next export` estático      | no sirve: el panel necesita ejecución en servidor (regla 3 de `CLAUDE.md`)              |
+| Camino                      | Estado                                                                                                                                                     |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@opennextjs/cloudflare`    | **el vigente.** Adaptador oficial. Corre Next sobre el runtime de Node de Workers                                                                          |
+| `@cloudflare/next-on-pages` | anterior, sobre Cloudflare Pages. Solo soportaba el runtime "edge" de Next. **No usar**                                                                    |
+| `next export` estático      | no sirve: el panel necesita ejecución en servidor (regla 3 de `CLAUDE.md`, que se fue con el panel; hoy lo que la necesita es el formulario — decisión 36) |
 
 La diferencia que importa: `next-on-pages` obligaba a marcar cada ruta con
 `export const runtime = "edge"`, un subconjunto recortado de APIs. Con
@@ -462,7 +486,7 @@ arquitectura tuvo que cambiar para mudarse.**
 
 #### Las dependencias que agrega, una por una
 
-La regla 8 de `CLAUDE.md` pide justificar cada dependencia. Son dos:
+La regla 8 de `CLAUDE.md` —hoy la 7— pide justificar cada dependencia. Son dos:
 
 | Paquete                  | Por qué                                                                                                                                                      |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -526,6 +550,11 @@ arquitectura resultó portable, que era lo que `docs/infraestructura.md` anticip
 
 ### 25. Las medidas de cada imagen se generan al subir, no al servir
 
+**Reformulada por la decisión 36**: las medidas se generan al preparar las
+fotos, con `sharp` en la máquina de quien desarrolla, y no en el navegador al
+subir. Sigue valiendo el núcleo: cada tamaño se genera una vez, antes de servir,
+y el optimizador de imágenes no se usa.
+
 **Fecha:** julio de 2026, junto con la decisión 24.
 
 **El planteo anterior era:** el navegador sube **un** WebP de 2560 px y
@@ -584,8 +613,9 @@ mostrar fotos el día 20 de cada mes no sirve para lo único que este sitio hace
   y resultó que lo que faltaba era GENERAR — decisión 35
 
 **Consecuencias concretas:** `next/image` pasa a usarse con `unoptimized`, o
-directamente `<img>`. Ver `docs/arquitectura.md` (sección «Subida de imágenes») y
-`docs/modelo-de-datos.md` (columna `medidas`).
+directamente `<img>`. Ver `docs/arquitectura.md` (sección «Subida de imágenes»,
+hoy «Preparación de imágenes») y `docs/modelo-de-datos.md` (columna `medidas`,
+hoy un campo de `contenido/fotos.ts`).
 
 **Esto es documentación, no implementación.** El código es de la Fase 3.
 
@@ -601,7 +631,10 @@ cada pantalla.
 
 ---
 
-### 26. El archivo se queda como `middleware.ts`, NO se renombra a `proxy.ts`
+### 26. El archivo se queda como `middleware.ts`, NO se renombra a `proxy.ts` ~~— SIN OBJETO desde la decisión 36~~
+
+No hay middleware: se fue con el panel. Lo que enseña sobre `npm run preview`
+sigue valiendo.
 
 **Fecha:** agosto de 2026, durante la Fase 2.
 
@@ -653,13 +686,16 @@ entonces el aviso de deprecación se convive a propósito, y hay un comentario
 al principio de `middleware.ts` que lo explica para que nadie lo "arregle".
 
 **Lo que nunca estuvo en discusión:** el archivo no autoriza. La regla 4 de
-`CLAUDE.md` y lo que `docs/seguridad.md` dice sobre CVE-2025-29927 valen igual
+`CLAUDE.md` de entonces —«el middleware no autoriza», que se fue con el panel— y
+lo que `docs/seguridad.md` decía sobre CVE-2025-29927 valen igual
 con cualquier nombre — el riesgo nunca fue cómo se llama, sino confiar en que
 corrió.
 
 ---
 
-### 27. Las políticas de lectura son para `anon` **y** `authenticated`
+### 27. Las políticas de lectura son para `anon` **y** `authenticated` ~~— SUPERADA por la decisión 36~~
+
+No hay base ni RLS.
 
 **Fecha:** agosto de 2026, durante la Fase 2.
 
@@ -686,7 +722,9 @@ vea un anónimo.
 
 ---
 
-### 28. Las migraciones son archivos `.sql` que se aplican a mano
+### 28. Las migraciones son archivos `.sql` que se aplican a mano ~~— SUPERADA por la decisión 36~~
+
+No hay migraciones: `supabase/` se borró entera.
 
 **Fecha:** agosto de 2026, durante la Fase 2.
 
@@ -694,9 +732,9 @@ vea un anónimo.
 desarrollo, renombrar `supabase/migraciones` a `supabase/migrations` y aplicar
 con `supabase db push`.
 
-**Por qué se descartó:** la regla 8 de `CLAUDE.md` pide justificar cada
-dependencia, y acá el beneficio es automatizar un paso que en toda la V1 se va
-a ejecutar un puñado de veces. Además `supabase link` pide un access token
+**Por qué se descartó:** la regla 8 de `CLAUDE.md` —hoy la 7— pide justificar
+cada dependencia, y acá el beneficio es automatizar un paso que en toda la V1 se
+va a ejecutar un puñado de veces. Además `supabase link` pide un access token
 personal y la contraseña de la base, o sea dos credenciales más para
 administrar, en un proyecto cuyo criterio de titularidad es explícito
 (`docs/infraestructura.md`).
@@ -717,7 +755,12 @@ a lo que dicen los archivos— está en la decisión 31.
 
 ---
 
-### 29. El caché incremental es Workers KV, y el de etiquetas es D1
+### 29. El caché incremental es Workers KV, y el de etiquetas es D1 ~~— SUPERADA por la decisión 36~~
+
+Sin panel no hay nada que revalidar, y KV y D1 se borraron. El caché
+incremental volvió con la decisión 39, sobre los assets estáticos. **Sigue
+valiendo lo de las dos piezas**: sin `tagCache`, `revalidatePath()` no hace nada
+y no avisa.
 
 **Fecha:** agosto de 2026, al empezar la Fase 3.
 
@@ -891,7 +934,10 @@ secreta, y va a la vista por la misma razón que las demás — decisión 55.
 
 ---
 
-### 31. Cómo se verifica que las migraciones coinciden con la base
+### 31. Cómo se verifica que las migraciones coinciden con la base ~~— SUPERADA por la decisión 36~~
+
+No hay base que comparar: `npm run esquema`, `scripts/verificar-esquema.mjs` y
+`supabase/` se borraron con el panel.
 
 **Fecha:** agosto de 2026, al empezar la Fase 3. Completa la decisión 28.
 
@@ -1039,7 +1085,10 @@ y la más grande mide 2560 × 1920. Con una de 640 × 480 salieron `{480, 640}`.
 
 ---
 
-### 33. El panel reordena con botones, no arrastrando
+### 33. El panel reordena con botones, no arrastrando ~~— SIN OBJETO desde la decisión 36~~
+
+No hay panel que reordene: el orden es el de los arreglos de `contenido/` y el
+de las carpetas de fotos.
 
 **Fecha:** agosto de 2026, durante la Fase 3.
 
@@ -1056,8 +1105,8 @@ listados, que es lo que hace cualquier panel moderno.
 - **Con teclado o con un lector de pantalla no existe.** Hacerlo accesible es
   reimplementarlo entero con `aria-grabbed` y atajos, que nadie descubre.
 - **Cuesta una dependencia.** Hacerlo bien a mano en móvil es bastante código;
-  la alternativa es una librería, y la regla 8 de `CLAUDE.md` pide justificar
-  cada una.
+  la alternativa es una librería, y la regla 8 de `CLAUDE.md` —hoy la 7— pide
+  justificar cada una.
 
 **Lo que se hace:** dos botones de 48 px, subir y bajar, con `aria-label` que
 dice qué se mueve. El orden se aplica en pantalla al instante y se guarda de
@@ -1071,7 +1120,10 @@ es un precio razonable.
 
 ---
 
-### 34. El panel puede reordenar productos y proyectos, no solo fotos
+### 34. El panel puede reordenar productos y proyectos, no solo fotos ~~— SIN OBJETO desde la decisión 36~~
+
+No hay panel ni columna `orden`: productos y proyectos se reordenan moviendo el
+bloque en su arreglo.
 
 **Fecha:** agosto de 2026, durante la Fase 3.
 
@@ -1092,7 +1144,10 @@ asigna solo al crear, para que lo nuevo entre al final.
 
 ---
 
-### 35. El formato de subida se detecta, y cada imagen registra el suyo
+### 35. El formato de subida se detecta, y cada imagen registra el suyo ~~— SUPERADA por la decisión 36~~
+
+Ya no comprime ningún navegador: WebP para todas, sin detección. Sobrevive que
+cada foto registre su formato — decisión 37.
 
 **Fecha:** agosto de 2026, probando el panel de la Fase 3 desde el teléfono de
 la empresa. Corrige la decisión 25.
@@ -1165,11 +1220,11 @@ mobile-first cuyo contenido es casi exclusivamente fotos.
 
 **Un codificador de WebP en WebAssembly**, para mantener WebP en todos lados.
 Es lo que hace la decisión 25 posible tal como estaba escrita, y se descartó
-por dos razones: agrega una dependencia (regla 8 de `CLAUDE.md`), y sobre todo
-**comprimir en WebAssembly en un teléfono es varias veces más lento que el
-codificador nativo**. Cada foto son tres o cuatro medidas; multiplicado por las
-300 fotos del archivo, la carga de contenido se volvería una tarea de días. El
-10-17% de bytes no vale eso.
+por dos razones: agrega una dependencia (regla 8 de `CLAUDE.md`, hoy la 7), y
+sobre todo **comprimir en WebAssembly en un teléfono es varias veces más lento
+que el codificador nativo**. Cada foto son tres o cuatro medidas; multiplicado
+por las 300 fotos del archivo, la carga de contenido se volvería una tarea de
+días. El 10-17% de bytes no vale eso.
 
 #### Lo que no cambia
 
@@ -1217,7 +1272,8 @@ sacó a propósito.
 
 **Cuándo revisarlo:** si la empresa pide publicar sin intermediario, o si el
 ritmo de cambios deja de ser «pocas veces al año». El código del panel queda en
-el historial de git —commits `9c5b9cc` a `e524d4c`— así que volver atrás es
+el historial de git —la Fase 3 son los commits `bcb9f19` a `e524d4c`, y el login
+y la base vienen de la Fase 2, desde `c425dab`— así que volver atrás es
 recuperar archivos, no reescribirlos.
 
 #### Lo que se gana, que es más de lo que parece
@@ -1492,6 +1548,9 @@ cabecera de `app/muestra/page.tsx` y acá. Una página de andamio que sobrevive 
 andamio es deuda: queda indexable por error, se desactualiza y nadie se anima a
 tocarla porque no sabe si se usa.
 
+**Hecho el 29/09/2026**, al cerrar la Fase 4.5: se borraron `app/muestra/`
+entera y `public/muestra-logo.png`, y `/muestra` pasa a dar 404.
+
 ---
 
 ### 42. «Nada de personas» rige para las fotos nuevas, no para el archivo
@@ -1503,7 +1562,7 @@ además ropa tendida en el patio vecino.
 
 **Se quedan las tres.** En las dos que tienen personas están de espaldas o
 lejos y no son identificables a simple vista, que es lo que la regla existe para
-evitar. Sacarlas costaría dos de las ocho fotos que hay de esos dos productos, y
+evitar. Sacarlas costaría dos de las seis fotos que hay de esos dos productos, y
 el archivo ya es chico.
 
 **Lo que sí cambia es el alcance de la regla, que estaba sin escribir.**
@@ -1748,6 +1807,10 @@ deja el panel y la bandeja de mensajes fuera del alcance de V1.
 
 ### 47. Inicio se compone por sectores, y no son los que pedía `docs/producto.md`
 
+**Matizada por las decisiones 49 y 52**: `/productos` no reusó la tarjeta —es
+una fila por producto— y el sector de proyectos entró con el primer proyecto,
+en la 4.3.
+
 **Fecha:** septiembre de 2026. Adelanta la Fase 4.5 y **rompe el orden del
 plan**: Inicio se compone antes que `/proyectos` (4.3) y `/productos` (4.4).
 Lo pidió quien desarrolla, mirando el armazón de la 4.2 y viendo que la página
@@ -1856,6 +1919,10 @@ ningún lado del proyecto**. Es la misma regla que ya sigue
 ---
 
 ### 48. Las variantes tienen fotos y video propios, y el tamaño de cada módulo sale de la foto
+
+**Superada en parte por la decisión 50**: la galería pasó a ser una tira que se
+desliza, y la primera de las dos reglas del punto 2 —el módulo por orientación—
+quedó sin uso. El tope de píxeles y todo lo demás siguen.
 
 **Fecha:** septiembre de 2026, Fase 4.4.
 
@@ -2080,27 +2147,39 @@ foto grande es lo que este negocio tiene para mostrar.
 **El número real es peor que el estimado al elegir.** El andamio calculaba «de
 unos 1.300 px a unos 3.600». Medido sobre la página terminada:
 
-| Ancho   | Alto de página |
-| ------- | -------------: |
-| 320 px  |       6.571 px |
-| 375 px  |       6.674 px |
-| 768 px  |       4.862 px |
-| 1024 px |       5.859 px |
-| 1440 px |       5.870 px |
+| Ancho   | Primera medida | Con la apertura y «Ver más» |
+| ------- | -------------: | --------------------------: |
+| 320 px  |       6.571 px |                    7.291 px |
+| 375 px  |       6.674 px |                    7.385 px |
+| 768 px  |       4.862 px |                    5.174 px |
+| 1024 px |       5.859 px |                    6.025 px |
+| 1440 px |       5.870 px |                    6.041 px |
 
-O sea **unos 5.900 px en escritorio y no 3.600**: el séptimo producto queda a
-seis pantallas del primero, no a cuatro. La diferencia son las descripciones,
-que el cálculo del andamio no tenía porque la grilla no las llevaba, más los
+La primera medida es de antes de la apertura nueva y de la línea «Ver más», que
+son de esta misma decisión, más abajo; la segunda es del 29/09/2026, con la
+página como está. En el teléfono suman unos 700 px porque ahí todo se apila; en
+escritorio, unos 170, porque «Ver más» entra al lado de la foto y lo que decide
+el alto de cada fila es la foto.
+
+O sea **unos 6.000 px en escritorio y no 3.600**: a 1440 × 900 la página mide
+casi siete pantallas y no cuatro, y el séptimo producto empieza 3.893 px debajo
+del primero, algo más de cuatro pantallas. La diferencia con el cálculo son las
+descripciones, que el andamio no tenía porque la grilla no las llevaba, más los
 chips. **La decisión no se reabre por esto** —el orden de magnitud es el mismo y
 las razones para elegir C no cambian— pero queda escrito con el número medido,
 porque si algún día alguien quiere volver sobre esto tiene que hacerlo con el
 dato correcto. Lo que lo destrabaría es acortar las descripciones, y eso es de
 la empresa.
 
+**Corregido el 29/09/2026:** esta entrada decía que el séptimo producto quedaba
+«a seis pantallas del primero». Seis pantallas era el largo de la página, no la
+distancia hasta el séptimo. Y la foto de cada fila mide 416 × 520: 416 es el
+ancho, no el alto, como decía el párrafo que sigue.
+
 Curiosamente el alto baja a 768 px: ahí entran las dos columnas pero la columna
 de texto todavía es angosta, así que la foto y el párrafo se equilibran. Los
 extremos son el teléfono, donde todo se apila, y el escritorio, donde la foto
-mide 416 px de alto útil y el texto no la llena.
+mide 416 × 520 y el texto no la llena.
 
 #### Lo que hubo que decidir al migrar, que el andamio no resolvía
 
@@ -2319,6 +2398,23 @@ dentro de un flex de ancho automático. **Las fotos no cargaban**: el ancho del
 envoltorio dependía de la foto y el de la foto del envoltorio, la circularidad
 resolvía a cero, y con una caja de 0 × 0 el navegador nunca disparaba la carga
 diferida. Se vio en el navegador, no leyendo el código.
+
+#### El `sizes` de la tira, corregido el 29/09/2026
+
+La diapositiva tiene el tope de 30rem en todos los anchos, y el `sizes` lo
+declaraba solo desde 768 px. Entre unos 600 y 767 px —una tablet chica en
+vertical— anunciaba más ancho que la caja: a 700 px, 568 para una diapositiva de
+480, y con densidad 2 el navegador bajaba `1600.webp` donde alcanzaba
+`960.webp`. Es el mismo error que la decisión 49 corrigió en `/productos`.
+
+Ahora el tope va en los dos tramos. Verificado en 320, 375, 700, 768, 1024 y
+1440: el `sizes` y la caja dan lo mismo, y a 700 px el navegador elige
+`960.webp`.
+
+De paso, una galería de una sola foto —que se dibuja sin tira, al ancho de la
+columna— declaraba el ancho de una diapositiva, y el navegador habría bajado un
+archivo más chico del que muestra. Hoy ninguna galería tiene una sola foto; ese
+caso pasó a declarar el ancho de la columna.
 
 ---
 
@@ -3370,12 +3466,12 @@ entero** y sin `Accept-Ranges`, no 206. No pasa por el Worker —no hay
 Safari pide los videos por rango, se temía que no los reprodujera. Probado en un
 iPhone después del despliegue: los videos del cowork se reproducen. El 200 sin
 rango queda anotado como dato, por si algún día un video largo necesita saltar
-a la mitad sin descargarlo entero; hoy, con archivos de 1 a 4 MB en bucle, no
-importa.
+a la mitad sin descargarlo entero; hoy, con archivos de 0,5 a 3,6 MB en bucle,
+no importa.
 
 **Falta el logo en vector, y una versión para fondo oscuro.** Hoy hay un JPG de
-524 px en `fotos-originales/logo.jpg`. Alcanza para el encabezado —160 px a
-triple densidad son 480— pero no para nada más grande, y no hay versión clara
+524 px en `fotos-originales/logo.jpg`. Alcanza para el encabezado —168 px a
+triple densidad son 504— pero no para nada más grande, y no hay versión clara
 para usar sobre un fondo oscuro. Se le pide a la empresa — decisión 43.
 
 **El favicon sigue sin salir, y ya se sabe por qué** — decisión 45. El círculo
@@ -3386,7 +3482,9 @@ que la empresa no autorizó. Se destraba con el vector, o con esa autorización.
 **No hay ninguna foto 4:5 de repuesto.** Las siete que existen son exactamente
 las siete portadas, así que cualquier portada que haya que retirar obliga a
 recortar una 3:4. No bloquea la Fase 4.1, pero define qué hay que fotografiar
-primero.
+primero. **Desde la 4.4 ya no es del todo así**: las fotos de variante suman
+cuatro 4:5, dos de Roller y dos de Cortinas de tela. Los otros cinco productos
+siguen sin repuesto.
 
 **Dónde viven las fotos cuando se cargue el archivo histórico.** Unas 300 fotos
 por cuatro medidas son del orden de 240 MB, y git guarda todas las versiones de

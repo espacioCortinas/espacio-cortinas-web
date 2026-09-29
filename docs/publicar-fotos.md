@@ -31,14 +31,14 @@ Una carpeta por producto o proyecto, con el mismo `slug` que tiene en
 ```
 fotos-originales/
 ├── productos/
-│   ├── roller-blackout/
+│   ├── roller/
 │   │   ├── 1.jpg
 │   │   ├── 2.jpg
 │   │   └── 3.jpg
-│   └── venecianas-de-aluminio/
+│   └── venecianas-pvc/
 │       └── 1.jpg
 └── proyectos/
-    └── casa-en-nordelta/
+    └── cowork-nordelta/
         ├── 1.jpg
         └── 2.jpg
 ```
@@ -139,9 +139,12 @@ archivo. Suelto es `npm run compartir`.
 Sale algo así:
 
 ```
-productos/roller-blackout
-  1. 1.jpg                        2560×3200  medidas: 480 · 960 · 1600 · 2560
-  2. 2.jpg                        1206×2144  medidas: 480 · 960 · 1206
+productos/cortinas-tela
+  productos/cortinas-tela/1          2338×2922  medidas: 480 · 960 · 1600 · 2338
+  productos/cortinas-tela/2          2560×3413  medidas: 480 · 960 · 1600 · 2560
+  productos/cortinas-tela/3          2560×1920  medidas: 480 · 960 · 1600 · 2560
+  productos/cortinas-tela/barral/1   2338×2922  medidas: 480 · 960 · 1600 · 2338
+  productos/cortinas-tela/barral/2   1028×822  medidas: 480 · 960 · 1028
 ```
 
 **Leé los avisos**, que empiezan con `!`. No cortan la corrida pero suelen
@@ -172,9 +175,10 @@ Lo que tiene que decir de cada archivo:
   · Perfil de color ICC (480 bytes)
 ```
 
-**El perfil de color está bien que quede.** Describe el espacio de color y nada
-más; sin él, los colores de las telas se ven apagados. Lo que **no** puede
-aparecer es una línea que diga `EXIF`, `XMP`, `IPTC` o `COORDENADAS GPS`.
+**El perfil de color está bien que quede.** Es el sRGB genérico que el script le
+pone a cada foto —el del teléfono no llega— y no dice nada del lugar, del equipo
+ni de la fecha. Lo que **no** puede aparecer es una línea que diga `EXIF`,
+`XMP`, `IPTC` o `COORDENADAS GPS`.
 
 ---
 
@@ -184,10 +188,13 @@ Si es contenido nuevo, agregá el bloque en `contenido/productos.ts`:
 
 ```ts
 {
-  slug: "roller-blackout",
-  nombre: "Roller Blackout",
+  slug: "roller",
+  nombre: "Roller",
   descripcion: "Es un tipo de cortina enrollable, que puede ser…",
-  variantes: ["Manual", "Motorizado"],
+  variantes: [
+    { nombre: "Screen", clave: "screen", descripcion: "Permite que ingrese…" },
+    { nombre: "Motorizado", clave: "motorizado" },
+  ],
   activo: false,
   destacado: false,
 },
@@ -233,7 +240,9 @@ gente que la galería.
 npm run build
 ```
 
-Si eso pasa, no falta ningún campo ni hay ningún slug mal escrito. Después:
+Si eso pasa, no falta ningún campo. Lo que el build no ve es un `slug` que no
+coincide con su carpeta: la página sale sin fotos y sin error, y el aviso llega
+recién con `npm run compartir`. Después:
 
 ```bash
 git add -A && git commit -m "Fotos de Roller Blackout"
@@ -310,10 +319,11 @@ anotala: ver «La imagen para compartir de una página nueva», más arriba.
 La foto elegida para compartir es demasiado chica: habría que agrandarla, y no
 se agranda nunca. Elegí otra en `contenido/compartir.ts`.
 
-### `quedó sin ninguna foto utilizable`
+### `quedó sin ninguna foto propia`
 
-Ninguna foto de esa carpeta se pudo leer. Suele ser una carpeta con capturas de
-pantalla o archivos que no son imágenes.
+La carpeta del producto o del proyecto no dejó ninguna foto publicada: o todas
+salieron con `NO SE PUBLICA` —más arriba dice por qué—, o solo tiene carpetas de
+variante y videos. Sin fotos propias no hay portada.
 
 ---
 
@@ -341,7 +351,9 @@ una carpeta suelta de más.
 
 ### El build falla con «PROBLEMAS CON LAS VARIABLES DE ENTORNO»
 
-No tiene que ver con las fotos: falta `NEXT_PUBLIC_SITE_URL` en `.env.local`.
+No tiene que ver con las fotos: a `.env.local` le falta una de las cuatro
+variables, o tiene una mal escrita. El mensaje dice cuál, y la plantilla es
+`.env.example`.
 
 ---
 

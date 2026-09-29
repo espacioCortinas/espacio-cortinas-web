@@ -3,13 +3,15 @@
 Este documento define **restricciones y sistema**, no maquetas. La composición de
 cada página se decide en su fase, dentro de estas reglas.
 
-> **Estado: Fase 4.2 cerrada.** La dirección es **«Cal», con el acento de
-> «Regla»** — decisión 43, elegida en la 4.1 y **no se reabre**. Sus valores son
-> tokens de `app/globals.css` y están descritos abajo en «La dirección». La 4.2
-> los convirtió en componentes: ver «Componentes», que ahora dice qué existe y
-> qué no. Las otras dos propuestas quedan documentadas al final, en «Las dos que
-> no se eligieron», porque la razón por la que se descartaron sigue valiendo.
-> `/muestra` sigue en pie hasta la Fase 4.5.
+> **Estado: el sitio está compuesto** —Fases 4.2 a 4.6 cerradas, con Inicio
+> (4.5) compuesta fuera de orden—. La dirección es **«Cal», con el
+> acento de «Regla»** — decisión 43, elegida en la 4.1 y **no se reabre**. Sus
+> valores son tokens de `app/globals.css` y están descritos abajo en «La
+> dirección». La 4.2 los convirtió en componentes: ver «Componentes», que ahora
+> dice qué existe y qué no. Las otras dos propuestas quedan documentadas al
+> final, en «Las dos que no se eligieron», porque la razón por la que se
+> descartaron sigue valiendo. `/muestra`, donde se compararon las tres
+> direcciones, se borró el 29/09/2026 al cerrar la 4.5 (decisión 41).
 
 ---
 
@@ -30,6 +32,12 @@ catálogo.
 oficina, uno apaisado de 15 s y el primer vertical del sitio, de 22 s. Es un
 juego más parejo que el de productos y es **el primer material corporativo**:
 fachada vidriada curva, rollers screen, puestos de trabajo — decisiones 51 y 52.
+
+**Desde la Fase 4.4 están también las ocho fotos de variante** —Screen y
+Blackout de Roller, Riel y Barral de Cortinas de tela—: cuatro 4:5, tres 5:4 y
+una 3:4 (decisión 48). Entre ellas está la más chica del catálogo,
+`cortinas-tela/barral/2`, de 1028 × 822. La tabla y el análisis que siguen son
+los de la 4.1, sobre las 23 de producto.
 
 | Proporción  | Cuántas | Cuáles                                                    |
 | ----------- | ------: | --------------------------------------------------------- |
@@ -52,6 +60,10 @@ porque no muestra el producto— **no hay con qué reemplazarla sin recortar una
 3:4**. La regla «los listados usan siempre la portada» se sostiene hoy por un
 margen de cero. Cargar fotos nuevas tiene que empezar por ahí.
 
+Así era en la 4.1. **Desde la 4.4 hay repuesto para dos productos**: las fotos
+de variante suman cuatro 4:5, dos de Roller y dos de Cortinas de tela. Los otros
+cinco siguen con margen cero. Las dos 4:5 del cowork son de proyecto.
+
 **2. Ninguna portada aguanta sangrado a pantalla completa en escritorio.**
 
 Los anchos máximos de las siete portadas son 2338, 2418, 2418, 2560, 2560, 2560 y
@@ -64,7 +76,8 @@ En el teléfono sí: 375 × 3 = 1125 px, y ahí sobra con cualquiera.
 
 **3. `toldos/3` tiene 1600 px y es la única 16:9.**
 
-Es la única foto del archivo que no llegó a las cuatro medidas. En un módulo chico
+Era la única foto del archivo que no llegó a las cuatro medidas —desde la 4.4
+está también `cortinas-tela/barral/2`, de 1028 px, con tres—. En un módulo chico
 de una grilla se ve perfecta; en cualquier lugar grande, no. El diseño tiene que
 poder **asignarle un lugar chico sin que eso se vea como un error**.
 
@@ -194,8 +207,8 @@ Eso se puede leer de dos maneras, y las dos son legítimas:
 - **La interfaz se calla** porque la foto ya trae toda la textura que la página
   necesita, y cualquier trama agregada vibra contra ella.
 
-Las direcciones de abajo toman partido distinto sobre esto, y es una de las cosas
-concretas que hay que ir a mirar a `/muestra`.
+Las direcciones de abajo toman partido distinto sobre esto, y fue una de las
+cosas concretas que se miraron en `/muestra`.
 
 ### Lo que este archivo no puede sostener
 
@@ -407,11 +420,13 @@ diseñado y no como ensamblado. Margen lateral 20 → 48.
 
 ### Movimiento en la galería
 
-El video es un ítem más de la galería, en la posición de la variante que
-documenta — y **no al ancho de la columna**, que es lo que decía este documento
-hasta la Fase 4.4 y contradecía su propia aritmética cuatro secciones más
-arriba: los videos tienen 1280 px y a doble densidad eso es una caja de 640, no
-de 1024. Cae solo con la regla del módulo de abajo, sin ninguna excepción.
+El video de una variante va en el bloque de la variante que documenta, debajo
+de sus fotos si las tiene y fuera de la tira; el de un proyecto es una
+diapositiva más de la galería (decisión 51). Ninguno va **al ancho de la
+columna**, que es lo que decía este documento hasta la Fase 4.4 y contradecía su
+propia aritmética cuatro secciones más arriba: los videos tienen 1280 px y a
+doble densidad eso es una caja de 640, no de 1024. Cae solo con las reglas de
+abajo, sin ninguna excepción.
 
 ### El tamaño de cada foto sale de la foto, no de su posición
 
@@ -428,8 +443,10 @@ sobra queda en papel.
 
 **En el resto del sitio**, donde una foto ocupa un lugar fijo, manda el **tope
 de píxeles**: nada se muestra más ancho que `ancho / 2`, con el 2 de
-`DENSIDAD_DE_REFERENCIA`. Hoy muerde en `toldos/3` (1600 px → 800), en
-`cortinas-tela/barral/2` (1028 px → 514) y en los dos videos (1280 → 640).
+`DENSIDAD_DE_REFERENCIA`. Hoy solo muerde en los dos videos de variante
+(1280 → 640), que van sueltos. `toldos/3` (1600 px → 800) y
+`cortinas-tela/barral/2` (1028 px → 514) tienen tope, pero van en la tira, donde
+la diapositiva no pasa de 480 (decisión 50).
 
 **El aire que queda al lado es la curaduría.** Que `toldos/3` no pueda ocupar un
 lugar grande deja de ser una limitación y pasa a ser una decisión editorial.
@@ -448,10 +465,11 @@ siguen valiendo.
 ### Imágenes
 
 - **Portadas y tarjetas: 4:5 vertical.** Siempre, sin excepción, para que las
-  grillas queden parejas. Hoy hay exactamente siete y son exactamente las siete
-  portadas: no hay margen.
+  grillas queden parejas. De producto, las únicas 4:5 de repuesto son cuatro de
+  variante, de Roller y de Cortinas de tela: los otros cinco no tienen margen.
 - **Galería: la proporción propia de cada foto.** Está permitido mezclar; la galería
-  no es una grilla rígida. Doce verticales y once horizontales.
+  no es una grilla rígida. Las 37 fotos publicadas son 19 verticales y 18
+  horizontales.
 - Contenedor con proporción fija y `object-fit: cover`. Nunca deformar.
 - Siempre con `ancho` y `alto` para que no salte el contenido al cargar.
 - Carga diferida en todo menos en la primera imagen visible.
@@ -556,22 +574,23 @@ La regla 10 se endurece con lo que muestra el archivo: **la capa tiene que ser o
 y del color de fondo**. Un velo translúcido o un gradiente sobre estas fotos no
 garantiza nada, porque la zona clara de cada cuadro cambia de lugar.
 
-`/muestra` carga seis familias tipográficas a la vez y por lo tanto **incumple la
-regla 7 a propósito**: es una página de comparación que se borra en la Fase 4.5, no
-una página del sitio. Es la única excepción y está acotada a ese archivo
-— decisión 41.
+**La regla 7 ya no tiene excepciones**: la única era `/muestra`, que cargaba
+seis familias tipográficas a la vez para comparar las tres direcciones de la
+4.1. No era una página del sitio, y se borró el 29/09/2026 al cerrar la
+Fase 4.5 — decisión 41.
 
 ---
 
 ## Movimiento
 
-Escaso y con función: transiciones de estado (150–200 ms), apertura de la galería,
-cambio de foto. Nada que se dispare solo al hacer scroll.
+Escaso y con función: transiciones de estado (150–200 ms). La galería no se abre
+ni anima el cambio de foto: la tira la mueve el dedo (decisión 50). Nada que se
+dispare solo al hacer scroll.
 
-**Los dos videos** son 1280×720, once segundos, sin pista de audio. Se presentan
-como un ítem más de la galería, en la posición de la variante motorizada que
-documentan —que es lo único que una foto no puede mostrar, decisión 40—, con
-`muted`, `loop` y `playsinline`, sin controles y con `preload="none"`. Con
+**Los dos videos de variante** son 1280×720, once segundos, sin pista de audio.
+Se presentan en el bloque de la variante motorizada que documentan —que es lo
+único que una foto no puede mostrar, decisión 40—, con `muted`, `loop` y
+`playsinline`, sin controles y con `preload="none"`. Con
 `prefers-reduced-motion: reduce` no se reproducen: queda el cuadro fijo y un
 control para iniciarlo.
 
@@ -602,7 +621,7 @@ revés.
   de todas las páginas, en el cierre de cada una, y además en la apertura de
   Inicio, de Contacto y de cada producto y proyecto (decisión 61). Los dos
   listados lo tienen al final y no arriba: en el catálogo, en un teléfono, eso
-  es casi al final de una página de 6.674 px (decisión 49). Queda anotado como
+  es casi al final de una página de 7.385 px (decisión 49). Queda anotado como
   pendiente; el menú sí lleva a Contacto desde arriba
 - Se verifica en 320, 375, 768, 1024 y 1440
 
@@ -616,7 +635,8 @@ Es parte de terminado, no un extra:
 - Foco visible en todo lo navegable por teclado
 - Encabezados jerárquicos, un solo `h1` por página
 - Toda imagen con texto alternativo
-- La galería se puede cerrar con `Escape`
+- La galería se recorre con el teclado: la tira toma el foco y las flechas la
+  mueven (decisión 50)
 
 ---
 
@@ -627,13 +647,13 @@ Material fotográfico real                       ✓ Fase 4.1
         ↓
 Dirección visual (color, tipografía, ritmo)     ✓ Fase 4.1
         ↓
-Sistema y componentes base                      ← acá estamos, Fase 4.2
+Sistema y componentes base                      ✓ Fase 4.2
         ↓
-Composición de cada página
+Composición de cada página                      ✓ Fases 4.3 a 4.6
         ↓
-Implementación
+Implementación                                  ✓ Fases 4.3 a 4.6
         ↓
-Verificación en los cinco anchos
+Verificación en los cinco anchos                ✓ la última, decisión 65
 ```
 
 No se escriben componentes antes de haber fijado la dirección visual. Ese salto es
@@ -659,7 +679,7 @@ partición entre fotos cálidas y frías, que se disuelve porque sobre el oscuro
 dos se convierten en «luz». Además es la única de las tres donde una foto sí puede
 sangrar en el teléfono, porque el fondo no compite.
 
-**Qué arriesga:** bastante, y hay que mirarlo de frente en `/muestra`. Un sitio
+**Qué arriesga:** bastante, y hubo que mirarlo de frente en `/muestra`. Un sitio
 oscuro para un negocio de luz natural puede contradecir el mensaje. Las fotos de
 hormigón gris —`compacta-blackout/3`, `bandas-verticales/3`— se embarran. Y el
 oscuro es el atajo de «lujo» de los últimos diez años.
@@ -682,8 +702,8 @@ que el claro para no apelmazarse—. Margen lateral 16 → 40.
 dentro de la columna. Sin borde, sin sombra, radio 0.
 **Texto sobre foto:** permitido en un solo caso, y con **banda sólida opaca** del
 color de fondo sobre el tercio superior. Nunca con gradiente ni con velo
-translúcido. Es la única de las tres que lo permite, y en `/muestra` está el ejemplo
-para poder rechazarlo.
+translúcido. Es la única de las tres que lo permite, y en `/muestra` estaba el
+ejemplo para poder rechazarlo.
 **Video:** a sangre en teléfono, dentro de la columna en escritorio.
 
 ---
@@ -740,4 +760,5 @@ técnico—. **Pero su acento es el que quedó**: el negro del logo para enlaces
 botón, sin ningún color inventado. Y su idea central sigue disponible para la
 Fase 4.3: el tamaño del módulo que le toca a cada foto puede salir de la tabla de
 calidad de este documento en vez del orden, que es la única forma estructural de
-curar un archivo desparejo.
+curar un archivo desparejo. La 4.4 tomó el mecanismo pero no la tabla —decisión
+48—, y la 50 cambió el módulo por la tira: de esa idea queda el tope de píxeles.

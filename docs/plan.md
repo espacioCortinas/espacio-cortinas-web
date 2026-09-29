@@ -12,30 +12,34 @@ documentos actualizados si algo cambió.
 Sin esto, las fases siguientes trabajan a ciegas.
 
 - [ ] Auditar el material fotográfico real: cuántos trabajos hay documentados,
-      cuántas fotos utilizables por trabajo, qué calidad
+      cuántas fotos utilizables por trabajo, qué calidad — la parte del
+      catálogo se hizo en la 4.1 (`docs/diseno.md`, «El material real»)
 - [ ] Pasar `docs/fotografia.md` a quien saca las fotos y **sacar un juego de
       prueba vertical** de un trabajo, para diseñar contra material del formato
       definitivo y no contra el archivo histórico
-- [ ] Delegar `espaciocortinas.com.ar` a Cloudflare desde NIC Argentina
-- [ ] Agregar el dominio como alias en Google Workspace y verificar que
+- [x] Delegar `espaciocortinas.com.ar` a Cloudflare desde NIC Argentina
+- [x] Agregar el dominio como alias en Google Workspace y verificar que
       `contacto@espaciocortinas.com.ar` recibe — el formulario terminó yendo a
-      `ventas@espaciocortinas.com.ar`, que ya recibía (Fase 4.6)
-- [ ] Crear el proyecto en Supabase y desactivar el registro público
-- [ ] Crear el repositorio en GitHub
+      `ventas@espaciocortinas.com.ar`, que ya recibía (Fase 4.6), y lo
+      verificado es esa: `contacto@` no se usó
+- [x] Crear el proyecto en Supabase y desactivar el registro público — y
+      después se borró, en la Fase 3.5 (decisión 36)
+- [x] Crear el repositorio en GitHub
 
 **Terminado cuando:** hay fotos reales para diseñar y el correo del dominio nuevo
 funciona.
 
 ---
 
-## Fase 1 — Cimientos
+## Fase 1 — Cimientos — HECHA
 
 Solo estructura. Nada de páginas.
 
 - Proyecto Next con App Router y TypeScript estricto
 - Tailwind con los tokens del sistema
 - Estructura de carpetas de `docs/arquitectura.md`
-- Clientes de Supabase: servidor, navegador y `admin` con `server-only`
+- Clientes de Supabase: servidor, navegador y `admin` con `server-only` —
+  se fueron en la Fase 3.5
 - Variables de entorno y su validación al arrancar
 - Linter, formateo y `tsc --noEmit` en verde
 - Despliegue con el dominio apuntando (se hizo en Vercel y se mudó a Cloudflare
@@ -48,7 +52,9 @@ vacía y el build pasa limpio.
 
 ---
 
-## Fase 2 — Base de datos y autenticación
+## Fase 2 — Base de datos y autenticación — HECHA, y después REVERTIDA
+
+Todo lo de esta fase se sacó en la 3.5 —decisión 36—. Queda como registro.
 
 - Migraciones de las cinco tablas de `docs/modelo-de-datos.md`
 - Índice único parcial de portada
@@ -110,7 +116,7 @@ Lo que sí sobrevive de esta fase, porque no dependía del panel:
 
 ---
 
-## Fase 3.5 — Sacar el panel
+## Fase 3.5 — Sacar el panel — HECHA
 
 El contenido pasa a archivos del repositorio y Supabase se va entero.
 **Decisión 36.**
@@ -126,6 +132,8 @@ Roller Blackout · Roller Screen · Compacta Blackout · Cortinas de tela
 Venecianas de aluminio · Venecianas de madera o PVC
 Toldos de brazos · Toldos vertical
 ```
+
+Después la decisión 40 los reordenó en siete productos con variantes.
 
 **Va primero de todo igual**, porque es el único paso que después no se puede
 deshacer: una vez borrado el proyecto de Supabase no hay de dónde sacarlos.
@@ -145,6 +153,8 @@ contenido/
 conviene que el editor autocomplete y que `tsc` frene el build si falta un
 campo, si un booleano está mal escrito o si una foto apunta a una carpeta que no
 existe. Con JSON esos errores aparecen en producción, como una página en blanco.
+(Lo de la carpeta no resultó así: `tsc` no ve el disco — ver
+`docs/modelo-de-datos.md`, «Por qué TypeScript y no JSON».)
 
 Los campos son los mismos que tenían las tablas —decisiones 8 y 11 siguen
 valiendo— menos los que existían solo por el panel: `id`, `creado_en`,
@@ -156,7 +166,7 @@ es más fácil de leer y de cambiar.
 ```
 scripts/preparar-fotos.mjs
    entrada:  una carpeta con los originales
-   salida:   public/fotos/{slug}/{n}-{ancho}.webp
+   salida:   public/fotos/{entidad}/{slug}/{n}/{ancho}.webp
              + el manifiesto con ancho, alto y medidas de cada foto
 ```
 
@@ -195,8 +205,9 @@ lib/revalidacion.ts                            42 líneas
 lib/estado-del-servidor.ts                     47 líneas
 ```
 
-**`components/ui/` se queda**: botón, campo, aviso y diálogo los usa el
-formulario de contacto de la Fase 4.6.
+**`components/ui/` se queda**: botón, campo y aviso los usa el formulario de
+contacto de la Fase 4.6. El diálogo de confirmación, `confirmar.tsx`, era del
+panel y se borró en este mismo paso.
 
 Salen de `package.json` `@supabase/ssr` y `@supabase/supabase-js`. Entra `sharp`
 como `devDependency`.
@@ -212,7 +223,9 @@ importa: si se borra un recurso que el Worker todavía referencia, el sitio se
 cae.
 
 1. Sacar los bindings de KV y D1 de `wrangler.jsonc` y vaciar
-   `open-next.config.ts` — decisión 29 sin objeto
+   `open-next.config.ts` — decisión 29 sin objeto. Vaciarlo del todo rompió
+   las páginas de producto: la decisión 39 le volvió a poner un caché, sobre
+   los assets estáticos
 2. Desplegar y verificar que el sitio responde
 3. Borrar el namespace de KV y la base D1
 4. Borrar de las **dos** listas del Worker `NEXT_PUBLIC_SUPABASE_URL`,
@@ -274,7 +287,8 @@ propio logo y el amarillo es un color de superficie con reglas de uso propias.
 ~~**Queda para la 4.2 la imagen de Open Graph de reserva**~~ — hecha:
 `public/marca/og.jpg`, 1200×630, con el logo sobre el papel y `cortinas-tela/1`
 dentro de su margen. Sin texto sobre la foto. Reemplazada en la 4.6 por el logo
-solo, centrado: WhatsApp recortaba esta composición — decisión 62.
+solo, centrado: WhatsApp recortaba esta composición — decisión 62. Y después,
+por una foto distinta en cada página, con el logo abajo — decisiones 63 y 64.
 
 **4.2 Sistema y estructura — HECHA.** Los tokens de la 4.1 se volvieron
 componentes: botón con tres variantes, chip, campo, aviso, estado vacío y la
@@ -346,10 +360,10 @@ buena cualquier cosa que no supiera leer.
 en filas consecutivas con el párrafo a la vista —se publica así a propósito,
 decisión 49—; el video del roller motorizado no muestra un roller; y el de
 cortinas de tela es vertical dentro de una caja 16:9. Acortar las descripciones
-además bajaría el alto de la página, que quedó en unos 5.900 px en escritorio.
+además bajaría el alto de la página, que ronda los 6.000 px en escritorio.
 
-**4.5 Inicio — COMPUESTA, fuera de orden.** Se adelantó a pedido: la página
-se compuso antes que `/proyectos` (4.3) y `/productos` (4.4), porque el armazón
+**4.5 Inicio — HECHA, fuera de orden.** Se adelantó a pedido: la página se
+compuso antes que `/proyectos` (4.3) y `/productos` (4.4), porque el armazón
 de la 4.2 la dejaba sin estructura. Cinco sectores —apertura, qué hacemos, cómo
 trabajamos, arquitectos y oficinas, cierre— decididos mirando cuatro sitios
 profesionales del rubro, con los textos provisorios en `contenido/inicio.ts`
@@ -363,10 +377,11 @@ destacados por criterio de venta, no fotográfico.
 ~~**Queda pendiente de la 4.5:** el sector de proyectos, que entra cuando haya
 contenido cargado.~~ Entró en la Fase 4.3, con el primer proyecto — decisión 52.
 
-**Y se borra el andamio de la 4.1:** `app/muestra/` entera —página, estilos y
-tipografías— más `public/muestra-logo.png`. Era para elegir la dirección visual
-y deja de tener sentido apenas el sitio está compuesto. Ninguna otra ruta los
-importa. Decisión 41.
+**El andamio de la 4.1 se borró el 29/09/2026, y era lo único que quedaba de
+la 4.5:** `app/muestra/` entera —página, estilos y tipografías— más
+`public/muestra-logo.png`. Era para elegir la dirección visual y dejó de tener
+sentido apenas el sitio estuvo compuesto. Ninguna otra ruta los importaba.
+Decisión 41.
 
 **4.6 Contacto — HECHA.** Es la página que importa: el objetivo comercial del
 sitio es que alguien termine escribiendo por WhatsApp.
@@ -410,7 +425,11 @@ sitio es que alguien termine escribiendo por WhatsApp.
 
 ---
 
-## Fase 5 — SEO, rendimiento y publicación
+## Fase 5 — SEO, rendimiento y publicación — PENDIENTE
+
+Al 28/09/2026 no hay analítica —ninguna página carga el script de Cloudflare—,
+ni cabeceras de seguridad, ni Perfil de Empresa (`perfilDeGoogle` sigue en
+`null`).
 
 Los cuatro primeros puntos se adelantaron a la Fase 4.0 — decisión 38. Quedan
 tachados acá para que no se hagan dos veces, y con lo que sí falta de cada uno:
@@ -445,12 +464,13 @@ tachados acá para que no se hagan dos veces, y con lo que sí falta de cada uno
 
 En orden de valor probable, no comprometido:
 
-1. Guía de fotografía para la empresa — sube la calidad del sitio más que
-   cualquier cambio de código
-2. Analítica, una vez elegida
+1. ~~Guía de fotografía para la empresa~~ — existe: `docs/fotografia.md`. Lo
+   que falta es pasársela a quien saca las fotos (Fase 0)
+2. ~~Analítica, una vez elegida~~ — elegida en la decisión 17, y está en la
+   Fase 5
 3. Relación entre productos y proyectos
 4. Vista previa antes de publicar
-5. Segundo administrador
+5. ~~Segundo administrador~~ — sin objeto: no hay panel (decisión 36)
 
 ---
 

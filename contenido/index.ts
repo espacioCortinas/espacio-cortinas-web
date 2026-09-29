@@ -17,8 +17,9 @@ import type {
  * —`productos.ts`, `proyectos.ts`— y lo generado —`fotos.ts`— viven separados
  * para que regenerar las fotos no pise los textos, y se juntan en este punto.
  *
- * La unión es por slug: las fotos de `productos.ts` con el slug
- * `roller-blackout` están bajo la clave `productos/roller-blackout`.
+ * La unión es por slug: las fotos del producto con el slug `roller` están bajo
+ * la clave `productos/roller`, y las de su variante `blackout`, bajo
+ * `productos/roller/blackout` — ver `unirVariantes()`.
  */
 
 function unir<T extends { slug: string }>(

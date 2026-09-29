@@ -420,10 +420,16 @@ async function prepararFoto(
     }
     const info = await tuberia
       .resize({ width: ancho, withoutEnlargement: true })
-      // El perfil de color sí se conserva, y es lo único. Un iPhone saca en
-      // Display P3; sin declarar el espacio de color, un navegador asume sRGB y
-      // los colores de las telas salen apagados. No dice nada del lugar, del
-      // equipo ni de la fecha.
+      // Adjunta un perfil de color, y es el único metadato que queda: el sRGB
+      // genérico —480 bytes, el mismo en todas—, no el de la foto. No dice nada
+      // del lugar, del equipo ni de la fecha.
+      //
+      // **Los colores no dependen de esta línea.** `sharp` convierte a sRGB
+      // antes de escribir, con o sin ella, así que una foto de iPhone, que sale
+      // en Display P3, no se apaga por no tenerla: comprobado el 28/09/2026,
+      // sin la línea la imagen comprimida sale idéntica byte a byte y lo único
+      // que falta es el perfil. Se queda porque sacarla cambiaría los bytes de
+      // cada foto ya publicada (regla 3 de arriba).
       .withIccProfile("srgb")
       .webp({ quality: Math.round(IMAGEN_CALIDAD * 100) })
       .toFile(join(carpetaDestino, `${ancho}.${FORMATO}`));
@@ -858,7 +864,8 @@ async function main() {
        * foto 4:5 para que nada quede desparejo — y recortarla a 4:5 «por las
        * dudas» le sacaría píxeles a una foto que después la galería muestra
        * apaisada. `cortinas-tela/barral/2` mide 1028 × 822 y es justo el caso:
-       * recortada quedaría en 658 de ancho y no aguantaría ningún módulo.
+       * recortada quedaría en 658 de ancho, con un tope de 329 px, y su
+       * diapositiva sería más angosta que las de al lado, que llegan a 480.
        */
       for (const clave of carpetasDeVariante) {
         vistas.add(clave);
@@ -1007,8 +1014,10 @@ async function main() {
     ` * ARCHIVO GENERADO — no editar a mano.\n` +
     ` *\n` +
     ` * Lo escribe \`scripts/preparar-fotos.mjs\` y se pisa entero en cada corrida.\n` +
-    ` * La clave es \`<entidad>/<slug>\`, y el orden del arreglo es el de la\n` +
-    ` * galería: la primera foto es la portada.\n` +
+    ` * Dos clases de clave, y en las dos el orden del arreglo es el de la galería.\n` +
+    ` * \`<entidad>/<slug>\`: las fotos de un producto o de un proyecto, y la primera\n` +
+    ` * es la portada. \`productos/<slug>/<clave de la variante>\`: las de una\n` +
+    ` * variante, que no tiene portada — decisión 48.\n` +
     ` */\n` +
     `export const fotos: Record<string, Foto[]> = {\n` +
     (cuerpo ? `${cuerpo}\n` : "") +

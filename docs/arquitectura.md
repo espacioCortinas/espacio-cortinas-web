@@ -2,20 +2,20 @@
 
 ## Stack
 
-| Capa                | Elección                                |
-| ------------------- | --------------------------------------- |
-| Framework           | Next.js, App Router                     |
-| Lenguaje            | TypeScript, modo estricto               |
-| Estilos             | Tailwind CSS                            |
-| **Contenido**       | **archivos de este repositorio**        |
-| Imágenes            | `sharp`, en la máquina de desarrollo    |
-| Envío de email      | Resend                                  |
-| Analítica           | Cloudflare Web Analytics                |
-| Hosting             | Cloudflare Workers                      |
-| Adaptador           | `@opennextjs/cloudflare`                |
-| CDN, DNS y TLS      | Cloudflare                              |
-| Despliegue continuo | Cloudflare Workers Builds, desde `main` |
-| Repositorio         | GitHub                                  |
+| Capa                | Elección                                      |
+| ------------------- | --------------------------------------------- |
+| Framework           | Next.js, App Router                           |
+| Lenguaje            | TypeScript, modo estricto                     |
+| Estilos             | Tailwind CSS                                  |
+| **Contenido**       | **archivos de este repositorio**              |
+| Imágenes            | `sharp`, en la máquina de desarrollo          |
+| Envío de email      | Resend                                        |
+| Analítica           | Cloudflare Web Analytics, sin activar: Fase 5 |
+| Hosting             | Cloudflare Workers                            |
+| Adaptador           | `@opennextjs/cloudflare`                      |
+| CDN, DNS y TLS      | Cloudflare                                    |
+| Despliegue continuo | Cloudflare Workers Builds, desde `main`       |
+| Repositorio         | GitHub                                        |
 
 **No hay base de datos.** Hubo una —PostgreSQL en Supabase, con autenticación,
 RLS y un bucket privado— y se sacó junto con el panel de administración en la
@@ -55,9 +55,12 @@ una foto o un texto es construir de nuevo, y no existe ninguna copia guardada
 que pueda quedar vieja. Por eso tampoco hace falta el caché incremental
 compartido, que se sacó con sus dos recursos — decisión 36.
 
-**Lo único que ejecuta código en respuesta a un visitante** es la Server Action
-del formulario de contacto (Fase 4.6). Por eso el sitio sigue siendo un Worker
-y no un montón de archivos estáticos. **`/contacto` sigue siendo estática**: la
+**Lo único de nuestro código que corre en respuesta a un visitante** es la
+Server Action del formulario de contacto (Fase 4.6). Por eso el sitio sigue
+siendo un Worker y no un montón de archivos estáticos. El HTML de las páginas lo
+entrega igual el Worker, que lo lee ya hecho del caché incremental —y eso cuesta
+CPU, ver «Formulario de contacto»—: ninguna se renderiza al pedirla.
+**`/contacto` sigue siendo estática**: la
 página se genera en el build, y lo que corre en el servidor es el envío, cuando
 alguien lo pide — un `POST` a la misma ruta.
 
@@ -102,14 +105,14 @@ contenido/
 components/
 ├── foto.tsx                     el <img> con srcset, proporción y recorte
 ├── galeria.tsx                  la tira que se desliza, con fotos y videos
-├── video-mudo.tsx               el video mudo, en bucle. "use client" (uno de tres)
+├── video-mudo.tsx               el video mudo, en bucle. "use client" (uno de cuatro)
 ├── tarjeta-producto.tsx         la portada y el nombre; la grilla de Inicio
 ├── tarjeta-proyecto.tsx         el proyecto en fila o en tarjeta
 ├── listado-proyectos.tsx        el primero en fila y el resto en grilla
 ├── logo.tsx                     el logo del encabezado
 ├── encabezado.tsx               logo y navegación
-├── navegacion.tsx               los cuatro enlaces. "use client" (uno de tres)
-├── formulario-contacto.tsx      el formulario y sus estados. "use client" (uno de tres)
+├── navegacion.tsx               los cuatro enlaces. "use client" (uno de cuatro)
+├── formulario-contacto.tsx      el formulario y sus estados. "use client" (uno de cuatro)
 ├── pie.tsx
 ├── whatsapp.tsx                 el enlace, con el mensaje según la página
 ├── medios-de-contacto.tsx       número, email, red y «Llamar», con su símbolo
@@ -172,11 +175,11 @@ Ni `.open-next/` ni `.wrangler/` se versionan: los regenera el build.
 
 ### Los tres archivos de configuración
 
-| Archivo               | Qué define                                                                                     |
-| --------------------- | ---------------------------------------------------------------------------------------------- |
-| `next.config.ts`      | Next. No tiene nada específico de Cloudflare                                                   |
-| `open-next.config.ts` | cómo el adaptador traduce Next a Worker: el caché incremental compartido — ver más abajo       |
-| `wrangler.jsonc`      | el Worker: nombre, entrada, compatibilidad, estáticos, bindings de caché y las `vars` públicas |
+| Archivo               | Qué define                                                                                                |
+| --------------------- | --------------------------------------------------------------------------------------------------------- |
+| `next.config.ts`      | Next. No tiene nada específico de Cloudflare                                                              |
+| `open-next.config.ts` | cómo el adaptador traduce Next a Worker: el caché incremental, sobre los assets estáticos — ver más abajo |
+| `wrangler.jsonc`      | el Worker: nombre, entrada, compatibilidad, estáticos, registros y las `vars` públicas                    |
 
 Dos cosas de `wrangler.jsonc` no son opcionales:
 
@@ -362,9 +365,9 @@ Con `srcset` y `sizes`, apuntando a las medidas que ya existen en `public/fotos/
 />
 ```
 
-`width` y `height` salen de las columnas `ancho` y `alto`, y no son decorativos:
-sin ellos el navegador no puede reservar el espacio y la página salta mientras
-carga.
+`width` y `height` salen de los campos `ancho` y `alto` del manifiesto, y no son
+decorativos: sin ellos el navegador no puede reservar el espacio y la página
+salta mientras carga.
 
 **El optimizador de `next/image` no se usa.** Si se usa el componente, va con
 `unoptimized`; si no, `<img>` directo. Lo que **no** hay que hacer es dejar el
@@ -532,7 +535,7 @@ No hay pantalla de configuración en V1. Los topes viven en `lib/constantes.ts`:
 export const PROYECTOS_DESTACADOS_HOME = 6;
 export const PRODUCTOS_DESTACADOS_HOME = 4;
 export const IMAGEN_LADO_MAXIMO = 2560;
-export const IMAGEN_PESO_MAXIMO_MB = 8;
+export const TOPE_BYTES_POR_ARCHIVO = 25 * 1024 * 1024;
 ```
 
 ## Copias de seguridad

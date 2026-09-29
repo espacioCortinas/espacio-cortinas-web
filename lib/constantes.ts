@@ -46,20 +46,21 @@ export const PORTADA_RELACION = 4 / 5;
  * La densidad de pantalla contra la que se mide si una foto tiene píxeles para
  * una caja.
  *
- * **De acá sale el tope de ancho de cada foto** (`topeDeAncho()` en
- * `lib/fotos.ts`), que es lo que decide el tamaño del módulo de la galería:
- * una foto no se muestra nunca más ancha que sus píxeles divididos por este
- * número. Con 2, una foto de 1600 px no pasa de una caja de 800 px de CSS.
+ * **De acá sale el tope de ancho de cada foto y de cada video**
+ * (`topeDeAncho()` en `lib/fotos.ts`), que es lo que decide cuánto puede medir
+ * cada diapositiva de la galería y cada medio que va suelto: nada se muestra
+ * nunca más ancho que sus píxeles divididos por este número. Con 2, una foto de
+ * 1600 px no pasa de una caja de 800 px de CSS.
  *
  * **Dos y no tres**, y es el mismo criterio con el que está escrito
  * `docs/diseno.md`: «1280 px a doble densidad es una caja de 640 px de CSS»,
- * «ninguna portada aguanta sangrado: 1440 con doble densidad pide 2880». El
- * módulo grande solo existe en escritorio, y ahí la doble densidad es el techo
+ * «ninguna portada aguanta sangrado: 1440 con doble densidad pide 2880». Las
+ * cajas grandes solo existen en escritorio, y ahí la doble densidad es el techo
  * real —una pantalla de triple densidad es un teléfono, donde todo ocupa el
  * ancho de la columna y cualquier foto del archivo sobra—.
  *
- * Subirlo a 3 dejaría a la mitad del archivo fuera del módulo grande sin que
- * nadie lo vea mejor; bajarlo a 1 desactiva el tope y devuelve las fotos
+ * Subirlo a 3 achicaría en escritorio los videos y `cortinas-tela/barral/2` sin
+ * que nadie los vea mejor; bajarlo a 1 desactiva el tope y devuelve las fotos
  * blandas que existe para evitar.
  */
 export const DENSIDAD_DE_REFERENCIA = 2;

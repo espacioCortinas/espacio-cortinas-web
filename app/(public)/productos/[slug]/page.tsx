@@ -139,10 +139,11 @@ export default async function Producto({ params }: Props) {
               sistema y el que rima con las lamas y los pliegues de las fotos.
               Sin tarjetas, sin sombras y sin fondo — `docs/diseno.md`.
 
-              **Las variantes sin fotos ni descripción se dibujan igual**, con
-              su nombre y nada más. Tres de las nueve del catálogo están así, y
-              siguen siendo opciones que alguien tiene que poder leer antes de
-              preguntar. Esconderlas sería esconder parte del producto.
+              **Las variantes sin fotos, video ni descripción se dibujan
+              igual**, con su nombre y nada más. Dos de las nueve del catálogo
+              están así —Blackout de Cortinas de tela y Motorizado de Toldos—,
+              y siguen siendo opciones que alguien tiene que poder leer antes
+              de preguntar. Esconderlas sería esconder parte del producto.
             */}
             <ul className="border-linea mt-8 border-t">
               {producto.variantes.map((variante) => (

@@ -11,7 +11,7 @@ import type { ConFotos, Proyecto } from "@/contenido/tipos";
  * leen como algo que no terminó de cargar. **Una composición pensada para uno
  * no escala**: veinte filas como las del catálogo, con la foto al costado y la
  * descripción, son del orden de 14.000 px de página en escritorio —el catálogo
- * de siete ya mide 5.900 (decisión 49)—.
+ * de siete ya ronda los 6.000 (decisión 49)—.
  *
  * # La regla
  *
@@ -28,8 +28,8 @@ import type { ConFotos, Proyecto } from "@/contenido/tipos";
  * **La fila no es decorativa: es la apertura del portfolio**, y cuál abre lo
  * decide el orden de `contenido/proyectos.ts`, que es donde ya se decide todo
  * el orden del sitio. Con veinte, la página queda en una fila más siete
- * renglones de tres: **5.751 px a 1440**, medido con copias temporales —lo
- * mismo que el catálogo de siete—. A 375, donde las tarjetas van de a una,
+ * renglones de tres: **5.751 px a 1440**, medido con copias temporales —del
+ * orden del catálogo de siete—. A 375, donde las tarjetas van de a una,
  * 12.491 px: dos columnas en teléfono dejan 155 px por tarjeta, y el chip de
  * ubicación, que no parte línea, no entra.
  *

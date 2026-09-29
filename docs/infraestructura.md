@@ -348,6 +348,13 @@ del Worker adelante, no resuelve: no es una dirección, es el espacio de nombres
 
 ### Cloudflare inyecta su propio `robots.txt` delante del nuestro
 
+**Ya no: verificado el 28/09/2026.** El archivo servido son exactamente las
+cinco líneas de `app/robots.ts`, con el user-agent de un navegador, el de
+Googlebot y el de GPTBot. O sea que hoy nada les pide a los rastreadores de
+entrenamiento que no entren. Desde el repositorio no se ve si alguien lo apagó
+en el panel o si cambió Cloudflare: es el «cambia sin pasar por un commit» de
+más abajo. Lo que sigue es cómo era.
+
 Descubierto al verificar el despliegue de la Fase 4.0. `app/robots.ts` genera
 esto:
 
@@ -397,17 +404,17 @@ infraestructura y conviene saberlo antes de mover 300 fotos.
 Verificado contra la documentación de Cloudflare en septiembre de 2026
 (`developers.cloudflare.com/workers/platform/limits/`, sección «Static Assets»):
 
-| Límite                     | Plan gratuito        | Plan pago            | Lo que necesitamos        |
-| -------------------------- | -------------------- | -------------------- | ------------------------- |
-| Archivos por versión       | 20.000               | 100.000              | ~1.200 · **6 % del tope** |
-| Tamaño de un archivo       | 25 MiB               | 25 MiB               | ~5 MB la más pesada       |
-| Tamaño total de los assets | sin tope documentado | sin tope documentado | ~240 MB                   |
+| Límite                     | Plan gratuito        | Plan pago            | Lo que necesitamos                           |
+| -------------------------- | -------------------- | -------------------- | -------------------------------------------- |
+| Archivos por versión       | 20.000               | 100.000              | ~1.200 · **6 % del tope**                    |
+| Tamaño de un archivo       | 25 MiB               | 25 MiB               | 3,6 MB el más pesado, un video; foto, 1,1 MB |
+| Tamaño total de los assets | sin tope documentado | sin tope documentado | ~240 MB                                      |
 
 **El camino resiste, y con margen amplio.** Unas 300 fotos por cuatro medidas
 son ~1.200 archivos: con los estáticos que genera Next —JS, CSS, el sitemap—
 el total queda en el orden de 1.500, contra un tope de 20.000. Ninguna foto se
-acerca a 25 MiB: la medida de 2560 px de una foto de interiores ronda los 5 MB
-en el peor caso, y las otras tres pesan mucho menos. **No hay tope documentado
+acerca a 25 MiB: medido el 28/09/2026, la medida de 2560 px más pesada del sitio
+es de 1,1 MB, y las otras tres pesan mucho menos. **No hay tope documentado
 de tamaño total de assets**, que es el número que hubiera sido el problema.
 
 Dos advertencias que salen de mirarlo:
@@ -789,6 +796,11 @@ Google Workspace o el registro del dominio en NIC. La cuenta de Vercel no toca
 ninguno de esos.
 
 ### Sobre rotar la `service_role key` — decidido que no
+
+**Sin objeto desde la decisión 36.** El proyecto de Supabase se borró —su
+dirección ya no resuelve, verificado el 28/09/2026— y la clave con él; tampoco
+queda en `.env.local` ni en los Secrets del Worker. Lo que sigue es el registro
+de cómo se razonó.
 
 Se evaluó rotarla y **se decidió no hacerlo**. La exposición real es acotada:
 

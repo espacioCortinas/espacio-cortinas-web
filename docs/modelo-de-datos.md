@@ -84,7 +84,7 @@ cada página.
 
 | Campo   | Notas                                                                              |
 | ------- | ---------------------------------------------------------------------------------- |
-| `ruta`  | `/compartir/productos-roller.a034f2fa.jpg`: el nombre lleva la huella de los bytes |
+| `ruta`  | `/compartir/productos-roller.3724fb43.jpg`: el nombre lleva la huella de los bytes |
 | `ancho` | 1200, leído del archivo escrito                                                    |
 | `alto`  | 630, ídem                                                                          |
 | `alt`   | el mismo texto que la foto tiene en el sitio: «Roller Blackout — foto 2»           |
@@ -101,9 +101,14 @@ juntos, regenerar las fotos pisaría los textos. Se juntan al leer, en
 ## Por qué TypeScript y no JSON
 
 Esto se edita a mano, así que conviene que el editor autocomplete y que `tsc`
-frene el build si falta un campo, si un booleano está mal escrito o si algo
-apunta a una carpeta que no existe. Con JSON esos errores no aparecen hasta que
-alguien visita la página.
+frene el build si falta un campo o si un booleano está mal escrito. Con JSON
+esos errores no aparecen hasta que alguien visita la página.
+
+**Lo que apunta a una carpeta no lo ve `tsc`**: son cadenas de texto. Una
+`clave` de variante sin carpeta la avisa `npm run fotos`, y una foto de
+`contenido/compartir.ts` que no está en el manifiesto corta `npm run compartir`.
+Un `slug` que no coincide con su carpeta no frena el build: la página sale sin
+fotos, y el aviso llega recién con `npm run compartir`.
 
 ## Producto
 
@@ -188,9 +193,9 @@ convención que `contenido/inicio.ts`.
 la variante cuelga de la del producto, así que no hace falta un mapa aparte:
 
 ```ts
-"productos/roller-blackout": [
+"productos/bandas-verticales": [
   {
-    carpeta: "productos/roller-blackout/1",
+    carpeta: "productos/bandas-verticales/1",
     medidas: [480, 960, 1600, 2560],
     formato: "webp",
     ancho: 2560,
@@ -231,17 +236,17 @@ salta mientras carga. Y con ese par se sabe la orientación sin abrir el archivo
 
 ```html
 <img
-  src="/fotos/productos/roller-blackout/1/1600.webp"
+  src="/fotos/productos/bandas-verticales/1/1600.webp"
   srcset="
-    /fotos/productos/roller-blackout/1/480.webp   480w,
-    /fotos/productos/roller-blackout/1/960.webp   960w,
-    /fotos/productos/roller-blackout/1/1600.webp 1600w,
-    /fotos/productos/roller-blackout/1/2560.webp 2560w
+    /fotos/productos/bandas-verticales/1/480.webp   480w,
+    /fotos/productos/bandas-verticales/1/960.webp   960w,
+    /fotos/productos/bandas-verticales/1/1600.webp 1600w,
+    /fotos/productos/bandas-verticales/1/2560.webp 2560w
   "
   sizes="(max-width: 768px) 100vw, 50vw"
   width="2560"
   height="3200"
-  alt="Roller Blackout — foto 1"
+  alt="Bandas verticales — foto 1"
   loading="lazy"
   decoding="async"
 />

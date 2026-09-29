@@ -4,8 +4,10 @@ import type { Foto } from "./tipos";
  * ARCHIVO GENERADO — no editar a mano.
  *
  * Lo escribe `scripts/preparar-fotos.mjs` y se pisa entero en cada corrida.
- * La clave es `<entidad>/<slug>`, y el orden del arreglo es el de la
- * galería: la primera foto es la portada.
+ * Dos clases de clave, y en las dos el orden del arreglo es el de la galería.
+ * `<entidad>/<slug>`: las fotos de un producto o de un proyecto, y la primera
+ * es la portada. `productos/<slug>/<clave de la variante>`: las de una
+ * variante, que no tiene portada — decisión 48.
  */
 export const fotos: Record<string, Foto[]> = {
   "productos/bandas-verticales": [

@@ -17,7 +17,7 @@ next-env.d.ts
 npm-debug.log*
 *.log
 
-# Variables de entorno (claves de Supabase y Resend)
+# Variables de entorno (la clave de Resend y las demás de .env.example)
 .env
 .env*.local
 .env.local
