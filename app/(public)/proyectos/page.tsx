@@ -38,7 +38,7 @@ import { metadataDePagina } from "@/lib/metadata";
 export const metadata: Metadata = metadataDePagina({
   titulo: "Proyectos",
   descripcion:
-    "Proyectos integrales de Espacio Cortinas en Buenos Aires: espacios " +
+    "Proyectos realizados por Espacio Cortinas en Buenos Aires: espacios " +
     "resueltos completos, con las fotos y los videos de cada uno.",
   ruta: "/proyectos",
 });
@@ -55,7 +55,7 @@ export default function Proyectos() {
             ` · ${proyectos.length} proyecto${proyectos.length === 1 ? "" : "s"}`}
         </p>
 
-        <h1 className="mt-4 text-display">Proyectos integrales</h1>
+        <h1 className="mt-4 text-display">Proyectos Realizados</h1>
 
         <p className="max-w-lectura text-texto-suave mt-6 text-subtitulo">
           Espacios completos que resolvimos de principio a fin, con
