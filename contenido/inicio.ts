@@ -109,7 +109,7 @@ export const inicio = {
      * de `docs/producto.md` —asesoran y colocan—: un espacio resuelto entero,
      * no una ventana.
      */
-    titulo: "Proyectos integrales",
+    titulo: "Proyectos realizados",
     bajada:
       "Espacios completos que resolvimos de principio a fin: asesoramiento, " +
       "medición y colocación propias.",

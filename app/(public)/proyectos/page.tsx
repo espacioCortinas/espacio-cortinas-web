@@ -55,7 +55,7 @@ export default function Proyectos() {
             ` · ${proyectos.length} proyecto${proyectos.length === 1 ? "" : "s"}`}
         </p>
 
-        <h1 className="mt-4 text-display">Proyectos Realizados</h1>
+        <h1 className="mt-4 text-display">Proyectos realizados</h1>
 
         <p className="max-w-lectura text-texto-suave mt-6 text-subtitulo">
           Espacios completos que resolvimos de principio a fin, con
