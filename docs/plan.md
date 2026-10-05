@@ -482,10 +482,12 @@ páginas sin tocar su armado.
   dejó pendiente: en el catálogo, desde el teléfono, WhatsApp quedaba al final
   de una página de más de 7.000 px.
 
-Lo que salió distinto de lo previsto: **el menú del teléfono pasó a un botón
-«Menú»** —un `<details>` nativo—, porque a 15 px y con las cinco etiquetas de
-la etapa 4 no entra en una fila; y **el pie perdió su botón de WhatsApp**, que
-con el flotante quedaba repetido.
+Lo que salió distinto de lo previsto: **el pie perdió su botón de WhatsApp**,
+que con el flotante quedaba repetido. Y **el menú del teléfono se probó como
+un botón «Menú»** desplegable y se volvió a los enlaces a la vista, a pedido:
+a 13 px y sin espaciado entre letras, los cuatro entran en una fila desde los
+teléfonos de 360 de ancho; con «Nosotros», en la etapa 4, van a pasar a dos
+renglones.
 
 **2. Inicio — HECHA.**
 

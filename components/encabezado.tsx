@@ -16,9 +16,9 @@ import { Contenedor } from "@/components/ui/contenedor";
  *
  * **Una franja blanca, como la del boceto de la empresa**, sobre el gris del
  * fondo: lo que la separa del contenido es el cambio de color, sin filete ni
- * sombra. Adentro, el logo a la izquierda y el menú a la derecha, en una sola
- * fila también en el teléfono, donde el menú es un botón (ver
- * `components/navegacion.tsx`).
+ * sombra. Adentro, el logo y los enlaces: en escritorio en una fila, el logo a
+ * la izquierda y los enlaces a la derecha; en el teléfono los enlaces bajan a
+ * su propia fila, debajo del logo (ver `components/navegacion.tsx`).
  *
  * # En Inicio no hay logo ni franja
  *
@@ -28,10 +28,10 @@ import { Contenedor } from "@/components/ui/contenedor";
  * El boceto lo resuelve igual: su encabezado no lleva el logo, y el único es el
  * del bloque.
  *
- * Así que en Inicio el encabezado es solo el menú, a la derecha y sin la franja
- * blanca: una franja con un hueco a la izquierda se leería como algo que
- * falta. En el resto de las páginas no hay logo grande, y el del encabezado es
- * el que dice de quién es el sitio.
+ * Así que en Inicio el encabezado son solo los enlaces, sin la franja blanca:
+ * una franja con un hueco donde iba el logo se leería como algo que falta. En
+ * el resto de las páginas no hay logo grande, y el del encabezado es el que
+ * dice de quién es el sitio.
  *
  * **Por eso es un componente de cliente**: necesita saber en qué página está.
  * Se dibuja igual en el servidor —`usePathname()` responde también ahí—, así
@@ -41,9 +41,6 @@ import { Contenedor } from "@/components/ui/contenedor";
  * de una pantalla de teléfono en un sitio cuyo contenido son fotos. Lo que sí
  * queda siempre a mano es WhatsApp, en el botón flotante.
  *
- * `relative` porque el menú del teléfono se despliega debajo de esta franja, a
- * todo el ancho, y se posiciona contra ella.
- *
  * El logo es también el enlace a Inicio. Su texto alternativo —«Espacio
  * Cortinas»— es el nombre accesible del enlace, así que no lleva `aria-label`
  * encima, que lo duplicaría.
@@ -52,12 +49,12 @@ export function Encabezado() {
   const enInicio = usePathname() === "/";
 
   return (
-    <header className={`relative ${enInicio ? "" : "bg-superficie"}`}>
+    <header className={enInicio ? "" : "bg-superficie"}>
       <Contenedor>
         <div
           className={
-            "flex items-center gap-6 py-3 md:gap-10 md:py-5 " +
-            (enInicio ? "justify-end" : "justify-between")
+            "flex flex-col gap-1 py-3 md:flex-row md:items-center md:gap-10 md:py-5 " +
+            (enInicio ? "md:justify-end" : "md:justify-between")
           }
         >
           {!enInicio && (
