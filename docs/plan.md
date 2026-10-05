@@ -425,6 +425,240 @@ sitio es que alguien termine escribiendo por WhatsApp.
 
 ---
 
+## Fase 4.7 — Rediseño a partir del boceto de la empresa — EN CURSO
+
+**Por qué existe.** En octubre de 2026 la empresa miró el sitio terminado y lo
+rechazó en lo visual: «no tiene diseño, se nota que lo hizo una IA», y tampoco
+le gustaron los colores. La estructura sí le pareció bien. Armó un boceto en
+Wix, publicado en `ventas35961.wixsite.com/my-site`, con sus colores, su armado
+y un logo nuevo.
+
+Tenía razón, y tiene nombre: el fondo crema, la Fraunces en los títulos, la
+lista numerada con filetes y las etiquetas chicas en mayúscula espaciada están
+hoy entre las marcas más repetidas de los sitios generados con IA. Y el sitio no
+tenía ni un color propio.
+
+**Se adapta el sitio a la idea del boceto; no se copia el boceto.** No anda en
+el teléfono —la versión móvil la armó Wix sola, y el sitio se va a ver casi
+entero desde uno—, usa fotos de muestra de la plantilla, tiene párrafos enteros
+en mayúscula, mezcla dos letras en los títulos y deja restos de plantilla
+(`info@misitio.com`, «My Site»).
+
+**Reabre las decisiones 43 y 44**: la dirección «Cal» y el amarillo como única
+marca. La decisión nueva se escribe en la etapa 5, con el resultado a la vista.
+
+### Cómo se trabaja
+
+- **En la rama `rediseno`.** `main` no se toca hasta que la empresa apruebe, y
+  hay un commit por etapa: cualquiera se puede deshacer sola.
+- **Cada etapa se muestra al terminar**, con capturas a 375 y a 1440. La
+  empresa revisa después de la 1 y de la 2, para ver la dirección antes de que
+  se componga el resto.
+- **Lo que sale de las fotos se mantiene; lo que era gusto, no.** Siguen
+  valiendo: nada de texto sobre una foto, ninguna foto más ancha que su tope
+  —regla 4 de `CLAUDE.md`— y las portadas 4:5 en los listados. Cambian el
+  papel, las letras, el acento y la composición.
+
+### Etapas
+
+**1. Sistema: color, letra y logo.** Cambia la cara de todas las páginas sin
+tocar su armado.
+
+- La paleta del boceto, medida de su código: fondo `#EDEFF0`, texto `#2F2F2F`,
+  pizarra `#405357` para títulos, enlaces y botón principal, azul verdoso
+  `#80A6AD` como color de superficie y el teal oscuro `#607D82` en el pie.
+- Dos arreglos de contraste: **sobre el azul verdoso el texto va oscuro** —el
+  blanco del boceto da 2,3:1, y hacen falta 3 aun en letra grande— y **el pie
+  se oscurece un poco**, porque el blanco sobre `#607D82` da 4,42:1.
+- Raleway para todo, con cifras de línea: por defecto trae las antiguas, que
+  suben y bajan y desparejan un teléfono o «25 mm». Se van Fraunces y Karla.
+  Tahoma, que el boceto usa en algunos títulos, no: es de Windows, en los
+  teléfonos no está.
+- El logo nuevo, de círculos de línea. El archivo que mandó la empresa pasa a
+  `fotos-originales/logo-vacio.png`, que no se versiona, y
+  `scripts/preparar-marca.mjs` publica la medida que hace falta.
+- Encabezado, pie y un botón flotante de WhatsApp abajo a la derecha, como el
+  «¡Chateá con nosotros!» del boceto. Resuelve además lo que la decisión 49
+  dejó pendiente: en el catálogo, desde el teléfono, WhatsApp quedaba al final
+  de una página de más de 7.000 px.
+
+**2. Inicio.**
+
+- Apertura: el bloque azul verdoso con el logo, montado sobre el borde de una
+  foto nuestra, y el lema debajo. En el teléfono, la foto a lo ancho y el
+  bloque pisando su borde de abajo. El bloque es opaco: no hay texto sobre la
+  foto.
+- Productos: cada uno con su portada y un bloque azul verdoso con el nombre,
+  alternando lados, con las tres frases del boceto intercaladas.
+- «Cómo trabajamos»: de la lista 01–04 a la grilla de 2×2 con líneas finas de
+  las páginas de producto del boceto.
+- El sector de proyectos pasa a llamarse «Nuestros trabajos».
+- El cierre, en azul verdoso.
+
+**3. Producto y proyecto.** El lema arriba del título, el título centrado, y
+las variantes en el damero de 2×2 del boceto: foto y texto alternados, con
+líneas finas y de borde a borde. **Las fotos no se recortan**: cada celda toma
+la proporción de su foto. A media pantalla casi todas tienen resolución de
+sobra; a pantalla completa no alcanzaría ninguna (`docs/diseno.md`, punto 2 del
+análisis). Los campos nuevos —`lema` y `recuadro`— van en `contenido/tipos.ts`.
+
+**4. Listados, Contacto y Nosotros.**
+
+- Las grillas de portadas 4:5 se quedan, con el nombre en una banda azul
+  verdosa debajo de la foto.
+- Contacto con el armado del boceto —los datos a la izquierda, el formulario a
+  la derecha— y WhatsApp como único botón principal.
+- **Página nueva, `/nosotros`**, con los textos del boceto: la empresa pidió
+  sumarla. Entra al menú, al sitemap y a la ficha de negocio local.
+- El menú queda: Inicio, Productos, Nuestros trabajos, Nosotros, Contacto.
+  **La dirección `/proyectos` no cambia**, solo su nombre en pantalla: los
+  enlaces que ya circulan siguen andando (decisión 10).
+
+**5. Cierre.**
+
+- Las doce imágenes para compartir, de nuevo, con el logo nuevo.
+- El favicon, que nunca hubo (decisión 45), a partir de los círculos del logo.
+- La documentación: `docs/diseno.md` con la dirección nueva —y «Cal» al final,
+  con las otras descartadas—, la decisión nueva en `docs/decisiones.md`,
+  `/nosotros` en `docs/producto.md` y los campos nuevos en
+  `docs/modelo-de-datos.md`.
+- Merge a `main`, con la aprobación de la empresa.
+
+**Terminado cuando:**
+
+- La empresa aprobó el resultado en su teléfono
+- Se ve bien en 320, 375, 768, 1024 y 1440
+- Ningún texto sobre el azul verdoso queda por debajo de 4,5:1, ni el del pie
+- `npm run build`, `tsc --noEmit`, eslint y `npm run preview` pasan, y
+  `npm run fotos:revisar` da verde
+
+### Los textos
+
+**Se usan todos los del boceto**, a pedido de la empresa, con el criterio que
+ya se siguió con las descripciones de `contenido/productos.ts`: se corrigen la
+ortografía, las tildes y la puntuación, no las palabras ni el tono. Los
+párrafos que el boceto escribe en mayúscula van en minúscula, con su mayúscula
+inicial. Donde el boceto no tiene texto —«Cómo trabajamos», arquitectos y
+oficinas, el cierre, las variantes que no son de roller— queda el que hay.
+
+Se copian acá porque el boceto es un sitio de Wix que la empresa puede cambiar
+o borrar, y el repositorio es la fuente de verdad.
+
+**Inicio**
+
+- Lema: «Hacé de tus espacios / tu mejor compañía».
+- Bajada: «Brindamos asesoramiento e instalación de nuestros productos.»
+- Las tres frases que van entre los productos:
+  1. «Dar a cada espacio la luz natural que requiere es nuestra tarea.
+     Combinando estética y funcionalidad.»
+  2. «La luz, el calor y el aire son elementos vitales para el planeta. El
+     control de estos elementos es un desafío para el hombre, desarrollando
+     cada vez más instrumentos y tecnología.»
+  3. «Nuestros productos son la respuesta más inteligente a este desafío.
+     Controlar estos elementos sin perjudicarlos mejora nuestra calidad de
+     vida, creándonos un hábitat ideal.»
+
+**Productos.** Cada página del boceto trae un lema, una descripción y un
+recuadro con un título y dos o tres frases. Así se reparten entre los siete
+productos del sitio:
+
+| Página del boceto      | Va a                                                                     |
+| ---------------------- | ------------------------------------------------------------------------ |
+| Roller Screen          | la variante Screen de `roller`                                           |
+| Roller Blackout        | la variante Blackout de `roller`                                         |
+| Cortinas de confección | `cortinas-tela`, que pasa a llamarse así; la dirección no cambia         |
+| Venecianas             | `venecianas-madera` y `venecianas-pvc`, el mismo texto, como ya pasa hoy |
+| Toldos                 | `toldos`                                                                 |
+| —                      | `compacta-blackout` y `bandas-verticales`: textos nuevos, con su estilo  |
+
+_Roller_ — lema «filtrar u oscurecer», que junta los de sus dos páginas; la
+descripción del producto queda.
+
+- Screen, «filtrar la luz»: «Los tejidos microperforados permiten ver hacia el
+  exterior, contribuyendo a mejorar el confort visual de quien vive o trabaja
+  en ambientes interiores. Difunden la luz y garantizan la privacidad en los
+  ambientes. El sistema más eficaz para filtrar la luz y reducir el calor.
+  Disponible en distintos factores de apertura adaptables a cada necesidad.»
+  Recuadro: «manuales y automatizadas» — «Disfrutar los espacios de interior.
+  Una luz para relajarse. Una luz para la creatividad.»
+- Blackout, «oscurecer»: «Las cortinas roller blackout permiten generar
+  oscuridad en los ambientes. El blackout es un tejido que puede ser sintético
+  o entelado, totalmente opaco a la luz, combinando practicidad y estética.
+  Complementados con perfilería de aluminio, garantizan un sistema totalmente
+  impermeable a la luz.» Recuadro: «manuales y automatizadas» — «Modulando la
+  luz con las cortinas, cada espacio adquiere un significado diferente. La luz
+  define la relación entre el ambiente y los que lo habitan.»
+
+_Cortinas de confección_ — «calidez»: «Combinar la calidez de las telas nos
+permite dar a cada ambiente un sello particular. Combinando distintas
+texturas, las cortinas de confección cubren grandes superficies cumpliendo
+todas las funciones: filtran la luz, dan intimidad y oscurecen. Amplían los
+ambientes y pueden combinar muy bien en cualquier espacio.» Recuadro:
+«manuales y automatizadas» — «Los géneros brindan calidez a los ambientes.
+Generan buena acústica y amplitud.»
+
+_Venecianas de madera y de PVC_ — «estilo»: «Las cortinas venecianas modulan la
+luz. En sus varias versiones —aluminio, PVC y madera— se transforman en un
+objeto decorativo. Muy funcionales y prácticas, proporcionan la solución ideal
+para cada necesidad.» Recuadro: «venecianas: 25 mm aluminio, 50 mm aluminio,
+50 mm PVC, 50 mm madera» — «Funcionales y decorativas.»
+
+_Toldos_ — «vivir el aire libre»: «Los toldos son sistemas de protección solar
+de uso externo. De brazos extensibles, verticales o punto recto, estos sistemas
+permiten disfrutar de los espacios abiertos. La variedad de lonas, tejidos y
+mecanismos los convierte en el complemento ideal a la hora de proteger
+viviendas y comercios. La estética en sus formas acompaña siempre fachadas y
+contrafrentes.» Recuadro: «manuales y automatizados» — «Los toldos detienen el
+impacto directo del sol. Permiten que podamos disfrutar de los espacios
+abiertos.»
+
+_Compacta Blackout_ — **texto nuevo**, con el estilo del boceto y los datos de
+la descripción que había: «descansar»: «Las cortinas compactas blackout logran
+la oscuridad más completa en los ambientes. La tela se enrolla dentro de un
+cajón y corre por guías laterales que impiden el paso de la luz por los
+costados. Manuales o motorizadas, son la solución ideal para dormitorios y
+espacios de descanso, dentro de las medidas que permite el sistema.» Recuadro:
+«manuales y automatizadas» — «Oscuridad completa, a cualquier hora del día. Un
+ambiente pensado para descansar.»
+
+_Bandas verticales_ — **texto nuevo**, igual: «orientar la luz»: «Las bandas
+verticales permiten orientar la luz y regular la privacidad, girando sobre su
+propio eje. Se recogen hacia un costado y dejan la ventana despejada. En telas
+translúcidas o blackout, son la solución ideal para grandes ventanales,
+puertas corredizas y oficinas.» Recuadro: «translúcidas o blackout» — «La luz
+justa para cada momento del día. Orden y amplitud en los espacios de trabajo.»
+
+**Nosotros** — página nueva:
+
+- Título: «Nosotros». Bajada: «Ofrecemos soluciones para cada exigencia,
+  brindando protección y regulación de la luz natural, con tecnología en cada
+  detalle.»
+- «Propósito»: «Con vasta experiencia en el rubro, seguimos cada proyecto de
+  principio a fin. La calidad de nuestra materia prima garantiza los
+  resultados. Siempre a disposición del cliente, estudiamos cada solución.
+  Brindamos asesoramiento para particulares y profesionales. Servicio de
+  posventa.»
+- «Visión»: «Preservando la calidad de nuestros productos, garantizamos como
+  resultado un producto confiable y duradero. Incorporamos tecnología y confort
+  en nuestros productos.»
+- «Cuidamos los detalles»: «Contamos con un servicio de asesoramiento a
+  domicilio, acompañando a profesionales en sus proyectos y a clientes
+  particulares.»
+
+**Nuestros trabajos** — el título de `/proyectos` y del sector de Inicio. El
+boceto dice «trabajos realizados»; la empresa eligió «Nuestros trabajos».
+
+**Lo que se corrigió**, para que se pueda revisar: intalación, compañia,
+estetica, desafio, mas, tecnologia, creandonos, habitat, confeccion, generos,
+acustica, relacion, proteccion y regulacion llevan su tilde; experiecia,
+brindandondo, tranforman, pemiten, sienpre, «untejido que puede puede» y «post
+venta» se escriben bien; «mejorar en confort» pasa a «mejorar el confort»; «la
+variedad… los convierten» concuerda en singular; y salen las comas entre sujeto
+y verbo —«…que requiere, es nuestra tarea», «…materia prima, garantiza»,
+«…sus formas, acompaña»—.
+
+---
+
 ## Fase 5 — SEO, rendimiento y publicación — PENDIENTE
 
 Al 28/09/2026 no hay analítica —ninguna página carga el script de Cloudflare—,
