@@ -513,6 +513,13 @@ Lo que salió distinto de lo previsto:
   pizarra sobre el azul verdoso da 3,08:1, y en el cierre hay un enlace.
 - «Cortinas de tela» pasó a «Cortinas de confección» acá y no en la etapa 3,
   porque el nombre se ve en los destacados de Inicio.
+- **En Inicio el encabezado no lleva el logo**, después de la primera
+  revisión: con el del encabezado y el del bloque, en el teléfono el logo
+  salía dos veces en la primera pantalla. Es lo que hace el boceto —su
+  encabezado no tiene logo—, y en el resto de las páginas el logo sigue
+  arriba. Con eso, en el teléfono el bloque pasó arriba de la foto.
+- **Instagram en la apertura**, debajo del lema, que es donde lo pone el
+  boceto.
 
 **3. Producto y proyecto.** El lema arriba del título, el título centrado, y
 las variantes en el damero de 2×2 del boceto: foto y texto alternados, con

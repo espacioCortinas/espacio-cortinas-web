@@ -27,9 +27,8 @@ import { ENLACES } from "@/lib/navegacion";
  *
  * # La página actual
  *
- * **Es uno de los tres componentes de cliente del sitio público**, con el video
- * y el formulario de contacto, y existe por eso: marcar en qué página está el
- * visitante necesita saber la ruta actual. Se marca con `aria-current="page"`,
+ * **Es de cliente por eso**, como el encabezado que lo contiene: marcar en qué
+ * página está el visitante necesita saber la ruta actual. Se marca con `aria-current="page"`,
  * subrayado y peso — tres señales y ninguna de color, porque el menú ya es del
  * color del acento.
  */

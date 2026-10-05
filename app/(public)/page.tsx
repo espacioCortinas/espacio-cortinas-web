@@ -4,12 +4,13 @@ import Link from "next/link";
 import { FotoImg } from "@/components/foto";
 import { ListadoProyectos } from "@/components/listado-proyectos";
 import { LogoGrande } from "@/components/logo";
-import { EnlaceLlamar } from "@/components/medios-de-contacto";
+import { EnlaceLlamar, EnlaceRed } from "@/components/medios-de-contacto";
 import { TarjetaProducto } from "@/components/tarjeta-producto";
 import { EnlaceWhatsapp } from "@/components/whatsapp";
 import { clasesDeBoton } from "@/components/ui/boton";
 import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
 import { fotoDe, productosDestacados, proyectosDestacados } from "@/contenido";
+import { contacto } from "@/contenido/contacto";
 import { inicio } from "@/contenido/inicio";
 import {
   PRODUCTOS_DESTACADOS_HOME,
@@ -40,7 +41,9 @@ import { altAutomatico } from "@/lib/texto";
  *
  * - **La apertura**: un bloque azul verdoso con el logo, montado sobre el borde
  *   de una foto, y el lema debajo —«hacé de tus espacios», chico; «tu mejor
- *   compañía», en mayúscula espaciada— con un filete corto abajo.
+ *   compañía», en mayúscula espaciada—, con Instagram y un filete corto abajo.
+ *   Y lo que hace el encabezado del boceto: en Inicio no lleva el logo, para
+ *   que el del bloque sea el único de la primera pantalla.
  * - **Los productos en zigzag**, cada uno con un bloque azul verdoso con su
  *   nombre, y entre ellos las tres frases del boceto. El boceto no tenía fotos
  *   en esos bloques; acá cada uno pisa la portada de su producto.
@@ -114,27 +117,42 @@ export default function Inicio() {
    */
   const fotoProfesionales = fotoDe("productos", "bandas-verticales", 2);
 
+  /* La red que el boceto pone en la apertura. Si algún día se va, no se dibuja. */
+  const instagram = contacto.redes.find((red) => red.nombre === "Instagram");
+
   return (
-    <main className={`${CLASES_CONTENEDOR} pt-8 pb-16 md:pt-16 md:pb-28`}>
+    // Arriba, poco aire: en Inicio el encabezado no lleva logo ni franja, y lo
+    // primero de la página es el bloque del logo (`components/encabezado.tsx`).
+    <main className={`${CLASES_CONTENEDOR} pt-2 pb-16 md:pt-8 md:pb-28`}>
       {/* 1 — APERTURA ------------------------------------------------ */}
       {/*
-        Tres piezas que se pisan, como en el boceto: la foto, el bloque con el
-        logo y el texto.
+        Tres piezas que se pisan, como en el boceto: el bloque con el logo, la
+        foto y el texto. El logo de este bloque es el único de la primera
+        pantalla: en Inicio el encabezado no lo repite.
 
-        En el teléfono van una debajo de la otra, y el bloque sube sobre el
-        borde de abajo de la foto —`-mt-16`— dejando a la derecha una franja
-        de foto a la vista: es lo que hace que se lea como montado y no como
-        apilado.
+        En el teléfono van una debajo de la otra y escalonadas: el bloque
+        arriba, recostado a la izquierda, y la foto debajo, recostada a la
+        derecha, metida 40 px por debajo del bloque. Es el boceto de escritorio
+        —bloque a la izquierda, foto a la derecha— doblado para una columna.
 
         Desde 768 es una grilla de 12 columnas: la foto a la derecha, en las
         columnas 7 a 12 y las dos filas; el bloque a la izquierda, en la 1 a la
         7, así que se mete una columna adentro de la foto; y el texto debajo
         del bloque. `grid-rows-[auto_1fr]` manda el alto que sobra de la foto a
         la segunda fila, debajo del texto, y no entre el bloque y el texto.
+
+        El bloque va antes que la foto en el documento —es lo primero que se
+        lee— y `relative z-10` lo deja encima de la foto que pisa.
       */}
       <section className="md:grid md:grid-cols-12 md:grid-rows-[auto_1fr] md:gap-x-6">
+        <div className="bg-marca relative z-10 mr-10 px-6 py-7 md:col-span-7 md:col-start-1 md:row-start-1 md:mt-12 md:mr-0 md:self-start md:px-10 md:py-12 lg:px-12 lg:py-14">
+          <div className="max-w-[26rem]">
+            <LogoGrande sizes="(min-width: 1024px) 26rem, (min-width: 768px) 20rem, calc(100vw - 8rem)" />
+          </div>
+        </div>
+
         {fotoApertura && (
-          <div className="md:col-span-6 md:col-start-7 md:row-span-2 md:row-start-1">
+          <div className="-mt-10 ml-10 md:col-span-6 md:col-start-7 md:row-span-2 md:row-start-1 md:mt-0 md:ml-0">
             <FotoImg
               foto={fotoApertura}
               alt={altAutomatico("Venecianas de madera", 2)}
@@ -142,29 +160,12 @@ export default function Inicio() {
               sizes={sizesConTope(fotoApertura, [
                 { desde: "1216px", ancho: "500px" },
                 { desde: "768px", ancho: "calc(50vw - 3.75rem)" },
-                { ancho: "calc(100vw - 2.5rem)" },
+                { ancho: "calc(100vw - 5rem)" },
               ])}
               prioridad
             />
           </div>
         )}
-
-        {/*
-          `relative` para que quede encima de la foto que pisa. Sin la foto —si
-          algún día se saca del archivo— no sube: no tendría qué pisar.
-        */}
-        <div
-          className={
-            "bg-marca relative mr-10 px-6 py-7 md:col-span-7 md:col-start-1 " +
-            "md:row-start-1 md:mt-12 md:mr-0 md:self-start md:px-10 md:py-12 " +
-            "lg:px-12 lg:py-14 " +
-            (fotoApertura ? "-mt-16" : "")
-          }
-        >
-          <div className="max-w-[26rem]">
-            <LogoGrande sizes="(min-width: 1024px) 26rem, (min-width: 768px) 20rem, calc(100vw - 8rem)" />
-          </div>
-        </div>
 
         <div className="mt-10 md:col-span-6 md:col-start-1 md:row-start-2 md:mt-12">
           {/*
@@ -181,8 +182,24 @@ export default function Inicio() {
               {inicio.lema.remate}
             </span>
           </h1>
+
+          {/*
+            Instagram, debajo del lema, que es donde lo pone el boceto: la
+            empresa lo quiere en la primera pantalla. Es el mismo enlace del pie
+            y de /contacto, con el logo de la red y la cuenta, que es lo que se
+            busca en la app.
+          */}
+          {instagram && (
+            <p className="mt-4">
+              <EnlaceRed
+                red={instagram}
+                className="text-texto inline-flex min-h-11 items-center gap-2 font-semibold underline decoration-1 underline-offset-4 hover:decoration-2"
+              />
+            </p>
+          )}
+
           {/* El filete corto que el boceto pone debajo del lema. */}
-          <span aria-hidden className="bg-acento mt-6 block h-0.5 w-32" />
+          <span aria-hidden className="bg-acento mt-5 block h-0.5 w-32" />
 
           <p className="max-w-lectura text-texto-suave mt-6 text-subtitulo">
             {inicio.bajada}

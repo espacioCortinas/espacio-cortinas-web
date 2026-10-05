@@ -64,12 +64,11 @@ export function Logo({ className = "" }: { className?: string }) {
  * teléfono se muestra a menos de 300 px y baja el de 600; en escritorio, a 416,
  * y una pantalla de doble densidad pide el de 1.200.
  *
- * **Sin texto alternativo**, a diferencia del del encabezado: el nombre ya lo
- * anuncia el enlace del encabezado, que está en la misma pantalla, y repetirlo
- * acá haría que un lector de pantalla diga «Espacio Cortinas» dos veces antes
- * del título.
+ * **Con el mismo texto alternativo que el del encabezado**, «Espacio
+ * Cortinas», porque en Inicio lo reemplaza: ahí el encabezado no lleva logo, y
+ * este es el único (ver `components/encabezado.tsx`).
  *
- * Es lo primero grande que se ve en Inicio, así que no se difiere.
+ * Es lo primero que se ve en Inicio, así que no se difiere.
  */
 export function LogoGrande({ sizes }: { sizes: string }) {
   return (
@@ -82,7 +81,7 @@ export function LogoGrande({ sizes }: { sizes: string }) {
       height={logoGrande.alto}
       fetchPriority="high"
       decoding="async"
-      alt=""
+      alt="Espacio Cortinas"
       className="h-auto w-full"
     />
   );
