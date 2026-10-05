@@ -523,12 +523,32 @@ Lo que salió distinto de lo previsto:
 - **Instagram en la apertura**, debajo del lema, que es donde lo pone el
   boceto.
 
-**3. Producto y proyecto.** El lema arriba del título, el título centrado, y
+**3. Producto y proyecto — HECHA.** El lema arriba del título, el título centrado, y
 las variantes en el damero de 2×2 del boceto: foto y texto alternados, con
 líneas finas y de borde a borde. **Las fotos no se recortan**: cada celda toma
 la proporción de su foto. A media pantalla casi todas tienen resolución de
 sobra; a pantalla completa no alcanzaría ninguna (`docs/diseno.md`, punto 2 del
 análisis). Los campos nuevos —`lema` y `recuadro`— van en `contenido/tipos.ts`.
+
+Cómo quedó:
+
+- **Qué va en cada celda lo decide `lib/damero.ts`**, que explica la regla, y
+  `components/damero.tsx` lo dibuja. Lo corto: la portada con el recuadro del
+  producto; Screen y Blackout de Roller, que en el boceto tenían página
+  propia, con su propio 2×2; las demás variantes juntas en una celda de texto,
+  sin esconder ninguna; y lo suelto de a dos, con el nombre de su variante
+  arriba de cada foto.
+- **La portada dejó de ir sola en la apertura**: es la primera celda del
+  damero. Y la tira que se desliza (decisión 50) ya no la usa ninguna página:
+  `components/galeria.tsx` se borra en la etapa 5 si la empresa aprueba el
+  damero, y si no, se vuelve a ella.
+- **Las fotos no hacen saltar la página al cargar.** Con ancho automático, una
+  foto diferida mide 300 px hasta que llega: en Roller la página pasaba de
+  4.814 a 6.503 px mientras cargaban. El ancho de cada foto sale ahora de una
+  cuenta con su proporción, y el alto queda fijo desde el principio.
+- **Cortinas de confección perdió su explicación de riel y barral** con la
+  descripción del boceto, así que esa parte de la descripción anterior se
+  repartió en las variantes, sin reescribirla, como en la decisión 40.
 
 **4. Listados, Contacto y Nosotros.**
 
