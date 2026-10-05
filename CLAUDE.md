@@ -21,6 +21,7 @@ Antes de trabajar leé el documento que corresponda en `docs/`:
 | `docs/publicar-fotos.md`  | el paso a paso para que una foto llegue al sitio     |
 | `docs/seguridad.md`       | privacidad de las fotos, claves, formulario          |
 | `docs/infraestructura.md` | estado real de dominio, DNS, correo, cuentas         |
+| `docs/mudanza-a-wix.md`   | el plan para pasar el sitio a Wix, si se decide      |
 | `docs/decisiones.md`      | **por qué** se decidió cada cosa                     |
 | `docs/plan.md`            | fases y criterio de terminado                        |
 
