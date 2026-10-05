@@ -5,7 +5,13 @@ import type { ComponentProps } from "react";
  *
  *     principal    pizarra sólida, blanco encima       8,10:1
  *     secundario   filete pizarra de 1 px, sin relleno 7,02:1 sobre el fondo
- *     enlace       texto pizarra subrayado             7,02:1 sobre el fondo
+ *     enlace       subrayado, del color que lo rodea   11,61:1 sobre el fondo
+ *
+ * **El enlace hereda el color**, y lo que lo marca como enlace es el
+ * subrayado. Desde la Fase 4.7 hay tres fondos —el gris, el azul verdoso de
+ * los bloques y el teal oscuro del pie— y la pizarra solo se lee sobre el
+ * primero: sobre el azul verdoso da 3,08:1, que no alcanza para texto de 17 px.
+ * Heredando, va en el color del texto de cada lugar, que ya pasa en los tres.
  *
  * La pizarra es la de los títulos del boceto de la empresa — Fase 4.7. Hasta
  * ahí los tres eran negros, porque el amarillo del logo anterior no podía
@@ -45,7 +51,7 @@ const ESTILOS: Record<Variante, string> = {
   secundario:
     "min-h-12 px-6 border border-acento text-acento hover:bg-acento hover:text-claro rounded-boton",
   enlace:
-    "min-h-11 text-acento underline underline-offset-4 decoration-1 hover:decoration-2",
+    "min-h-11 text-inherit underline underline-offset-4 decoration-1 hover:decoration-2",
 };
 
 const BASE =

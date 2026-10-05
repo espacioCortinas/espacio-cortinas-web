@@ -1,4 +1,4 @@
-import { logo } from "@/contenido/marca";
+import { logo, logoGrande } from "@/contenido/marca";
 
 /**
  * El logo de la empresa, tal cual es: dos círculos de línea, «espacio» en
@@ -49,6 +49,41 @@ export function Logo({ className = "" }: { className?: string }) {
       decoding="async"
       alt="Espacio Cortinas"
       className={`h-auto w-[10rem] md:w-[12.5rem] ${className}`.trim()}
+    />
+  );
+}
+
+/**
+ * El logo grande, para el bloque azul verdoso de la apertura de Inicio: es la
+ * imagen central del boceto de la empresa, el dibujo gris carbón apoyado sobre
+ * el color de la marca. Sobre ese color da 4,58:1.
+ *
+ * **Ocupa todo el ancho de su bloque**, y el bloque decide cuánto es: el
+ * tope de 26 rem lo pone quien lo usa. Por eso lleva las dos medidas en el
+ * `srcset` —600 y 1.200 px— y un `sizes` que dice lo mismo que el bloque: en un
+ * teléfono se muestra a menos de 300 px y baja el de 600; en escritorio, a 416,
+ * y una pantalla de doble densidad pide el de 1.200.
+ *
+ * **Sin texto alternativo**, a diferencia del del encabezado: el nombre ya lo
+ * anuncia el enlace del encabezado, que está en la misma pantalla, y repetirlo
+ * acá haría que un lector de pantalla diga «Espacio Cortinas» dos veces antes
+ * del título.
+ *
+ * Es lo primero grande que se ve en Inicio, así que no se difiere.
+ */
+export function LogoGrande({ sizes }: { sizes: string }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={logoGrande.ruta}
+      srcSet={`${logo.ruta} ${logo.ancho}w, ${logoGrande.ruta} ${logoGrande.ancho}w`}
+      sizes={sizes}
+      width={logoGrande.ancho}
+      height={logoGrande.alto}
+      fetchPriority="high"
+      decoding="async"
+      alt=""
+      className="h-auto w-full"
     />
   );
 }

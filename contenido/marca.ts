@@ -26,3 +26,13 @@ export const logo: ArchivoDeMarca = {
   ancho: 600,
   alto: 186,
 };
+
+/**
+ * El mismo logo, al doble, para el bloque de la apertura de Inicio: ahí se ve
+ * de hasta 416 px de ancho.
+ */
+export const logoGrande: ArchivoDeMarca = {
+  ruta: "/marca/logo-grande.png",
+  ancho: 1200,
+  alto: 372,
+};

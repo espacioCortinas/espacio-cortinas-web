@@ -141,7 +141,8 @@ export default async function Producto({ params }: Props) {
 
               **Las variantes sin fotos, video ni descripción se dibujan
               igual**, con su nombre y nada más. Dos de las nueve del catálogo
-              están así —Blackout de Cortinas de tela y Motorizado de Toldos—,
+              están así —Blackout de Cortinas de confección y Motorizado de
+              Toldos—,
               y siguen siendo opciones que alguien tiene que poder leer antes
               de preguntar. Esconderlas sería esconder parte del producto.
             */}

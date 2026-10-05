@@ -8,8 +8,8 @@ import type { Producto } from "./tipos";
  * tope de `PRODUCTOS_DESTACADOS_HOME` (decisión 9). Para reordenar, se mueve
  * el bloque.
  *
- * **Los cuatro destacados son Roller, Cortinas de tela, Venecianas de PVC y
- * Toldos**, y el criterio no es fotográfico: son los que más se venden en el
+ * **Los cuatro destacados son Roller, Cortinas de confección, Venecianas de PVC
+ * y Toldos**, y el criterio no es fotográfico: son los que más se venden en el
  * día a día, según la empresa. Es el dato que el sitio no puede deducir solo y
  * la única razón válida para elegir cuáles anticipar en Inicio — decisión 47.
  *
@@ -67,7 +67,10 @@ export const productos: Producto[] = [
   },
   {
     slug: "cortinas-tela",
-    nombre: "Cortinas de tela",
+    // «Cortinas de confección» es el nombre del boceto de la empresa — Fase
+    // 4.7. Hasta ahí era «Cortinas de tela». El slug no cambia: lo usan los
+    // enlaces que ya circulan por WhatsApp (decisión 10).
+    nombre: "Cortinas de confección",
     descripcion:
       "Este tipo de cortina puede ser colocado a un riel o un barral. El riel te permite hacer cortinados en ventanales de gran tamaño sin limitaciones, en cambio, el barral puede ser más estético pero te limita el recorrido de la tela. Estas telas pueden ser en blackout o translúcidas y mucha variedad de colores y modelos.",
     variantes: [

@@ -5,7 +5,8 @@
  *
  *     node scripts/preparar-marca.mjs
  *
- *     fotos-originales/logo-vacio.png  ──→  public/marca/logo.png   600 px
+ *     fotos-originales/logo-vacio.png  ──→  public/marca/logo.png          600 px
+ *                                      ──→  public/marca/logo-grande.png  1.200 px
  *
  *                                           contenido/marca.ts      el manifiesto
  *
@@ -32,12 +33,21 @@
  * de la marca nueva es el del bloque sobre el que el boceto lo apoya, no una
  * tinta del dibujo.
  *
- * ## Por qué 600 px, y por qué con paleta
+ * ## Por qué 600 y 1.200 px, y por qué con paleta
  *
- * **600 es el triple del ancho más grande al que se muestra**, 200 px en el
- * encabezado de escritorio: alcanza para una pantalla de triple densidad. El
- * original tiene 1.695 y publicarlo entero sería mandar casi diez veces los
- * píxeles que se ven, en todas las páginas.
+ * **600 es el triple del ancho más grande al que se muestra en el
+ * encabezado**, 200 px en escritorio: alcanza para una pantalla de triple
+ * densidad. El original tiene 1.695 y publicarlo entero sería mandar casi diez
+ * veces los píxeles que se ven, en todas las páginas.
+ *
+ * **1.200 es para el bloque de la apertura de Inicio**, donde el logo va grande
+ * —hasta 26 rem, 416 px— sobre el azul verdoso, como en el boceto. Ahí 600 se
+ * queda corto en una pantalla de doble densidad. Las dos medidas van en el
+ * `srcset` de `LogoGrande`, así que un teléfono, que lo muestra a menos de 300
+ * px, sigue bajando el de 600.
+ *
+ * Entró en la etapa 2 de la Fase 4.7, **como un archivo aparte y no agrandando
+ * el que ya estaba**: lo publicado no se reescribe con otros bytes.
  *
  * **La paleta lo deja en 19,6 kB contra 45 en color completo**, y no se nota:
  * el dibujo es un solo gris con su suavizado, que son niveles de transparencia,
@@ -72,43 +82,24 @@ const DESTINO = join(RAIZ, "public", "marca");
 const MANIFIESTO = join(RAIZ, "contenido", "marca.ts");
 
 /**
- * El ancho del archivo publicado: el triple de los 200 px a los que se muestra
- * en el encabezado de escritorio. `components/logo.tsx` tiene el otro lado de
- * esta cuenta.
+ * Las medidas publicadas: el logo del encabezado y el de la apertura de
+ * Inicio. `components/logo.tsx` tiene el otro lado de esta cuenta.
  */
-const ANCHO_PUBLICADO = 600;
+const MEDIDAS = [
+  { archivo: "logo.png", ancho: 600 },
+  { archivo: "logo-grande.png", ancho: 1200 },
+];
 
-const kB = (bytes) => `${(bytes / 1024).toFixed(1)} kB`;
-
-async function main() {
-  mkdirSync(DESTINO, { recursive: true });
-
-  /* --- El logo del encabezado ---------------------------------------- */
-
-  /*
-   * Sin el original —que vive en el Drive de la empresa y no se versiona— se
-   * usa el logo ya publicado y no se lo reescribe: el script anda igual en una
-   * máquina que no tenga el archivo de la empresa.
-   */
-  const rutaLogo = join(DESTINO, "logo.png");
-  let infoLogo;
-
-  if (existsSync(LOGO_ORIGINAL)) {
-    const original = await sharp(LOGO_ORIGINAL).metadata();
-    if (original.width < ANCHO_PUBLICADO) {
-      console.warn(
-        `  ! el original mide ${original.width} px de ancho y se publica a ` +
-          `${ANCHO_PUBLICADO}: se va a agrandar, y agrandar no agrega detalle.`,
-      );
-    }
-
-    infoLogo = await sharp(LOGO_ORIGINAL)
+/** La misma receta para las dos: ver «Por qué 600 y 1.200 px» arriba. */
+async function publicar(archivo, ancho) {
+  return (
+    sharp(LOGO_ORIGINAL)
       // Recorta el aire transparente que pudiera traer el archivo: lo que queda
-      // es el logo exacto, y el componente lo alinea con el texto sin
-      // compensar un margen que no se ve. El de la Fase 4.7 no traía, pero el
-      // próximo puede traer.
+      // es el logo exacto, y el componente lo alinea con el texto sin compensar
+      // un margen que no se ve. El de la Fase 4.7 no traía, pero el próximo
+      // puede traer.
       .trim({ threshold: 0 })
-      .resize({ width: ANCHO_PUBLICADO })
+      .resize({ width: ancho })
       .png({
         compressionLevel: 9,
         palette: true,
@@ -116,18 +107,52 @@ async function main() {
         colors: 256,
         effort: 10,
       })
-      .toFile(rutaLogo);
+      .toFile(join(DESTINO, archivo))
+  );
+}
 
-    console.log(
-      `  logo.png     ${infoLogo.width}×${infoLogo.height}  ${kB(infoLogo.size)}`,
-    );
+const kB = (bytes) => `${(bytes / 1024).toFixed(1)} kB`;
+
+async function main() {
+  mkdirSync(DESTINO, { recursive: true });
+
+  /* --- Los dos archivos del logo ---------------------------------- */
+
+  /*
+   * Sin el original —que vive en el Drive de la empresa y no se versiona— se
+   * usan los ya publicados y no se los reescribe: el script anda igual en una
+   * máquina que no tenga el archivo de la empresa.
+   */
+  const infos = {};
+
+  if (existsSync(LOGO_ORIGINAL)) {
+    const original = await sharp(LOGO_ORIGINAL).metadata();
+
+    for (const { archivo, ancho } of MEDIDAS) {
+      if (original.width < ancho) {
+        console.warn(
+          `  ! el original mide ${original.width} px de ancho y ${archivo} se ` +
+            `publica a ${ancho}: se va a agrandar, y agrandar no agrega detalle.`,
+        );
+      }
+      const info = await publicar(archivo, ancho);
+      infos[archivo] = info;
+      console.log(
+        `  ${archivo.padEnd(16)} ${info.width}×${info.height}  ${kB(info.size)}`,
+      );
+    }
   } else {
-    const meta = await sharp(rutaLogo).metadata();
-    infoLogo = { width: meta.width, height: meta.height };
+    for (const { archivo } of MEDIDAS) {
+      const meta = await sharp(join(DESTINO, archivo)).metadata();
+      infos[archivo] = { width: meta.width, height: meta.height };
+    }
     console.log(
-      `  logo.png     sin el original en fotos-originales/: se usa el publicado, sin tocarlo`,
+      `  sin el original en fotos-originales/: se usan los publicados, sin tocarlos`,
     );
   }
+
+  const infoLogo = infos["logo.png"];
+  const infoGrande = infos["logo-grande.png"];
 
   /* --- El manifiesto -------------------------------------------------- */
 
@@ -158,6 +183,16 @@ export const logo: ArchivoDeMarca = {
   ruta: "/marca/logo.png",
   ancho: ${infoLogo.width},
   alto: ${infoLogo.height},
+};
+
+/**
+ * El mismo logo, al doble, para el bloque de la apertura de Inicio: ahí se ve
+ * de hasta 416 px de ancho.
+ */
+export const logoGrande: ArchivoDeMarca = {
+  ruta: "/marca/logo-grande.png",
+  ancho: ${infoGrande.width},
+  alto: ${infoGrande.height},
 };
 `;
 

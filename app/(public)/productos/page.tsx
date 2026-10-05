@@ -33,7 +33,7 @@ import { altAutomatico } from "@/lib/texto";
  * archivo sacado con celular es la diferencia entre ver el cabezal y adivinarlo.
  *
  * **3. Las variantes invisibles.** Hay nueve en el catálogo —Roller tres,
- * Cortinas de tela cuatro, Toldos dos— y la grilla no nombraba ninguna, cuando
+ * Cortinas de confección cuatro, Toldos dos— y la grilla no nombraba ninguna, cuando
  * la decisión 40 dice que la variante es lo que decide la compra. Ahora van como
  * chips, debajo de la descripción.
  *
@@ -70,7 +70,7 @@ import { altAutomatico } from "@/lib/texto";
 export const metadata: Metadata = metadataDePagina({
   titulo: "Productos",
   descripcion:
-    "Rollers blackout y screen, cortinas de tela, venecianas y toldos. " +
+    "Rollers blackout y screen, cortinas de confección, venecianas y toldos. " +
     "Todo a medida, con asesoramiento y colocación en Buenos Aires.",
   ruta: "/productos",
 });

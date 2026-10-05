@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { FotoImg } from "@/components/foto";
 import { ListadoProyectos } from "@/components/listado-proyectos";
+import { LogoGrande } from "@/components/logo";
 import { EnlaceLlamar } from "@/components/medios-de-contacto";
 import { TarjetaProducto } from "@/components/tarjeta-producto";
 import { EnlaceWhatsapp } from "@/components/whatsapp";
@@ -14,60 +15,59 @@ import {
   PRODUCTOS_DESTACADOS_HOME,
   PROYECTOS_DESTACADOS_HOME,
 } from "@/lib/constantes";
+import { sizesConTope } from "@/lib/fotos";
 import { DESCRIPCION_SITIO, metadataDePagina } from "@/lib/metadata";
 import { altAutomatico } from "@/lib/texto";
 
 /**
  * Inicio.
  *
- * # Los sectores, y por qué son estos
+ * # Los sectores
  *
- *     1  APERTURA                  la frase, la foto, una acción
- *     2  QUÉ HACEMOS               los cuatro productos destacados
- *     3  CÓMO TRABAJAMOS           asesoramiento, medición, fabricación, colocación
- *     4  PROYECTOS INTEGRALES      los proyectos destacados — solo si hay alguno
+ *     1  APERTURA                  el bloque con el logo sobre la foto, el lema
+ *     2  PRODUCTOS                 los cuatro destacados, en zigzag
+ *     3  CÓMO TRABAJAMOS           los cuatro pasos, en una grilla de 2×2
+ *     4  NUESTROS TRABAJOS         los proyectos destacados — solo si hay alguno
  *     5  ARQUITECTOS Y OFICINAS    los otros dos públicos
- *     6  CIERRE                    una sola acción
+ *     6  CIERRE                    una sola acción, en un bloque azul verdoso
  *
- * Se decidió mirando cuatro sitios profesionales del rubro —Silent Gliss, The
- * Shade Store, Dino Conte y un estudio de interiorismo— y **lo único que las
- * cuatro comparten es una grilla de fotos con nombre**: ninguna se sostiene con
- * texto. De ahí que el sector 2 sea el que lleva el peso visual.
+ * Son los mismos sectores que fijó la decisión 47 y en el mismo orden: la
+ * empresa dijo que la estructura estaba bien. **Lo que cambió en la Fase 4.7
+ * es cómo se ven**, y sale del boceto que armó la empresa en Wix
+ * (`docs/plan.md`).
  *
- * Dos diferencias con el orden que pedía `docs/producto.md`, y las dos son
- * decisión 47:
+ * # Lo que se tomó del boceto
  *
- * - **«Empresa» no abre la página.** Es la apertura más débil posible para un
- *   negocio visual, y además no hay con qué: ni foto de equipo, ni taller, ni
- *   años documentados. Se disuelve en la bajada y en «cómo trabajamos».
- * - **Productos antes que proyectos**, porque productos es la única sección con
- *   material.
+ * - **La apertura**: un bloque azul verdoso con el logo, montado sobre el borde
+ *   de una foto, y el lema debajo —«hacé de tus espacios», chico; «tu mejor
+ *   compañía», en mayúscula espaciada— con un filete corto abajo.
+ * - **Los productos en zigzag**, cada uno con un bloque azul verdoso con su
+ *   nombre, y entre ellos las tres frases del boceto. El boceto no tenía fotos
+ *   en esos bloques; acá cada uno pisa la portada de su producto.
+ * - **La frase que abre los productos**: «Brindamos asesoramiento e instalación
+ *   de nuestros productos.», centrada, como en el boceto.
+ * - **La grilla de 2×2 con líneas finas** de sus páginas de producto, para los
+ *   cuatro pasos de «Cómo trabajamos», que eran una lista numerada con filetes.
+ *   El número a la izquierda de cada paso —01, 02— era una de las marcas de
+ *   sitio hecho con IA; el orden lo siguen diciendo la grilla y el `<ol>`.
+ * - **El cierre** en el azul verdoso de los bloques.
  *
- * # Lo que NO está, y es a propósito
+ * # Lo que no se tomó, y es a propósito
  *
- * **El sector de proyectos existe solo si hay alguno destacado.** Una página
- * de inicio no promete lo que no existe (decisión 47): si mañana todos quedan
- * inactivos, el sector desaparece solo y `/proyectos` muestra su estado vacío.
- * Entró en la Fase 4.3 con un solo proyecto, a pedido, y se compone con la
- * misma regla que el listado —el primero en fila, el resto en grilla— para que
- * con uno no parezca una grilla incompleta (decisión 52).
+ * **El boceto no tiene versión de teléfono**: la armó Wix sola, y se desarma.
+ * Todo esto se compuso primero a 375 px.
  *
- * **Va después de «cómo trabajamos» y antes de «arquitectos y oficinas»**: el
- * sector 3 dice cómo se trabaja y este muestra el resultado; y el primer
- * proyecto es una oficina, que es la evidencia que el sector 5 no tenía.
- *
- * **No hay grilla de tres columnas con ícono, título y párrafo** para explicar
- * el servicio, que es exactamente lo que hace The Shade Store en ese lugar y
- * lo que prohíbe la regla 5 de `docs/diseno.md`. En su lugar hay una lista
- * numerada con filetes.
- *
- * **No hay texto sobre ninguna foto.** En este archivo no se hace nunca: la
+ * **No hay texto sobre ninguna foto.** Los bloques que pisan las fotos son
+ * opacos y el texto va sobre ellos, no sobre la imagen: en este archivo la
  * ventana es la zona más clara del cuadro y cambia de lugar en cada foto.
  *
- * # Los textos son provisorios
+ * **Ningún bloque lleva el texto en blanco**, que es como lo pone el boceto:
+ * sobre el azul verdoso el blanco da 2,63:1. Va en el color del texto, 5,08:1.
  *
- * Todos salen de `contenido/inicio.ts` y **los reemplaza la empresa**.
- * Reemplazarlos es editar ese archivo: acá no hay ninguna cadena escrita.
+ * # Los textos
+ *
+ * Todos salen de `contenido/inicio.ts`, que dice cuáles son del boceto y cuáles
+ * son nuestros y provisorios. Acá no hay ninguna cadena escrita.
  */
 
 export const metadata: Metadata = metadataDePagina({
@@ -79,20 +79,31 @@ export const metadata: Metadata = metadataDePagina({
 /** El ritmo entre sectores: 64 en teléfono, 112 en escritorio. */
 const SECTOR = "mt-16 md:mt-28";
 
+/*
+ * El ancho de la foto de cada producto destacado. La fila es una grilla de 12
+ * columnas desde 768 y la tarjeta ocupa 5, con la foto al 80 %: 330 px con la
+ * columna entera de 1.024. En el teléfono la foto es el 72 % de la columna.
+ * Es el mismo dato que esos anchos, escrito dos veces: cambian juntos.
+ */
+const SIZES_TARJETA =
+  "(min-width: 1216px) 330px, (min-width: 768px) calc(33vw - 2.75rem), calc(72vw - 1.8rem)";
+
 export default function Inicio() {
   const destacados = productosDestacados(PRODUCTOS_DESTACADOS_HOME);
   const proyectos = proyectosDestacados(PROYECTOS_DESTACADOS_HOME);
 
   /*
-   * La foto que abre. Es `venecianas-madera/2`, una de las cuatro que
+   * La foto de la apertura. Es `venecianas-madera/2`, una de las cuatro que
    * `docs/diseno.md` califica como capaces de sostener un lugar grande
-   * —«arquitectura de verdad; bañera, lamas negras, río de fondo»— y es
-   * vertical.
+   * —«arquitectura de verdad; bañera, lamas negras, río de fondo»—, y sus
+   * grises fríos y el negro de las lamas van con el azul verdoso del bloque.
    *
-   * **No es `cortinas-tela/1`, que es la mejor del archivo, y es por una razón
-   * de composición:** esa es la portada de Cortinas de tela, que está en la
-   * grilla de acá abajo. La misma foto dos veces en la misma pantalla se lee
-   * como un error.
+   * **No es `cortinas-tela/1`, que es la mejor del archivo**: esa es la portada
+   * de Cortinas de confección, que está en los destacados de acá abajo. La
+   * misma foto dos veces en la misma página se lee como un error.
+   *
+   * Va recortada a 4:5 —es 3:4— para que en el teléfono el lema entre en la
+   * primera pantalla. El recorte es alto, así que lo que se pierde es piso.
    */
   const fotoApertura = fotoDe("productos", "venecianas-madera", 2);
 
@@ -104,73 +115,147 @@ export default function Inicio() {
   const fotoProfesionales = fotoDe("productos", "bandas-verticales", 2);
 
   return (
-    <main className={`${CLASES_CONTENEDOR} py-16 md:py-28`}>
+    <main className={`${CLASES_CONTENEDOR} pt-8 pb-16 md:pt-16 md:pb-28`}>
       {/* 1 — APERTURA ------------------------------------------------ */}
       {/*
-        La frase primero y la foto después. Es lo contrario de lo que hacen los
-        cuatro sitios de referencia, y es deliberado por dos razones: la
-        dirección elegida dice que lo que sostiene las páginas es la tipografía
-        —«la mitad del archivo no da para sostener nada»— y en un teléfono una
-        foto 4:5 arriba de todo empuja el mensaje abajo del pliegue.
+        Tres piezas que se pisan, como en el boceto: la foto, el bloque con el
+        logo y el texto.
+
+        En el teléfono van una debajo de la otra, y el bloque sube sobre el
+        borde de abajo de la foto —`-mt-16`— dejando a la derecha una franja
+        de foto a la vista: es lo que hace que se lea como montado y no como
+        apilado.
+
+        Desde 768 es una grilla de 12 columnas: la foto a la derecha, en las
+        columnas 7 a 12 y las dos filas; el bloque a la izquierda, en la 1 a la
+        7, así que se mete una columna adentro de la foto; y el texto debajo
+        del bloque. `grid-rows-[auto_1fr]` manda el alto que sobra de la foto a
+        la segunda fila, debajo del texto, y no entre el bloque y el texto.
       */}
-      <section>
-        <h1 className="max-w-lectura text-display">{inicio.titular}</h1>
-        <p className="max-w-lectura text-texto-suave mt-6 text-subtitulo">
-          {inicio.bajada}
-        </p>
-
-        <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3">
-          <EnlaceWhatsapp contexto={{ tipo: "general" }} />
-          <Link href="/productos" className={clasesDeBoton("secundario")}>
-            Ver los productos
-          </Link>
-        </div>
-
+      <section className="md:grid md:grid-cols-12 md:grid-rows-[auto_1fr] md:gap-x-6">
         {fotoApertura && (
-          // Dentro de la columna y alineada al margen izquierdo, no centrada:
-          // el aire que queda a la derecha es parte de la composición. Y nunca
-          // a sangre, que además de ser la tesis es aritmética — ninguna foto
-          // del archivo tiene píxeles para el ancho de un escritorio.
-          <div className="mt-12 max-w-[34rem] md:mt-16">
+          <div className="md:col-span-6 md:col-start-7 md:row-span-2 md:row-start-1">
             <FotoImg
               foto={fotoApertura}
               alt={altAutomatico("Venecianas de madera", 2)}
-              sizes="(min-width: 768px) 544px, 100vw"
+              proporcion="4/5"
+              sizes={sizesConTope(fotoApertura, [
+                { desde: "1216px", ancho: "500px" },
+                { desde: "768px", ancho: "calc(50vw - 3.75rem)" },
+                { ancho: "calc(100vw - 2.5rem)" },
+              ])}
               prioridad
             />
           </div>
         )}
-      </section>
 
-      {/* 2 — QUÉ HACEMOS --------------------------------------------- */}
-      {destacados.length > 0 && (
-        <section className={SECTOR}>
-          <h2 className="text-titulo">{inicio.productos.titulo}</h2>
-          <p className="max-w-lectura text-texto-suave mt-4">
-            {inicio.productos.bajada}
+        {/*
+          `relative` para que quede encima de la foto que pisa. Sin la foto —si
+          algún día se saca del archivo— no sube: no tendría qué pisar.
+        */}
+        <div
+          className={
+            "bg-marca relative mr-10 px-6 py-7 md:col-span-7 md:col-start-1 " +
+            "md:row-start-1 md:mt-12 md:mr-0 md:self-start md:px-10 md:py-12 " +
+            "lg:px-12 lg:py-14 " +
+            (fotoApertura ? "-mt-16" : "")
+          }
+        >
+          <div className="max-w-[26rem]">
+            <LogoGrande sizes="(min-width: 1024px) 26rem, (min-width: 768px) 20rem, calc(100vw - 8rem)" />
+          </div>
+        </div>
+
+        <div className="mt-10 md:col-span-6 md:col-start-1 md:row-start-2 md:mt-12">
+          {/*
+            El lema es el `<h1>`, en sus dos partes. El remate va en mayúscula
+            espaciada, que es como lo compuso el boceto, y siempre en dos
+            renglones —«tu mejor» y «compañía»—: con el espaciado no entra en
+            uno en ningún ancho, y `text-wrap: balance` los parte parejos.
+          */}
+          <h1>
+            <span className="block text-subtitulo font-normal tracking-[0.02em]">
+              {inicio.lema.entrada}
+            </span>
+            <span className="mt-2 block text-[clamp(1.75rem,4.2vw,2.75rem)] leading-[1.2] tracking-[0.28em] uppercase">
+              {inicio.lema.remate}
+            </span>
+          </h1>
+          {/* El filete corto que el boceto pone debajo del lema. */}
+          <span aria-hidden className="bg-acento mt-6 block h-0.5 w-32" />
+
+          <p className="max-w-lectura text-texto-suave mt-6 text-subtitulo">
+            {inicio.bajada}
           </p>
 
-          {/*
-            Dos columnas hasta 1024 y cuatro arriba. A cuatro columnas en una
-            tablet cada portada quedaría en 150 px, que para una foto de
-            interior es una estampilla.
-          */}
-          <ul className="mt-10 grid grid-cols-2 gap-x-5 gap-y-10 md:gap-x-6 lg:grid-cols-4">
-            {destacados.map((producto, i) => (
-              <li key={producto.slug}>
-                <TarjetaProducto
-                  producto={producto}
-                  // El mismo dato que los anchos de la grilla de arriba,
-                  // escrito dos veces. Cambian juntos.
-                  sizes="(min-width: 1024px) 238px, (min-width: 768px) 324px, 45vw"
-                  prioridad={i === 0}
-                />
-              </li>
-            ))}
-          </ul>
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <EnlaceWhatsapp contexto={{ tipo: "general" }} />
+            <Link href="/productos" className={clasesDeBoton("secundario")}>
+              Ver los productos
+            </Link>
+          </div>
+        </div>
+      </section>
 
-          <p className="mt-10">
-            <Link href="/productos" className={clasesDeBoton("enlace")}>
+      {/* 2 — PRODUCTOS ----------------------------------------------- */}
+      {destacados.length > 0 && (
+        <section className={SECTOR}>
+          <h2 className="mx-auto max-w-[22ch] text-center text-titulo">
+            {inicio.productos.titulo}
+          </h2>
+
+          {/*
+            Una fila por producto, alternando el lado: es el zigzag del boceto.
+            Al lado de cada una, una de sus tres frases; el cuarto producto va
+            solo.
+
+            No es una lista, a propósito: las frases no son de cada producto
+            sino una sola idea partida en tres, y dentro de un `<li>` un lector
+            de pantalla las leería como parte del producto.
+
+            En el teléfono la frase va debajo de su fila. Desde 768, la fila es
+            una grilla de 12 columnas: la tarjeta en 5 y la frase en otras 5,
+            con una columna de aire en el medio.
+          */}
+          <div className="mt-12 flex flex-col gap-14 md:mt-16 md:gap-20">
+            {destacados.map((producto, i) => {
+              const derecha = i % 2 === 1;
+              const frase = inicio.productos.frases[i];
+              return (
+                <div
+                  key={producto.slug}
+                  className="md:grid md:grid-cols-12 md:items-center md:gap-x-6"
+                >
+                  <div
+                    className={
+                      "md:row-start-1 md:col-span-5 " +
+                      (derecha ? "md:col-start-8" : "md:col-start-1")
+                    }
+                  >
+                    <TarjetaProducto
+                      producto={producto}
+                      lado={derecha ? "derecha" : "izquierda"}
+                      sizes={SIZES_TARJETA}
+                    />
+                  </div>
+                  {frase && (
+                    <p
+                      className={
+                        "mt-6 max-w-[26rem] text-subtitulo leading-[1.55] " +
+                        "md:row-start-1 md:mt-0 md:col-span-5 " +
+                        (derecha ? "md:col-start-2" : "md:col-start-7")
+                      }
+                    >
+                      {frase}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="mt-12 text-center md:mt-16">
+            <Link href="/productos" className={clasesDeBoton("secundario")}>
               {inicio.productos.enlace}
             </Link>
           </p>
@@ -182,39 +267,33 @@ export default function Inicio() {
         <h2 className="text-titulo">{inicio.trabajo.titulo}</h2>
 
         {/*
-          Lista numerada con filetes, y no cuatro columnas con un ícono arriba.
-          La numeración es el recurso que aportó la dirección «Regla» y el
-          filete de 1 px es el único elemento gráfico del sistema.
+          La grilla de 2×2 con líneas finas de las páginas de producto del
+          boceto. Las líneas las arman el borde de arriba y el de la izquierda
+          de la lista, y el de la derecha y el de abajo de cada paso: así cada
+          línea es una sola, sin dobles donde dos pasos se tocan. En el
+          teléfono la grilla es de una columna y queda una caja por paso.
 
           Es un `<ol>` de verdad: el orden es información —primero se mide y
-          después se coloca— y así lo anuncia un lector de pantalla sin
-          depender de que vea el número.
+          después se coloca— y así lo anuncia un lector de pantalla. La
+          numeración a la vista se fue con la lista: el orden lo da la grilla,
+          que se lee de izquierda a derecha y de arriba abajo.
         */}
-        <ol className="border-linea mt-8 border-t">
-          {inicio.trabajo.pasos.map((paso, i) => (
+        <ol className="border-acento mt-8 grid border-t border-l md:mt-10 md:grid-cols-2">
+          {inicio.trabajo.pasos.map((paso) => (
             <li
               key={paso.titulo}
-              className="border-linea border-b py-6 md:grid md:grid-cols-[5rem_1fr] md:gap-8 md:py-8"
+              className="border-acento border-r border-b p-6 md:p-10"
             >
-              <span
-                // El número ya lo anuncia el `<ol>`; acá es tipografía.
-                aria-hidden
-                className="text-texto-suave block text-meta tracking-[0.12em]"
-              >
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <div className="mt-2 md:mt-0">
-                <h3 className="text-subtitulo">{paso.titulo}</h3>
-                <p className="max-w-lectura text-texto-suave mt-2">
-                  {paso.descripcion}
-                </p>
-              </div>
+              <h3 className="text-subtitulo">{paso.titulo}</h3>
+              <p className="max-w-lectura text-texto-suave mt-3">
+                {paso.descripcion}
+              </p>
             </li>
           ))}
         </ol>
       </section>
 
-      {/* 4 — PROYECTOS INTEGRALES ----------------------------------- */}
+      {/* 4 — NUESTROS TRABAJOS --------------------------------------- */}
       {proyectos.length > 0 && (
         <section className={SECTOR}>
           <h2 className="text-titulo">{inicio.proyectos.titulo}</h2>
@@ -265,13 +344,18 @@ export default function Inicio() {
       </section>
 
       {/* 6 — CIERRE --------------------------------------------------- */}
+      {/*
+        El azul verdoso de los bloques del boceto, de borde a borde de la
+        columna. Todo lo de adentro va en el color del texto —el título
+        también, aunque los títulos sean pizarra—: sobre este color la pizarra
+        da 3,08:1, y el texto, 5,08. El botón principal sigue siendo la
+        pizarra sólida, que se recorta bien contra el azul verdoso.
+      */}
       <section
-        className={`${SECTOR} bg-superficie -mx-5 px-5 py-12 md:-mx-12 md:px-12 md:py-20`}
+        className={`${SECTOR} bg-marca text-texto -mx-5 px-5 py-12 md:-mx-12 md:px-12 md:py-20`}
       >
-        <h2 className="text-titulo">{inicio.cierre.titulo}</h2>
-        <p className="max-w-lectura text-texto-suave mt-4">
-          {inicio.cierre.texto}
-        </p>
+        <h2 className="text-texto text-titulo">{inicio.cierre.titulo}</h2>
+        <p className="max-w-lectura mt-4">{inicio.cierre.texto}</p>
 
         <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
           <EnlaceWhatsapp contexto={{ tipo: "general" }} />

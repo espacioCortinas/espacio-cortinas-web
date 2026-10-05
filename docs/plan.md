@@ -461,8 +461,8 @@ marca. La decisión nueva se escribe en la etapa 5, con el resultado a la vista.
 
 ### Etapas
 
-**1. Sistema: color, letra y logo.** Cambia la cara de todas las páginas sin
-tocar su armado.
+**1. Sistema: color, letra y logo — HECHA.** Cambia la cara de todas las
+páginas sin tocar su armado.
 
 - La paleta del boceto, medida de su código: fondo `#EDEFF0`, texto `#2F2F2F`,
   pizarra `#405357` para títulos, enlaces y botón principal, azul verdoso
@@ -482,7 +482,12 @@ tocar su armado.
   dejó pendiente: en el catálogo, desde el teléfono, WhatsApp quedaba al final
   de una página de más de 7.000 px.
 
-**2. Inicio.**
+Lo que salió distinto de lo previsto: **el menú del teléfono pasó a un botón
+«Menú»** —un `<details>` nativo—, porque a 15 px y con las cinco etiquetas de
+la etapa 4 no entra en una fila; y **el pie perdió su botón de WhatsApp**, que
+con el flotante quedaba repetido.
+
+**2. Inicio — HECHA.**
 
 - Apertura: el bloque azul verdoso con el logo, montado sobre el borde de una
   foto nuestra, y el lema debajo. En el teléfono, la foto a lo ancho y el
@@ -494,6 +499,20 @@ tocar su armado.
   las páginas de producto del boceto.
 - El sector de proyectos pasa a llamarse «Nuestros trabajos».
 - El cierre, en azul verdoso.
+
+Lo que salió distinto de lo previsto:
+
+- **La frase del boceto «Brindamos asesoramiento e instalación…» abre el
+  sector de productos** y no la apertura, que es donde la pone el boceto: es
+  la que presenta su zigzag. La apertura se queda con nuestra bajada, que dice
+  qué se vende y dónde, cosa que el lema no dice.
+- **El logo grande pidió un archivo más**, `public/marca/logo-grande.png`, de
+  1.200 px: en el bloque se ve de hasta 416, y el de 600 se quedaba corto en
+  una pantalla de doble densidad. Es nuevo, no se reescribió el de 600.
+- **El enlace del sistema pasó a heredar el color** de lo que lo rodea: la
+  pizarra sobre el azul verdoso da 3,08:1, y en el cierre hay un enlace.
+- «Cortinas de tela» pasó a «Cortinas de confección» acá y no en la etapa 3,
+  porque el nombre se ve en los destacados de Inicio.
 
 **3. Producto y proyecto.** El lema arriba del título, el título centrado, y
 las variantes en el damero de 2×2 del boceto: foto y texto alternados, con
@@ -546,8 +565,10 @@ o borrar, y el repositorio es la fuente de verdad.
 
 **Inicio**
 
-- Lema: «Hacé de tus espacios / tu mejor compañía».
-- Bajada: «Brindamos asesoramiento e instalación de nuestros productos.»
+- Lema: «hacé de tus espacios / tu mejor compañía», con la minúscula del
+  boceto en la entrada.
+- La frase que abre los productos: «Brindamos asesoramiento e instalación de
+  nuestros productos.»
 - Las tres frases que van entre los productos:
   1. «Dar a cada espacio la luz natural que requiere es nuestra tarea.
      Combinando estética y funcionalidad.»
