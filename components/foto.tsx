@@ -139,8 +139,8 @@ export function FotoImg({
    * separa una foto del papel es el aire, no un marco (`docs/diseno.md`).
    *
    * El fondo de superficie es lo que se ve mientras la foto carga y en la
-   * franja que el navegador todavía no pintó. Es un paso del papel, no un gris:
-   * un recuadro gris sobre papel cálido se ve como un agujero.
+   * franja que el navegador todavía no pintó: el blanco del sistema, que sobre
+   * el gris del fondo se lee como el lugar de la foto y no como un agujero.
    */
   return (
     <div

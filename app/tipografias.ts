@@ -1,35 +1,31 @@
-import { Fraunces, Karla } from "next/font/google";
+import { Raleway } from "next/font/google";
 
 /**
- * Las dos familias del sitio. Dos, que es el máximo — `docs/diseno.md`.
+ * La familia del sitio: Raleway, la del boceto de la empresa — Fase 4.7.
  *
- * **Se cargan con `next/font` y no con un `<link>` a Google.** `next/font`
+ * **Una sola, en dos pesos**: 700 los títulos y 400 el texto. Reemplaza a
+ * Fraunces y Karla, de la dirección que la empresa rechazó; Fraunces, además,
+ * es hoy una de las letras que más se repiten en los sitios hechos con IA.
+ *
+ * El boceto usa también Tahoma en algunos títulos, y esa no: es una letra de
+ * Windows, que en los teléfonos no está, y la mezcla de dos letras en los
+ * títulos era de las cosas del boceto que no se copian (`docs/plan.md`).
+ *
+ * **Se carga con `next/font` y no con un `<link>` a Google.** `next/font`
  * descarga los archivos en el build y los sirve desde el propio dominio: no hay
  * pedido a un tercero en tiempo de ejecución, no hay una conexión más que
- * abrir antes de pintar texto, y no hay salto al renderizar.
+ * abrir antes de pintar texto, y no hay salto al renderizar. Es la versión
+ * variable, así que los dos pesos salen del mismo archivo.
  *
- * Cada una expone su variable CSS, que es lo que consumen los tokens
- * `--font-titulo` y `--font-texto` de `app/globals.css`. Los componentes usan
- * el token, nunca la fuente directamente.
+ * Expone su variable CSS, que es lo que consumen los tokens `--font-titulo` y
+ * `--font-texto` de `app/globals.css`. Los componentes usan el token, nunca la
+ * fuente directamente.
  */
-
-/**
- * Títulos. Serif de contraste con eje óptico: a tamaño de display abre las
- * formas y a tamaño chico las cierra, así que un solo archivo sirve para la
- * escala entera.
- */
-export const fraunces = Fraunces({
+export const raleway = Raleway({
   subsets: ["latin"],
-  variable: "--fuente-titulo",
+  variable: "--fuente-raleway",
   display: "swap",
 });
 
-/** Texto. Sans neutra, con buena altura de x para los 17 px del teléfono. */
-export const karla = Karla({
-  subsets: ["latin"],
-  variable: "--fuente-texto",
-  display: "swap",
-});
-
-/** Para colgar de `<html>`, que es desde donde las heredan los tokens. */
-export const variablesDeFuentes = `${fraunces.variable} ${karla.variable}`;
+/** Para colgar de `<html>`, que es desde donde la heredan los tokens. */
+export const variablesDeFuentes = raleway.variable;

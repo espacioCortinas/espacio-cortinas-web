@@ -31,12 +31,12 @@ export default function LayoutRaiz({
   children: React.ReactNode;
 }) {
   /*
-   * Las variables de las dos familias van en `<html>` y no en `<body>`: los
-   * tokens `--font-titulo` y `--font-texto` de `globals.css` las resuelven
-   * desde ahí, y así también las alcanza cualquier cosa que se renderice
-   * fuera del flujo normal del documento.
+   * La variable de la familia va en `<html>` y no en `<body>`: los tokens
+   * `--font-titulo` y `--font-texto` de `globals.css` la resuelven desde ahí,
+   * y así también la alcanza cualquier cosa que se renderice fuera del flujo
+   * normal del documento.
    *
-   * El color de papel y la familia de texto los pone `globals.css` en la capa
+   * El color de fondo y la familia de texto los pone `globals.css` en la capa
    * base, no este archivo: son del sistema, no del layout.
    */
   return (

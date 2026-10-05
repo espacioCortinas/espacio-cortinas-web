@@ -194,8 +194,8 @@ export default function Contacto() {
 
 /**
  * Un dato de contacto: el nombre del medio y el dato. El nombre va en el
- * tratamiento del antetítulo —13 px en versalita, texto suave, 5,23:1— y el
- * dato en negro.
+ * tratamiento del antetítulo —13 px en versalita, texto suave, 5,25:1— y el
+ * dato en el color del texto.
  *
  * **Al costado solo entre 768 y 1023**, que es cuando la lista tiene la
  * columna entera. Desde 1024 comparte el ancho con el formulario y le quedan

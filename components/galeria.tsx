@@ -217,9 +217,9 @@ export function Galeria({
      * poder recibir foco para que se lo pueda recorrer con el teclado, y tiene
      * que anunciar qué es. Es lo que convierte esto en algo usable sin mouse.
      *
-     * La barra va fina y del gris del sistema —`texto-suave`, 5,23:1, el mismo
+     * La barra va fina y del gris del sistema —`texto-suave`, 5,25:1, el mismo
      * que la decisión 46 fijó para el borde de un control— porque en escritorio
-     * es la otra señal de que esto se mueve. Con `--color-linea` daría 1,29:1 y
+     * es la otra señal de que esto se mueve. Con `--color-linea` daría 1,34:1 y
      * no se vería.
      */
     <ul

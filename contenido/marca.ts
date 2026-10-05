@@ -23,6 +23,6 @@ export type ArchivoDeMarca = {
  */
 export const logo: ArchivoDeMarca = {
   ruta: "/marca/logo.png",
-  ancho: 504,
-  alto: 145,
+  ancho: 600,
+  alto: 186,
 };

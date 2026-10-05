@@ -275,8 +275,8 @@ function Fila({
             duplicaría el nombre accesible de cada fila y volvería a dejar
             catorce elementos enfocables donde tiene que haber siete.
 
-            Va subrayado y en negro —14,69:1— porque es la forma que este sitio
-            le da a un enlace (`docs/diseno.md`, «Color»).
+            Va subrayado —en el color del texto, 11,61:1— porque es la forma
+            que este sitio le da a un enlace (`docs/diseno.md`, «Color»).
           */}
           <p className="mt-6 text-meta">
             <span className="underline decoration-1 underline-offset-4">

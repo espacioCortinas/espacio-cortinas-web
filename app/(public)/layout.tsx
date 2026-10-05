@@ -1,6 +1,7 @@
 import { DatosEstructurados } from "@/components/datos-estructurados";
 import { Encabezado } from "@/components/encabezado";
 import { Pie } from "@/components/pie";
+import { WhatsappFlotante } from "@/components/whatsapp";
 
 /**
  * Layout de las páginas públicas: el encabezado, el contenido y el pie.
@@ -14,6 +15,10 @@ import { Pie } from "@/components/pie";
  * El salto al contenido es lo primero que recibe el foco al tabular. Sin él,
  * quien navega con teclado tiene que pasar por los cuatro enlaces del menú en
  * cada página antes de llegar a leer nada.
+ *
+ * El botón flotante de WhatsApp va al final del documento, después del pie: es
+ * lo último a lo que se llega tabulando, y no se interpone entre el salto y el
+ * contenido. Se ve siempre igual porque es `fixed`.
  */
 export default function LayoutPublico({
   children,
@@ -34,6 +39,7 @@ export default function LayoutPublico({
         {children}
       </div>
       <Pie />
+      <WhatsappFlotante />
     </>
   );
 }
@@ -49,7 +55,7 @@ function SaltoAlContenido() {
   return (
     <a
       href="#contenido"
-      className="bg-texto text-fondo sr-only px-4 py-3 text-cuerpo focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-10"
+      className="bg-acento text-claro sr-only px-4 py-3 text-cuerpo focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-40"
     >
       Ir al contenido
     </a>

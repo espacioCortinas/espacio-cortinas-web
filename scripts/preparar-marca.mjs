@@ -5,45 +5,58 @@
  *
  *     node scripts/preparar-marca.mjs
  *
- *     fotos-originales/logo.jpg  ──→  public/marca/logo.png   transparente
+ *     fotos-originales/logo-vacio.png  ──→  public/marca/logo.png   600 px
  *
- *                                     contenido/marca.ts      el manifiesto
+ *                                           contenido/marca.ts      el manifiesto
  *
  * Es hermano de `preparar-fotos.mjs` y sigue sus mismas reglas:
  *
  * - **los datos técnicos los calcula el script**, no una persona: el ancho y el
  *   alto del logo se escriben en `contenido/marca.ts` y de ahí los lee el
  *   componente, igual que `contenido/fotos.ts` (CLAUDE.md, regla 4);
- * - **no se versiona el original.** `fotos-originales/logo.jpg` es el archivo
- *   que mandó la empresa; lo que se publica sale de acá;
- * - **lo publicado no se reescribe con otros bytes.** `sharp` es determinista:
- *   con la misma entrada y los mismos parámetros da el mismo archivo, así que
- *   correr esto de nuevo no toca nada.
+ * - **no se versiona el original.** `fotos-originales/logo-vacio.png` es el
+ *   archivo que mandó la empresa; lo que se publica sale de acá;
+ * - **lo publicado no se reescribe con otros bytes.** `sharp` es determinista
+ *   —también con la paleta, se comprobó—: con la misma entrada y los mismos
+ *   parámetros da el mismo archivo, así que correr esto de nuevo no toca nada.
  *
- * ## Por qué hay que recortar el fondo blanco
+ * ## El logo es el del boceto de la empresa — Fase 4.7
  *
- * El logo llegó como JPG con fondo blanco, y el sitio es papel de cal
- * `#F6F2EC`. Pegado tal cual, el encabezado de todas las páginas tendría un
- * recuadro blanco alrededor del logo. Así que se le saca el fondo — ver
- * `sacarElFondoBlanco()`, que explica por qué no alcanza con «hacer
- * transparente lo blanco».
+ * Hasta la Fase 4.7 el logo era un JPG con fondo blanco y el círculo amarillo
+ * relleno, y este script le sacaba el fondo deshaciendo la mezcla con el
+ * blanco (decisión 44). **El de ahora es otro dibujo**: dos círculos de línea
+ * en lugar del círculo amarillo, todo en un solo gris carbón, y llegó como PNG
+ * ya transparente. No hay fondo que sacar, así que esa parte se fue.
  *
- * ## La imagen para compartir ya no sale de acá — decisiones 63 y 64
+ * El amarillo no se reemplazó por otro color dentro del logo: el azul verdoso
+ * de la marca nueva es el del bloque sobre el que el boceto lo apoya, no una
+ * tinta del dibujo.
  *
- * Salió de acá dos veces: el logo a la izquierda y una foto a la derecha
- * (decisión 59), que WhatsApp recortaba desde el centro, y después el logo
- * solo, centrado sobre el papel (decisión 62), igual para todas las páginas.
- * **Ahora es una foto por página, con este logo centrado en una banda de
- * papel abajo.** La arma `scripts/preparar-compartir.mjs`, que parte de las
- * fotos y usa el `logo.png` que escribe este script. Por eso `npm run marca`
- * la vuelve a armar al terminar: si el logo cambia, las doce cambian con él.
+ * ## Por qué 600 px, y por qué con paleta
+ *
+ * **600 es el triple del ancho más grande al que se muestra**, 200 px en el
+ * encabezado de escritorio: alcanza para una pantalla de triple densidad. El
+ * original tiene 1.695 y publicarlo entero sería mandar casi diez veces los
+ * píxeles que se ven, en todas las páginas.
+ *
+ * **La paleta lo deja en 19,6 kB contra 45 en color completo**, y no se nota:
+ * el dibujo es un solo gris con su suavizado, que son niveles de transparencia,
+ * y 256 entradas alcanzan para todos. Medido contra la versión en color
+ * completo, compuesta sobre blanco, la diferencia media por canal es 0,08 sobre
+ * 255, y la máxima 8,5 en un puñado de píxeles de borde.
+ *
+ * ## La imagen para compartir no sale de acá — decisiones 63 y 64
+ *
+ * **Es una foto por página, con este logo centrado en una banda abajo.** La
+ * arma `scripts/preparar-compartir.mjs`, que parte de las fotos y usa el
+ * `logo.png` que escribe este script. Por eso `npm run marca` la vuelve a armar
+ * al terminar: si el logo cambia, las doce cambian con él.
  *
  * ## Lo que este script NO hace
  *
- * **No genera favicon.** Quedó pendiente a propósito: el círculo amarillo del
- * logo viene cortado por el borde superior del archivo fuente y la «e» lo pisa,
- * así que un recorte literal sale sucio, y cualquier otra cosa sería un lockup
- * nuevo que la empresa no autorizó. Decisión 45.
+ * **No genera favicon** todavía. Con el círculo amarillo quedó pendiente a
+ * propósito —decisión 45—; con los círculos de línea se hace en la etapa 5 de
+ * la Fase 4.7 (`docs/plan.md`).
  */
 
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
@@ -54,78 +67,16 @@ import prettier from "prettier";
 import sharp from "sharp";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
-const LOGO_ORIGINAL = join(RAIZ, "fotos-originales", "logo.jpg");
+const LOGO_ORIGINAL = join(RAIZ, "fotos-originales", "logo-vacio.png");
 const DESTINO = join(RAIZ, "public", "marca");
 const MANIFIESTO = join(RAIZ, "contenido", "marca.ts");
 
 /**
- * Le saca el fondo blanco al logo, dejando los bordes limpios sobre cualquier
- * color.
- *
- * **No alcanza con «lo que es blanco se vuelve transparente».** El JPG tiene
- * texto negro sobre blanco, así que entre la letra y el fondo hay una banda de
- * grises de suavizado. Si esos grises se dejan opacos, sobre el papel de cal se
- * ven como un halo gris alrededor de cada letra; si se vuelven transparentes de
- * golpe, las letras quedan dentadas.
- *
- * Lo que hace es deshacer la mezcla. Un píxel gris no es «gris»: es negro
- * tapado por blanco. Si el original se compuso sobre blanco,
- *
- *     visto = real × α + 255 × (1 − α)
- *
- * y como el negro y el amarillo del logo tienen los dos un canal en 0, el canal
- * más bajo del píxel dice cuánto blanco se mezcló:
- *
- *     α    = 1 − min(r, g, b) / 255
- *     real = (visto − 255 × (1 − α)) / α
- *
- * Así el suavizado sobrevive como transparencia y no como color, que es lo que
- * hace que el mismo archivo sirva sobre el papel, sobre blanco o sobre negro.
- *
- * El umbral de 248 es contra el ruido del JPEG: el fondo no es exactamente
- * `#FFFFFF` en todos lados —se midieron píxeles en 253— y sin el umbral esas
- * diferencias quedarían como una mugre apenas visible sobre el papel.
+ * El ancho del archivo publicado: el triple de los 200 px a los que se muestra
+ * en el encabezado de escritorio. `components/logo.tsx` tiene el otro lado de
+ * esta cuenta.
  */
-async function sacarElFondoBlanco(ruta) {
-  const { data, info } = await sharp(ruta)
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-
-  const salida = Buffer.alloc(info.width * info.height * 4);
-
-  for (let i = 0; i < info.width * info.height; i += 1) {
-    const o = i * info.channels;
-    const r = data[o];
-    const g = data[o + 1];
-    const b = data[o + 2];
-    const minimo = Math.min(r, g, b);
-
-    if (minimo >= 248) {
-      // Fondo. Los cuatro canales quedan en 0: transparente y sin color
-      // guardado debajo, que es lo que evita el halo al escalar.
-      continue;
-    }
-
-    const alfa = 1 - minimo / 255;
-    const blanco = 255 * (1 - alfa);
-    const p = i * 4;
-    salida[p] = Math.max(0, Math.min(255, Math.round((r - blanco) / alfa)));
-    salida[p + 1] = Math.max(0, Math.min(255, Math.round((g - blanco) / alfa)));
-    salida[p + 2] = Math.max(0, Math.min(255, Math.round((b - blanco) / alfa)));
-    salida[p + 3] = Math.round(alfa * 255);
-  }
-
-  return (
-    sharp(salida, {
-      raw: { width: info.width, height: info.height, channels: 4 },
-    })
-      // Recorta el aire que le sobra al archivo fuente. Lo que queda es el logo
-      // exacto, así que el componente lo puede alinear con el texto sin tener que
-      // compensar un margen que no se ve.
-      .trim({ threshold: 0 })
-  );
-}
+const ANCHO_PUBLICADO = 600;
 
 const kB = (bytes) => `${(bytes / 1024).toFixed(1)} kB`;
 
@@ -140,32 +91,41 @@ async function main() {
    * máquina que no tenga el archivo de la empresa.
    */
   const rutaLogo = join(DESTINO, "logo.png");
-  let logo;
   let infoLogo;
 
   if (existsSync(LOGO_ORIGINAL)) {
-    logo = await sacarElFondoBlanco(LOGO_ORIGINAL);
-    infoLogo = await logo.clone().png({ compressionLevel: 9 }).toFile(rutaLogo);
+    const original = await sharp(LOGO_ORIGINAL).metadata();
+    if (original.width < ANCHO_PUBLICADO) {
+      console.warn(
+        `  ! el original mide ${original.width} px de ancho y se publica a ` +
+          `${ANCHO_PUBLICADO}: se va a agrandar, y agrandar no agrega detalle.`,
+      );
+    }
+
+    infoLogo = await sharp(LOGO_ORIGINAL)
+      // Recorta el aire transparente que pudiera traer el archivo: lo que queda
+      // es el logo exacto, y el componente lo alinea con el texto sin
+      // compensar un margen que no se ve. El de la Fase 4.7 no traía, pero el
+      // próximo puede traer.
+      .trim({ threshold: 0 })
+      .resize({ width: ANCHO_PUBLICADO })
+      .png({
+        compressionLevel: 9,
+        palette: true,
+        quality: 100,
+        colors: 256,
+        effort: 10,
+      })
+      .toFile(rutaLogo);
+
     console.log(
       `  logo.png     ${infoLogo.width}×${infoLogo.height}  ${kB(infoLogo.size)}`,
     );
   } else {
-    logo = sharp(rutaLogo);
-    const meta = await logo.metadata();
+    const meta = await sharp(rutaLogo).metadata();
     infoLogo = { width: meta.width, height: meta.height };
     console.log(
       `  logo.png     sin el original en fotos-originales/: se usa el publicado, sin tocarlo`,
-    );
-  }
-
-  // El logo del encabezado se muestra a 168 px de ancho como máximo. Con
-  // pantallas de triple densidad eso pide 504 px de archivo, y el original
-  // tiene 524: entra justo. Si algún día el logo se quiere ver más grande, hace
-  // falta el vector que `docs/diseno.md` todavía le está pidiendo a la empresa.
-  if (infoLogo.width < 504) {
-    console.warn(
-      `  ! el logo quedó en ${infoLogo.width} px de ancho. A 168 px de ancho en ` +
-        `pantalla, una pantalla de triple densidad pide 504: se va a ver blando.`,
     );
   }
 

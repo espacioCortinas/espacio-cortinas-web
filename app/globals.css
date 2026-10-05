@@ -18,12 +18,15 @@
 @source not "../README.md";
 
 /*
-  Tokens del sistema de diseño — Fase 4.1, dirección elegida.
+  Tokens del sistema de diseño — Fase 4.7, el rediseño a partir del boceto de
+  la empresa (`docs/plan.md`).
 
-  La dirección es «Cal»: papel cálido, tipografía como estructura, la foto
-  siempre dentro de la columna. El acento NO es un color: es el negro de la
-  marca. El porqué de cada valor está en `docs/diseno.md`, y la decisión en la
-  43 de `docs/decisiones.md`.
+  Reemplazan a los de la Fase 4.1 —«Cal»: papel crema, Fraunces y el negro como
+  único acento, decisión 43—, que la empresa rechazó. La paleta es la del
+  boceto, medida de su código y no estimada, con los arreglos de contraste que
+  están anotados en cada valor. **Los nombres de los tokens no cambiaron**: un
+  componente que usaba `text-texto-suave` sigue usándolo, y lo que cambió es el
+  color que hay detrás.
 
   **Los componentes usan el token, nunca el valor suelto.** Si un color hace
   falta y no está acá, la respuesta casi siempre es que no hace falta.
@@ -39,53 +42,72 @@
   /* --- Color ------------------------------------------------------- */
 
   /*
-    Papel de cal. No es blanco: las fotos son de celular y contra el blanco
-    puro se ven duras, y sobre un fondo cálido apagado se disimula que vienen
-    de distintas cámaras y horas del día.
+    El gris frío del boceto. Es un neutro de saturación muy baja, que es lo
+    que el archivo de fotos pedía desde la Fase 4.1: la mitad son interiores
+    cálidos y la otra mitad obra, oficinas y cielo azul, y un fondo que
+    «combine» con unas ensucia a las otras (`docs/diseno.md`, «La paleta del
+    material»). Ya no es crema: el crema es hoy el fondo por defecto de los
+    sitios hechos con IA, y fue parte de lo que la empresa rechazó.
   */
-  --color-fondo: #f6f2ec;
-  /* Un paso más oscuro, para separar bloques sin bordes ni sombras. */
-  --color-superficie: #efe9e0;
+  --color-fondo: #edeff0;
+  /*
+    El blanco del encabezado del boceto. Es lo que se apoya sobre el fondo: el
+    encabezado, los campos del formulario, el lugar de una foto mientras carga.
+  */
+  --color-superficie: #ffffff;
+
+  /* El texto del boceto. 11,61:1 sobre el fondo y 13,39:1 sobre blanco. */
+  --color-texto: #2f2f2f;
+  /*
+    Metadatos, pies y chips. 5,25:1 sobre el fondo y 6,06:1 sobre blanco. El
+    gris claro que usa el boceto, `#9C9C9C`, da 2,38:1: no se lee.
+  */
+  --color-texto-suave: #56656a;
 
   /*
-    El negro es el del logo, exacto, no uno parecido. 14,69:1 sobre el papel,
-    que es AAA de sobra.
+    La pizarra de los títulos del boceto, que acá es también el acento:
+    títulos, enlaces, botón principal y foco. 7,02:1 sobre el fondo; el blanco
+    encima, 8,10:1.
   */
-  --color-texto: #211f20;
-  /* Metadatos, pies y chips. 5,23:1 sobre el papel. */
-  --color-texto-suave: #6b645c;
+  --color-acento: #405357;
+  /* Un paso más oscuro, para el botón principal al pasar el puntero: 11,13:1. */
+  --color-acento-hondo: #2f3e41;
+
+  /* Filete decorativo. 1,34:1: no sirve para el borde de un campo. */
+  --color-linea: #c9d1d3;
 
   /*
-    EL ACENTO ES EL MISMO NEGRO, y es una decisión, no una omisión.
+    El azul verdoso del boceto: el de los bloques, el de los nombres de
+    producto y el del botón de chat. ES UN COLOR DE SUPERFICIE, Y EL TEXTO
+    ENCIMA VA OSCURO:
 
-    La marca aporta un amarillo de croma máximo que contra cualquier fondo
-    claro da 1,06:1 — no puede ser color de enlace, ni de texto, ni de línea.
-    Meter ADEMÁS un tercer color para enlaces daría un sitio de cuatro colores
-    con la marca compitiendo contra un acento inventado. Así que los enlaces
-    son negros y subrayados, y el botón principal es negro sólido.
+    - el texto del sitio encima da 5,08:1, y es el único que se usa;
+    - la pizarra encima da 3,08:1: solo letra grande;
+    - el blanco encima da 2,63:1, y el gris claro que puso el boceto, 2,28:1:
+      ninguno de los dos, ni en letra grande, que pide 3;
+    - como línea o forma sobre el fondo da 2,28:1, así que no puede ser lo
+      único que marque un estado.
   */
-  --color-acento: #211f20;
-
-  --color-linea: #ded6ca;
+  --color-marca: #80a6ad;
 
   /*
-    El amarillo del logo. USO RESTRINGIDO, ver `docs/diseno.md`:
-
-    - Solo como superficie con texto negro encima (13,92:1) o como forma.
-    - NUNCA como texto, enlace o línea fina: 1,06:1 contra el papel.
-    - NUNCA como único indicio de un estado: contra el papel da 1,06:1 y el
-      mínimo para un elemento de interfaz con significado es 3:1. Lo que el
-      amarillo marque tiene que estar marcado también por peso, subrayado o
-      posición.
-    - Una vez por pantalla. Si aparece en todos lados deja de ser la marca.
+    El teal oscuro del pie del boceto, `#607D82`, un punto más oscuro: con el
+    original el blanco daba 4,42:1, y hacen falta 4,5. Así da 4,87.
   */
-  --color-marca: #fff100;
+  --color-marca-oscuro: #5a767b;
+
+  /* El texto sobre la pizarra y sobre el teal oscuro. */
+  --color-claro: #ffffff;
 
   /* --- Tipografía --------------------------------------------------- */
 
-  /* Las familias las carga `app/tipografias.ts` con `next/font`. */
-  --font-titulo: var(--fuente-titulo), Georgia, "Times New Roman", serif;
-  --font-texto: var(--fuente-texto), ui-sans-serif, system-ui, sans-serif;
+  /*
+    Una sola familia, Raleway, que es la del boceto: 700 en los títulos y 400
+    en el texto. La carga `app/tipografias.ts` con `next/font`. Quedan dos
+    tokens porque son dos papeles distintos, aunque hoy apunten a lo mismo.
+  */
+  --font-titulo: var(--fuente-raleway), ui-sans-serif, system-ui, sans-serif;
+  --font-texto: var(--fuente-raleway), ui-sans-serif, system-ui, sans-serif;
 
   /*
     Escala corta y con saltos amplios: un display, dos títulos, un cuerpo y un
@@ -110,6 +132,14 @@
 
   --text-meta: 0.8125rem; /* 13 */
   --text-meta--line-height: 1.45;
+
+  /*
+    El menú y los botones chicos, a 15 px como en el boceto. Antes el menú iba
+    a 13 en mayúscula espaciada: la etiqueta chica y espaciada es otra de las
+    marcas de los sitios hechos con IA.
+  */
+  --text-menu: 0.9375rem; /* 15 */
+  --text-menu--line-height: 1.3;
 
   /* --- Espaciado ---------------------------------------------------- */
 
@@ -151,9 +181,14 @@
 
 @layer base {
   /*
-    El papel y el negro se ponen acá una vez, y no en cada página. Lo único que
+    El fondo y el texto se ponen acá una vez, y no en cada página. Lo único que
     vive en esta capa es lo que vale para el documento entero; la composición
     de cada página es de su fase.
+
+    **Cifras de línea**, todas de la misma altura. Raleway trae por defecto las
+    antiguas, que suben y bajan como minúsculas: quedan lindas en un párrafo y
+    desparejan un teléfono, una medida —«25 mm»— o un precio. En este sitio los
+    números son casi siempre de esos.
   */
   body {
     background-color: var(--color-fondo);
@@ -161,19 +196,27 @@
     font-family: var(--font-texto);
     font-size: var(--text-cuerpo);
     line-height: var(--text-cuerpo--line-height);
+    font-variant-numeric: lining-nums;
     -webkit-font-smoothing: antialiased;
   }
 
   /*
-    Los títulos son de la familia de títulos, una vez y no en cada componente.
-    Los tamaños sí los pone cada uno: la escala es corta y el h2 de una página
-    no siempre es del mismo tamaño que el de otra.
+    Los títulos son de la familia de títulos, en negrita y en la pizarra del
+    boceto, una vez y no en cada componente. Los tamaños sí los pone cada uno:
+    la escala es corta y el h2 de una página no siempre es del mismo tamaño que
+    el de otra.
+
+    Sobre el azul verdoso de la marca la pizarra da 3,08:1, que solo alcanza en
+    letra grande: un título más chico que `text-titulo` puesto sobre ese color
+    tiene que pasar al color del texto.
   */
   h1,
   h2,
   h3,
   h4 {
     font-family: var(--font-titulo);
+    font-weight: 700;
+    color: var(--color-acento);
     text-wrap: balance;
   }
 
@@ -182,11 +225,15 @@
     cada componente. Es parte de terminado, no un extra.
 
     El desplazamiento de 2 px es lo que hace que el anillo del botón principal
-    —que es negro sólido— caiga sobre el papel y se vea. Sin él, un anillo negro
-    sobre un botón negro no existe.
+    —que es pizarra sólida— caiga sobre el fondo y se vea. Sin él, un anillo
+    pizarra sobre un botón pizarra no existe.
+
+    **El color se puede cambiar por zona**, con `--foco`: sobre el teal oscuro
+    del pie, la pizarra da 1,66:1 y el anillo desaparecería, así que el pie lo
+    pone en blanco.
   */
   :focus-visible {
-    outline: 2px solid var(--color-acento);
+    outline: 2px solid var(--foco, var(--color-acento));
     outline-offset: 2px;
   }
 

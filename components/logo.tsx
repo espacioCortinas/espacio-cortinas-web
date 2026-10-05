@@ -1,65 +1,30 @@
 import { logo } from "@/contenido/marca";
 
 /**
- * El logo de la empresa, tal cual es: «espacio» en minúscula, «CORTINAS» en
- * versalita espaciada, y el círculo amarillo detrás de la «e».
+ * El logo de la empresa, tal cual es: dos círculos de línea, «espacio» en
+ * minúscula y «CORTINAS» en versalita espaciada, todo en un solo gris carbón.
  *
- * # El problema, que es el de toda la fase
+ * # Es el logo nuevo, el del boceto — Fase 4.7
  *
- * El logo vino como JPG **con fondo blanco**, y el sitio es papel de cal
- * `#F6F2EC`. El encabezado está en todas las páginas, así que lo que se resuelva
- * acá se ve siempre.
+ * Hasta la Fase 4.7 el logo tenía un círculo amarillo relleno detrás de la
+ * «e», y casi todo este componente explicaba cómo apoyar ese amarillo sobre un
+ * papel crema con el que casi no contrastaba (decisión 44). **Ese problema se
+ * fue con el dibujo**: el de ahora no tiene color propio. El azul verdoso de la
+ * marca nueva es el del bloque sobre el que el boceto lo apoya, no una tinta
+ * del logo, y acá va directo sobre el blanco del encabezado.
  *
- * ## Lo que se hizo: va sobre el papel, sin campo propio, y el papel no se mueve
+ * El gris del dibujo, `#35363A`, da 12,07:1 sobre el blanco y 10,46:1 sobre
+ * el fondo: se lee igual en los dos.
  *
- * `scripts/preparar-marca.mjs` le saca el fondo blanco deshaciendo la mezcla
- * —el suavizado sobrevive como transparencia y no como color— y el logo se
- * apoya directo sobre el papel, al mismo margen que el texto.
+ * # El tamaño: 160 px en el teléfono, 200 en escritorio
  *
- * ## Por qué, con los números
+ * **Los círculos son de línea fina, y eso pone el piso.** Se miraron a 140,
+ * 168, 200 y 240 px en una pantalla de doble densidad: a 140 la línea todavía
+ * se ve, pero ya casi es un pelo. El logo anterior iba a 140 y 168.
  *
- * **Lo que tiene que ser legible es la palabra, y la palabra es negra.**
- * `#211F20` sobre el papel da **14,69:1**. Nada del logo depende de que el
- * amarillo se lea: el amarillo es el círculo, que es una forma.
- *
- * **Y el contraste WCAG es el instrumento equivocado para medir esa forma.**
- * Mide luminancia, y el amarillo `#FFF100` tiene casi exactamente la misma
- * luminancia que el papel: L\* 93,5 contra 95,6. De ahí sale 1,06:1, que
- * describiría un círculo invisible. No lo es: la separación es de croma, no de
- * claridad, y medida como diferencia perceptual da **ΔE2000 = 28,5**. El
- * círculo se ve, y se ve como amarillo.
- *
- * **Las tres salidas posibles se midieron, y ninguna compra lo que cuesta:**
- *
- * | Fondo del logo         | Amarillo vs. fondo |  ΔE2000 |
- * | ---------------------- | -----------------: | ------: |
- * | papel de cal `#F6F2EC` |             1,06:1 |    28,5 |
- * | recambio `#F8F6F2`     |             1,09:1 |    29,0 |
- * | campo blanco `#FFFFFF` |             1,18:1 |    30,3 |
- *
- * Mover el papel entero al valor de recambio de la decisión 43 mueve la
- * separación **0,5 unidades**, por debajo del umbral en que se nota un cambio
- * —que ronda 2— y a cambio de aflojar el papel de cal, que es lo que resuelve
- * el problema número uno del archivo fotográfico: la disparidad de calidad
- * entre las 23 fotos. Un campo blanco detrás del logo compra 1,8 unidades y
- * mete en el encabezado de todas las páginas un color que no está en la paleta,
- * con aspecto de calcomanía pegada sobre el papel. Y la versión en negro tira
- * el único color de la marca para arreglar un problema que mide 1,8.
- *
- * Así que el papel se queda en `#F6F2EC`, el logo va sin campo, y el amarillo
- * del círculo es **el único amarillo de la pantalla**: la regla de una vez por
- * pantalla la gasta entera el logo, y por eso no hay amarillo en ningún otro
- * lado del sitio (`docs/diseno.md`, «La marca»). Decisión 44.
- *
- * # Dos cosas que quedan abiertas, y no son de esta fase
- *
- * - **El archivo es un JPG de 524 px.** Alcanza justo para los 168 px de ancho
- *   máximo de acá en una pantalla de triple densidad. Para cualquier cosa más
- *   grande hace falta el vector, que `docs/diseno.md` le sigue pidiendo a la
- *   empresa.
- * - **El círculo viene cortado por el borde superior del archivo fuente**, así
- *   que arriba tiene una tangente plana. Se ve en el original y se arregla con
- *   el vector, no acá.
+ * El archivo publicado tiene 600 px, el triple de 200: alcanza para una
+ * pantalla de triple densidad. La cuenta está del otro lado, en
+ * `scripts/preparar-marca.mjs`.
  */
 export function Logo({ className = "" }: { className?: string }) {
   return (
@@ -71,7 +36,7 @@ export function Logo({ className = "" }: { className?: string }) {
      *
      * `width` y `alto` salen del manifiesto generado y no de una cuenta: con
      * ellos el navegador reserva el lugar del logo antes de descargarlo y el
-     * encabezado no salta al cargar.
+     * encabezado no salta.
      */
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -83,7 +48,7 @@ export function Logo({ className = "" }: { className?: string }) {
       fetchPriority="high"
       decoding="async"
       alt="Espacio Cortinas"
-      className={`h-auto w-[8.75rem] md:w-[10.5rem] ${className}`.trim()}
+      className={`h-auto w-[10rem] md:w-[12.5rem] ${className}`.trim()}
     />
   );
 }

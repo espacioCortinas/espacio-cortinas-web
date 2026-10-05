@@ -20,18 +20,18 @@ import type { ComponentProps, ReactNode } from "react";
  *
  * ## El borde es `texto-suave` y no `linea`, y es por contraste
  *
- * `--color-linea` da 1,29:1 contra el papel: alcanza para un filete decorativo
- * y **no** para el borde de un control, que es lo único que dice dónde empieza
- * y dónde termina un campo. WCAG pide 3:1 para eso. `--color-texto-suave` da
- * 5,23:1 y es el token que corresponde.
+ * `--color-linea` da 1,55:1 contra el blanco del campo: alcanza para un filete
+ * decorativo y **no** para el borde de un control, que es lo único que dice
+ * dónde empieza y dónde termina un campo. WCAG pide 3:1 para eso.
+ * `--color-texto-suave` da 6,06:1 y es el token que corresponde.
  *
  * ## El error no es rojo
  *
- * La paleta son tres colores —papel, negro y amarillo— y son los del logo
- * (decisión 43). Un rojo sería un cuarto, y el amarillo no puede marcar un
- * estado porque da 1,06:1 contra el papel. Así que el error se marca como se
- * marca en un impreso: negro, en negrita, con un filete al costado y la palabra
- * escrita. Decisión 46.
+ * Un rojo sería un color más, inventado, en una paleta que es la del boceto de
+ * la empresa, y el azul verdoso de la marca no puede marcar un estado: da
+ * 2,28:1 contra el fondo. Así que el error se marca como se marca en un
+ * impreso: en el color del texto, en negrita, con un filete al costado y la
+ * palabra escrita. Decisión 46.
  *
  * El color tampoco era lo que comunicaba: una de cada doce personas no
  * distingue rojo de verde, así que el aviso ya tenía que decirlo con palabras.
@@ -45,7 +45,7 @@ const CONTROL =
 const ETIQUETA = "text-meta font-medium text-texto";
 const AYUDA = "text-meta text-texto-suave";
 
-/** El error: negro, negrita y un filete de 3 px al costado. Sin color. */
+/** El error: color del texto, negrita y un filete de 3 px al costado. */
 const ERROR =
   "border-texto border-l-[3px] pl-2.5 text-meta font-bold text-texto";
 

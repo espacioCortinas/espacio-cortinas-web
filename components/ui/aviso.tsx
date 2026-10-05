@@ -4,10 +4,10 @@ import type { ReactNode } from "react";
  * Un mensaje al pie de una acción: salió bien o salió mal.
  *
  * **Sin color, y es una decisión medida** — decisión 46. La versión del panel
- * usaba rojo, verde y ámbar de Tailwind. La paleta de este sitio son tres
- * colores y son los del logo: papel, negro y amarillo (decisión 43). Un rojo
- * sería un cuarto color inventado, y el amarillo no puede marcar un estado —
- * 1,06:1 contra el papel, y hacen falta 3:1.
+ * usaba rojo, verde y ámbar de Tailwind. La paleta de este sitio es la del
+ * boceto de la empresa (Fase 4.7): un rojo sería un color inventado, y el azul
+ * verdoso de la marca no puede marcar un estado — 2,28:1 contra el fondo, y
+ * hacen falta 3:1.
  *
  * Lo que distingue un error de una confirmación es lo mismo que lo distinguía
  * antes de que el color existiera: **las palabras**, el peso y un filete más
@@ -19,7 +19,7 @@ import type { ReactNode } from "react";
  * distinguirse. Una confirmación va con `role="status"`, que se anuncia cuando
  * termina la frase en curso.
  *
- * Contraste medido: negro `#211F20` sobre el papel, **14,69:1**.
+ * Contraste medido: el texto, `#2F2F2F`, sobre el fondo, **11,61:1**.
  */
 
 type Tono = "error" | "nota";

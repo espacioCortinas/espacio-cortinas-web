@@ -234,8 +234,8 @@ export function VideoMudo({
       }}
       onPause={() => setReproduciendo(false)}
       aria-label={etiqueta}
-      // `bg-superficie` es lo que se ve mientras el cartel carga: un paso del
-      // papel, no un gris. Un recuadro gris sobre papel cálido es un agujero.
+      // `bg-superficie` es lo que se ve mientras el cartel carga: el blanco del
+      // sistema, que sobre el gris del fondo se lee como el lugar del video.
       // Como la caja del elemento mide exactamente lo que el video, esto no
       // aparece nunca como franja al costado.
       className={

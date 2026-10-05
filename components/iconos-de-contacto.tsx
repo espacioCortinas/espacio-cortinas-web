@@ -10,10 +10,11 @@
  * mismo con el correo, para que los tres medios se lean como una familia. Van
  * solo al lado de un medio de contacto — decisión 65.
  *
- * **En el negro del texto, no en sus colores.** El verde de WhatsApp y el
- * degradé de Instagram serían dos colores más en una paleta de tres (decisión
- * 46), y el degradé rompe además la regla 1. Las dos marcas tienen versión de
- * un solo color. `currentColor` toma el del enlace: 14,69:1 sobre el papel.
+ * **En el color del texto del enlace, no en sus colores.** El verde de
+ * WhatsApp y el degradé de Instagram serían dos colores más en la paleta
+ * (decisión 46), y el degradé rompe además la regla 1. Las dos marcas tienen
+ * versión de un solo color. `currentColor` toma el del enlace, que ya pasa el
+ * contraste donde esté: el del texto sobre el fondo, el blanco en el pie.
  *
  * **Los dos logos son los de Simple Icons 16.33** (dominio público, CC0), que
  * reproducen los oficiales, y no se tocan: son la marca de otro. **El sobre es
