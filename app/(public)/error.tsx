@@ -22,10 +22,10 @@ import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
 export default function Error({ reset }: { reset: () => void }) {
   return (
     <main className={`${CLASES_CONTENEDOR} py-16 md:py-28`}>
-      <p className="text-texto-suave text-meta tracking-[0.12em] uppercase">
-        Algo falló
-      </p>
-      <h1 className="mt-4 text-display">No se pudo mostrar esta página</h1>
+      {/* La frase chica de arriba, como los lemas del boceto: en minúscula y
+          gris, no en mayúscula espaciada (Fase 4.7). */}
+      <p className="text-texto-suave text-subtitulo">algo falló</p>
+      <h1 className="mt-2 text-display">No se pudo mostrar esta página</h1>
       <p className="max-w-lectura text-texto-suave mt-6 text-subtitulo">
         Puede ser un problema momentáneo de conexión. Probá de nuevo; si sigue
         igual, escribinos y te respondemos igual de rápido.

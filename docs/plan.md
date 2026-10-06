@@ -550,7 +550,7 @@ Cómo quedó:
   descripción del boceto, así que esa parte de la descripción anterior se
   repartió en las variantes, sin reescribirla, como en la decisión 40.
 
-**4. Listados, Contacto y Nosotros.**
+**4. Listados, Contacto y Nosotros — HECHA.**
 
 - Las grillas de portadas 4:5 se quedan, con el nombre en una banda azul
   verdosa debajo de la foto.
@@ -561,6 +561,28 @@ Cómo quedó:
 - El menú queda: Inicio, Productos, Nuestros trabajos, Nosotros, Contacto.
   **La dirección `/proyectos` no cambia**, solo su nombre en pantalla: los
   enlaces que ya circulan siguen andando (decisión 10).
+
+Cómo quedó:
+
+- **El menú entra en una fila, con «Trabajos» y en minúscula**: la empresa no
+  quería dos renglones, y con «Nuestros trabajos» o en mayúscula no hay forma
+  —medido con la letra real en `components/navegacion.tsx`—. La página sigue
+  llamándose «Nuestros trabajos». Probado en una fila a 320, 360, 375 y 768.
+- **El catálogo y el listado de trabajos no quedaron en grilla con banda**,
+  como decía arriba, sino como filas del damero de las páginas de producto,
+  con las mismas piezas (`components/damero.tsx` las exporta): así lo que se
+  lista y lo que se abre se leen como lo mismo. La regla de la decisión 52
+  sigue: el primer trabajo en fila y el resto en grilla.
+- **Nosotros** junta las dos páginas del boceto, con una foto del archivo al
+  lado de cada texto. La ficha de negocio local no lista páginas, así que no
+  hubo nada que sumarle; y la imagen para compartir es la de Inicio hasta la
+  etapa 5, que la hace propia.
+- **Se fueron todas las etiquetas chicas en mayúscula espaciada** que quedaban:
+  la de Contacto, las de sus datos, las de los listados, la del estado vacío,
+  la de la página que no existe y la de error.
+- Verificado en el runtime de producción con `npm run preview`: todas las
+  páginas responden 200, `/nosotros` está en el sitemap y una ruta que no
+  existe da 404.
 
 **5. Cierre.**
 

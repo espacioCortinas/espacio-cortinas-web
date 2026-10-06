@@ -1,4 +1,5 @@
 import { TarjetaProyecto } from "@/components/tarjeta-proyecto";
+import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
 import type { ConFotos, Proyecto } from "@/contenido/tipos";
 
 /**
@@ -46,8 +47,18 @@ import type { ConFotos, Proyecto } from "@/contenido/tipos";
  * columnas, cada tarjeta mediría 488 y el proyecto de apertura tendría la
  * portada más chica de la página, que es la jerarquía al revés.
  *
- * Es una sola `<ul>`: son N proyectos, no uno más una lista aparte. El primer
- * `<li>` ocupa todas las columnas.
+ * # Desde la Fase 4.7: la fila es del damero, y la grilla va aparte
+ *
+ * La fila pasó a ser una fila del damero del boceto de la empresa, con sus
+ * líneas finas (`components/tarjeta-proyecto.tsx`). En `/proyectos` va de
+ * borde a borde, como el damero de cada producto, y la grilla no puede: sus
+ * tarjetas tocarían los bordes de la pantalla. Así que **son dos piezas**: la
+ * fila, que llega hasta donde llegue quien la contiene, y debajo la lista del
+ * resto, que con `aSangre` se pone su propia columna.
+ *
+ * Antes era una sola `<ul>` con el primer `<li>` ocupando todas las columnas.
+ * Ahora el primero es un `<article>` suelto y los demás una lista: un lector
+ * de pantalla oye el trabajo de apertura y después «lista, N elementos».
  */
 
 /**
@@ -70,44 +81,48 @@ export function ListadoProyectos({
   proyectos,
   nivel,
   prioridad = false,
+  aSangre = false,
 }: {
   proyectos: ConFotos<Proyecto>[];
   /** El nivel de los títulos: `2` en `/proyectos`, `3` en Inicio. */
   nivel: 2 | 3;
   /** Si la portada del primero es lo primero que se ve en la página. */
   prioridad?: boolean;
+  /**
+   * Si el listado va fuera de la columna de la página, de borde a borde: la
+   * fila se estira, y la grilla del resto se pone su propia columna.
+   */
+  aSangre?: boolean;
 }) {
   if (proyectos.length === 0) return null;
 
+  const [primero, ...resto] = proyectos;
+
   return (
-    <ul className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-      {proyectos.map((proyecto, i) =>
-        i === 0 ? (
-          <li
-            key={proyecto.slug}
-            // El mismo filete de 1 px arriba y abajo que las filas del
-            // catálogo: es lo que separa la apertura de la grilla sin agregar
-            // un recurso. Sin grilla debajo, cierra la lista igual.
-            className="border-linea border-y py-10 sm:col-span-2 md:py-16 lg:col-span-3"
-          >
-            <TarjetaProyecto
-              proyecto={proyecto}
-              forma="fila"
-              nivel={nivel}
-              prioridad={prioridad}
-            />
-          </li>
-        ) : (
-          <li key={proyecto.slug}>
-            <TarjetaProyecto
-              proyecto={proyecto}
-              forma="tarjeta"
-              nivel={nivel}
-              sizes={SIZES_TARJETA}
-            />
-          </li>
-        ),
+    <>
+      <TarjetaProyecto
+        proyecto={primero}
+        forma="fila"
+        nivel={nivel}
+        prioridad={prioridad}
+      />
+
+      {resto.length > 0 && (
+        <div className={aSangre ? CLASES_CONTENEDOR : ""}>
+          <ul className="mt-12 grid gap-x-6 gap-y-12 sm:grid-cols-2 md:mt-16 lg:grid-cols-3">
+            {resto.map((proyecto) => (
+              <li key={proyecto.slug}>
+                <TarjetaProyecto
+                  proyecto={proyecto}
+                  forma="tarjeta"
+                  nivel={nivel}
+                  sizes={SIZES_TARJETA}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
-    </ul>
+    </>
   );
 }

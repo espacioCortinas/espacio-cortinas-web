@@ -52,10 +52,16 @@ export function Vacio({
      * donde toma el margen que compensa.
      */
     <div className="bg-superficie -mx-5 px-5 py-12 md:-mx-12 md:px-12 md:py-20">
-      <p className="text-texto-suave text-meta tracking-[0.12em] uppercase">
-        {etiqueta}
+      {/*
+        La línea de arriba va como los lemas del boceto de la empresa —chica,
+        en minúscula y gris— y no en mayúscula espaciada a 13 px, que es una de
+        las marcas de sitio hecho con IA (Fase 4.7). El título, en el peso y la
+        pizarra de los títulos aunque sea un `<p>`.
+      */}
+      <p className="text-texto-suave text-subtitulo">{etiqueta}</p>
+      <p className="font-titulo text-acento max-w-lectura mt-2 text-titulo font-bold">
+        {titulo}
       </p>
-      <p className="font-titulo max-w-lectura mt-4 text-titulo">{titulo}</p>
       <div className="max-w-lectura text-texto-suave mt-4">{children}</div>
       {acciones && (
         <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">

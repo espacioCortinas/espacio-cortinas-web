@@ -30,10 +30,10 @@ export default function NoEncontrada() {
     <>
       <Encabezado />
       <main className={`${CLASES_CONTENEDOR} py-16 md:py-28`}>
-        <p className="text-texto-suave text-meta tracking-[0.12em] uppercase">
-          Error 404
-        </p>
-        <h1 className="mt-4 text-display">Esta página no existe</h1>
+        {/* La frase chica de arriba, como los lemas del boceto: en
+            minúscula y gris, no en mayúscula espaciada (Fase 4.7). */}
+        <p className="text-texto-suave text-subtitulo">error 404</p>
+        <h1 className="mt-2 text-display">Esta página no existe</h1>
         <p className="max-w-lectura text-texto-suave mt-6 text-subtitulo">
           La dirección no corresponde a ninguna página del sitio. Puede ser un
           enlace viejo: el catálogo tiene los siete productos con sus fotos, y

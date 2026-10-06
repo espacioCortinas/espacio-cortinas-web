@@ -6,27 +6,35 @@ import { usePathname } from "next/navigation";
 import { ENLACES } from "@/lib/navegacion";
 
 /**
- * Los enlaces del sitio, siempre a la vista: en escritorio a la derecha del
- * logo, en el teléfono en su propia fila debajo.
+ * Los enlaces del sitio, siempre a la vista y siempre en una fila: en
+ * escritorio a la derecha del logo, en el teléfono en su propia fila debajo.
  *
- * # Sin botón «Menú», a pedido
+ * # Sin botón «Menú», y en un solo renglón: los dos a pedido
  *
- * **No hay menú desplegable, y es una decisión de la empresa.** En la etapa 1
- * de la Fase 4.7 el teléfono pasó a un botón «Menú» que abría la lista; la
- * empresa prefirió volver a los enlaces a la vista, que es como estaba el sitio
- * antes. Es también lo que la Fase 4.2 había razonado: esconderlos agrega un
- * toque de más para llegar a cualquier lado, a cambio de nada.
+ * **No hay menú desplegable.** En la etapa 1 de la Fase 4.7 el teléfono pasó a
+ * un botón «Menú»; la empresa prefirió volver a los enlaces a la vista, que es
+ * como estaba el sitio antes. Y **tampoco dos renglones**: con «Nosotros» son
+ * cinco enlaces, y tienen que entrar en una fila.
  *
- * **En el teléfono van a 13 px, sin espaciado entre letras y con 16 px entre
- * enlaces; en escritorio, a 15, que es el tamaño del boceto.** Medido con
- * Raleway, las cuatro etiquetas ocupan 313 px así, y entran en una fila desde
- * los teléfonos de 360 de ancho, que son casi todos. Con las letras espaciadas
- * del sitio anterior no entraban: aun con la letra de entonces, más angosta,
- * «Contacto» quedaba solo en un segundo renglón.
+ * # Las medidas, con la letra real
  *
- * Por debajo de 360 —y cuando entre «Nosotros» en la etapa 4, que suma una
- * quinta etiqueta— pasan a dos renglones: `flex-wrap` lo resuelve solo, sin
- * que nada se salga del ancho.
+ * Medido con Raleway a 13 px, en el peso más ancho de los dos que usa:
+ *
+ *     en mayúscula, con «Nuestros trabajos»        402 px de texto
+ *     en mayúscula, con «Trabajos»                 329
+ *     en minúscula, con «Trabajos»                 264   ← así quedó
+ *
+ * Un teléfono de 360 de ancho deja 320 para el menú, así que **solo entra en
+ * minúscula y con «Trabajos»**, que es la opción que eligió la empresa: la
+ * mayúscula ocupa un cuarto más. Con 8 px entre enlaces como mínimo, los cinco
+ * ocupan 296 y sobran 24, que `justify-between` reparte.
+ *
+ * **Por debajo de 360 la letra baja sola**, hasta 12 px a 320 de ancho: 244 de
+ * texto y 32 de huecos en los 280 que quedan. `flex-wrap` sigue puesto como red,
+ * por si alguien agranda la letra del sistema: antes que salirse de la pantalla,
+ * pasa un enlace al renglón de abajo.
+ *
+ * En escritorio van a 15 px, que es el tamaño del boceto, a la derecha.
  *
  * Cada enlace tiene 44 px de alto, que es la zona táctil mínima.
  *
@@ -52,7 +60,7 @@ export function Navegacion() {
 
   return (
     <nav aria-label="Principal">
-      <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 md:justify-end md:gap-x-8">
+      <ul className="flex flex-wrap items-center justify-between gap-x-2 md:justify-end md:gap-x-6 lg:gap-x-8">
         {ENLACES.map(({ href, texto }) => {
           const activo = estaActivo(ruta, href);
           return (
@@ -61,8 +69,8 @@ export function Navegacion() {
                 href={href}
                 aria-current={activo ? "page" : undefined}
                 className={
-                  "text-acento inline-flex min-h-11 items-center text-meta " +
-                  "uppercase underline-offset-[6px] " +
+                  "text-acento inline-flex min-h-11 items-center " +
+                  "text-[clamp(0.75rem,3.6vw,0.8125rem)] underline-offset-[6px] " +
                   "md:text-menu md:underline-offset-8 " +
                   (activo
                     ? "font-bold underline decoration-2"

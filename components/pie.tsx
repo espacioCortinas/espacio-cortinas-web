@@ -50,13 +50,13 @@ export function Pie() {
      * `py` del `<main>` de cada página, que ya es el ritmo del sistema —64 en
      * teléfono, 112 en escritorio—.
      *
-     * Abajo, en el teléfono, sobra lugar a propósito: es donde se apoya el
-     * botón flotante de WhatsApp al llegar al final de la página, y sin ese
-     * aire taparía el último enlace.
+     * Abajo sobra lugar a propósito: es donde se apoya el botón flotante de
+     * WhatsApp al llegar al final de la página, y sin ese aire taparía el
+     * último enlace del menú del pie, que en escritorio cae justo arriba de él.
      */
     <footer className="bg-marca-oscuro text-claro [--foco:var(--color-claro)]">
       <Contenedor>
-        <div className="grid gap-10 pt-12 pb-24 md:grid-cols-[1fr_auto] md:gap-20 md:py-16">
+        <div className="grid gap-10 pt-12 pb-24 md:grid-cols-[1fr_auto] md:gap-20 md:pt-16 md:pb-28">
           <div>
             <p className="font-titulo text-titulo font-bold">
               Espacio Cortinas
@@ -90,7 +90,7 @@ export function Pie() {
                 <li key={href}>
                   <Link
                     href={href}
-                    className="text-claro inline-flex min-h-11 items-center text-menu uppercase underline-offset-8 hover:underline"
+                    className="text-claro inline-flex min-h-11 items-center text-menu underline-offset-8 hover:underline"
                   >
                     {texto}
                   </Link>

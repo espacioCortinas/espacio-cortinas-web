@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { FotoImg } from "@/components/foto";
 import { VideoMudo } from "@/components/video-mudo";
+import type { Foto } from "@/contenido/tipos";
 import type { Celda, CeldaDeMedio, Fila } from "@/lib/damero";
 import { esVideo, sizesConTope, topeDeAncho } from "@/lib/fotos";
 
@@ -50,12 +51,66 @@ const LINEA = "border-acento";
 
 export function Damero({ filas }: { filas: Fila[] }) {
   return (
-    <div className={`${LINEA} border-t`}>
+    <MarcoDelDamero>
       {filas.map((fila, i) => (
         // La primera foto del damero está en la primera pantalla en casi todos
         // los anchos: va con prioridad, como iba antes la portada.
         <FilaDelDamero key={i} fila={fila} prioridad={i === 0} />
       ))}
+    </MarcoDelDamero>
+  );
+}
+
+/*
+ * ────────────────────────────────────────────────────────────────────────────
+ * Las piezas, sueltas
+ *
+ * El catálogo, el listado de trabajos y Nosotros arman su damero a mano, con
+ * su propio contenido en cada celda, y usan estas mismas piezas para que las
+ * líneas, el aire y las fotos sean idénticas en todas las páginas.
+ * ────────────────────────────────────────────────────────────────────────────
+ */
+
+/** La línea de arriba del damero. Las filas ponen la de abajo de cada una. */
+export function MarcoDelDamero({ children }: { children: ReactNode }) {
+  return <div className={`${LINEA} border-t`}>{children}</div>;
+}
+
+/**
+ * Una fila de dos celdas con sus líneas, o de una sola que ocupa todo el ancho.
+ *
+ * **La primera es la que va arriba en el teléfono**, y por eso es siempre la
+ * del medio. `invertida` la pasa a la derecha en escritorio, con la línea del
+ * medio del lado que corresponde: con `order` y no cambiando el orden del
+ * documento, para que en el teléfono la foto siga yendo arriba de su texto.
+ */
+export function FilaConLineas({
+  primera,
+  segunda,
+  invertida = false,
+}: {
+  primera: ReactNode;
+  segunda?: ReactNode;
+  invertida?: boolean;
+}) {
+  if (!segunda) {
+    return <div className={`${LINEA} border-b`}>{primera}</div>;
+  }
+
+  return (
+    <div className={`${LINEA} border-b md:grid md:grid-cols-2`}>
+      <div
+        className={
+          invertida ? `md:order-2 md:border-l ${LINEA}` : `md:border-r ${LINEA}`
+        }
+      >
+        {primera}
+      </div>
+      <div
+        className={`${LINEA} border-t md:border-t-0 ${invertida ? "md:order-1" : ""}`}
+      >
+        {segunda}
+      </div>
     </div>
   );
 }
@@ -69,33 +124,19 @@ function FilaDelDamero({
 }) {
   const [primera, segunda] = fila.celdas;
 
-  if (!segunda) {
-    return (
-      <div className={`${LINEA} border-b`}>
-        <CeldaDelDamero celda={primera} sola prioridad={prioridad} />
-      </div>
-    );
-  }
-
   // Dos medios en una fila no se invierten: no hay texto que alternar, y
   // cambiarlos de lado solo desordenaría la numeración de las fotos.
-  const invertir = fila.invertida && segunda.tipo !== "medio";
+  const invertida =
+    fila.invertida && segunda !== undefined && segunda.tipo !== "medio";
 
   return (
-    <div className={`${LINEA} border-b md:grid md:grid-cols-2`}>
-      <div
-        className={
-          invertir ? `md:order-2 md:border-l ${LINEA}` : `md:border-r ${LINEA}`
-        }
-      >
-        <CeldaDelDamero celda={primera} prioridad={prioridad} />
-      </div>
-      <div
-        className={`${LINEA} border-t md:border-t-0 ${invertir ? "md:order-1" : ""}`}
-      >
-        <CeldaDelDamero celda={segunda} />
-      </div>
-    </div>
+    <FilaConLineas
+      primera={
+        <CeldaDelDamero celda={primera} sola={!segunda} prioridad={prioridad} />
+      }
+      segunda={segunda && <CeldaDelDamero celda={segunda} />}
+      invertida={invertida}
+    />
   );
 }
 
@@ -177,7 +218,7 @@ function CeldaDelDamero({
 }
 
 /** Texto centrado en su celda, con aire, y el alto que le dé la foto de al lado. */
-function CeldaDeTexto({ children }: { children: ReactNode }) {
+export function CeldaDeTexto({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-full flex-col items-center justify-center px-5 py-12 text-center md:px-12 md:py-16 lg:px-16">
       {children}
@@ -222,32 +263,61 @@ function CeldaConMedio({
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center md:p-10">
-      {etiqueta}
-      {/*
-        **El ancho de la foto sale de una cuenta y no de `width: auto`**, y es
-        lo que evita que la página salte al cargar. Con `auto`, una foto
-        diferida mide 300 px hasta que llega —es lo que vale cualquier imagen
-        sin datos— y después crece a su tamaño: medido en Roller, la página
-        pasaba de 4.814 a 6.503 px de alto mientras cargaban las fotos.
+    <FotoEnCelda
+      foto={medio}
+      alt={nombre}
+      encima={etiqueta}
+      sola={sola}
+      prioridad={prioridad}
+    />
+  );
+}
 
-        La cuenta: lo que quepa en la celda, o lo que dé el alto máximo de 44 rem
-        por la proporción de la foto, lo que sea menos. `--proporcion` es ancho
-        sobre alto, del manifiesto. En el teléfono, la foto va a lo ancho.
-      */}
+/**
+ * Una foto en su celda: en su proporción, con su tope, centrada y con aire en
+ * escritorio, y a lo ancho de la pantalla en el teléfono.
+ *
+ * **El ancho de la foto sale de una cuenta y no de `width: auto`**, y es lo
+ * que evita que la página salte al cargar. Con `auto`, una foto diferida mide
+ * 300 px hasta que llega —es lo que vale cualquier imagen sin datos— y después
+ * crece a su tamaño: medido en Roller, la página pasaba de 4.814 a 6.503 px de
+ * alto mientras cargaban las fotos.
+ *
+ * La cuenta: lo que quepa en la celda, o lo que dé el alto máximo de 44 rem por
+ * la proporción de la foto, lo que sea menos. `--proporcion` es ancho sobre
+ * alto, del manifiesto.
+ */
+export function FotoEnCelda({
+  foto,
+  alt,
+  encima,
+  sola = false,
+  prioridad = false,
+}: {
+  foto: Foto;
+  alt: string;
+  /** Lo que va arriba de la foto, adentro de la celda: el nombre de una variante. */
+  encima?: ReactNode;
+  /** Si la celda ocupa toda la fila: cambia el `sizes`. */
+  sola?: boolean;
+  prioridad?: boolean;
+}) {
+  return (
+    <div className="flex h-full flex-col items-center justify-center md:p-10">
+      {encima}
       <div
         className="w-full"
         style={
           {
-            maxWidth: `${topeDeAncho(medio)}px`,
-            "--proporcion": medio.ancho / medio.alto,
+            maxWidth: `${topeDeAncho(foto)}px`,
+            "--proporcion": foto.ancho / foto.alto,
           } as CSSProperties
         }
       >
         <FotoImg
-          foto={medio}
-          alt={nombre}
-          sizes={sizesConTope(medio, [
+          foto={foto}
+          alt={alt}
+          sizes={sizesConTope(foto, [
             {
               desde: "768px",
               ancho: sola ? "calc(100vw - 5rem)" : "calc(50vw - 5rem)",
