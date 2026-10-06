@@ -89,8 +89,9 @@ doble densidad es una caja de 640 px de CSS. **El video no puede ser el
 protagonista de una página; es una celda más del damero.**
 
 Desde la 4.3 hay además dos de proyecto, uno de ellos vertical. Y el de «Riel
-motorizado» es un vertical que llegó metido en un cuadro horizontal: las franjas
-negras de los costados están dentro del archivo (decisión 66).
+motorizado» era un vertical que llegó metido en un cuadro horizontal, con las
+franjas negras dentro del archivo: en la 4.7 se recortó, y hoy es un vertical
+de 710 × 1076 (decisión 66).
 
 ### La paleta del material: son dos archivos, no uno
 
@@ -253,7 +254,9 @@ de las imágenes para compartir.
 fino alrededor. Lo calado deja ver el fondo, así que sobre el gris del sitio las
 letras quedan claras. Es el que el boceto pone en su Nosotros; llegó bajado del
 boceto, en AVIF de 704 px, y se publica en 96 y 144. Va en la barra de enlaces
-de todas las páginas menos Inicio, en el lugar del enlace «Inicio».
+de todas las páginas menos Inicio, en el lugar del enlace «Inicio». **Y es el
+ícono de la pestaña**, sobre un disco del color del fondo para que no
+desaparezca en una pestaña oscura — decisiones 45 y 66.
 
 **Nunca los dos en la misma pantalla.** En Inicio la barra no lleva el
 circular, porque el de líneas está grande en la apertura: es lo que hace el
@@ -296,8 +299,6 @@ para que el blanco encima llegue a 4,87:1. El del boceto, `#607D82`, daba 4,42.
   alcanza el PNG: lo más grande que se publica son 1.200 px.
 - **Una versión clara, para fondo oscuro.** El sitio no la necesita —el pie
   escribe el nombre—; un PDF o una publicación, sí.
-- **Si quiere el logo circular como favicon.** Ya no habría que inventar un
-  dibujo, que era lo que lo frenaba — decisión 45.
 
 ---
 
@@ -484,7 +485,7 @@ mano.
 `DENSIDAD_DE_REFERENCIA`. En el damero cada foto ocupa su celda, sin pasar de
 44 rem de alto, y el tope la frena antes cuando el archivo no da:
 `cortinas-tela/barral/2` (1028 px → 514) queda más angosta que su celda, y los
-videos también (1280 → 640; el vertical del cowork, 720 → 360). En el teléfono
+videos también (1280 → 640; los verticales, 720 → 360 y 710 → 355). En el teléfono
 la celda es más angosta que cualquier tope.
 
 **El ancho de cada foto se calcula con su proporción**, y no se deja

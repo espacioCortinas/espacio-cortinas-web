@@ -462,9 +462,8 @@ vista.
 
 ### Estado, al 06/10/2026
 
-**Etapas 1 a 4 hechas, en la rama `rediseno`, y de la 5 lo que hace falta
-para que la empresa lo revise.** `main` sigue intacto: el sitio publicado es
-todavía el de antes.
+**Etapas 1 a 5 hechas en la rama `rediseno` —salvo las imágenes para
+compartir— y listas para mergear a `main`, que es lo que publica.**
 
 ```
 14154e8  el plan
@@ -663,10 +662,11 @@ desde 400, 44 en escritorio— y la barra sigue en una fila en todos los
 anchos: a 320 sobran 40 px. En escritorio la barra sigue a la derecha, así
 que el logo queda adelante de «Productos», donde estaba «Inicio».
 
-_Hace falta para que la empresa lo vea_:
+_La dirección de prueba de la rama_ —**no se usó**: el rediseño se mergeó
+directo a `main`. Queda por si alguna vez hace falta—:
 
-- **Una dirección de prueba de la rama**, para que lo vea en su teléfono antes
-  del merge: hoy solo se publica `main`. La activa quien desarrolla, en el
+- **Una dirección de prueba de la rama**, para ver una rama en un teléfono
+  antes del merge: solo se publica `main`. La activa quien desarrolla, en el
   panel de Cloudflare:
   1. Subir la rama `rediseno` a GitHub. Sola no publica nada.
   2. Worker `espacio-cortinas-web` → Settings → Build → Branch control: tildar
@@ -682,20 +682,19 @@ _Hace falta para que la empresa lo vea_:
   - **Comparte los secretos de producción**: si alguien manda el formulario
     desde ahí, el mensaje llega de verdad a ventas@.
 
-_A decidir con la empresa_:
+_Al cerrar, el 06/10/2026_, a pedido de quien desarrolla:
 
-- **El favicon**, que nunca hubo (decisión 45). La decisión 45 lo frenó
-  porque un recorte del logo es un dibujo nuevo que la empresa no autorizó.
-  **Con el logo circular eso cambia**: ya es redondo, y es dibujo de ella. Lo
-  que queda por preguntarle es si lo quiere ahí. Probado chico: a 16 px es el
-  círculo oscuro con la «e» como una mancha clara, y las letras no se leen; a
-  32, la «e» ya se reconoce.
-- **El video de «Riel motorizado» tiene franjas negras a los costados**, y
-  están dentro del archivo: el original que mandó la empresa es un video
-  vertical metido en un cuadro horizontal de 1920 × 1080, con la imagen en
-  710 × 1076 en el medio. En el sitio publicado hoy se ve igual. Se arregla
-  recortando el original con ffmpeg y volviendo a prepararlo: es un archivo
-  nuevo, y el viejo queda en el historial —unos 0,5 MB más en git—.
+- **El favicon**, que nunca hubo, desde el logo circular: la decisión 45 queda
+  resuelta, porque ya no hubo que inventar un dibujo. `scripts/preparar-marca.mjs`
+  escribe `app/favicon.ico` —16, 32 y 48 px—, `app/icon.png` de 192 y
+  `app/apple-icon.png` de 180 y sin transparencia, sobre un disco del color del
+  fondo para que no desaparezca en una pestaña oscura. A 16 px es el círculo
+  oscuro con la «e» como una mancha clara; a 32, la «e» ya se reconoce.
+- **El video de «Riel motorizado», recortado**: 710 × 1076 y sin las franjas
+  negras que traía dentro del archivo. Suma unos 0,9 MB a git, no los 0,5 que
+  se habían estimado, porque ahora todo el cuadro es imagen. El original con
+  franjas quedó en `fotos-originales/respaldos/`, y el paso a paso, en
+  `docs/publicar-fotos.md`.
 
 _Documentación, hecha el 06/10/2026_ (`c6954f3`):
 
@@ -736,14 +735,10 @@ _Lo que queda_:
     viejos se borran y quedan en el historial: unos 1,1 MB más en git.
   - **No correr `npm run marca` ni `npm run fotos`**: los dos terminan
     corriendo también este script.
-- **El favicon**, si la empresa dice que sí, con el logo circular.
-- **El video de «Riel motorizado»**, si se decide recortarlo (arriba).
 - **Opcional**: el correo que manda el formulario (`lib/correo.ts`) usa los
   colores viejos y un filete al costado, pero solo lo lee la empresa.
-- **La dirección de prueba de la rama**, si se la quiere mostrar a la empresa
-  antes de publicarlo (arriba).
-- **Merge a `main`**, cuando lo decida quien desarrolla: el push a `main`
-  publica.
+- **Merge a `main`**, con todo lo de arriba, a pedido de quien desarrolla. El
+  push a `main` publica.
 
 **Terminado cuando:**
 

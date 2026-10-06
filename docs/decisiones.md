@@ -1746,12 +1746,12 @@ el estado activo del menú, ni en los avisos.
 
 ---
 
-### 45. El favicon sigue pendiente, y ahora se sabe por qué no salía
+### 45. El favicon sigue pendiente, y ahora se sabe por qué no salía ~~— RESUELTA por la decisión 66~~
 
-**Matizada por la decisión 66**: con el logo circular del boceto, el favicon
-ya no sería un dibujo inventado —es redondo, y es de la empresa—. Sigue sin
-hacerse hasta preguntarle si lo quiere ahí. Probado chico: a 16 px se ve el
-círculo oscuro con la «e» como una mancha clara; a 32, la «e» se reconoce.
+**Por qué quedó resuelta.** Con el rediseño de la Fase 4.7 apareció el logo
+circular de la empresa, que ya es redondo: el favicon sale de él tal cual, y
+no hace falta inventar ningún dibujo. Lo decidió quien desarrolla al cerrar la
+etapa 5. Cómo está hecho, en la decisión 66.
 
 **Fecha:** septiembre de 2026, Fase 4.2.
 
@@ -2073,7 +2073,8 @@ documentación contemplaba:
 - **`public/videos/cortinas-tela/riel-motorizado.mp4` es un video vertical
   metido en una caja 16:9.** `cropdetect` da 464 × 704 de contenido útil: el
   62 % de cada cuadro es negro puro, y en este sitio no hay ninguna superficie
-  negra.
+  negra. **Recortado en la Fase 4.7** — decisión 66: hoy es un vertical de
+  710 × 1076, sin franjas.
 
 **Se decidió dejar cada uno donde está**, a pedido de quien desarrolla, y
 anotarlo. Lo que destraba las dos cosas es filmar de nuevo: un video del roller
@@ -3581,6 +3582,16 @@ Los dos los publica `scripts/preparar-marca.mjs`, desde `fotos-originales/`.
 **El amarillo se fue con el logo viejo**, y con él la regla de «una vez por
 pantalla» de la decisión 44.
 
+**El circular es también el ícono de la pestaña**, y con eso se resolvió la
+decisión 45: ya es redondo y es de la empresa, así que no hubo que inventar
+nada. Va sobre un disco del color del fondo, porque el logo es calado y sobre
+la pestaña oscura de un navegador —la de Chrome en modo oscuro es casi el mismo
+gris carbón— desaparecería entero. El mismo script escribe `app/favicon.ico`,
+con 16, 32 y 48 px adentro, `app/icon.png` de 192, y `app/apple-icon.png` de
+180 y sin transparencia, porque iOS rellena lo transparente de negro. Probado
+chico: a 16 px se ve el círculo oscuro con la «e» como una mancha clara; a 32,
+la «e» se reconoce.
+
 #### La composición
 
 - **Bloques azul verdoso**, opacos: la apertura de Inicio —el logo grande
@@ -3638,17 +3649,29 @@ su bloque.
   un radio; el anillo de foco del enlace que lo lleva sigue su borde.
 - **Los estados sin color**, con otra forma: decisión 46.
 
+#### El video de «Riel motorizado», recortado
+
+**Traía franjas negras dentro del archivo**, que la decisión 48 había anotado
+y dejado: la empresa lo exportó de Clipchamp como un vertical metido en un
+cuadro de 1920 × 1080, con la imagen en 710 × 1076 en el medio, igual en los
+342 cuadros. En el damero se veía como una caja negra con una franja de video
+adentro.
+
+**Se recortó el original**, con ffmpeg y a un intermedio casi sin pérdida, y
+`scripts/preparar-fotos.mjs` lo preparó con sus parámetros de siempre: hoy es
+un vertical de 710 × 1076, de 859 kB, con su cartel nuevo. **Es una excepción
+consciente a que lo publicado no se reescriba**: el archivo viejo, de 455 kB,
+queda en el historial, y el nuevo suma unos 0,9 MB a git —más que el medio
+mega que se había estimado, porque ahora todo el cuadro es imagen—. Lo decidió
+quien desarrolla. El original con franjas quedó en `fotos-originales/respaldos/`,
+fuera de las carpetas que lee el script.
+
 #### Lo que queda pendiente
 
 - **Las imágenes para compartir siguen siendo las de «Cal»**: la banda es del
   crema viejo y lleva el logo de línea (decisiones 63 y 64). Rehacerlas suma
   unos 1,1 MB a git, y antes hay que decidir dos cosas: el color de la banda,
   y si va el logo de línea o el circular.
-- **El favicon** — decisión 45: con el logo circular ya no hace falta inventar
-  un dibujo, y queda preguntarle a la empresa si lo quiere.
-- **El video de «Riel motorizado» trae franjas negras dentro del archivo**: el
-  original es un video vertical metido en un cuadro de 1920 × 1080. Se arregla
-  recortándolo, y suma unos 0,5 MB a git.
 - **El correo que manda el formulario** (`lib/correo.ts`) sigue con los
   colores viejos. Solo lo lee la empresa.
 
@@ -3683,14 +3706,10 @@ sitio usa, que llega a 1.200. Un vector seguiría sirviendo para imprenta, y
 sigue sin haber una versión clara para fondo oscuro: por eso el pie escribe el
 nombre en vez de poner el logo.
 
-**El favicon sigue sin salir** — decisión 45. Con el logo circular del boceto
-ya no haría falta inventar un dibujo, que era lo que lo frenaba: queda
-preguntarle a la empresa si lo quiere.
-
 **Lo que dejó pendiente el rediseño** — decisión 66: las imágenes para
-compartir siguen siendo las de «Cal», con la banda del crema viejo; y el video
-de «Riel motorizado» trae franjas negras dentro del archivo. Las dos cosas
-suman peso a git para siempre, así que se hacen cuando se decidan.
+compartir siguen siendo las de «Cal», con la banda del crema viejo. Rehacerlas
+suma peso a git para siempre, así que se hace cuando se decida el color de la
+banda y el logo que lleva.
 
 **No hay ninguna foto 4:5 de repuesto.** Las siete que existen son exactamente
 las siete portadas, así que cualquier portada que haya que retirar obliga a

@@ -89,9 +89,9 @@ export function portadaDe(fotos: Foto[]): Foto | null {
  * **Muerde en lo más chico del archivo.** En el damero cada foto ocupa su
  * celda —media pantalla en escritorio, sin pasar de 44 rem de alto— y el tope
  * la frena antes cuando el archivo no da: `cortinas-tela/barral/2` (1028 px →
- * 514) queda más angosta que su celda, y los videos también (1280 px → 640; el
- * vertical del cowork, 720 → 360). En el teléfono la celda es más angosta que
- * cualquier tope.
+ * 514) queda más angosta que su celda, y los videos también (1280 px → 640;
+ * los verticales, 720 → 360 y 710 → 355). En el teléfono la celda es más
+ * angosta que cualquier tope.
  *
  * **El aire que queda al lado es la curaduría**: una foto mediana con aire
  * alrededor se lee como una lámina, y la misma foto estirada se lee como un

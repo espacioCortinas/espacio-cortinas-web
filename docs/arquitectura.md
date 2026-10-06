@@ -89,6 +89,9 @@ app/
 ├── sitemap.ts
 ├── robots.ts
 ├── globals.css                  los tokens del sistema
+├── favicon.ico                  el ícono de la pestaña, 16, 32 y 48 px — GENERADO
+├── icon.png                     el mismo, de 192 — GENERADO
+├── apple-icon.png               para iOS, de 180 y sin transparencia — GENERADO
 └── layout.tsx
 contenido/
 ├── productos.ts                 se edita a mano
@@ -145,7 +148,8 @@ scripts/
 ├── preparar-fotos.mjs           recorta, redimensiona y borra los metadatos
 ├── preparar-compartir.mjs       la imagen para compartir de cada página, desde
 │                                las fotos publicadas
-├── preparar-marca.mjs           los dos logos, en las medidas que se usan
+├── preparar-marca.mjs           los dos logos, en las medidas que se usan, y
+│                                los íconos de app/
 └── revisar-metadatos.mjs        comprueba que ninguna publicada conserve GPS
 public/fotos/                    las imágenes generadas
 public/videos/                   los videos publicados y su cuadro de cartel
