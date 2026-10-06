@@ -479,6 +479,8 @@ c9c0a20  el estado, antes de la etapa 5
 818753d    ajuste: la barra de enlaces igual en todas, con el logo circular
 7c9da6d  el ajuste de la barra, en el plan
 c6954f3  etapa 5 — la documentación, y la galería se borra
+68cd485  el commit de la documentación, en el plan
+2e14539  etapa 5 — el ícono de la pestaña y el video sin franjas
 ```
 
 **La empresa todavía no lo vio.** Quien desarrolla revisó cada etapa con
