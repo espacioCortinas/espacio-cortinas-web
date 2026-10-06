@@ -475,6 +475,8 @@ b451b0b    ajuste: el menú del teléfono vuelve a los enlaces a la vista
 98103dc  etapa 4 — menú, listados, Contacto y Nosotros
 c9c0a20  el estado, antes de la etapa 5
 51aeecc  etapa 5 — ajustes para que la empresa lo revise
+8854a79  lo hecho de la etapa 5 y lo que queda
+818753d    ajuste: la barra de enlaces igual en todas, con el logo circular
 ```
 
 **La empresa todavía no lo vio.** Quien desarrolla revisó cada etapa con
@@ -484,8 +486,10 @@ capturas y pidió los dos ajustes de la etapa 2 y el menú en una fila de la 4.
 
 - La foto de la apertura del boceto —un local con lámparas colgantes— **no es
   de la empresa** y no se usa.
-- El logo en círculo que el boceto pone en su Nosotros **no llegó**: la empresa
-  mandó solo el de círculos de línea. `/nosotros` va sin él.
+- El logo en círculo que el boceto pone en su Nosotros **no llegó** con el de
+  círculos de línea: el 06/10/2026 lo bajó del boceto quien desarrolla, en
+  AVIF, y quedó en `fotos-originales/logo-circulo.avif`. Va en la barra de
+  enlaces —abajo, en la etapa 5—, y por eso `/nosotros` no lo repite.
 - Las fotos del boceto se revisaron antes de usarlo de referencia: la única
   propia no trae GPS; las demás son de muestra de la plantilla de Wix.
 
@@ -642,6 +646,16 @@ tampoco sobre el azul verdoso ni en el pie. Lo que se arregló:
   lo que cambia es la forma, y se escribe con la documentación.
 - **La página que no existe también tiene el botón flotante de WhatsApp.**
 
+_Ajuste del 06/10/2026_ (`818753d`), pedido después de ver lo anterior: **la
+barra de enlaces se ve igual en todas las páginas.** En Inicio queda como
+estaba, con los cinco enlaces escritos; en las demás se fueron la franja
+blanca y el logo de línea, y el enlace «Inicio» es el logo circular de la
+empresa (`components/navegacion.tsx`). `scripts/preparar-marca.mjs` lo
+publica en 96 y 144 px. Se achica con la pantalla —32 px a 320 de ancho, 40
+desde 400, 44 en escritorio— y la barra sigue en una fila en todos los
+anchos: a 320 sobran 40 px. En escritorio la barra sigue a la derecha, así
+que el logo queda adelante de «Productos», donde estaba «Inicio».
+
 _Hace falta para que la empresa lo vea_:
 
 - **Una dirección de prueba de la rama**, para que lo vea en su teléfono antes
@@ -663,10 +677,12 @@ _Hace falta para que la empresa lo vea_:
 
 _A decidir con la empresa_:
 
-- **El favicon**, que nunca hubo (decisión 45), a partir de los círculos del
-  logo. **Preguntarle antes**, al mostrarle el sitio: la decisión 45 lo frenó
-  porque un recorte del logo es un dibujo nuevo que ella no autorizó, y eso
-  sigue valiendo con el logo nuevo.
+- **El favicon**, que nunca hubo (decisión 45). La decisión 45 lo frenó
+  porque un recorte del logo es un dibujo nuevo que la empresa no autorizó.
+  **Con el logo circular eso cambia**: ya es redondo, y es dibujo de ella. Lo
+  que queda por preguntarle es si lo quiere ahí. Probado chico: a 16 px es el
+  círculo oscuro con la «e» como una mancha clara, y las letras no se leen; a
+  32, la «e» ya se reconoce.
 - **El video de «Riel motorizado» tiene franjas negras a los costados**, y
   están dentro del archivo: el original que mandó la empresa es un video
   vertical metido en un cuadro horizontal de 1920 × 1080, con la imagen en
@@ -683,6 +699,9 @@ _Para cuando la empresa lo apruebe_:
     de la paleta nueva antes de correrlo. El fondo `#EDEFF0` o el blanco del
     encabezado: decidir mirando las dos.
   - Sumar `"/nosotros"` a `contenido/compartir.ts`, con su foto.
+  - La banda lleva el logo de línea, y `contenido/compartir.ts` lo justifica
+    con que es el del encabezado del sitio: desde el ajuste de la barra, el
+    encabezado lleva el circular. Decidir cuál de los dos va en la banda.
   - Correr `npm run compartir`. Regenera también
     `contenido/imagenes-para-compartir.ts`, que todavía dice «Cortinas de tela
     Riel» en un texto alternativo.
