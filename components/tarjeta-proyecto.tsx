@@ -1,5 +1,11 @@
 import Link from "next/link";
 
+import {
+  CeldaDeTexto,
+  FilaConLineas,
+  FotoEnCelda,
+  MarcoDelDamero,
+} from "@/components/damero";
 import { FotoImg } from "@/components/foto";
 import { Chip } from "@/components/ui/chip";
 import type { ConFotos, Proyecto } from "@/contenido/tipos";
@@ -20,8 +26,9 @@ import { altAutomatico, recortar } from "@/lib/texto";
  * # Dos formas, y quién decide cuál
  *
  *     tarjeta   portada arriba, texto abajo. Es el elemento de la grilla
- *     fila      portada a un costado y texto al otro, con la descripción y
- *               la línea que dice que se abre. Es la de `/productos`
+ *     fila      una fila del damero: la portada en una celda y el texto
+ *               centrado en la otra, con la descripción y la línea que dice
+ *               que se abre. Es la de `/productos` — Fase 4.7
  *
  * **La forma la elige `components/listado-proyectos.tsx`, no quien carga el
  * contenido**: el primero del arreglo va en fila y el resto en tarjeta —
@@ -40,17 +47,6 @@ import { altAutomatico, recortar } from "@/lib/texto";
  * contenido del `<a>`, y sumarle la ubicación lo convertiría en una frase que
  * un lector de pantalla lee entera cada vez.
  */
-
-/** El ancho de la portada en la forma de fila. Ver `SIZES_FILA`. */
-const ANCHO_FILA = "max-w-[26rem]";
-
-/**
- * El mismo dato que `ANCHO_FILA`, del lado del navegador, con el mismo cálculo
- * de dos tramos que `/productos` — decisión 49, «Una corrección al `sizes`».
- */
-const SIZES_FILA =
-  "(min-width: 768px) min(calc((100vw - 9rem) / 2), 26rem), " +
-  "min(calc(100vw - 2.5rem), 26rem)";
 
 export function TarjetaProyecto({
   proyecto,
@@ -80,28 +76,27 @@ export function TarjetaProyecto({
   const Titulo = nivel === 2 ? "h2" : "h3";
   const href = `/proyectos/${proyecto.slug}`;
 
-  const foto = portada ? (
-    <FotoImg
-      foto={portada}
-      alt={altAutomatico(proyecto.titulo, 1)}
-      // Los listados usan siempre la portada, y la portada siempre es 4:5: es
-      // lo que hace que la grilla quede pareja aunque la galería mezcle
-      // orientaciones (decisión 14).
-      proporcion="4/5"
-      sizes={forma === "fila" ? SIZES_FILA : (sizes ?? "100vw")}
-      prioridad={prioridad}
-    />
-  ) : (
-    // Sin portada, el mismo bloque de superficie que ocupa una foto mientras
-    // carga: la grilla no se descuadra y no hay un ícono de imagen rota.
-    <div className="bg-superficie" style={{ aspectRatio: "4/5" }} />
-  );
-
   if (forma === "tarjeta") {
     return (
       <article>
         <Link href={href} className="group block">
-          {foto}
+          {portada ? (
+            <FotoImg
+              foto={portada}
+              alt={altAutomatico(proyecto.titulo, 1)}
+              // Los listados usan siempre la portada, y la portada siempre es
+              // 4:5: es lo que hace que la grilla quede pareja aunque la
+              // galería mezcle orientaciones (decisión 14).
+              proporcion="4/5"
+              sizes={sizes ?? "100vw"}
+              prioridad={prioridad}
+            />
+          ) : (
+            // Sin portada, el mismo bloque de superficie que ocupa una foto
+            // mientras carga: la grilla no se descuadra y no hay un ícono de
+            // imagen rota.
+            <div className="bg-superficie" style={{ aspectRatio: "4/5" }} />
+          )}
           <Titulo className="mt-3 text-subtitulo underline-offset-4 group-hover:underline">
             {proyecto.titulo}
           </Titulo>
@@ -113,41 +108,65 @@ export function TarjetaProyecto({
     );
   }
 
+  /*
+   * La fila, con las mismas piezas que el damero de las páginas de producto:
+   * las líneas las pone el marco y la fila, y la foto va en su proporción y
+   * con su tope (`components/damero.tsx`). Llega hasta donde llegue quien la
+   * contiene: de borde a borde en `/proyectos`, el ancho de la columna en
+   * Inicio.
+   */
   return (
-    <article className="group relative md:grid md:grid-cols-2 md:items-center md:gap-12">
-      <div className={ANCHO_FILA}>{foto}</div>
+    <MarcoDelDamero>
+      <article className="group relative">
+        <FilaConLineas
+          primera={
+            portada ? (
+              <FotoEnCelda
+                foto={portada}
+                alt={altAutomatico(proyecto.titulo, 1)}
+                prioridad={prioridad}
+              />
+            ) : (
+              <div className="md:p-10">
+                <div className="bg-superficie" style={{ aspectRatio: "4/5" }} />
+              </div>
+            )
+          }
+          segunda={
+            <CeldaDeTexto>
+              <Titulo className="text-titulo">
+                <Link
+                  href={href}
+                  className="underline-offset-4 group-hover:underline after:absolute after:inset-0"
+                >
+                  {proyecto.titulo}
+                </Link>
+              </Titulo>
 
-      <div className="mt-6 md:mt-0">
-        <Titulo className="text-titulo">
-          <Link
-            href={href}
-            className="underline-offset-4 group-hover:underline after:absolute after:inset-0"
-          >
-            {proyecto.titulo}
-          </Link>
-        </Titulo>
+              <p className="mt-4">
+                <Chip>{proyecto.ubicacion}</Chip>
+              </p>
 
-        <p className="mt-4">
-          <Chip>{proyecto.ubicacion}</Chip>
-        </p>
+              <p className="text-texto-suave mt-5 max-w-[42ch] text-left">
+                {recortar(proyecto.descripcion, 240)}
+              </p>
 
-        <p className="max-w-lectura text-texto-suave mt-4">
-          {recortar(proyecto.descripcion, 240)}
-        </p>
-
-        {/*
-          Lo que dice que la fila se abre, sin depender del `hover` — el mismo
-          recurso de `/productos` (decisión 49). No es un enlace: el enlace
-          estirado del título ya cubre esta línea, y un segundo `<a>` duplicaría
-          el nombre accesible.
-        */}
-        <p className="mt-6 text-meta">
-          <span className="underline decoration-1 underline-offset-4">
-            Ver el proyecto
-          </span>
-          <span aria-hidden> →</span>
-        </p>
-      </div>
-    </article>
+              {/*
+                Lo que dice que la fila se abre, sin depender del `hover` — el
+                mismo recurso de `/productos` (decisión 49). No es un enlace:
+                el enlace estirado del título ya cubre esta línea, y un segundo
+                `<a>` duplicaría el nombre accesible.
+              */}
+              <p className="mt-6">
+                <span className="underline decoration-1 underline-offset-4">
+                  Ver el trabajo
+                </span>
+                <span aria-hidden> →</span>
+              </p>
+            </CeldaDeTexto>
+          }
+        />
+      </article>
+    </MarcoDelDamero>
   );
 }

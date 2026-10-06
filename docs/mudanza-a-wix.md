@@ -129,9 +129,11 @@ ahora la columna de la derecha:
 | `/productos/bandas-verticales` |               |
 | `/proyectos`                   |               |
 | `/proyectos/cowork-nordelta`   |               |
+| `/nosotros`                    |               |
 | `/contacto`                    |               |
 
-Es la lista del sitemap al 05/10/2026. Si después se agregó algún producto o
+Es la lista del sitemap al 05/10/2026, más `/nosotros`, que entró con el
+rediseño de la Fase 4.7. Si después se agregó algún producto o
 proyecto, hay que mirarla de nuevo:
 
 ```bash

@@ -1,37 +1,34 @@
-import Link from "next/link";
-
-import { Logo } from "@/components/logo";
 import { Navegacion } from "@/components/navegacion";
 import { Contenedor } from "@/components/ui/contenedor";
 
 /**
  * El encabezado del sitio.
  *
- * La estructura —`<header>`, `<nav aria-label="Principal">`, la lista de cuatro
- * enlaces— es la misma que dejó la Fase 4.0 y es definitiva. Lo que cambia acá
- * es cómo se ve.
+ * La estructura —`<header>`, `<nav aria-label="Principal">`, la lista de
+ * enlaces— es la misma que dejó la Fase 4.0. Lo que cambió en la 4.7 es cómo se
+ * ve.
+ *
+ * **Es la barra de los enlaces, y se ve igual en todas las páginas**: sobre el
+ * fondo, sin franja ni filete, a la derecha en escritorio y a lo ancho en el
+ * teléfono. Lo único que cambia es el primer enlace: en Inicio dice «Inicio»,
+ * y en las demás es el logo circular de la empresa
+ * (`components/navegacion.tsx`).
+ *
+ * Hasta el ajuste del 06/10/2026 no era así: fuera de Inicio el encabezado era
+ * una franja blanca con el logo de línea a la izquierda, y en Inicio quedaban
+ * solo los enlaces, porque ahí el logo grande de la apertura no podía tener
+ * otro encima. Quien desarrolla pidió la misma barra en todas, con el logo
+ * circular en el lugar de «Inicio».
  *
  * **No se pega arriba al hacer scroll.** Un encabezado fijo se come una franja
- * de una pantalla de teléfono en un sitio cuyo contenido son fotos, y la
- * dirección elegida pide quietud: la interfaz no compite con la foto. El menú
- * son cuatro enlaces a un toque de distancia del principio de cualquier página.
- *
- * **Filete de 1 px y nada más.** Sin sombra, sin barra de otro color, sin
- * degradado: lo que separa el encabezado del contenido es el filete y el aire
- * que hay debajo.
- *
- * El logo es también el enlace a Inicio. Su texto alternativo —«Espacio
- * Cortinas»— es el nombre accesible del enlace, así que no lleva `aria-label`
- * encima, que lo duplicaría.
+ * de una pantalla de teléfono en un sitio cuyo contenido son fotos. Lo que sí
+ * queda siempre a mano es WhatsApp, en el botón flotante.
  */
 export function Encabezado() {
   return (
-    <header className="border-linea border-b">
+    <header>
       <Contenedor>
-        <div className="flex flex-col gap-1 py-4 md:flex-row md:items-center md:justify-between md:gap-10 md:py-6">
-          <Link href="/" className="inline-flex w-fit items-center py-2">
-            <Logo />
-          </Link>
+        <div className="py-3 md:flex md:justify-end md:py-5">
           <Navegacion />
         </div>
       </Contenedor>

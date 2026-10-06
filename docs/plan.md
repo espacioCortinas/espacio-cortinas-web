@@ -425,6 +425,460 @@ sitio es que alguien termine escribiendo por WhatsApp.
 
 ---
 
+## Fase 4.7 — Rediseño a partir del boceto de la empresa — EN CURSO
+
+**Por qué existe.** En octubre de 2026 la empresa miró el sitio terminado y lo
+rechazó en lo visual: «no tiene diseño, se nota que lo hizo una IA», y tampoco
+le gustaron los colores. La estructura sí le pareció bien. Armó un boceto en
+Wix, publicado en `ventas35961.wixsite.com/my-site`, con sus colores, su armado
+y un logo nuevo.
+
+Tenía razón, y tiene nombre: el fondo crema, la Fraunces en los títulos, la
+lista numerada con filetes y las etiquetas chicas en mayúscula espaciada están
+hoy entre las marcas más repetidas de los sitios generados con IA. Y el sitio no
+tenía ni un color propio.
+
+**Se adapta el sitio a la idea del boceto; no se copia el boceto.** No anda en
+el teléfono —la versión móvil la armó Wix sola, y el sitio se va a ver casi
+entero desde uno—, usa fotos de muestra de la plantilla, tiene párrafos enteros
+en mayúscula, mezcla dos letras en los títulos y deja restos de plantilla
+(`info@misitio.com`, «My Site»).
+
+**Reabre las decisiones 43 y 44**: la dirección «Cal» y el amarillo como única
+marca. La decisión nueva es la 66, escrita en la etapa 5 con el resultado a la
+vista.
+
+### Cómo se trabaja
+
+- **En la rama `rediseno`.** `main` no se toca hasta que la empresa apruebe, y
+  hay un commit por etapa: cualquiera se puede deshacer sola.
+- **Cada etapa se muestra al terminar**, con capturas a 375 y a 1440. La
+  empresa revisa después de la 1 y de la 2, para ver la dirección antes de que
+  se componga el resto.
+- **Lo que sale de las fotos se mantiene; lo que era gusto, no.** Siguen
+  valiendo: nada de texto sobre una foto, ninguna foto más ancha que su tope
+  —regla 4 de `CLAUDE.md`— y las portadas 4:5 en los listados. Cambian el
+  papel, las letras, el acento y la composición.
+
+### Estado, al 06/10/2026
+
+**Etapas 1 a 5 hechas en la rama `rediseno` —salvo las imágenes para
+compartir— y listas para mergear a `main`, que es lo que publica.**
+
+```
+14154e8  el plan
+724fdc0  etapa 1 — paleta, letra y logo
+1b5aa64  etapa 2 — Inicio
+d7f0247    ajuste: un solo logo en la primera pantalla de Inicio, e Instagram
+b451b0b    ajuste: el menú del teléfono vuelve a los enlaces a la vista
+7334e54  etapa 3 — producto y proyecto, el damero
+98103dc  etapa 4 — menú, listados, Contacto y Nosotros
+c9c0a20  el estado, antes de la etapa 5
+51aeecc  etapa 5 — ajustes para que la empresa lo revise
+8854a79  lo hecho de la etapa 5 y lo que queda
+818753d    ajuste: la barra de enlaces igual en todas, con el logo circular
+7c9da6d  el ajuste de la barra, en el plan
+c6954f3  etapa 5 — la documentación, y la galería se borra
+68cd485  el commit de la documentación, en el plan
+2e14539  etapa 5 — el ícono de la pestaña y el video sin franjas
+```
+
+**La empresa todavía no lo vio.** Quien desarrolla revisó cada etapa con
+capturas y pidió los dos ajustes de la etapa 2, el menú en una fila de la 4 y
+la barra igual en todas las páginas de la 5. **Y decidió que el rediseño se
+queda aunque la empresa no lo apruebe**: con eso se escribió la documentación.
+
+**Lo que se decidió en la conversación y no está en otro lado:**
+
+- La foto de la apertura del boceto —un local con lámparas colgantes— **no es
+  de la empresa** y no se usa.
+- El logo en círculo que el boceto pone en su Nosotros **no llegó** con el de
+  círculos de línea: el 06/10/2026 lo bajó del boceto quien desarrolla, en
+  AVIF, y quedó en `fotos-originales/logo-circulo.avif`. Va en la barra de
+  enlaces —abajo, en la etapa 5—, y por eso `/nosotros` no lo repite.
+- Las fotos del boceto se revisaron antes de usarlo de referencia: la única
+  propia no trae GPS; las demás son de muestra de la plantilla de Wix.
+
+### Etapas
+
+**1. Sistema: color, letra y logo — HECHA.** Cambia la cara de todas las
+páginas sin tocar su armado.
+
+- La paleta del boceto, medida de su código: fondo `#EDEFF0`, texto `#2F2F2F`,
+  pizarra `#405357` para títulos, enlaces y botón principal, azul verdoso
+  `#80A6AD` como color de superficie y el teal oscuro `#607D82` en el pie.
+- Dos arreglos de contraste: **sobre el azul verdoso el texto va oscuro** —el
+  blanco del boceto da 2,63:1, y hacen falta 3 aun en letra grande— y **el pie
+  se oscurece un poco**, porque el blanco sobre `#607D82` da 4,42:1.
+- Raleway para todo, con cifras de línea: por defecto trae las antiguas, que
+  suben y bajan y desparejan un teléfono o «25 mm». Se van Fraunces y Karla.
+  Tahoma, que el boceto usa en algunos títulos, no: es de Windows, en los
+  teléfonos no está.
+- El logo nuevo, de círculos de línea. El archivo que mandó la empresa pasa a
+  `fotos-originales/logo-vacio.png`, que no se versiona, y
+  `scripts/preparar-marca.mjs` publica la medida que hace falta.
+- Encabezado, pie y un botón flotante de WhatsApp abajo a la derecha, como el
+  «¡Chateá con nosotros!» del boceto. Resuelve además lo que la decisión 49
+  dejó pendiente: en el catálogo, desde el teléfono, WhatsApp quedaba al final
+  de una página de más de 7.000 px.
+
+Lo que salió distinto de lo previsto: **el pie perdió su botón de WhatsApp**,
+que con el flotante quedaba repetido. Y **el menú del teléfono se probó como
+un botón «Menú»** desplegable y se volvió a los enlaces a la vista, a pedido:
+a 13 px y sin espaciado entre letras, los cuatro entran en una fila desde los
+teléfonos de 360 de ancho; con «Nosotros», en la etapa 4, van a pasar a dos
+renglones.
+
+**2. Inicio — HECHA.**
+
+- Apertura: el bloque azul verdoso con el logo, montado sobre el borde de una
+  foto nuestra, y el lema debajo. En el teléfono, la foto a lo ancho y el
+  bloque pisando su borde de abajo. El bloque es opaco: no hay texto sobre la
+  foto.
+- Productos: cada uno con su portada y un bloque azul verdoso con el nombre,
+  alternando lados, con las tres frases del boceto intercaladas.
+- «Cómo trabajamos»: de la lista 01–04 a la grilla de 2×2 con líneas finas de
+  las páginas de producto del boceto.
+- El sector de proyectos pasa a llamarse «Nuestros trabajos».
+- El cierre, en azul verdoso.
+
+Lo que salió distinto de lo previsto:
+
+- **La frase del boceto «Brindamos asesoramiento e instalación…» abre el
+  sector de productos** y no la apertura, que es donde la pone el boceto: es
+  la que presenta su zigzag. La apertura se queda con nuestra bajada, que dice
+  qué se vende y dónde, cosa que el lema no dice.
+- **El logo grande pidió un archivo más**, `public/marca/logo-grande.png`, de
+  1.200 px: en el bloque se ve de hasta 416, y el de 600 se quedaba corto en
+  una pantalla de doble densidad. Es nuevo, no se reescribió el de 600.
+- **El enlace del sistema pasó a heredar el color** de lo que lo rodea: la
+  pizarra sobre el azul verdoso da 3,08:1, y en el cierre hay un enlace.
+- «Cortinas de tela» pasó a «Cortinas de confección» acá y no en la etapa 3,
+  porque el nombre se ve en los destacados de Inicio.
+- **En Inicio el encabezado no lleva el logo**, después de la primera
+  revisión: con el del encabezado y el del bloque, en el teléfono el logo
+  salía dos veces en la primera pantalla. Es lo que hace el boceto —su
+  encabezado no tiene logo—, y en el resto de las páginas el logo sigue
+  arriba. Con eso, en el teléfono el bloque pasó arriba de la foto.
+- **Instagram en la apertura**, debajo del lema, que es donde lo pone el
+  boceto.
+
+**3. Producto y proyecto — HECHA.** El lema arriba del título, el título centrado, y
+las variantes en el damero de 2×2 del boceto: foto y texto alternados, con
+líneas finas y de borde a borde. **Las fotos no se recortan**: cada celda toma
+la proporción de su foto. A media pantalla casi todas tienen resolución de
+sobra; a pantalla completa no alcanzaría ninguna (`docs/diseno.md`, punto 2 del
+análisis). Los campos nuevos —`lema` y `recuadro`— van en `contenido/tipos.ts`.
+
+Cómo quedó:
+
+- **Qué va en cada celda lo decide `lib/damero.ts`**, que explica la regla, y
+  `components/damero.tsx` lo dibuja. Lo corto: la portada con el recuadro del
+  producto; Screen y Blackout de Roller, que en el boceto tenían página
+  propia, con su propio 2×2; las demás variantes juntas en una celda de texto,
+  sin esconder ninguna; y lo suelto de a dos, con el nombre de su variante
+  arriba de cada foto.
+- **La portada dejó de ir sola en la apertura**: es la primera celda del
+  damero. Y la tira que se desliza (decisión 50) ya no la usa ninguna página:
+  `components/galeria.tsx` se borra en la etapa 5 si la empresa aprueba el
+  damero, y si no, se vuelve a ella.
+- **Las fotos no hacen saltar la página al cargar.** Con ancho automático, una
+  foto diferida mide 300 px hasta que llega: en Roller la página pasaba de
+  4.814 a 6.503 px mientras cargaban. El ancho de cada foto sale ahora de una
+  cuenta con su proporción, y el alto queda fijo desde el principio.
+- **Cortinas de confección perdió su explicación de riel y barral** con la
+  descripción del boceto, así que esa parte de la descripción anterior se
+  repartió en las variantes, sin reescribirla, como en la decisión 40.
+
+**4. Listados, Contacto y Nosotros — HECHA.**
+
+- Las grillas de portadas 4:5 se quedan, con el nombre en una banda azul
+  verdosa debajo de la foto.
+- Contacto con el armado del boceto —los datos a la izquierda, el formulario a
+  la derecha— y WhatsApp como único botón principal.
+- **Página nueva, `/nosotros`**, con los textos del boceto: la empresa pidió
+  sumarla. Entra al menú, al sitemap y a la ficha de negocio local.
+- El menú queda: Inicio, Productos, Nuestros trabajos, Nosotros, Contacto.
+  **La dirección `/proyectos` no cambia**, solo su nombre en pantalla: los
+  enlaces que ya circulan siguen andando (decisión 10).
+
+Cómo quedó:
+
+- **El menú entra en una fila, con «Trabajos» y en minúscula**: la empresa no
+  quería dos renglones, y con «Nuestros trabajos» o en mayúscula no hay forma
+  —medido con la letra real en `components/navegacion.tsx`—. La página sigue
+  llamándose «Nuestros trabajos». Probado en una fila a 320, 360, 375 y 768.
+- **El catálogo y el listado de trabajos no quedaron en grilla con banda**,
+  como decía arriba, sino como filas del damero de las páginas de producto,
+  con las mismas piezas (`components/damero.tsx` las exporta): así lo que se
+  lista y lo que se abre se leen como lo mismo. La regla de la decisión 52
+  sigue: el primer trabajo en fila y el resto en grilla.
+- **Nosotros** junta las dos páginas del boceto, con una foto del archivo al
+  lado de cada texto. La ficha de negocio local no lista páginas, así que no
+  hubo nada que sumarle; y la imagen para compartir es la de Inicio hasta la
+  etapa 5, que la hace propia.
+- **Se fueron todas las etiquetas chicas en mayúscula espaciada** que quedaban:
+  la de Contacto, las de sus datos, las de los listados, la del estado vacío,
+  la de la página que no existe y la de error.
+- Verificado en el runtime de producción con `npm run preview`: todas las
+  páginas responden 200, `/nosotros` está en el sitemap y una ruta que no
+  existe da 404.
+
+**5. Cierre — EN CURSO.** Se partió en dos a pedido de quien desarrolla:
+**primero, lo que hace falta para que la empresa lo apruebe; el resto, cuando
+lo apruebe.** Si no lo aprueba, lo demás es trabajo perdido, y las imágenes
+para compartir además pesan en git para siempre. Después quien desarrolla
+decidió que el rediseño se queda igual, y la documentación se hizo enseguida
+(abajo); lo que sigue pendiente espera decisiones, no la aprobación.
+
+_Hecho el 06/10/2026_ (`51aeecc`). Se revisaron las catorce páginas en los
+cinco anchos, con capturas y un control automático de contraste y de lo que
+se sale de su caja. **Contraste: nada por debajo de 4,5:1 en ninguna**,
+tampoco sobre el azul verdoso ni en el pie. Lo que se arregló:
+
+- **El bloque de producto de Inicio no se angosta más que su palabra más
+  larga** (`min-w-min`): a 320 y a 768 la flecha de «Cortinas de confección»
+  y de «Venecianas de PVC» quedaba afuera del bloque.
+- **La celda de variantes no repite una variante que ya está nombrada arriba
+  de sus fotos o de su video.** En Roller quedaba «Motorizado» solo, sin nada
+  abajo, al lado de su propio video: ahora Roller no tiene celda de variantes.
+  La lista va centrada y con filetes, y una variante que es solo un nombre
+  —el Motorizado de Toldos— se lee como un renglón de la lista.
+- **Ningún párrafo deja una palabra sola en el último renglón**
+  (`text-wrap: pretty` en `app/globals.css`), y los textos centrados cortos
+  —los recuadros, la bajada de variantes— se equilibran.
+- **El formulario, sin filetes al costado**, que era el opcional de abajo: el
+  error de un campo es la negrita debajo del campo, que engorda su borde; el
+  envío fallido, un recuadro blanco con borde; la confirmación, un bloque azul
+  verdoso como los cierres. La decisión 46 sigue —los estados no usan color—;
+  lo que cambia es la forma, y se escribe con la documentación.
+- **La página que no existe también tiene el botón flotante de WhatsApp.**
+
+_Ajuste del 06/10/2026_ (`818753d`), pedido después de ver lo anterior: **la
+barra de enlaces se ve igual en todas las páginas.** En Inicio queda como
+estaba, con los cinco enlaces escritos; en las demás se fueron la franja
+blanca y el logo de línea, y el enlace «Inicio» es el logo circular de la
+empresa (`components/navegacion.tsx`). `scripts/preparar-marca.mjs` lo
+publica en 96 y 144 px. Se achica con la pantalla —32 px a 320 de ancho, 40
+desde 400, 44 en escritorio— y la barra sigue en una fila en todos los
+anchos: a 320 sobran 40 px. En escritorio la barra sigue a la derecha, así
+que el logo queda adelante de «Productos», donde estaba «Inicio».
+
+_La dirección de prueba de la rama_ —**no se usó**: el rediseño se mergeó
+directo a `main`. Queda por si alguna vez hace falta—:
+
+- **Una dirección de prueba de la rama**, para ver una rama en un teléfono
+  antes del merge: solo se publica `main`. La activa quien desarrolla, en el
+  panel de Cloudflare:
+  1. Subir la rama `rediseno` a GitHub. Sola no publica nada.
+  2. Worker `espacio-cortinas-web` → Settings → Build → Branch control: tildar
+     **Builds for non-production branches**, y en **Non-production branch
+     deploy command** poner `npx opennextjs-cloudflare upload` —el par de
+     `deploy`, que es el de producción—. El que trae por defecto, el
+     `versions upload` de wrangler, se saltea el paso del adaptador.
+  3. Con el próximo push a la rama, el build sube una versión que no se
+     publica y la deja en una dirección propia con el nombre de la rama:
+     `rediseno-espacio-cortinas-web.ventas-ccf.workers.dev`. Si no aparece,
+     mirar en Settings → Domains & Routes que estén encendidas las Preview
+     URLs.
+  - **Comparte los secretos de producción**: si alguien manda el formulario
+    desde ahí, el mensaje llega de verdad a ventas@.
+
+_Al cerrar, el 06/10/2026_, a pedido de quien desarrolla:
+
+- **El favicon**, que nunca hubo, desde el logo circular: la decisión 45 queda
+  resuelta, porque ya no hubo que inventar un dibujo. `scripts/preparar-marca.mjs`
+  escribe `app/favicon.ico` —16, 32 y 48 px—, `app/icon.png` de 192 y
+  `app/apple-icon.png` de 180 y sin transparencia, sobre un disco del color del
+  fondo para que no desaparezca en una pestaña oscura. A 16 px es el círculo
+  oscuro con la «e» como una mancha clara; a 32, la «e» ya se reconoce.
+- **El video de «Riel motorizado», recortado**: 710 × 1076 y sin las franjas
+  negras que traía dentro del archivo. Suma unos 0,9 MB a git, no los 0,5 que
+  se habían estimado, porque ahora todo el cuadro es imagen. El original con
+  franjas quedó en `fotos-originales/respaldos/`, y el paso a paso, en
+  `docs/publicar-fotos.md`.
+
+_Documentación, hecha el 06/10/2026_ (`c6954f3`):
+
+- `docs/decisiones.md`: **la decisión 66**, que reemplaza a la 43, la 44 y la
+  50 y matiza la 45, la 46, la 47, la 49, la 51 y la 52 —cada una lo dice
+  arriba—; y las decisiones abiertas, al día.
+- `docs/diseno.md`: la marca, la dirección y el sistema, nuevos; «Cal» al
+  final, con las otras dos descartadas; y tres reglas verificables más, la 11,
+  la 12 y la 13, con las marcas de sitio hecho con IA que tenía el anterior. La
+  regla 6 se reescribió para el azul verdoso. El análisis del material quedó,
+  con notas.
+- `docs/producto.md`, `docs/modelo-de-datos.md`, `docs/arquitectura.md`,
+  `docs/mudanza-a-wix.md` y la regla 10 de `CLAUDE.md`.
+- **`components/galeria.tsx` se borró**, y con ella la prop `caja` de
+  `components/video-mudo.tsx`: desde la etapa 3 no la usaba ninguna página.
+- Los comentarios que llamaban «papel» al fondo o hablaban de la tira,
+  corregidos. Los que quedan describen las imágenes para compartir, que siguen
+  teniendo la banda del crema viejo: `lib/metadata.ts`,
+  `contenido/compartir.ts` y `scripts/preparar-compartir.mjs`. Cambian cuando
+  se rehagan.
+
+_Lo que queda_:
+
+- **Las imágenes para compartir, de nuevo**, con el logo nuevo: las doce más
+  una para `/nosotros`, que hoy usa la de Inicio.
+  - `scripts/preparar-compartir.mjs` tiene el crema viejo escrito a mano —
+    `const PAPEL = "#f6f2ec"`, la banda del logo— y hay que pasarlo a un color
+    de la paleta nueva antes de correrlo. El fondo `#EDEFF0` o el blanco del
+    encabezado: decidir mirando las dos.
+  - Sumar `"/nosotros"` a `contenido/compartir.ts`, con su foto.
+  - La banda lleva el logo de línea, y `contenido/compartir.ts` lo justifica
+    con que es el del encabezado del sitio: desde el ajuste de la barra, el
+    encabezado lleva el circular. Decidir cuál de los dos va en la banda.
+  - Correr `npm run compartir`. Regenera también
+    `contenido/imagenes-para-compartir.ts`, que todavía dice «Cortinas de tela
+    Riel» en un texto alternativo.
+  - Son archivos nuevos —el nombre lleva la huella de los bytes—, así que los
+    viejos se borran y quedan en el historial: unos 1,1 MB más en git.
+  - **No correr `npm run marca` ni `npm run fotos`**: los dos terminan
+    corriendo también este script.
+- **Opcional**: el correo que manda el formulario (`lib/correo.ts`) usa los
+  colores viejos y un filete al costado, pero solo lo lee la empresa.
+- **Merge a `main`**, con todo lo de arriba, a pedido de quien desarrolla. El
+  push a `main` publica.
+
+**Terminado cuando:**
+
+- Está en `main` y publicado
+- Se ve bien en 320, 375, 768, 1024 y 1440
+- Ningún texto sobre el azul verdoso queda por debajo de 4,5:1, ni el del pie
+- `npm run build`, `tsc --noEmit`, eslint y `npm run preview` pasan, y
+  `npm run fotos:revisar` da verde
+
+### Los textos
+
+**Se usan todos los del boceto**, a pedido de la empresa, con el criterio que
+ya se siguió con las descripciones de `contenido/productos.ts`: se corrigen la
+ortografía, las tildes y la puntuación, no las palabras ni el tono. Los
+párrafos que el boceto escribe en mayúscula van en minúscula, con su mayúscula
+inicial. Donde el boceto no tiene texto —«Cómo trabajamos», arquitectos y
+oficinas, el cierre, las variantes que no son de roller— queda el que hay.
+
+Se copian acá porque el boceto es un sitio de Wix que la empresa puede cambiar
+o borrar, y el repositorio es la fuente de verdad.
+
+**Inicio**
+
+- Lema: «hacé de tus espacios / tu mejor compañía», con la minúscula del
+  boceto en la entrada.
+- La frase que abre los productos: «Brindamos asesoramiento e instalación de
+  nuestros productos.»
+- Las tres frases que van entre los productos:
+  1. «Dar a cada espacio la luz natural que requiere es nuestra tarea.
+     Combinando estética y funcionalidad.»
+  2. «La luz, el calor y el aire son elementos vitales para el planeta. El
+     control de estos elementos es un desafío para el hombre, desarrollando
+     cada vez más instrumentos y tecnología.»
+  3. «Nuestros productos son la respuesta más inteligente a este desafío.
+     Controlar estos elementos sin perjudicarlos mejora nuestra calidad de
+     vida, creándonos un hábitat ideal.»
+
+**Productos.** Cada página del boceto trae un lema, una descripción y un
+recuadro con un título y dos o tres frases. Así se reparten entre los siete
+productos del sitio:
+
+| Página del boceto      | Va a                                                                     |
+| ---------------------- | ------------------------------------------------------------------------ |
+| Roller Screen          | la variante Screen de `roller`                                           |
+| Roller Blackout        | la variante Blackout de `roller`                                         |
+| Cortinas de confección | `cortinas-tela`, que pasa a llamarse así; la dirección no cambia         |
+| Venecianas             | `venecianas-madera` y `venecianas-pvc`, el mismo texto, como ya pasa hoy |
+| Toldos                 | `toldos`                                                                 |
+| —                      | `compacta-blackout` y `bandas-verticales`: textos nuevos, con su estilo  |
+
+_Roller_ — lema «filtrar u oscurecer», que junta los de sus dos páginas; la
+descripción del producto queda.
+
+- Screen, «filtrar la luz»: «Los tejidos microperforados permiten ver hacia el
+  exterior, contribuyendo a mejorar el confort visual de quien vive o trabaja
+  en ambientes interiores. Difunden la luz y garantizan la privacidad en los
+  ambientes. El sistema más eficaz para filtrar la luz y reducir el calor.
+  Disponible en distintos factores de apertura adaptables a cada necesidad.»
+  Recuadro: «manuales y automatizadas» — «Disfrutar los espacios de interior.
+  Una luz para relajarse. Una luz para la creatividad.»
+- Blackout, «oscurecer»: «Las cortinas roller blackout permiten generar
+  oscuridad en los ambientes. El blackout es un tejido que puede ser sintético
+  o entelado, totalmente opaco a la luz, combinando practicidad y estética.
+  Complementados con perfilería de aluminio, garantizan un sistema totalmente
+  impermeable a la luz.» Recuadro: «manuales y automatizadas» — «Modulando la
+  luz con las cortinas, cada espacio adquiere un significado diferente. La luz
+  define la relación entre el ambiente y los que lo habitan.»
+
+_Cortinas de confección_ — «calidez»: «Combinar la calidez de las telas nos
+permite dar a cada ambiente un sello particular. Combinando distintas
+texturas, las cortinas de confección cubren grandes superficies cumpliendo
+todas las funciones: filtran la luz, dan intimidad y oscurecen. Amplían los
+ambientes y pueden combinar muy bien en cualquier espacio.» Recuadro:
+«manuales y automatizadas» — «Los géneros brindan calidez a los ambientes.
+Generan buena acústica y amplitud.»
+
+_Venecianas de madera y de PVC_ — «estilo»: «Las cortinas venecianas modulan la
+luz. En sus varias versiones —aluminio, PVC y madera— se transforman en un
+objeto decorativo. Muy funcionales y prácticas, proporcionan la solución ideal
+para cada necesidad.» Recuadro: «venecianas: 25 mm aluminio, 50 mm aluminio,
+50 mm PVC, 50 mm madera» — «Funcionales y decorativas.»
+
+_Toldos_ — «vivir el aire libre»: «Los toldos son sistemas de protección solar
+de uso externo. De brazos extensibles, verticales o punto recto, estos sistemas
+permiten disfrutar de los espacios abiertos. La variedad de lonas, tejidos y
+mecanismos los convierte en el complemento ideal a la hora de proteger
+viviendas y comercios. La estética en sus formas acompaña siempre fachadas y
+contrafrentes.» Recuadro: «manuales y automatizados» — «Los toldos detienen el
+impacto directo del sol. Permiten que podamos disfrutar de los espacios
+abiertos.»
+
+_Compacta Blackout_ — **texto nuevo**, con el estilo del boceto y los datos de
+la descripción que había: «descansar»: «Las cortinas compactas blackout logran
+la oscuridad más completa en los ambientes. La tela se enrolla dentro de un
+cajón y corre por guías laterales que impiden el paso de la luz por los
+costados. Manuales o motorizadas, son la solución ideal para dormitorios y
+espacios de descanso, dentro de las medidas que permite el sistema.» Recuadro:
+«manuales y automatizadas» — «Oscuridad completa, a cualquier hora del día. Un
+ambiente pensado para descansar.»
+
+_Bandas verticales_ — **texto nuevo**, igual: «orientar la luz»: «Las bandas
+verticales permiten orientar la luz y regular la privacidad, girando sobre su
+propio eje. Se recogen hacia un costado y dejan la ventana despejada. En telas
+translúcidas o blackout, son la solución ideal para grandes ventanales,
+puertas corredizas y oficinas.» Recuadro: «translúcidas o blackout» — «La luz
+justa para cada momento del día. Orden y amplitud en los espacios de trabajo.»
+
+**Nosotros** — página nueva:
+
+- Título: «Nosotros». Bajada: «Ofrecemos soluciones para cada exigencia,
+  brindando protección y regulación de la luz natural, con tecnología en cada
+  detalle.»
+- «Propósito»: «Con vasta experiencia en el rubro, seguimos cada proyecto de
+  principio a fin. La calidad de nuestra materia prima garantiza los
+  resultados. Siempre a disposición del cliente, estudiamos cada solución.
+  Brindamos asesoramiento para particulares y profesionales. Servicio de
+  posventa.»
+- «Visión»: «Preservando la calidad de nuestros productos, garantizamos como
+  resultado un producto confiable y duradero. Incorporamos tecnología y confort
+  en nuestros productos.»
+- «Cuidamos los detalles»: «Contamos con un servicio de asesoramiento a
+  domicilio, acompañando a profesionales en sus proyectos y a clientes
+  particulares.»
+
+**Nuestros trabajos** — el título de `/proyectos` y del sector de Inicio. El
+boceto dice «trabajos realizados»; la empresa eligió «Nuestros trabajos».
+
+**Lo que se corrigió**, para que se pueda revisar: intalación, compañia,
+estetica, desafio, mas, tecnologia, creandonos, habitat, confeccion, generos,
+acustica, relacion, proteccion y regulacion llevan su tilde; experiecia,
+brindandondo, tranforman, pemiten, sienpre, «untejido que puede puede» y «post
+venta» se escriben bien; «mejorar en confort» pasa a «mejorar el confort»; «la
+variedad… los convierten» concuerda en singular; y salen las comas entre sujeto
+y verbo —«…que requiere, es nuestra tarea», «…materia prima, garantiza»,
+«…sus formas, acompaña»—.
+
+---
+
 ## Fase 5 — SEO, rendimiento y publicación — PENDIENTE
 
 Al 28/09/2026 no hay analítica —ninguna página carga el script de Cloudflare—,

@@ -19,7 +19,7 @@ import { urlAbsoluta } from "@/lib/metadata";
  * años que Google los ignora.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const fijas = ["/", "/productos", "/proyectos", "/contacto"];
+  const fijas = ["/", "/productos", "/proyectos", "/nosotros", "/contacto"];
 
   return [
     ...fijas.map((ruta) => ({ url: urlAbsoluta(ruta) })),

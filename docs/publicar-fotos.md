@@ -335,6 +335,23 @@ variante y videos. Sin fotos propias no hay portada.
 cuando se construye de nuevo. Faltó el `git push`, o el build todavía no
 terminó.
 
+### Cambié un video y el sitio muestra el viejo
+
+**Un video que ya está publicado no se vuelve a convertir**: `public/videos/`
+está en git, y reconvertirlo con otros bytes suma su peso otra vez a la
+historia, para siempre. Si de verdad hay que cambiarlo —como el de «Riel
+motorizado», que en la Fase 4.7 se recortó porque traía franjas negras—:
+
+1. Guardá el original viejo **fuera** de `productos/` y `proyectos/`, por
+   ejemplo en `fotos-originales/respaldos/`. Dentro de esas carpetas el script
+   lo tomaría por otro video.
+2. Poné el nuevo con el mismo nombre que el viejo.
+3. Borrá el `.mp4` y el `.webp` publicados de `public/videos/`.
+4. Corré `npm run fotos` y `npm run fotos:revisar`.
+
+El archivo viejo queda en el historial de git: cambiar un video cuesta su peso
+entero.
+
 ### Una foto se ve borrosa en la computadora
 
 Fijate qué medidas generó. Si dice `medidas: 480 · 900`, esa foto original mide

@@ -142,6 +142,23 @@ export type Video = {
 };
 
 /**
+ * El recuadro de las páginas de producto del boceto de la empresa — Fase 4.7:
+ * un título corto y una o dos frases, que van en una celda del damero, al
+ * lado de una foto.
+ *
+ *     manuales y automatizadas
+ *     Los géneros brindan calidez a los ambientes. Generan buena acústica…
+ *
+ * El título va en minúscula, como en el boceto. **Puede tener saltos de
+ * renglón** —`\n`— y se respetan: el de las venecianas es una lista de medidas,
+ * una por renglón.
+ */
+export type Recuadro = {
+  titulo: string;
+  texto: string;
+};
+
+/**
  * Una opción del mismo producto: «Screen», «Motorizado», «Barral».
  *
  * **No son productos aparte** — decisión 40. Un roller screen y un roller
@@ -154,6 +171,15 @@ export type Video = {
 export type Variante = {
   nombre: string;
   descripcion?: string;
+
+  /**
+   * La frase corta, en minúscula, que va arriba del nombre: «filtrar la luz»,
+   * «oscurecer». Opcional: la llevan las variantes que en el boceto de la
+   * empresa tenían página propia —Screen y Blackout de Roller—, y con ella y
+   * su recuadro tienen su propio 2×2 en el damero (`lib/damero.ts`).
+   */
+  lema?: string;
+  recuadro?: Recuadro;
 
   /**
    * La clave con la que esta variante encuentra sus fotos y su video.
@@ -181,6 +207,22 @@ export type Variante = {
 
 export type Producto = Publicable & {
   nombre: string;
+
+  /**
+   * La frase corta, en minúscula, que abre la página del producto, arriba del
+   * nombre: «calidez», «vivir el aire libre». Es del boceto de la empresa
+   * (Fase 4.7) y la llevan todos, así que es obligatoria: un producto nuevo
+   * sin lema no compila.
+   */
+  lema: string;
+
+  /**
+   * El recuadro que el damero pone al lado de la portada. Opcional: Roller no
+   * lo tiene, porque en el boceto sus recuadros son de cada tela —ver
+   * `Variante.recuadro`—.
+   */
+  recuadro?: Recuadro;
+
   variantes: Variante[];
 };
 

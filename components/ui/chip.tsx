@@ -16,7 +16,7 @@ import type { ReactNode } from "react";
  * aportó y el único que rima con las lamas y los pliegues de las 16 fotos que
  * ya son una trama de líneas finas.
  *
- * Contraste medido: texto suave `#6B645C` sobre el papel, **5,23:1**. El filete
+ * Contraste medido: texto suave `#56656A` sobre el fondo, **5,25:1**. El filete
  * es decorativo y no informa nada por su cuenta — lo que dice el chip lo dicen
  * sus palabras.
  */

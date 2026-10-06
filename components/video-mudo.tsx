@@ -32,9 +32,8 @@ import { rutaDePosterDeVideo, rutaDeVideo, topeDeAncho } from "@/lib/fotos";
  *
  * - **No gasta datos hasta que alguien llega.** `preload="none"` más un
  *   `IntersectionObserver`: el archivo no se pide hasta que el video está por
- *   entrar en pantalla, y se pausa al salir. Dentro de la galería, «en
- *   pantalla» quiere decir en la diapositiva visible: uno que está más allá en
- *   la tira no se descarga hasta que alguien desliza hasta él.
+ *   entrar en pantalla, y se pausa al salir: en el damero, uno que está más
+ *   abajo no se descarga hasta que alguien llega.
  * - **Si la reproducción automática está bloqueada, aparece el control.** En
  *   iOS con el modo de bajo consumo, `play()` es rechazado aunque el video esté
  *   mudo y en línea. Sin esto quedaría un cuadro fijo sin ninguna forma de
@@ -42,8 +41,8 @@ import { rutaDePosterDeVideo, rutaDeVideo, topeDeAncho } from "@/lib/fotos";
  *
  *   **Y solo si está bloqueada de verdad**, que es un `NotAllowedError`. Un
  *   `play()` también se rechaza —con `AbortError`— cuando el video sale de la
- *   vista antes de arrancar y este mismo componente lo pausa, y en la galería
- *   eso pasa cada vez que alguien desliza la tira. Tomar ese rechazo como un
+ *   vista antes de arrancar y este mismo componente lo pausa, que es lo que
+ *   pasa cada vez que alguien pasa de largo con el dedo. Tomar ese rechazo como un
  *   bloqueo era lo que dejaba, en un iPhone, un botón «Pausar» debajo de un
  *   video que andaba solo — decisión 51. **Y el botón se va apenas el video
  *   arranca**: existe para iniciar lo que no pudo arrancar, no para
@@ -91,7 +90,6 @@ function useMenosMovimiento(): boolean {
 export function VideoMudo({
   video,
   etiqueta,
-  caja,
 }: {
   video: Video;
   /**
@@ -100,19 +98,6 @@ export function VideoMudo({
    * quien lo usa porque es quien sabe qué muestra.
    */
   etiqueta: string;
-  /**
-   * La proporción de la caja donde tiene que entrar, en `ancho / alto`, cuando
-   * el video vive dentro de una diapositiva de `components/galeria.tsx`.
-   *
-   * **Es lo que hace que el vertical no tenga barras.** El `<video>` se
-   * dimensiona a SU proporción dentro de la caja —al alto si es más alto que
-   * ella, al ancho si no— en vez de estirarse a la caja entera y dejar el
-   * relleno adentro del elemento, que es donde aparecerían las franjas.
-   *
-   * Sin `caja`, el video ocupa el ancho disponible con el tope de píxeles, que
-   * es como lo muestra la página de producto.
-   */
-  caja?: number;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const menosMovimiento = useMenosMovimiento();
@@ -160,8 +145,7 @@ export function VideoMudo({
       (entradas) => {
         for (const entrada of entradas) {
           if (!entrada.isIntersecting) {
-            // Lo que no se ve no se reproduce. En la galería eso incluye
-            // deslizar la tira hasta que el video sale.
+            // Lo que no se ve no se reproduce.
             el.pause();
           } else {
             el.play().catch((rechazo: unknown) => {
@@ -204,15 +188,9 @@ export function VideoMudo({
   /*
    * El mismo tope que las fotos, y por la misma cuenta: 1280 px de archivo a
    * doble densidad son 640 px de CSS. **El video no puede ser grande**, así que
-   * tampoco puede ser el protagonista de la página — `docs/diseno.md`. Dentro
-   * de una galería el tope lo pone la diapositiva, no esto.
+   * tampoco puede ser el protagonista de la página — `docs/diseno.md`.
    */
   const tope = topeDeAncho(video);
-
-  // ¿Es más alto que la caja? Entonces manda el alto, y el ancho sale de su
-  // proporción; si no, al revés. Las dos proporciones en alto / ancho.
-  const masAltoQueLaCaja =
-    caja !== undefined && video.alto / video.ancho > 1 / caja;
 
   const elemento = (
     <video
@@ -234,41 +212,17 @@ export function VideoMudo({
       }}
       onPause={() => setReproduciendo(false)}
       aria-label={etiqueta}
-      // `bg-superficie` es lo que se ve mientras el cartel carga: un paso del
-      // papel, no un gris. Un recuadro gris sobre papel cálido es un agujero.
+      // `bg-superficie` es lo que se ve mientras el cartel carga: el blanco del
+      // sistema, que sobre el gris del fondo se lee como el lugar del video.
       // Como la caja del elemento mide exactamente lo que el video, esto no
       // aparece nunca como franja al costado.
-      className={
-        "bg-superficie " +
-        (caja === undefined
-          ? "h-auto w-full"
-          : masAltoQueLaCaja
-            ? "h-full w-auto max-w-full"
-            : "h-auto max-h-full w-full")
-      }
-      style={
-        caja === undefined
-          ? undefined
-          : { aspectRatio: `${video.ancho} / ${video.alto}` }
-      }
+      className="bg-superficie h-auto w-full"
     />
   );
 
   return (
-    <figure
-      className="m-0"
-      style={caja === undefined ? { maxWidth: `${tope}px` } : undefined}
-    >
-      {caja === undefined ? (
-        elemento
-      ) : (
-        <div
-          className="flex items-center justify-center"
-          style={{ aspectRatio: caja }}
-        >
-          {elemento}
-        </div>
-      )}
+    <figure className="m-0" style={{ maxWidth: `${tope}px` }}>
+      {elemento}
 
       <figcaption className="text-texto-suave mt-3 text-meta">
         {/*

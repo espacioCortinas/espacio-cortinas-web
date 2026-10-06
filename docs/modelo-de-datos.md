@@ -14,6 +14,7 @@ contenido/
 ├── productos.ts      se edita a mano
 ├── proyectos.ts      se edita a mano
 ├── inicio.ts         se edita a mano: los textos de Inicio
+├── nosotros.ts       se edita a mano: los textos de Nosotros
 ├── contacto.ts       se edita a mano: casilla, redes y zonas donde trabaja
 ├── compartir.ts      se edita a mano: qué foto lleva cada página al compartirla
 ├── fotos.ts          GENERADO por scripts/preparar-fotos.mjs
@@ -52,9 +53,19 @@ publicar un dato falso sobre la empresa.
 
 ## Archivos de marca
 
-`contenido/marca.ts`, que escribe `scripts/preparar-marca.mjs`, exporta uno
-solo: `logo`, el logo sin fondo del encabezado, con `ruta`, `ancho` y `alto`
-del archivo escrito.
+`contenido/marca.ts`, que escribe `scripts/preparar-marca.mjs`, exporta los
+archivos de los dos logos, cada uno con `ruta`, `ancho` y `alto` del archivo
+escrito:
+
+| Export              | Archivo                           | Para qué                                                         |
+| ------------------- | --------------------------------- | ---------------------------------------------------------------- |
+| `logo`              | `logo.png`, 600 px                | la ficha de negocio local y el `srcset` de la apertura de Inicio |
+| `logoGrande`        | `logo-grande.png`, 1.200 px       | el bloque de la apertura de Inicio                               |
+| `logoCirculo`       | `logo-circulo.png`, 96 px         | el logo circular de la barra de enlaces, fuera de Inicio         |
+| `logoCirculoGrande` | `logo-circulo-grande.png`, 144 px | el mismo, para pantallas de triple densidad                      |
+
+La banda de las imágenes para compartir lleva el `logo.png`, pero lo lee
+`scripts/preparar-compartir.mjs` directo del archivo, no de acá.
 
 Hasta la decisión 63 exportaba también `og`, la imagen para compartir, que era
 el logo sobre el papel y la misma para todas las páginas. Ya no es de la marca:
@@ -112,25 +123,48 @@ fotos, y el aviso llega recién con `npm run compartir`.
 
 ## Producto
 
-| Campo         | Tipo         | Notas                                              |
-| ------------- | ------------ | -------------------------------------------------- |
-| `slug`        | `string`     | la parte final del enlace, y la clave de las fotos |
-| `nombre`      | `string`     |                                                    |
-| `descripcion` | `string`     | breve, texto plano                                 |
-| `variantes`   | `Variante[]` | ver abajo                                          |
-| `activo`      | `boolean`    |                                                    |
-| `destacado`   | `boolean`    |                                                    |
+| Campo         | Tipo         | Notas                                                                      |
+| ------------- | ------------ | -------------------------------------------------------------------------- |
+| `slug`        | `string`     | la parte final del enlace, y la clave de las fotos                         |
+| `nombre`      | `string`     |                                                                            |
+| `lema`        | `string`     | una o dos palabras, en minúscula, arriba del nombre: «filtrar u oscurecer» |
+| `descripcion` | `string`     | breve, texto plano                                                         |
+| `recuadro`    | `Recuadro?`  | el recuadro de la página del producto, ver abajo                           |
+| `variantes`   | `Variante[]` | ver abajo                                                                  |
+| `activo`      | `boolean`    |                                                                            |
+| `destacado`   | `boolean`    |                                                                            |
+
+**`lema` y `recuadro` entraron en la Fase 4.7**, con el boceto de la empresa:
+cada página de producto del boceto tiene un lema arriba del título y un
+recuadro con un título y dos o tres frases — decisión 66. El lema es
+obligatorio: es lo primero que se lee en la página y en el catálogo.
+
+### Recuadro
+
+| Campo    | Tipo     | Notas                                                                                      |
+| -------- | -------- | ------------------------------------------------------------------------------------------ |
+| `titulo` | `string` | en minúscula, como en el boceto: «manuales y automatizadas». Respeta los saltos de renglón |
+| `texto`  | `string` | dos o tres frases                                                                          |
+
+Los saltos de renglón del título se respetan porque el de las venecianas es una
+lista de medidas, una por renglón.
 
 ### Variante
 
 Las variantes **no** son productos independientes: `Toldos motorizados` es una
 variante de `Toldos`, no una entrada más del catálogo — decisión 40.
 
-| Campo         | Tipo      | Notas                                       |
-| ------------- | --------- | ------------------------------------------- |
-| `nombre`      | `string`  | lo que se lee. Ej. `"Riel motorizado"`      |
-| `descripcion` | `string?` | solo donde la diferencia hay que explicarla |
-| `clave`       | `string?` | con qué carpeta y qué video se une          |
+| Campo         | Tipo        | Notas                                          |
+| ------------- | ----------- | ---------------------------------------------- |
+| `nombre`      | `string`    | lo que se lee. Ej. `"Riel motorizado"`         |
+| `descripcion` | `string?`   | solo donde la diferencia hay que explicarla    |
+| `clave`       | `string?`   | con qué carpeta y qué video se une             |
+| `lema`        | `string?`   | solo las que tenían página propia en el boceto |
+| `recuadro`    | `Recuadro?` | igual                                          |
+
+**Una variante con `lema` o `recuadro` arma su propio 2×2 en el damero** de la
+página del producto: Screen y Blackout de Roller, que en el boceto tenían página
+propia. Las demás van juntas en una celda de texto — `lib/damero.ts`.
 
 **Sí pueden tener descripción, fotos y video**, contra lo que decía este
 documento hasta la Fase 4.4. La descripción llegó con la decisión 40 —existe
@@ -178,12 +212,32 @@ convención que `contenido/inicio.ts`.
 
 `contenido/index.ts` le da a cada proyecto dos listas, y no es redundante:
 
-| Campo     | Qué tiene                                     | Quién lo usa                      |
-| --------- | --------------------------------------------- | --------------------------------- |
-| `fotos`   | solo fotos, en orden; la primera, portada     | listados, la apertura del detalle |
-| `galeria` | fotos **y videos**, en el orden de la carpeta | la galería del detalle            |
+| Campo     | Qué tiene                                     | Quién lo usa          |
+| --------- | --------------------------------------------- | --------------------- |
+| `fotos`   | solo fotos, en orden; la primera, portada     | los listados          |
+| `galeria` | fotos **y videos**, en el orden de la carpeta | el damero del detalle |
 
 `galeria` se arma insertando cada video de proyecto en su `posicion` — decisión 51. La portada queda primera aunque la carpeta empiece con un video.
+
+## Los textos de Inicio y de Nosotros
+
+**`contenido/inicio.ts`**, un objeto por sector, en el orden de la página:
+
+| Campo           | Qué tiene                                                                                          |
+| --------------- | -------------------------------------------------------------------------------------------------- |
+| `lema`          | `entrada` y `remate`: «hacé de tus espacios» / «tu mejor compañía», del boceto                     |
+| `bajada`        | qué se vende y dónde, debajo del lema                                                              |
+| `productos`     | el título del sector, las tres frases del boceto que van entre los productos y el texto del enlace |
+| `trabajo`       | «Cómo trabajamos»: el título y los cuatro pasos, cada uno con título y descripción                 |
+| `proyectos`     | «Nuestros trabajos»: título, bajada y el texto del enlace                                          |
+| `profesionales` | el sector de arquitectos, estudios y oficinas                                                      |
+| `cierre`        | el bloque del final: título y texto                                                                |
+
+**`contenido/nosotros.ts`**, entero del boceto salvo el cierre: `titulo`,
+`bajada`, el `cierre` y `secciones` —propósito, visión y «Cuidamos los
+detalles»—, cada una con `titulo`, `texto` y `foto`. La foto se elige por
+`entidad`, `slug` y `posicion` en el manifiesto: es una foto del archivo, no una
+nueva.
 
 ## Fotos
 

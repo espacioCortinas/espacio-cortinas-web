@@ -3,16 +3,24 @@ import type { ComponentProps } from "react";
 /**
  * Los botones del sitio: **tres variantes y ninguna más** — `docs/diseno.md`.
  *
- *     principal    negro sólido, papel encima      14,69:1
- *     secundario   filete de 1 px, sin relleno     14,69:1
- *     enlace       texto negro subrayado           14,69:1
+ *     principal    pizarra sólida, blanco encima       8,10:1
+ *     secundario   filete pizarra de 1 px, sin relleno 7,02:1 sobre el fondo
+ *     enlace       subrayado, del color que lo rodea   11,61:1 sobre el fondo
  *
- * **El principal no es amarillo, y es deliberado.** El amarillo de la marca da
- * 1,06:1 contra el papel de cal: un botón amarillo sería una mancha clara sobre
- * fondo claro, justo en lo único que este sitio tiene que lograr, que es que
- * alguien escriba por WhatsApp. El amarillo es un color de superficie con texto
- * negro encima, y en este sitio lo gasta entero el logo del encabezado —
- * decisión 43.
+ * **El enlace hereda el color**, y lo que lo marca como enlace es el
+ * subrayado. Desde la Fase 4.7 hay tres fondos —el gris, el azul verdoso de
+ * los bloques y el teal oscuro del pie— y la pizarra solo se lee sobre el
+ * primero: sobre el azul verdoso da 3,08:1, que no alcanza para texto de 17 px.
+ * Heredando, va en el color del texto de cada lugar, que ya pasa en los tres.
+ *
+ * La pizarra es la de los títulos del boceto de la empresa — Fase 4.7. Hasta
+ * ahí los tres eran negros, porque el amarillo del logo anterior no podía
+ * llevar texto sobre fondo claro (decisión 43).
+ *
+ * **El principal no es azul verdoso, aunque sea el color de la marca.** El
+ * blanco sobre ese color da 2,63:1: un botón así no se lee. Con el texto oscuro
+ * sí se leería —5,08:1—, pero quedaría como un bloque más de los del boceto, y
+ * el botón tiene que ser lo que más pesa de la pantalla.
  *
  * Se fue la variante `peligro`, que era del panel: en un sitio público no hay
  * ninguna acción que destruya nada.
@@ -34,16 +42,16 @@ type Variante = "principal" | "secundario" | "enlace";
  * que informa algo: nada de este sitio depende de `hover` para entenderse
  * (`docs/diseno.md`, mobile-first). En un teléfono no existe.
  *
- * El hover del principal va al gris cálido del sistema y no a un negro más
- * claro inventado: papel sobre `texto-suave` da 5,23:1, que sigue pasando.
+ * El hover del principal va a la pizarra un paso más oscura del sistema:
+ * blanco encima, 11,13:1.
  */
 const ESTILOS: Record<Variante, string> = {
   principal:
-    "min-h-12 px-6 bg-texto text-fondo hover:bg-texto-suave rounded-boton",
+    "min-h-12 px-6 bg-acento text-claro hover:bg-acento-hondo rounded-boton",
   secundario:
-    "min-h-12 px-6 border border-texto text-texto hover:bg-texto hover:text-fondo rounded-boton",
+    "min-h-12 px-6 border border-acento text-acento hover:bg-acento hover:text-claro rounded-boton",
   enlace:
-    "min-h-11 text-texto underline underline-offset-4 decoration-1 hover:decoration-2",
+    "min-h-11 text-inherit underline underline-offset-4 decoration-1 hover:decoration-2",
 };
 
 const BASE =
@@ -54,7 +62,7 @@ const BASE =
  * Apagado de verdad: más tenue y con el cursor de «no».
  *
  * **Un botón que está enviando no se apaga así**, aunque tampoco se pueda
- * tocar. Al 50 % el texto del principal queda en 3,12:1 contra su propio fondo,
+ * tocar. Al 50 % el texto del principal queda en 2,46:1 contra su propio fondo,
  * y en ese momento el texto es lo único que dice qué está pasando —«Enviando…»
  * con la rueda—. WCAG exime a los controles inactivos del contraste, pero este
  * no está inactivo: está trabajando, y tiene que leerse.

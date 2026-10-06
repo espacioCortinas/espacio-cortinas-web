@@ -17,8 +17,8 @@ export const videos: Record<string, Video> = {
     archivo: "cortinas-tela/riel-motorizado",
     formato: "mp4",
     formatoPoster: "webp",
-    ancho: 1280,
-    alto: 720,
+    ancho: 710,
+    alto: 1076,
     duracion: 11,
   },
   "productos/roller/motorizado": {
