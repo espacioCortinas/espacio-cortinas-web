@@ -461,8 +461,9 @@ marca. La decisión nueva se escribe en la etapa 5, con el resultado a la vista.
 
 ### Estado, al 06/10/2026
 
-**Etapas 1 a 4 hechas, en la rama `rediseno`; falta la 5.** `main` sigue
-intacto: el sitio publicado es todavía el de antes.
+**Etapas 1 a 4 hechas, en la rama `rediseno`, y de la 5 lo que hace falta
+para que la empresa lo revise.** `main` sigue intacto: el sitio publicado es
+todavía el de antes.
 
 ```
 14154e8  el plan
@@ -472,6 +473,8 @@ d7f0247    ajuste: un solo logo en la primera pantalla de Inicio, e Instagram
 b451b0b    ajuste: el menú del teléfono vuelve a los enlaces a la vista
 7334e54  etapa 3 — producto y proyecto, el damero
 98103dc  etapa 4 — menú, listados, Contacto y Nosotros
+c9c0a20  el estado, antes de la etapa 5
+51aeecc  etapa 5 — ajustes para que la empresa lo revise
 ```
 
 **La empresa todavía no lo vio.** Quien desarrolla revisó cada etapa con
@@ -611,8 +614,67 @@ Cómo quedó:
   páginas responden 200, `/nosotros` está en el sitemap y una ruta que no
   existe da 404.
 
-**5. Cierre — PENDIENTE.** Lo que falta, con todo lo que apareció en el
-camino y que no está escrito en otro lado:
+**5. Cierre — EN CURSO.** Se partió en dos a pedido de quien desarrolla:
+**ahora, lo que hace falta para que la empresa lo apruebe; el resto, cuando
+lo apruebe.** Si no lo aprueba, lo demás es trabajo perdido, y las imágenes
+para compartir además pesan en git para siempre.
+
+_Hecho el 06/10/2026_ (`51aeecc`). Se revisaron las catorce páginas en los
+cinco anchos, con capturas y un control automático de contraste y de lo que
+se sale de su caja. **Contraste: nada por debajo de 4,5:1 en ninguna**,
+tampoco sobre el azul verdoso ni en el pie. Lo que se arregló:
+
+- **El bloque de producto de Inicio no se angosta más que su palabra más
+  larga** (`min-w-min`): a 320 y a 768 la flecha de «Cortinas de confección»
+  y de «Venecianas de PVC» quedaba afuera del bloque.
+- **La celda de variantes no repite una variante que ya está nombrada arriba
+  de sus fotos o de su video.** En Roller quedaba «Motorizado» solo, sin nada
+  abajo, al lado de su propio video: ahora Roller no tiene celda de variantes.
+  La lista va centrada y con filetes, y una variante que es solo un nombre
+  —el Motorizado de Toldos— se lee como un renglón de la lista.
+- **Ningún párrafo deja una palabra sola en el último renglón**
+  (`text-wrap: pretty` en `app/globals.css`), y los textos centrados cortos
+  —los recuadros, la bajada de variantes— se equilibran.
+- **El formulario, sin filetes al costado**, que era el opcional de abajo: el
+  error de un campo es la negrita debajo del campo, que engorda su borde; el
+  envío fallido, un recuadro blanco con borde; la confirmación, un bloque azul
+  verdoso como los cierres. La decisión 46 sigue —los estados no usan color—;
+  lo que cambia es la forma, y se escribe con la documentación.
+- **La página que no existe también tiene el botón flotante de WhatsApp.**
+
+_Hace falta para que la empresa lo vea_:
+
+- **Una dirección de prueba de la rama**, para que lo vea en su teléfono antes
+  del merge: hoy solo se publica `main`. La activa quien desarrolla, en el
+  panel de Cloudflare:
+  1. Subir la rama `rediseno` a GitHub. Sola no publica nada.
+  2. Worker `espacio-cortinas-web` → Settings → Build → Branch control: tildar
+     **Builds for non-production branches**, y en **Non-production branch
+     deploy command** poner `npx opennextjs-cloudflare upload` —el par de
+     `deploy`, que es el de producción—. El que trae por defecto, el
+     `versions upload` de wrangler, se saltea el paso del adaptador.
+  3. Con el próximo push a la rama, el build sube una versión que no se
+     publica y la deja en una dirección propia con el nombre de la rama:
+     `rediseno-espacio-cortinas-web.ventas-ccf.workers.dev`. Si no aparece,
+     mirar en Settings → Domains & Routes que estén encendidas las Preview
+     URLs.
+  - **Comparte los secretos de producción**: si alguien manda el formulario
+    desde ahí, el mensaje llega de verdad a ventas@.
+
+_A decidir con la empresa_:
+
+- **El favicon**, que nunca hubo (decisión 45), a partir de los círculos del
+  logo. **Preguntarle antes**, al mostrarle el sitio: la decisión 45 lo frenó
+  porque un recorte del logo es un dibujo nuevo que ella no autorizó, y eso
+  sigue valiendo con el logo nuevo.
+- **El video de «Riel motorizado» tiene franjas negras a los costados**, y
+  están dentro del archivo: el original que mandó la empresa es un video
+  vertical metido en un cuadro horizontal de 1920 × 1080, con la imagen en
+  710 × 1076 en el medio. En el sitio publicado hoy se ve igual. Se arregla
+  recortando el original con ffmpeg y volviendo a prepararlo: es un archivo
+  nuevo, y el viejo queda en el historial —unos 0,5 MB más en git—.
+
+_Para cuando la empresa lo apruebe_:
 
 - **Las imágenes para compartir, de nuevo**, con el logo nuevo: las doce más
   una para `/nosotros`, que hoy usa la de Inicio.
@@ -626,10 +688,9 @@ camino y que no está escrito en otro lado:
     Riel» en un texto alternativo.
   - Son archivos nuevos —el nombre lleva la huella de los bytes—, así que los
     viejos se borran y quedan en el historial: unos 1,1 MB más en git.
-- **El favicon**, que nunca hubo (decisión 45), a partir de los círculos del
-  logo. **Preguntarle antes a la empresa**: la decisión 45 lo frenó porque un
-  recorte del logo es un dibujo nuevo que ella no autorizó, y eso sigue
-  valiendo con el logo nuevo.
+  - **No correr `npm run marca` ni `npm run fotos`**: los dos terminan
+    corriendo también este script.
+- **El favicon**, si la empresa dice que sí.
 - **Borrar `components/galeria.tsx` si la empresa aprueba el damero**: desde la
   etapa 3 no la usa ninguna página. Con ella se va la prop `caja` de
   `components/video-mudo.tsx`, que solo la usaba la galería. Si no lo aprueba,
@@ -639,8 +700,10 @@ camino y que no está escrito en otro lado:
     círculos, los bloques azul verdoso, el damero, el botón flotante, el menú
     en una fila— y «Cal» al final, con las otras descartadas.
   - `docs/decisiones.md`: la decisión 66, que reemplaza a la 43 y la 44, y deja
-    sin objeto la 45 si se hace el favicon. Lo que se decidió en el camino
-    está en las notas «Lo que salió distinto» y «Cómo quedó» de cada etapa.
+    sin objeto la 45 si se hace el favicon; y en la 46, la forma nueva de los
+    estados del formulario. Lo que se decidió en el camino está en las notas
+    «Lo que salió distinto» y «Cómo quedó» de cada etapa, y en «Hecho el
+    06/10/2026» de esta.
   - `docs/producto.md`: `/nosotros` en la estructura, «Nuestros trabajos», y
     que los textos son de la empresa.
   - `docs/modelo-de-datos.md`: los campos `lema` y `recuadro`, y
@@ -650,14 +713,8 @@ camino y que no está escrito en otro lado:
     dirección anterior: `components/foto.tsx`, `components/galeria.tsx`,
     `components/listado-proyectos.tsx`, `lib/fotos.ts`, `lib/metadata.ts`,
     `components/datos-estructurados.tsx`.
-- **Opcional, a decidir**: el correo que manda el formulario
-  (`lib/correo.ts`) usa los colores viejos, pero solo lo lee la empresa; y el
-  error de los campos lleva un filete de 3 px al costado (decisión 46), que es
-  otra de las marcas de sitio hecho con IA.
-- **Una dirección de prueba de la rama**, para que la empresa lo vea en su
-  teléfono antes del merge: hoy solo se publica `main`. Se activa en el panel
-  de Cloudflare —builds de ramas que no son de producción, con dirección
-  propia—, y lo hace quien desarrolla. Pendiente de decidir.
+- **Opcional**: el correo que manda el formulario (`lib/correo.ts`) usa los
+  colores viejos y un filete al costado, pero solo lo lee la empresa.
 - **Merge a `main`**, con la aprobación de la empresa.
 
 **Terminado cuando:**
