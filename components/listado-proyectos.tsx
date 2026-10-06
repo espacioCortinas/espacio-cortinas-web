@@ -8,7 +8,7 @@ import type { ConFotos, Proyecto } from "@/contenido/tipos";
  * # El problema
  *
  * Hoy hay un proyecto. **Una grilla pensada para muchos se ve rota con uno**:
- * una tarjeta de un tercio de ancho y dos tercios de papel vacío al lado se
+ * una tarjeta de un tercio de ancho y dos tercios de fondo vacío al lado se
  * leen como algo que no terminó de cargar. **Una composición pensada para uno
  * no escala**: veinte filas como las del catálogo, con la foto al costado y la
  * descripción, son del orden de 14.000 px de página en escritorio —el catálogo

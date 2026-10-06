@@ -86,24 +86,21 @@ export function portadaDe(fotos: Foto[]): Foto | null {
  * fotos concretas y el archivo va camino a 300, mientras que esto lo calcula el
  * script a partir del archivo que efectivamente escribió.
  *
- * **Hoy solo muerde en los dos videos de variante** (1280 px → tope de 640 px
- * de CSS), que la página de producto muestra sueltos, fuera de la tira: sin el
- * tope ocuparían la columna entera, 1024 px (`components/video-mudo.tsx`).
+ * **Muerde en lo más chico del archivo.** En el damero cada foto ocupa su
+ * celda —media pantalla en escritorio, sin pasar de 44 rem de alto— y el tope
+ * la frena antes cuando el archivo no da: `cortinas-tela/barral/2` (1028 px →
+ * 514) queda más angosta que su celda, y los videos también (1280 px → 640; el
+ * vertical del cowork, 720 → 360). En el teléfono la celda es más angosta que
+ * cualquier tope.
  *
- * `toldos/3` (1600 px → 800) y `cortinas-tela/barral/2` (1028 px → 514)
- * también tienen un tope más angosto que la columna, pero van en la galería, y
- * desde la decisión 50 la diapositiva no pasa de 480 px. Lo mismo los dos
- * videos del cowork: el vertical tiene un tope de 360, pero se muestra al alto
- * de la caja y no llega a usarlo (`topeDeDiapositiva()`, en la galería).
- *
- * **El aire que queda al lado es la curaduría**: una foto mediana rodeada de
- * papel se lee como una lámina, y la misma foto estirada se lee como un error
- * (`docs/diseno.md`, «La tesis»).
+ * **El aire que queda al lado es la curaduría**: una foto mediana con aire
+ * alrededor se lee como una lámina, y la misma foto estirada se lee como un
+ * error (`docs/diseno.md`).
  *
  * Se aplica en dos lugares a la vez y los dos hacen falta: `max-width` en la
- * caja —en la galería, la diapositiva—, para que no se estire, y el `sizes` del
- * `<img>`, para que el navegador no descargue un archivo más grande del que va
- * a mostrar.
+ * caja de la celda (`components/damero.tsx`), para que no se estire, y el
+ * `sizes` del `<img>`, para que el navegador no descargue un archivo más grande
+ * del que va a mostrar.
  */
 export function topeDeAncho(medio: Pick<Foto, "ancho">): number {
   return Math.floor(medio.ancho / DENSIDAD_DE_REFERENCIA);

@@ -67,9 +67,10 @@ Se mudó desde Vercel en julio de 2026 — decisión 24 de `docs/decisiones.md`.
    hero centrado + tres tarjetas + gradiente + `rounded-xl` + `shadow-lg` como
    punto de partida. Cada decisión responde a la fotografía real y al recorrido
    comercial. Ver `docs/diseno.md`.
-10. **Las portadas son verticales 4:5; la galería mezcla orientaciones.** El
-    archivo histórico es horizontal, las fotos nuevas se sacan verticales. Los
-    listados usan siempre la portada, por eso quedan parejos.
+10. **Las portadas son verticales 4:5; las páginas de producto y de proyecto
+    mezclan orientaciones.** El archivo histórico es horizontal, las fotos
+    nuevas se sacan verticales. Los listados usan siempre la portada, por eso
+    quedan parejos.
 11. **Mobile-first real.** Se diseña primero para teléfono. Nada depende de
     `hover` para funcionar o entenderse.
 12. **Animaciones escasas y con función.** Sin parallax, sin fade-in en todo.

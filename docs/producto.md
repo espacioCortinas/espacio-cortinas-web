@@ -47,20 +47,32 @@ cualquier texto.
 ## Estructura
 
 ```
-INICIO      Apertura, productos destacados, cómo trabajamos,
-            proyectos destacados, arquitectos y oficinas, cierre
+INICIO              Apertura, productos destacados, cómo trabajamos,
+                    nuestros trabajos, arquitectos y oficinas, cierre
 
-PROYECTOS   Listado de trabajos realizados
-            Proyecto → título, ubicación, descripción, galería
+PRODUCTOS           Catálogo
+                    Producto → lema, descripción, recuadro, variantes, fotos, CTA
 
-PRODUCTOS   Catálogo
-            Producto → descripción, variantes, galería, CTA
+NUESTROS TRABAJOS   /proyectos: el listado de trabajos realizados
+                    Proyecto → título, ubicación, descripción, fotos y videos
 
-CONTACTO    WhatsApp, teléfono, email, formulario, redes
+NOSOTROS            Propósito, visión y cómo trabajamos, con los textos de la empresa
+
+CONTACTO            WhatsApp, teléfono, email, formulario, redes
 ```
 
+**El menú dice Inicio, Productos, Trabajos, Nosotros y Contacto**, en ese orden,
+que es el del boceto de la empresa. «Trabajos» y no «Nuestros trabajos», que es
+el nombre de la página: con el nombre entero, los cinco enlaces no entran en una
+fila en un teléfono. **La dirección sigue siendo `/proyectos`**: los enlaces que
+ya circulan siguen andando — decisiones 10 y 66.
+
+**`/nosotros` entró en la Fase 4.7**, a pedido de la empresa, con los textos de
+su boceto.
+
 Inicio se compuso en cinco sectores y **«Empresa» dejó de abrir la página** —
-decisión 47. Es la apertura más débil posible para un negocio visual y además no
+decisión 47. Con el rediseño de la Fase 4.7 los sectores son los mismos, con el
+armado del boceto de la empresa — decisión 66. Es la apertura más débil posible para un negocio visual y además no
 hay con qué: ni foto de equipo, ni taller, ni años documentados. Lo que la
 empresa es se dice en la bajada del titular y en «cómo trabajamos», que es donde
 vive el diferencial de verdad: la colocación es propia.
@@ -71,44 +83,56 @@ compone igual que `/proyectos` —el primero en fila, el resto en grilla— para
 que con uno no parezca una grilla incompleta. Si todos quedan inactivos,
 desaparece solo — decisión 52.
 
-**Los textos de Inicio son provisorios y los redacta la empresa.** Viven en
-`contenido/inicio.ts`, en un solo archivo, y ahí está escrito qué no se puede
-afirmar sin confirmarlo: años de trayectoria, cantidad de trabajos, marcas y
-garantías.
+**Los textos son de la empresa.** Desde la Fase 4.7 el sitio usa los de su
+boceto: el lema y las frases de Inicio, la descripción, el lema y el recuadro
+de cada producto, y Nosotros entero. Se corrigieron la ortografía, las tildes y
+la puntuación, no las palabras ni el tono, y están copiados en `docs/plan.md`,
+Fase 4.7, porque el boceto es un sitio que la empresa puede cambiar o borrar.
+Donde el boceto no tenía texto —la bajada de la apertura, «Cómo trabajamos»,
+arquitectos y oficinas, los cierres— quedó el que había, que es provisorio.
+
+Viven en `contenido/`: `inicio.ts`, `productos.ts` y `nosotros.ts`. En
+`inicio.ts` está escrito, además, qué no se puede afirmar sin confirmarlo: años
+de trayectoria, cantidad de trabajos, marcas y garantías.
 
 **Productos vive como sección aparte del recorrido institucional.** Inicio,
-Proyectos y Contacto son el recorrido comercial; Productos es el catálogo, que se
+Nuestros trabajos y Contacto son el recorrido comercial; Productos es el catálogo, que se
 explora por separado. En Inicio aparecen algunos productos como anticipo, nunca el
 catálogo completo.
 
 La distinción tiene que quedar clara para el visitante:
 
 - **Productos = qué vendemos**
-- **Proyectos = qué hicimos**
+- **Nuestros trabajos = qué hicimos**
 
 ## Contenido
 
 ### Producto
 
 - Nombre
+- Lema: una o dos palabras en minúscula, arriba del nombre — «filtrar u
+  oscurecer»
 - Descripción breve
-- Variantes (ej. Cortinas de tela → riel, riel motorizado, barral; Toldos → de
-  brazos, motorizado)
-- Galería de fotos, con una de portada
+- Recuadro: un título y dos o tres frases — «manuales y automatizadas»
+- Variantes (ej. Cortinas de confección → riel, riel motorizado, barral; Toldos
+  → de brazos, motorizado)
+- Fotos, con una de portada
 - Activo / inactivo · Destacado / no destacado
 
 Las variantes **no** son productos independientes. `Toldos motorizados` es una
 variante de `Toldos`, no una entrada más del catálogo.
 
-Catálogo: Roller · Compacta Blackout · Cortinas de tela · Venecianas de madera ·
-Venecianas de PVC · Toldos · Bandas verticales — decisión 40.
+Catálogo: Roller · Compacta Blackout · Cortinas de confección · Venecianas de
+madera · Venecianas de PVC · Toldos · Bandas verticales — decisión 40.
+«Cortinas de confección» se llamó «Cortinas de tela» hasta la Fase 4.7; la
+dirección, `/productos/cortinas-tela`, no cambió.
 
 ### Proyecto
 
 - Título
 - Ubicación
 - Descripción
-- Galería de fotos, con una de portada
+- Fotos y videos, con una foto de portada
 - Activo / inactivo · Destacado / no destacado
 
 Nada más. Sin categoría, sin fecha, sin cliente, sin superficie, sin productos
@@ -149,8 +173,11 @@ prefiere editarlo a mano — decisión 36, que incluye lo que eso deja abierto.
 El contenido son archivos del repositorio:
 
 ```
-contenido/productos.ts     nombre, descripción, variantes, activo, destacado
+contenido/productos.ts     nombre, lema, descripción, recuadro, variantes,
+                           activo, destacado
 contenido/proyectos.ts     título, ubicación, descripción, activo, destacado
+contenido/inicio.ts        los textos de Inicio
+contenido/nosotros.ts      los textos de Nosotros
 fotos-originales/          las fotos, que un script prepara y limpia
 ```
 
@@ -195,8 +222,8 @@ hablarlo. En los demás lugares el número se lee completo, `+54 9 11 3311 1686`
 con el logo de WhatsApp adelante, y tocarlo abre el chat — decisión 65.
 
 Los datos de contacto —casilla, redes y las zonas donde trabaja la empresa—
-viven en `contenido/contacto.ts` y los redacta la empresa, igual que los textos
-de Inicio.
+viven en `contenido/contacto.ts` y los redacta la empresa, igual que los demás
+textos.
 
 ## Fuera del alcance de V1
 

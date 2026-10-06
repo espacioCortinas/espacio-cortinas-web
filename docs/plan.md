@@ -445,7 +445,8 @@ en mayúscula, mezcla dos letras en los títulos y deja restos de plantilla
 (`info@misitio.com`, «My Site»).
 
 **Reabre las decisiones 43 y 44**: la dirección «Cal» y el amarillo como única
-marca. La decisión nueva se escribe en la etapa 5, con el resultado a la vista.
+marca. La decisión nueva es la 66, escrita en la etapa 5 con el resultado a la
+vista.
 
 ### Cómo se trabaja
 
@@ -480,7 +481,9 @@ c9c0a20  el estado, antes de la etapa 5
 ```
 
 **La empresa todavía no lo vio.** Quien desarrolla revisó cada etapa con
-capturas y pidió los dos ajustes de la etapa 2 y el menú en una fila de la 4.
+capturas y pidió los dos ajustes de la etapa 2, el menú en una fila de la 4 y
+la barra igual en todas las páginas de la 5. **Y decidió que el rediseño se
+queda aunque la empresa no lo apruebe**: con eso se escribió la documentación.
 
 **Lo que se decidió en la conversación y no está en otro lado:**
 
@@ -502,7 +505,7 @@ páginas sin tocar su armado.
   pizarra `#405357` para títulos, enlaces y botón principal, azul verdoso
   `#80A6AD` como color de superficie y el teal oscuro `#607D82` en el pie.
 - Dos arreglos de contraste: **sobre el azul verdoso el texto va oscuro** —el
-  blanco del boceto da 2,3:1, y hacen falta 3 aun en letra grande— y **el pie
+  blanco del boceto da 2,63:1, y hacen falta 3 aun en letra grande— y **el pie
   se oscurece un poco**, porque el blanco sobre `#607D82` da 4,42:1.
 - Raleway para todo, con cifras de línea: por defecto trae las antiguas, que
   suben y bajan y desparejan un teléfono o «25 mm». Se van Fraunces y Karla.
@@ -619,9 +622,11 @@ Cómo quedó:
   existe da 404.
 
 **5. Cierre — EN CURSO.** Se partió en dos a pedido de quien desarrolla:
-**ahora, lo que hace falta para que la empresa lo apruebe; el resto, cuando
+**primero, lo que hace falta para que la empresa lo apruebe; el resto, cuando
 lo apruebe.** Si no lo aprueba, lo demás es trabajo perdido, y las imágenes
-para compartir además pesan en git para siempre.
+para compartir además pesan en git para siempre. Después quien desarrolla
+decidió que el rediseño se queda igual, y la documentación se hizo enseguida
+(abajo); lo que sigue pendiente espera decisiones, no la aprobación.
 
 _Hecho el 06/10/2026_ (`51aeecc`). Se revisaron las catorce páginas en los
 cinco anchos, con capturas y un control automático de contraste y de lo que
@@ -690,7 +695,27 @@ _A decidir con la empresa_:
   recortando el original con ffmpeg y volviendo a prepararlo: es un archivo
   nuevo, y el viejo queda en el historial —unos 0,5 MB más en git—.
 
-_Para cuando la empresa lo apruebe_:
+_Documentación, hecha el 06/10/2026_:
+
+- `docs/decisiones.md`: **la decisión 66**, que reemplaza a la 43, la 44 y la
+  50 y matiza la 45, la 46, la 47, la 49, la 51 y la 52 —cada una lo dice
+  arriba—; y las decisiones abiertas, al día.
+- `docs/diseno.md`: la marca, la dirección y el sistema, nuevos; «Cal» al
+  final, con las otras dos descartadas; y tres reglas verificables más, la 11,
+  la 12 y la 13, con las marcas de sitio hecho con IA que tenía el anterior. La
+  regla 6 se reescribió para el azul verdoso. El análisis del material quedó,
+  con notas.
+- `docs/producto.md`, `docs/modelo-de-datos.md`, `docs/arquitectura.md`,
+  `docs/mudanza-a-wix.md` y la regla 10 de `CLAUDE.md`.
+- **`components/galeria.tsx` se borró**, y con ella la prop `caja` de
+  `components/video-mudo.tsx`: desde la etapa 3 no la usaba ninguna página.
+- Los comentarios que llamaban «papel» al fondo o hablaban de la tira,
+  corregidos. Los que quedan describen las imágenes para compartir, que siguen
+  teniendo la banda del crema viejo: `lib/metadata.ts`,
+  `contenido/compartir.ts` y `scripts/preparar-compartir.mjs`. Cambian cuando
+  se rehagan.
+
+_Lo que queda_:
 
 - **Las imágenes para compartir, de nuevo**, con el logo nuevo: las doce más
   una para `/nosotros`, que hoy usa la de Inicio.
@@ -709,36 +734,18 @@ _Para cuando la empresa lo apruebe_:
     viejos se borran y quedan en el historial: unos 1,1 MB más en git.
   - **No correr `npm run marca` ni `npm run fotos`**: los dos terminan
     corriendo también este script.
-- **El favicon**, si la empresa dice que sí.
-- **Borrar `components/galeria.tsx` si la empresa aprueba el damero**: desde la
-  etapa 3 no la usa ninguna página. Con ella se va la prop `caja` de
-  `components/video-mudo.tsx`, que solo la usaba la galería. Si no lo aprueba,
-  se vuelve a la galería.
-- **La documentación**:
-  - `docs/diseno.md`: la dirección nueva —la paleta, Raleway, el logo de
-    círculos, los bloques azul verdoso, el damero, el botón flotante, el menú
-    en una fila— y «Cal» al final, con las otras descartadas.
-  - `docs/decisiones.md`: la decisión 66, que reemplaza a la 43 y la 44, y deja
-    sin objeto la 45 si se hace el favicon; y en la 46, la forma nueva de los
-    estados del formulario. Lo que se decidió en el camino está en las notas
-    «Lo que salió distinto» y «Cómo quedó» de cada etapa, y en «Hecho el
-    06/10/2026» de esta.
-  - `docs/producto.md`: `/nosotros` en la estructura, «Nuestros trabajos», y
-    que los textos son de la empresa.
-  - `docs/modelo-de-datos.md`: los campos `lema` y `recuadro`, y
-    `contenido/nosotros.ts`.
-  - `docs/arquitectura.md`: `lib/damero.ts` y `components/damero.tsx`.
-  - Quedan comentarios en el código que llaman «papel» al fondo, de la
-    dirección anterior: `components/foto.tsx`, `components/galeria.tsx`,
-    `components/listado-proyectos.tsx`, `lib/fotos.ts`, `lib/metadata.ts`,
-    `components/datos-estructurados.tsx`.
+- **El favicon**, si la empresa dice que sí, con el logo circular.
+- **El video de «Riel motorizado»**, si se decide recortarlo (arriba).
 - **Opcional**: el correo que manda el formulario (`lib/correo.ts`) usa los
   colores viejos y un filete al costado, pero solo lo lee la empresa.
-- **Merge a `main`**, con la aprobación de la empresa.
+- **La dirección de prueba de la rama**, si se la quiere mostrar a la empresa
+  antes de publicarlo (arriba).
+- **Merge a `main`**, cuando lo decida quien desarrolla: el push a `main`
+  publica.
 
 **Terminado cuando:**
 
-- La empresa aprobó el resultado en su teléfono
+- Está en `main` y publicado
 - Se ve bien en 320, 375, 768, 1024 y 1440
 - Ningún texto sobre el azul verdoso queda por debajo de 4,5:1, ni el del pie
 - `npm run build`, `tsc --noEmit`, eslint y `npm run preview` pasan, y

@@ -1583,7 +1583,12 @@ esa foto además tiene solo 1600 px, así que no le sobra encuadre.
 
 ---
 
-### 43. La dirección visual es «Cal» con el acento de «Regla», y el amarillo del logo es un color de superficie
+### 43. La dirección visual es «Cal» con el acento de «Regla», y el amarillo del logo es un color de superficie ~~— REEMPLAZADA por la decisión 66~~
+
+**Por qué quedó reemplazada.** En octubre de 2026 la empresa rechazó lo visual
+del sitio —«se nota que lo hizo una IA»— y armó un boceto con sus colores y un
+logo nuevo, sin el amarillo. La dirección pasó a ser la del boceto: decisión 66. Lo de abajo queda escrito tal cual, porque el análisis del amarillo y del
+papel explica por qué el sitio era como era.
 
 **Contexto:** la Fase 4.1 propuso tres direcciones y se miraron en `/muestra` con
 las fotos reales. El logo apareció después de las tres, y cambió el análisis.
@@ -1661,7 +1666,11 @@ nada más grande.
 
 ---
 
-### 44. El logo va sobre el papel de cal, sin campo propio, y el papel no se mueve
+### 44. El logo va sobre el papel de cal, sin campo propio, y el papel no se mueve ~~— REEMPLAZADA por la decisión 66~~
+
+**Por qué quedó reemplazada.** El papel de cal y el logo amarillo se fueron
+juntos con el rediseño de la Fase 4.7: el logo nuevo es de un solo gris y no
+tiene color que apoyar sobre nada — decisión 66.
 
 **Fecha:** septiembre de 2026, Fase 4.2.
 
@@ -1739,6 +1748,11 @@ el estado activo del menú, ni en los avisos.
 
 ### 45. El favicon sigue pendiente, y ahora se sabe por qué no salía
 
+**Matizada por la decisión 66**: con el logo circular del boceto, el favicon
+ya no sería un dibujo inventado —es redondo, y es de la empresa—. Sigue sin
+hacerse hasta preguntarle si lo quiere ahí. Probado chico: a 16 px se ve el
+círculo oscuro con la «e» como una mancha clara; a 32, la «e» se reconoce.
+
 **Fecha:** septiembre de 2026, Fase 4.2.
 
 **El estado.** `docs/diseno.md` lo tenía en «lo que falta pedirle a la empresa»:
@@ -1769,6 +1783,14 @@ baldosa amarilla con la «e».
 ---
 
 ### 46. Los estados no usan color: la paleta se queda en tres
+
+**Matizada por la decisión 66**: los estados siguen sin color, pero la paleta
+ya no es la del logo, y la forma cambió. Sin filetes al costado, que son otra
+marca de sitio hecho con IA: el error de un campo es la negrita debajo del
+campo, que engorda su borde; el envío fallido, un recuadro blanco con borde
+de 2 px; la confirmación, un bloque azul verdoso con texto oscuro (5,08:1). El
+borde de los controles sigue siendo el texto suave: 6,06:1 contra el blanco
+del campo.
 
 **Fecha:** septiembre de 2026, Fase 4.2.
 
@@ -1809,7 +1831,10 @@ deja el panel y la bandeja de mensajes fuera del alcance de V1.
 
 **Matizada por las decisiones 49 y 52**: `/productos` no reusó la tarjeta —es
 una fila por producto— y el sector de proyectos entró con el primer proyecto,
-en la 4.3.
+en la 4.3. **Y por la 66**: los sectores son los mismos, con el armado del
+boceto —la apertura en un bloque azul verdoso con el logo, los productos en
+zigzag con las frases del boceto entre ellos, «Cómo trabajamos» en una grilla
+de 2×2 y el sector de proyectos con el nombre «Nuestros trabajos»—.
 
 **Fecha:** septiembre de 2026. Adelanta la Fase 4.5 y **rompe el orden del
 plan**: Inicio se compone antes que `/proyectos` (4.3) y `/productos` (4.4).
@@ -2098,6 +2123,11 @@ imprime la coordenada y el script devuelve 1.
 
 ### 49. El catálogo es una fila por producto, con el lado de la foto alternado
 
+**Matizada por la decisión 66**: sigue siendo una fila por producto con el lado
+alternado, ahora con las piezas del damero —líneas finas y de borde a borde—.
+Y WhatsApp, que acá quedaba al final de la página en el teléfono, está siempre
+a mano en el botón flotante.
+
 **Fecha:** septiembre de 2026, Fase 4.4.
 
 **Cómo se eligió.** Con el mismo mecanismo que usó la 4.1 para la dirección
@@ -2309,7 +2339,13 @@ escrito dos veces»— y es la que el propio enunciado del cambio pedía respeta
 
 ---
 
-### 50. La galería se desliza de costado, y la caja sale de sus propias fotos
+### 50. La galería se desliza de costado, y la caja sale de sus propias fotos ~~— REEMPLAZADA por la decisión 66~~
+
+**Por qué quedó reemplazada.** Con el rediseño de la Fase 4.7, las fotos de un
+producto y de un proyecto van en el damero del boceto —foto y texto alternados
+en una grilla de 2×2— y no en una tira. `components/galeria.tsx` se borró al
+cerrar la etapa 5; el código está en el historial. Lo de abajo sigue valiendo
+como análisis de cómo se recorre una galería con el pulgar.
 
 **Fecha:** septiembre de 2026, Fase 4.4. **Reemplaza la grilla de dos módulos de
 la decisión 48**, que valía para una galería apilada.
@@ -2419,6 +2455,9 @@ caso pasó a declarar el ancho de la columna.
 ---
 
 ### 51. Los videos de un proyecto van intercalados en su galería, en bucle como los de producto
+
+**Matizada por la decisión 66**: siguen intercalados en el orden de la carpeta
+y en bucle, pero en el damero, de a dos, y no en una tira.
 
 **Fecha:** septiembre de 2026, Fase 4.3.
 
@@ -2559,6 +2598,9 @@ metadatos de Clipchamp con que llegaron.
 ---
 
 ### 52. El listado de proyectos: el primero en fila, el resto en grilla — y así también en Inicio
+
+**Matizada por la decisión 66**: la regla sigue; la fila del primero se arma
+con las piezas del damero, y el listado se llama «Nuestros trabajos».
 
 **Fecha:** septiembre de 2026, Fase 4.3.
 
@@ -3455,6 +3497,171 @@ en `#211F20`, 14,69:1 sobre el papel; y la ficha JSON-LD sigue diciendo
 
 ---
 
+### 66. La dirección visual es la del boceto de la empresa, y «Cal» se va
+
+**Fecha:** octubre de 2026, Fase 4.7. **Reemplaza a las decisiones 43, 44 y
+50**, y matiza la 45, la 46, la 47, la 49, la 51 y la 52: cada una lo dice
+arriba.
+
+**El planteo.** Con el sitio terminado, la empresa lo rechazó en lo visual:
+«no tiene diseño, se nota que lo hizo una IA», y tampoco le gustaron los
+colores. La estructura sí le pareció bien. Armó un boceto en Wix
+—`ventas35961.wixsite.com/my-site`— con sus colores, su armado y un logo
+nuevo. La decisión 43 decía que la dirección «no se reabre»; en lo visual
+decide la empresa, y se reabrió.
+
+**Tenía razón, y lo que vio tiene nombre.** El fondo crema, la Fraunces en los
+títulos, la lista numerada 01–04 con filetes y las etiquetas chicas en
+mayúscula espaciada están hoy entre las marcas más repetidas de los sitios
+generados con IA. Y el sitio no tenía un color propio: papel, negro y un
+amarillo que solo podía ir en el logo.
+
+**Lo decidido: se adapta el sitio a la idea del boceto, no se copia el
+boceto.** El boceto no anda en un teléfono —la versión móvil la armó Wix sola,
+y el sitio se ve casi entero desde uno—, usa fotos de muestra de la plantilla,
+escribe párrafos enteros en mayúscula, mezcla dos letras en los títulos y deja
+restos de plantilla, como `info@misitio.com`. De él se toman los colores, la
+letra, los logos, los bloques de color y el armado de cada página; lo que sale
+de las fotos y de la accesibilidad se queda.
+
+Se hizo en la rama `rediseno`, en cinco etapas con un commit cada una y
+capturas en cada paso. Lo que se previó en cada etapa, y lo que salió
+distinto, está en `docs/plan.md`, Fase 4.7. **Se queda aunque la empresa no
+termine de aprobarlo**: quien desarrolla lo decidió al cerrar la etapa 5.
+
+#### La paleta, medida del código del boceto
+
+```
+Fondo          #EDEFF0   el gris del boceto
+Superficie     #FFFFFF   campos, avisos, el lugar de una foto mientras carga
+Texto          #2F2F2F                                       11,61:1 sobre el fondo
+Texto suave    #56656A   lemas, pies, chips                   5,25:1
+Acento         #405357   pizarra: títulos, enlaces, botón      7,02:1
+Marca          #80A6AD   azul verdoso: los bloques
+Marca oscuro   #5A767B   el pie
+Línea          #C9D1D3   filetes decorativos
+```
+
+Dos arreglos de contraste sobre lo que trae el boceto:
+
+- **Sobre el azul verdoso, el texto va oscuro.** El boceto pone blanco, y
+  blanco sobre `#80A6AD` da 2,63:1: no llega ni a los 3:1 de la letra grande.
+  El texto da 5,08:1. La pizarra da 3,08:1, así que sobre ese color solo va en
+  letra grande, y el enlace del sistema hereda el color de lo que lo rodea.
+- **El pie se oscurece un poco.** El teal oscuro del boceto, `#607D82`, da
+  4,42:1 con el blanco encima; `#5A767B` da 4,87:1 y no se distingue a la
+  vista. Sobre ese color el anillo de foco pizarra no se ve (1,66:1), así que
+  el pie lo pasa a blanco.
+
+**Un azul que no es el de las interfaces.** La regla 6 de `docs/diseno.md`
+prohibía azul o violeta como color de marca, porque son el color por defecto
+de las interfaces genéricas. El azul verdoso de la empresa no es eso: es
+apagado, lo eligió ella y va de superficie, nunca de enlace ni de botón. La
+regla se reescribió para decir lo que protegía.
+
+#### La letra
+
+**Raleway para todo**, con cifras de línea: por defecto trae las antiguas, que
+suben y bajan y desparejan un teléfono o «25 mm». Se van Fraunces y Karla.
+**Tahoma, que el boceto usa en algunos títulos, no**: es de Windows y en los
+teléfonos no está.
+
+#### Los dos logos
+
+- **El de círculos de línea**, que la empresa mandó para el boceto: todo gris
+  carbón `#35363A`, en PNG transparente de 1.695 px. Va grande en el bloque
+  azul verdoso de la apertura de Inicio, donde da 4,58:1, y en las imágenes
+  para compartir.
+- **El circular**, que el boceto pone en su Nosotros: un círculo carbón con el
+  logo calado. No llegó con el otro; quien desarrolla lo bajó del boceto en
+  AVIF de 704 px, sin metadatos. Va en la barra de enlaces, en el lugar de
+  «Inicio», en todas las páginas menos Inicio.
+
+Los dos los publica `scripts/preparar-marca.mjs`, desde `fotos-originales/`.
+**El amarillo se fue con el logo viejo**, y con él la regla de «una vez por
+pantalla» de la decisión 44.
+
+#### La composición
+
+- **Bloques azul verdoso**, opacos: la apertura de Inicio —el logo grande
+  montado sobre el borde de una foto—, el nombre de cada producto destacado,
+  el cierre de cada página, la confirmación del formulario y el botón flotante.
+  Ninguno lleva texto sobre una foto.
+- **El damero reemplaza a la tira de la decisión 50.** En producto y en
+  proyecto, foto y texto alternados en una grilla de 2×2 con líneas finas, de
+  borde a borde, como las páginas de producto del boceto. **Las fotos no se
+  recortan**: cada celda toma la proporción de su foto. Qué va en cada celda
+  lo decide `lib/damero.ts`, y el catálogo y el listado de trabajos usan las
+  mismas piezas.
+- **Cada producto tiene un lema y un recuadro**, del boceto: el lema en
+  minúscula y gris arriba del título —«filtrar u oscurecer»—, y el recuadro
+  con un título y dos o tres frases.
+- **La barra de enlaces se ve igual en todas las páginas**: a la vista, en una
+  fila, sin franja ni filete. En minúscula y con «Trabajos» en vez de «Nuestros
+  trabajos», que es lo único que entra en una fila en un teléfono de 320. Fuera
+  de Inicio, el enlace «Inicio» es el logo circular. En Inicio no lleva logo,
+  porque ahí está el grande de la apertura, que es lo que hace el boceto.
+- **WhatsApp flota abajo a la derecha** en todas las páginas, «Chateá con
+  nosotros», como el del boceto. Resuelve lo que la decisión 49 dejó
+  pendiente: en el catálogo, en un teléfono, WhatsApp quedaba al final de una
+  página de más de 7.000 px. El pie perdió su botón, que quedaba repetido.
+- **`/nosotros` es nueva**, con los textos del boceto, y **«Nuestros
+  trabajos»** es el nombre de `/proyectos`. La dirección no cambia: los
+  enlaces que ya circulan siguen andando (decisión 10).
+- **Los textos son los de la empresa**, corregidos en ortografía, tildes y
+  puntuación, no en palabras ni en tono. Compacta Blackout y Bandas
+  verticales, que el boceto no tenía, se escribieron con su estilo. Están
+  copiados en `docs/plan.md`, porque el boceto es un sitio que la empresa
+  puede cambiar o borrar.
+
+#### Lo que se fue por ser marca de IA
+
+- el fondo crema y la Fraunces;
+- la lista numerada 01–04 con filetes: «Cómo trabajamos» pasó a la grilla de
+  2×2 con líneas del boceto;
+- las etiquetas chicas en mayúscula espaciada, en todas las páginas: las
+  reemplazan los lemas en minúscula;
+- el filete al costado de los avisos del formulario —decisión 46—.
+
+**La mayúscula espaciada queda solo donde la pone el boceto, y en grande**:
+«TU MEJOR COMPAÑÍA», en la apertura de Inicio, y el nombre de cada producto en
+su bloque.
+
+#### Lo que se mantuvo, porque sale de las fotos
+
+- **Nada de texto sobre una foto**: el contraluz del archivo no deja ningún
+  lugar seguro (`docs/diseno.md`, «El material real»).
+- **Ninguna foto más ancha que su tope** —decisión 48 y regla 4 de
+  `CLAUDE.md`—, también en el damero.
+- **Las portadas 4:5 en los listados.**
+- **Sin sombras, y radios de hasta 4 px.** El logo circular es una imagen, no
+  un radio; el anillo de foco del enlace que lo lleva sigue su borde.
+- **Los estados sin color**, con otra forma: decisión 46.
+
+#### Lo que queda pendiente
+
+- **Las imágenes para compartir siguen siendo las de «Cal»**: la banda es del
+  crema viejo y lleva el logo de línea (decisiones 63 y 64). Rehacerlas suma
+  unos 1,1 MB a git, y antes hay que decidir dos cosas: el color de la banda,
+  y si va el logo de línea o el circular.
+- **El favicon** — decisión 45: con el logo circular ya no hace falta inventar
+  un dibujo, y queda preguntarle a la empresa si lo quiere.
+- **El video de «Riel motorizado» trae franjas negras dentro del archivo**: el
+  original es un video vertical metido en un cuadro de 1920 × 1080. Se arregla
+  recortándolo, y suma unos 0,5 MB a git.
+- **El correo que manda el formulario** (`lib/correo.ts`) sigue con los
+  colores viejos. Solo lo lee la empresa.
+
+**Verificado** en cada etapa, y al final en las catorce páginas: 320, 375,
+768, 1024 y 1440 sin scroll horizontal ni nada que se salga de su caja; ningún
+texto por debajo de 4,5:1, también sobre el azul verdoso y en el pie, medido
+con un control automático de cada texto contra su fondo real; el menú en una
+fila en todos los anchos; `npm run build`, `tsc`, eslint y prettier limpios;
+`npm run preview` con todas las rutas en 200 y una inexistente en 404; y
+`npm run fotos:revisar` en verde.
+
+---
+
 ## Decisiones abiertas
 
 ~~**Los videos no responden a pedidos por rango, y Safari puede no
@@ -3469,22 +3676,28 @@ rango queda anotado como dato, por si algún día un video largo necesita saltar
 a la mitad sin descargarlo entero; hoy, con archivos de 0,5 a 3,6 MB en bucle,
 no importa.
 
-**Falta el logo en vector, y una versión para fondo oscuro.** Hoy hay un JPG de
-524 px en `fotos-originales/logo.jpg`. Alcanza para el encabezado —168 px a
-triple densidad son 504— pero no para nada más grande, y no hay versión clara
-para usar sobre un fondo oscuro. Se le pide a la empresa — decisión 43.
+**Falta el logo en vector, y una versión para fondo oscuro.** Desde el
+rediseño —decisión 66— el logo es el de círculos de línea, en un PNG de
+1.695 px (`fotos-originales/logo-vacio.png`): alcanza para todo lo que el
+sitio usa, que llega a 1.200. Un vector seguiría sirviendo para imprenta, y
+sigue sin haber una versión clara para fondo oscuro: por eso el pie escribe el
+nombre en vez de poner el logo.
 
-**El favicon sigue sin salir, y ya se sabe por qué** — decisión 45. El círculo
-amarillo viene cortado por el borde superior del archivo fuente y la «e» lo pisa,
-así que un recorte literal sale sucio; cualquier otra cosa sería un lockup nuevo
-que la empresa no autorizó. Se destraba con el vector, o con esa autorización.
+**El favicon sigue sin salir** — decisión 45. Con el logo circular del boceto
+ya no haría falta inventar un dibujo, que era lo que lo frenaba: queda
+preguntarle a la empresa si lo quiere.
+
+**Lo que dejó pendiente el rediseño** — decisión 66: las imágenes para
+compartir siguen siendo las de «Cal», con la banda del crema viejo; y el video
+de «Riel motorizado» trae franjas negras dentro del archivo. Las dos cosas
+suman peso a git para siempre, así que se hacen cuando se decidan.
 
 **No hay ninguna foto 4:5 de repuesto.** Las siete que existen son exactamente
 las siete portadas, así que cualquier portada que haya que retirar obliga a
 recortar una 3:4. No bloquea la Fase 4.1, pero define qué hay que fotografiar
 primero. **Desde la 4.4 ya no es del todo así**: las fotos de variante suman
-cuatro 4:5, dos de Roller y dos de Cortinas de tela. Los otros cinco productos
-siguen sin repuesto.
+cuatro 4:5, dos de Roller y dos de Cortinas de confección. Los otros cinco
+productos siguen sin repuesto.
 
 **Dónde viven las fotos cuando se cargue el archivo histórico.** Unas 300 fotos
 por cuatro medidas son del orden de 240 MB, y git guarda todas las versiones de

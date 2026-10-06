@@ -74,8 +74,9 @@ app/
 │   │   ├── page.tsx
 │   │   └── [slug]/page.tsx
 │   ├── proyectos/
-│   │   ├── page.tsx
+│   │   ├── page.tsx             «Nuestros trabajos»
 │   │   └── [slug]/page.tsx
+│   ├── nosotros/page.tsx
 │   ├── contacto/
 │   │   ├── page.tsx
 │   │   └── acciones.ts          la Server Action del formulario. Lo único que
@@ -94,27 +95,31 @@ contenido/
 ├── proyectos.ts                 se edita a mano
 ├── contacto.ts                  se edita a mano: casilla, redes y zonas donde trabaja
 ├── inicio.ts                    se edita a mano: los textos de Inicio
+├── nosotros.ts                  se edita a mano: los textos de Nosotros
 ├── compartir.ts                 se edita a mano: qué foto lleva cada página al
 │                                compartirla
 ├── fotos.ts                     GENERADO por scripts/preparar-fotos.mjs
 ├── videos.ts                    GENERADO por scripts/preparar-fotos.mjs
-├── marca.ts                     GENERADO por scripts/preparar-marca.mjs: el logo
+├── marca.ts                     GENERADO por scripts/preparar-marca.mjs: los logos
 ├── imagenes-para-compartir.ts   GENERADO por scripts/preparar-compartir.mjs
 ├── tipos.ts
 └── index.ts                     une contenido y medios; es lo que leen las páginas
 components/
 ├── foto.tsx                     el <img> con srcset, proporción y recorte
-├── galeria.tsx                  la tira que se desliza, con fotos y videos
+├── damero.tsx                   la grilla de 2×2 de producto y proyecto, y sus
+│                                piezas sueltas para los listados y Nosotros
 ├── video-mudo.tsx               el video mudo, en bucle. "use client" (uno de cuatro)
-├── tarjeta-producto.tsx         la portada y el nombre; la grilla de Inicio
+├── tarjeta-producto.tsx         la portada con su bloque; el zigzag de Inicio
 ├── tarjeta-proyecto.tsx         el proyecto en fila o en tarjeta
 ├── listado-proyectos.tsx        el primero en fila y el resto en grilla
-├── logo.tsx                     el logo del encabezado
-├── encabezado.tsx               logo y navegación
-├── navegacion.tsx               los cuatro enlaces. "use client" (uno de cuatro)
+├── logo.tsx                     el logo grande de Inicio y el circular de la barra
+├── encabezado.tsx               la barra de enlaces, igual en todas las páginas
+├── navegacion.tsx               los cinco enlaces; fuera de Inicio, el primero es
+│                                el logo circular. "use client" (uno de cuatro)
 ├── formulario-contacto.tsx      el formulario y sus estados. "use client" (uno de cuatro)
 ├── pie.tsx
-├── whatsapp.tsx                 el enlace, con el mensaje según la página
+├── whatsapp.tsx                 el enlace, con el mensaje según la página, y el
+│                                botón flotante
 ├── medios-de-contacto.tsx       número, email, red y «Llamar», con su símbolo
 ├── iconos-de-contacto.tsx       los logos de WhatsApp e Instagram, y el sobre
 ├── datos-estructurados.tsx      JSON-LD del negocio local
@@ -134,17 +139,18 @@ lib/
 ├── whatsapp.ts                  el mensaje contextual, el enlace y el número
 ├── texto.ts                     slugs y textos derivados
 ├── navegacion.ts                los enlaces del menú, en un solo lugar
+├── damero.ts                    qué va en cada celda del damero
 └── constantes.ts
 scripts/
 ├── preparar-fotos.mjs           recorta, redimensiona y borra los metadatos
 ├── preparar-compartir.mjs       la imagen para compartir de cada página, desde
 │                                las fotos publicadas
-├── preparar-marca.mjs           el logo sin fondo
+├── preparar-marca.mjs           los dos logos, en las medidas que se usan
 └── revisar-metadatos.mjs        comprueba que ninguna publicada conserve GPS
 public/fotos/                    las imágenes generadas
 public/videos/                   los videos publicados y su cuadro de cartel
 public/compartir/                una imagen por página, 1200 × 630, GENERADAS
-public/marca/                    logo.png, GENERADO
+public/marca/                    los logos, GENERADOS
 fotos-originales/                los originales. NO se versiona
 docs/
 next.config.ts
@@ -215,15 +221,15 @@ cambie sin build, hay que enchufar **las dos** piezas, no una: sin el
 
 ### Comandos
 
-| Comando             | Qué hace                                                                                    |
-| ------------------- | ------------------------------------------------------------------------------------------- |
-| `npm run dev`       | Next en local. Es el de todos los días                                                      |
-| `npm run marca`     | rehace el logo y `contenido/marca.ts`, y después las imágenes para compartir, que lo llevan |
-| `npm run compartir` | rehace la imagen para compartir de cada página. `npm run fotos` ya lo corre al terminar     |
-| `npm run build`     | solo `next build`. Es el que verifica que el código compila                                 |
-| `npm run build:cf`  | además arma el Worker. Lo que corre el despliegue                                           |
-| `npm run preview`   | levanta el Worker real en local, sobre `workerd`                                            |
-| `npm run deploy`    | despliega a mano. Normalmente no se usa: despliega `main`                                   |
+| Comando             | Qué hace                                                                                      |
+| ------------------- | --------------------------------------------------------------------------------------------- |
+| `npm run dev`       | Next en local. Es el de todos los días                                                        |
+| `npm run marca`     | rehace los logos y `contenido/marca.ts`, y después las imágenes para compartir, que lo llevan |
+| `npm run compartir` | rehace la imagen para compartir de cada página. `npm run fotos` ya lo corre al terminar       |
+| `npm run build`     | solo `next build`. Es el que verifica que el código compila                                   |
+| `npm run build:cf`  | además arma el Worker. Lo que corre el despliegue                                             |
+| `npm run preview`   | levanta el Worker real en local, sobre `workerd`                                              |
+| `npm run deploy`    | despliega a mano. Normalmente no se usa: despliega `main`                                     |
 
 `npm run preview` es lo que hay que correr antes de dar por buena cualquier cosa
 que dependa del servidor: es el único que ejecuta el código en el mismo runtime
@@ -310,7 +316,7 @@ que un video de celular trae igual que una foto. El lado mayor va a 1280 —no e
 ancho: un vertical saldría agrandado— y un video de más de 25 MiB no se publica
 (decisión 51).
 
-**Los videos de un proyecto van en su galería**, en el lugar que les da el orden
+**Los videos de un proyecto van en su damero**, en el lugar que les da el orden
 de la carpeta, y el manifiesto registra ese lugar en `posicion`. Decisión 51.
 
 **Un HEIC de iPhone no lo lee `sharp`**: su binario no trae decodificador HEVC.

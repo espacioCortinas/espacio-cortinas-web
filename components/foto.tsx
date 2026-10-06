@@ -30,10 +30,11 @@ import { medidaPredeterminada, rutaDeFoto, srcSetDe } from "@/lib/fotos";
  * Las proporciones que usa el sitio.
  *
  * `4/5` es la de las portadas y la de los listados, sin excepción: es lo que
- * hace que las grillas queden parejas aunque la galería mezcle orientaciones
- * (decisión 14). `propia` es la de la galería, que respeta la proporción de
- * cada foto porque el archivo es mitad vertical y mitad horizontal, y una
- * galería que suponga una sola orientación se rompe la mitad de las veces.
+ * hace que las grillas queden parejas aunque las fotos de cada producto
+ * mezclen orientaciones (decisión 14). `propia` es la del damero de las
+ * páginas de producto y de proyecto, que respeta la proporción de cada foto
+ * porque el archivo es mitad vertical y mitad horizontal, y una composición
+ * que suponga una sola orientación se rompe la mitad de las veces.
  */
 type Proporcion = "4/5" | "3/4" | "1/1" | "16/9" | "propia";
 
@@ -136,7 +137,7 @@ export function FotoImg({
 
   /*
    * La caja de proporción fija. Va sin borde, sin sombra y sin radio: lo que
-   * separa una foto del papel es el aire, no un marco (`docs/diseno.md`).
+   * separa una foto del fondo es el aire, no un marco (`docs/diseno.md`).
    *
    * El fondo de superficie es lo que se ve mientras la foto carga y en la
    * franja que el navegador todavía no pintó: el blanco del sistema, que sobre

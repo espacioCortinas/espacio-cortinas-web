@@ -3,15 +3,14 @@
 Este documento define **restricciones y sistema**, no maquetas. La composición de
 cada página se decide en su fase, dentro de estas reglas.
 
-> **Estado: el sitio está compuesto** —Fases 4.2 a 4.6 cerradas, con Inicio
-> (4.5) compuesta fuera de orden—. La dirección es **«Cal», con el
-> acento de «Regla»** — decisión 43, elegida en la 4.1 y **no se reabre**. Sus
-> valores son tokens de `app/globals.css` y están descritos abajo en «La
-> dirección». La 4.2 los convirtió en componentes: ver «Componentes», que ahora
-> dice qué existe y qué no. Las otras dos propuestas quedan documentadas al
-> final, en «Las dos que no se eligieron», porque la razón por la que se
-> descartaron sigue valiendo. `/muestra`, donde se compararon las tres
-> direcciones, se borró el 29/09/2026 al cerrar la 4.5 (decisión 41).
+> **Estado: el sitio está compuesto con la dirección del boceto de la
+> empresa** — Fase 4.7, decisión 66. La anterior, «Cal», se usó de la Fase 4.1
+> a la 4.6, y la empresa la rechazó en octubre de 2026 porque se notaba hecha
+> con IA: queda al final, en «Las direcciones descartadas», con las otras dos
+> de la 4.1. Los valores de la dirección son tokens de `app/globals.css` y
+> están descritos abajo, en «La dirección». **El análisis del material real
+> sigue valiendo**: las fotos son las mismas, y lo que de ellas salía como
+> restricción se mantuvo.
 
 ---
 
@@ -34,7 +33,8 @@ juego más parejo que el de productos y es **el primer material corporativo**:
 fachada vidriada curva, rollers screen, puestos de trabajo — decisiones 51 y 52.
 
 **Desde la Fase 4.4 están también las ocho fotos de variante** —Screen y
-Blackout de Roller, Riel y Barral de Cortinas de tela—: cuatro 4:5, tres 5:4 y
+Blackout de Roller, Riel y Barral de Cortinas de confección, que hasta la 4.7 se
+llamaba Cortinas de tela y sigue en la carpeta `cortinas-tela`—: cuatro 4:5, tres 5:4 y
 una 3:4 (decisión 48). Entre ellas está la más chica del catálogo,
 `cortinas-tela/barral/2`, de 1028 × 822. La tabla y el análisis que siguen son
 los de la 4.1, sobre las 23 de producto.
@@ -86,7 +86,11 @@ poder **asignarle un lugar chico sin que eso se vea como un error**.
 Horizontales, mudos —sin pista de audio, no «silenciados»— y cortos. No entran en
 el ritmo vertical 4:5 de las portadas y no se pueden mostrar grandes: 1280 px a
 doble densidad es una caja de 640 px de CSS. **El video no puede ser el
-protagonista de una página; es un ítem más de la galería**, y encima horizontal.
+protagonista de una página; es una celda más del damero.**
+
+Desde la 4.3 hay además dos de proyecto, uno de ellos vertical. Y el de «Riel
+motorizado» es un vertical que llegó metido en un cuadro horizontal: las franjas
+negras de los costados están dentro del archivo (decisión 66).
 
 ### La paleta del material: son dos archivos, no uno
 
@@ -113,6 +117,9 @@ archivo partido en dos.
 fotos cálidas, porque contra las frías se vería sucio y contra el azul,
 amarillento. Tiene que ser un neutro capaz de sostener las dos familias. Eso se
 resuelve con **saturación muy baja**, no con temperatura.
+
+El fondo del boceto de la empresa, `#EDEFF0`, es exactamente eso: un gris de
+saturación muy baja, apenas frío (decisión 66).
 
 ### El contraluz: menos grave, y más específico, de lo que se suponía
 
@@ -191,7 +198,7 @@ de las tres se muestra grande.
 63: `cortinas-tela/3` tiene, contra el borde izquierdo, el pelo y el hombro de
 una persona, cortados por el cuadro. No se la reconoce y la foto se queda,
 con el mismo criterio; pero ninguna imagen para compartir lleva ni un pedazo
-de alguien, así que esa no es la de Cortinas de tela.
+de alguien, así que esa no es la de Cortinas de confección.
 
 ### El motivo formal que sí sirve
 
@@ -207,8 +214,8 @@ Eso se puede leer de dos maneras, y las dos son legítimas:
 - **La interfaz se calla** porque la foto ya trae toda la textura que la página
   necesita, y cualquier trama agregada vibra contra ella.
 
-Las direcciones de abajo toman partido distinto sobre esto, y fue una de las
-cosas concretas que se miraron en `/muestra`.
+«Cal» tomó la segunda. El boceto de la empresa toma la primera: las líneas
+finas en pizarra del damero son su recurso de separación (decisión 66).
 
 ### Lo que este archivo no puede sostener
 
@@ -224,209 +231,248 @@ cosas concretas que se miraron en `/muestra`.
 
 ## La marca
 
-El logo llegó después de las propuestas y terminó confirmando la elección por su
-cuenta. Los valores están medidos del archivo, no estimados:
+La empresa tiene dos logos, los dos del boceto, y un color: el azul verdoso de
+sus bloques. Los valores están medidos de los archivos y del código del boceto,
+no estimados:
 
 ```
-Amarillo   #FFF100   amarillo proceso, croma máximo
-Negro      #211F20   neutro
-Fondo      #FFFFFF
+Logo           #35363A   gris carbón, un solo color
+Azul verdoso   #80A6AD   el color de la marca: una superficie
 ```
 
-Es una tipografía geométrica —familia Futura—, «espacio» en minúscula y
-«CORTINAS» en versalita espaciada, con un círculo amarillo detrás de la «e».
+### Los dos logos
 
-### El amarillo no es un acento: es un color de superficie
+**El de círculos de línea** es el principal: dos círculos de línea fina,
+«espacio» en minúscula y «CORTINAS» en versalita espaciada, todo en el mismo
+gris carbón. Llegó en un PNG transparente de 1.695 px y
+`scripts/preparar-marca.mjs` lo publica en 600 y 1.200. Va grande en el bloque
+azul verdoso de la apertura de Inicio —4,58:1 sobre ese color— y en la banda
+de las imágenes para compartir.
 
-Es el dato que manda sobre toda la paleta.
+**El circular** es un círculo gris carbón con el logo calado adentro y un aro
+fino alrededor. Lo calado deja ver el fondo, así que sobre el gris del sitio las
+letras quedan claras. Es el que el boceto pone en su Nosotros; llegó bajado del
+boceto, en AVIF de 704 px, y se publica en 96 y 144. Va en la barra de enlaces
+de todas las páginas menos Inicio, en el lugar del enlace «Inicio».
 
-| Combinación                        |   Contraste |          |
-| ---------------------------------- | ----------: | -------- |
-| amarillo sobre el papel de cal     |      1,06:1 | inusable |
-| amarillo sobre blanco puro         |      1,18:1 | inusable |
-| **negro sobre amarillo**           | **13,92:1** | perfecto |
-| amarillo sobre un fondo muy oscuro |     15,16:1 | perfecto |
+**Nunca los dos en la misma pantalla.** En Inicio la barra no lleva el
+circular, porque el de líneas está grande en la apertura: es lo que hace el
+boceto, cuyo encabezado no tiene logo. En las demás páginas el circular es el
+único.
 
-Hace falta 4,5:1 para texto y 3:1 para un elemento de interfaz que signifique
-algo. O sea que sobre este papel el amarillo **no puede ser color de enlace, ni
-de texto, ni de línea fina, ni el único indicio de un estado**. Lo que sí puede
-ser es una superficie con texto negro encima, o una forma.
+**El pie escribe el nombre en vez de poner un logo**: los dos son gris carbón,
+y sobre el teal oscuro del pie no se leerían. No hay versión clara, y no se
+inventa una.
+
+### El azul verdoso es un color de superficie
+
+Como el amarillo del logo anterior, y por la misma razón: no le da el
+contraste para llevar cualquier cosa encima, ni para ser una línea.
+
+| Combinación                           | Contraste |             |
+| ------------------------------------- | --------: | ----------- |
+| texto `#2F2F2F` sobre azul verdoso    |    5,08:1 | se usa      |
+| pizarra `#405357` sobre azul verdoso  |    3,08:1 | solo grande |
+| blanco sobre azul verdoso             |    2,63:1 | no se usa   |
+| azul verdoso sobre el fondo `#EDEFF0` |    2,28:1 | no se usa   |
 
 **Las reglas de uso:**
 
-1. Solo como superficie con texto negro encima, o como forma.
-2. Nunca como texto, enlace o línea.
-3. Nunca como único indicio de algo: lo que el amarillo marque tiene que estar
-   marcado también por peso, subrayado o posición.
-4. **Una vez por pantalla.** El logo, y a lo sumo una cosa más. Si aparece en
-   todos lados deja de ser la marca y pasa a ser ruido.
+1. Solo como superficie, con el texto oscuro encima. Nunca como texto, enlace
+   ni línea.
+2. Nunca como único indicio de un estado: contra el fondo no llega a los 3:1
+   de un elemento de interfaz con significado.
+3. **Bloques con función, y no más**: la apertura de Inicio, el nombre de un
+   producto destacado, el cierre de cada página, la confirmación del formulario
+   y el botón flotante de WhatsApp. Si todo fuera un bloque azul verdoso,
+   ninguno diría nada.
 
-**Y desde la Fase 4.2 esa vez la gasta entera el logo del encabezado**, que está
-en todas las páginas. Por eso no hay amarillo en ningún otro lado del sitio: ni
-en el botón principal, ni en los chips, ni en el foco, ni en el estado activo del
-menú, ni en los avisos — decisión 44.
-
-**Fuera del sitio, el logo va en la imagen para compartir** cada página, con las
-mismas reglas: una vez, directo sobre el papel y centrado en una banda debajo
-de la foto, nunca encima de ella — decisión 64.
-
-### El logo sobre el papel: por qué va directo y sin campo propio
-
-Es el problema que la 4.2 tenía que resolver, porque el encabezado se ve en todas
-las páginas. **El logo se apoya directo sobre el papel de cal, con el fondo
-blanco del JPG recortado, y `--color-fondo` no se movió.**
-
-Lo que tiene que ser legible es la palabra, y la palabra es negra: **14,69:1**.
-El amarillo es el círculo, que es una forma, y para una forma el contraste WCAG
-—que mide luminancia— es el instrumento equivocado: el amarillo tiene L\* 93,5 y
-el papel L\* 95,6, casi la misma claridad. La separación es de croma:
-
-| Fondo del logo         | Contraste WCAG | ΔE2000 |
-| ---------------------- | -------------: | -----: |
-| papel de cal `#F6F2EC` |         1,06:1 |   28,5 |
-| recambio `#F8F6F2`     |         1,09:1 |   29,0 |
-| campo blanco `#FFFFFF` |         1,18:1 |   30,3 |
-
-Los tres papeles están a menos de dos unidades entre sí, o sea que **ninguna de
-las salidas compra lo que cuesta**: mover el papel gana 0,5 —por debajo de lo que
-se nota— y afloja lo único que resuelve la disparidad del archivo fotográfico. El
-detalle completo, con lo que se descartó y por qué, está en la decisión 44.
+**El teal oscuro del pie, `#5A767B`, es el mismo color un paso más oscuro**,
+para que el blanco encima llegue a 4,87:1. El del boceto, `#607D82`, daba 4,42.
 
 ### Lo que falta pedirle a la empresa
 
-- **El logo en vector** (SVG, `.ai` o `.eps`). Hoy hay un JPG de 524 px, que
-  después de recortarle el fondo y el aire quedan 504: alcanza justo para los
-  168 px del encabezado en una pantalla de triple densidad, y para nada más
-  grande. **En el vector, además, el círculo tiene que estar entero**: en el JPG
-  viene cortado por el borde superior del archivo y arriba le queda una tangente
-  plana.
-- **Una versión para fondo oscuro**, con la palabra en claro. La que hay es
-  negra y sobre oscuro desaparece. No hace falta para el sitio, sí para el pie
-  de un PDF o una publicación.
-- **Un favicon**, o la autorización para componer uno con las formas del logo.
-  Sigue pendiente después de la Fase 4.2 y ahora se sabe por qué: el recorte
-  literal del círculo sale sucio —está cortado arriba y la «e» lo pisa— y
-  cualquier otra composición sería un lockup nuevo. Decisión 45.
+- **El logo en vector** (SVG, `.ai` o `.eps`), para imprenta. Para el sitio
+  alcanza el PNG: lo más grande que se publica son 1.200 px.
+- **Una versión clara, para fondo oscuro.** El sitio no la necesita —el pie
+  escribe el nombre—; un PDF o una publicación, sí.
+- **Si quiere el logo circular como favicon.** Ya no habría que inventar un
+  dibujo, que era lo que lo frenaba — decisión 45.
 
 ---
 
 ## La dirección
 
-**«Cal», con el acento de «Regla»** — decisión 43. Los valores de abajo están
+**La del boceto de la empresa** — decisión 66. Los valores de abajo están
 fijados como tokens en `app/globals.css` y **se usan siempre por token, nunca
 sueltos en los componentes**.
 
 ### Los ejes
 
-El sitio tiene que sentirse más cerca de **arquitectura, interiorismo y
-fotografía editorial** que de software.
-
+- **La idea de la empresa, adaptada al teléfono.** Se toman sus colores, su
+  letra, sus bloques y el armado de sus páginas; no su maqueta, que no anda en
+  un teléfono, y el sitio se ve casi entero desde uno.
+- **Un color propio, el de la empresa.** El azul verdoso, en bloques. Todo lo
+  demás es gris, pizarra y blanco.
 - **Espacio antes que elementos.** Ante la duda, sacar algo, no agregar.
-- **Tipografía como estructura.** Es lo que va a sostener las páginas, no las
-  imágenes: la mitad del archivo no da para sostener nada.
-- **Un solo color, y es el de la marca.** Todo lo demás es papel y negro.
+- **Texto sobre foto: no.** Ver el análisis de contraluz.
+- **Nada que delate un sitio hecho con IA** —reglas 11 a 13—: es lo que la
+  empresa vio en la dirección anterior, y tenía razón.
 - **Quietud.** El producto son cortinas: luz, textura, calma. La interfaz no
   tiene que competir con eso.
-- **Texto sobre foto: no.** Ver el análisis de contraluz.
-- **Nada a sangre completa.** Ver el punto 2 del análisis.
 
 El nombre ayuda: _Espacio_ Cortinas sugiere ambiente, no producto. El sitio
 muestra espacios, no artículos.
 
 ### La tesis
 
-El papel hace el trabajo. Un fondo de cal, apagado y cálido, integra las fotos
-desparejas rodeándolas de aire en vez de enmarcándolas. La foto nunca toca el
-borde de la pantalla: entra en la misma columna que el texto y alineada al mismo
-margen, de modo que la página se lee como una sola columna editorial.
+**Bloques de color y líneas finas.** El boceto compone con dos recursos: un
+bloque azul verdoso, opaco, que lleva el nombre o el mensaje y se monta sobre el
+borde de una foto sin taparla; y una grilla de 2×2 con líneas finas en
+pizarra, donde foto y texto se alternan.
 
-**Qué problema del material resuelve:** la disparidad de calidad, que es el
-problema número uno de este archivo. Una foto mediana rodeada de aire cálido se
-lee como una lámina; la misma foto a sangre se lee como un error.
+**Qué problemas del material resuelve:**
 
-**Qué hay que vigilar:** es la respuesta esperable, y llevada al extremo blando
-puede terminar oliendo a spa. La disciplina está en no redondear nada, en no
-agregar un segundo color, y en que el ritmo vertical sea grande de verdad.
+- **La partición del archivo entre fotos cálidas y frías.** El fondo es un gris
+  de saturación muy baja que sostiene las dos familias, y el azul verdoso,
+  apagado, no pelea con el cielo de las frías ni ensucia las cálidas.
+- **La disparidad de calidad.** En el damero cada foto tiene su celda y su
+  proporción, al lado de un texto: una foto mediana se lee como parte de la
+  página, no como un error.
+- **Que el sitio no tenía un color propio.** Ahora lo tiene, y es el de la
+  empresa.
+
+**Qué hay que vigilar:** que el bloque azul verdoso no se use para todo, y que
+las líneas sigan siendo finas. Un recuadro con sombra o con las esquinas
+redondeadas ya es la tarjeta de plantilla.
 
 ### Color
 
 ```
-Fondo         #F6F2EC   papel de cal
-Superficie    #EFE9E0   un paso, para separar sin bordes ni sombras
-Texto         #211F20   el negro del logo, exacto        14,69:1
-Texto suave   #6B645C   metadatos, pies y chips           5,23:1
-Acento        #211F20   el mismo negro
-Línea         #DED6CA
-Marca         #FFF100   uso restringido, ver «La marca»
+Fondo          #EDEFF0   el gris del boceto
+Superficie     #FFFFFF   campos, avisos, el lugar de una foto mientras carga
+Texto          #2F2F2F                                       11,61:1
+Texto suave    #56656A   lemas, pies y chips                  5,25:1
+Acento         #405357   pizarra: títulos, enlaces, botón      7,02:1
+Acento hondo   #2F3E41   el hover del botón principal
+Línea          #C9D1D3   filetes decorativos
+Marca          #80A6AD   azul verdoso, ver «La marca»
+Marca oscuro   #5A767B   el pie
 ```
 
-**El acento es el mismo negro, y es una decisión, no una omisión.** La marca ya
-aporta un color, y ese color no puede llevar texto sobre fondo claro. Agregar
-ADEMÁS un tercer color para los enlaces daría un sitio de cuatro colores con la
-marca compitiendo contra un acento inventado. Así que:
+Los contrastes son sobre el fondo; sobre el blanco, el texto suave da 6,06:1.
 
-- **Enlaces:** negros y subrayados.
-- **Botón principal:** negro sólido, papel encima — 14,69:1.
-- **Botón secundario:** línea de 1 px, sin relleno.
-- **El amarillo no es el CTA.** Un botón amarillo sobre este papel sería una
-  mancha clara sobre fondo claro, justo en lo único que este sitio tiene que
-  lograr.
+- **Títulos y enlaces en pizarra.** Los enlaces van subrayados. Sobre un bloque
+  azul verdoso heredan el color del texto que los rodea, porque la pizarra ahí
+  da 3,08:1.
+- **Botón principal: pizarra sólida, blanco encima** — 8,10:1.
+- **Botón secundario: filete pizarra de 1 px**, sin relleno.
+- **El azul verdoso no es el botón principal**: no le da para llevar texto
+  blanco. El único botón azul verdoso es el flotante de WhatsApp, con el texto
+  oscuro, como en el boceto.
 
-Sin azul ni violeta: son el color por defecto de las interfaces genéricas. Que el
-azul de cielo aparezca en ocho fotos no lo habilita como color de interfaz — al
-contrario, es una razón más para que la interfaz no compita con él.
+**Sin el azul de las interfaces.** El azul saturado y el violeta son el color
+por defecto de las interfaces genéricas, y siguen prohibidos (regla 6). El azul
+verdoso de la empresa es otra cosa: apagado, elegido por ella y solo de
+superficie.
 
 ### Tipografía
 
-**Fraunces** para títulos y **Karla** para texto. Dos familias, que es el máximo.
-Se cargan con `next/font` en `app/tipografias.ts`: los archivos se descargan en
-el build y se sirven desde el propio dominio, así que no hay pedido a un tercero
+**Raleway para todo**, títulos y texto: una sola familia, como el boceto. Se
+carga con `next/font` en `app/tipografias.ts`: los archivos se descargan en el
+build y se sirven desde el propio dominio, así que no hay pedido a un tercero
 en tiempo de ejecución ni salto al renderizar.
 
-Fraunces tiene eje óptico: a tamaño de display abre las formas y a tamaño chico
-las cierra, así que una sola familia sostiene la escala entera.
+**Con cifras de línea**, todas de la misma altura. Raleway trae por defecto las
+antiguas, que suben y bajan como minúsculas: quedan lindas en un párrafo y
+desparejan un teléfono, una medida —«25 mm»— o un precio.
 
-**El logo es geométrico y las dos familias no lo son, a propósito.** Si los
-títulos del sitio también fueran geométricos, el logo dejaría de leerse como
-logo y se confundiría con la página. Y las geométricas tienen altura de x chica,
-que a 17 px en un teléfono se lee peor.
+**Tahoma, que el boceto usa en algunos títulos, no**: es de Windows, y en los
+teléfonos no está.
 
 ```
 Display      32 → 56 px    títulos
 Título       24 → 34 px    títulos
-Subtítulo    19 → 22 px    títulos
+Subtítulo    19 → 22 px    títulos y lemas
 Cuerpo       17 → 18 px    texto
+Menú            15 px      la barra de enlaces, en escritorio
 Meta            13 px      texto
 ```
 
-Cada tamaño crece solo entre el teléfono y el escritorio, así que la escala no se
-repite en cada punto de quiebre. Texto de lectura entre 60 y 75 caracteres por
-línea. En el teléfono nunca menos de 16 px.
+Cada tamaño crece solo entre el teléfono y el escritorio, así que la escala no
+se repite en cada punto de quiebre. Texto de lectura entre 60 y 75 caracteres
+por línea. En el teléfono nunca menos de 16 px, salvo la barra de enlaces, que
+baja hasta 12 para entrar en una fila.
+
+**Mayúscula espaciada, solo donde la pone el boceto y en grande**: «TU MEJOR
+COMPAÑÍA», en la apertura de Inicio, y el nombre de cada producto en su bloque.
+Las etiquetas chicas en mayúscula espaciada se fueron todas, y las reemplazan
+los **lemas**: en minúscula, en el gris del texto suave y arriba del título —
+«filtrar u oscurecer», «a medida», «error 404».
+
+**Sin palabras solas al final de un párrafo** (`text-wrap: pretty`), y los
+títulos y los textos centrados cortos, equilibrados (`balance`).
 
 ### Espaciado
 
 Una sola escala, múltiplos de 4. El ritmo vertical entre secciones es **64 en
 teléfono y 112 en escritorio**, y es lo que hace que un sitio se lea como
-diseñado y no como ensamblado. Margen lateral 20 → 48.
+diseñado y no como ensamblado. Margen lateral 20 → 48. El damero no lleva
+margen: va de borde a borde.
+
+### Las piezas
+
+**El bloque azul verdoso.** Opaco, sin borde ni sombra. En la apertura de
+Inicio lleva el logo grande y se monta sobre el borde de la foto; en los
+productos destacados, el nombre en mayúscula y una flecha, sobre el borde de su
+portada; al final de cada página, el cierre, con una sola acción. Nunca más
+angosto que su palabra más larga.
+
+**El damero.** Foto y texto alternados en una grilla de 2×2 con líneas finas
+en pizarra, de borde a borde, como las páginas de producto del boceto. En el
+teléfono es una columna, con cada foto arriba de su texto; en escritorio son
+dos, y las filas alternan el lado. Qué va en cada celda lo decide
+`lib/damero.ts`, y `components/damero.tsx` lo dibuja:
+
+1. la portada, con el recuadro del producto;
+2. cada variante con texto propio —Screen y Blackout de Roller— arma su propio
+   2×2: una foto con su nombre, su lema y su descripción, y otra con su
+   recuadro;
+3. las demás variantes van juntas en una celda de texto, centrada y con
+   filetes entre una y otra. La que tiene fotos o video y no tiene descripción
+   no se repite ahí: ya está nombrada arriba de sus medios;
+4. lo suelto va de a dos, con el nombre de su variante arriba de cada foto.
+
+Un proyecto es más simple: todas sus fotos y videos de a dos, en el orden de la
+carpeta. El catálogo, el listado de trabajos y Nosotros se arman con las mismas
+piezas.
+
+**La barra de enlaces.** A la vista, en una fila y sin franja: a la derecha en
+escritorio, a lo ancho en el teléfono. En minúscula y con «Trabajos» en vez de
+«Nuestros trabajos», porque es lo único que entra en una fila en un teléfono de
+320 (`components/navegacion.tsx`, con las medidas). **Se ve igual en todas las
+páginas**: fuera de Inicio, el enlace «Inicio» es el logo circular. No se pega
+arriba al hacer scroll.
+
+**El botón flotante de WhatsApp.** Abajo a la derecha, en todas las páginas:
+«Chateá con nosotros», azul verdoso con el texto oscuro, como el del boceto. El
+pie deja aire abajo para que no tape su último enlace.
+
+**El pie**, en el teal oscuro con el texto blanco: el nombre escrito, los
+medios directos de contacto con su símbolo y los enlaces. El anillo de foco
+pasa a blanco, porque el pizarra ahí da 1,66:1.
 
 ### Imagen
 
-- **Nunca a sangre, ni en el teléfono.** La foto entra en la columna, alineada al
-  mismo margen que el texto. Además de ser la tesis, es lo único que el archivo
-  aguanta: ninguna portada tiene píxeles para un sangrado en escritorio.
-- **Sin texto encima, nunca.** Ver el análisis de contraluz.
-- Sin borde y sin sombra: lo que separa es el cambio de tono de fondo.
+- **En el damero, de borde a borde en el teléfono y a media pantalla en
+  escritorio**, a la proporción de cada foto y sin recortar. Es lo que el
+  archivo aguanta: en el teléfono sobra con cualquiera —375 × 3 = 1.125 px—, y
+  ninguna portada tiene píxeles para un sangrado entero en escritorio (punto 2
+  del análisis).
+- **Sin texto encima, nunca.** Los bloques se montan sobre el borde de una
+  foto, opacos, y no tapan lo que la foto muestra.
+- **Sin borde y sin sombra.** Lo que separa es el aire o la línea del damero.
 - Radio 0.
-
-### Movimiento en la galería
-
-El video de una variante va en el bloque de la variante que documenta, debajo
-de sus fotos si las tiene y fuera de la tira; el de un proyecto es una
-diapositiva más de la galería (decisión 51). Ninguno va **al ancho de la
-columna**, que es lo que decía este documento hasta la Fase 4.4 y contradecía su
-propia aritmética cuatro secciones más arriba: los videos tienen 1280 px y a
-doble densidad eso es una caja de 640, no de 1024. Cae solo con las reglas de
-abajo, sin ninguna excepción.
 
 ### El tamaño de cada foto sale de la foto, no de su posición
 
@@ -434,117 +480,121 @@ Es lo que sobrevivió de la dirección «Regla» — decisión 48. Todo sale de
 `contenido/fotos.ts`, que lo escribe el script, y nada de una lista escrita a
 mano.
 
-**En la galería**, que es una tira que se desliza de costado (decisión 50), la
-caja de cada diapositiva sale de la foto **más alta de esa galería**, con tope
-en 4:5. Una galería de puras apaisadas queda en una tira baja y ancha sin nada
-de aire desperdiciado —`bandas-verticales` da 4:3—; una que mezcla queda en una
-caja vertical donde las apaisadas flotan. Nada se recorta ni se deforma: lo que
-sobra queda en papel.
+**Ninguna foto se muestra más ancha que su tope**: `ancho / 2`, con el 2 de
+`DENSIDAD_DE_REFERENCIA`. En el damero cada foto ocupa su celda, sin pasar de
+44 rem de alto, y el tope la frena antes cuando el archivo no da:
+`cortinas-tela/barral/2` (1028 px → 514) queda más angosta que su celda, y los
+videos también (1280 → 640; el vertical del cowork, 720 → 360). En el teléfono
+la celda es más angosta que cualquier tope.
 
-**En el resto del sitio**, donde una foto ocupa un lugar fijo, manda el **tope
-de píxeles**: nada se muestra más ancho que `ancho / 2`, con el 2 de
-`DENSIDAD_DE_REFERENCIA`. Hoy solo muerde en los dos videos de variante
-(1280 → 640), que van sueltos. `toldos/3` (1600 px → 800) y
-`cortinas-tela/barral/2` (1028 px → 514) tienen tope, pero van en la tira, donde
-la diapositiva no pasa de 480 (decisión 50).
+**El ancho de cada foto se calcula con su proporción**, y no se deja
+automático: una foto que todavía no cargó mide 300 px, y en Roller la página
+pasaba de 4.814 a 6.503 px mientras llegaban.
 
-**El aire que queda al lado es la curaduría.** Que `toldos/3` no pueda ocupar un
-lugar grande deja de ser una limitación y pasa a ser una decisión editorial.
+**El aire que queda al lado es la curaduría.** Que `toldos/3` o
+`cortinas-tela/barral/2` no puedan ocupar un lugar grande deja de ser una
+limitación y pasa a ser una decisión editorial.
 
-**No reemplaza a la tabla de calidad de más arriba**, que califica por contenido
-y que ningún número deduce: `bandas-verticales/4` y `/5` están calificadas
-«apoyo» y aparecen igual. La respuesta a una foto floja sigue siendo sacarla.
+**No reemplaza a la tabla de calidad de más arriba**, que califica por
+contenido y que ningún número deduce: `bandas-verticales/4` y `/5` están
+calificadas «apoyo» y aparecen igual. La respuesta a una foto floja sigue
+siendo sacarla.
 
 ---
 
 ## Sistema
 
-Lo que sigue son reglas que no dependen de la dirección: valían para las tres y
-siguen valiendo.
+Lo que sigue son reglas que no dependen de la dirección: valían con «Cal» y
+siguen valiendo con el boceto.
 
 ### Imágenes
 
 - **Portadas y tarjetas: 4:5 vertical.** Siempre, sin excepción, para que las
   grillas queden parejas. De producto, las únicas 4:5 de repuesto son cuatro de
-  variante, de Roller y de Cortinas de tela: los otros cinco no tienen margen.
-- **Galería: la proporción propia de cada foto.** Está permitido mezclar; la galería
-  no es una grilla rígida. Las 37 fotos publicadas son 19 verticales y 18
-  horizontales.
-- Contenedor con proporción fija y `object-fit: cover`. Nunca deformar.
+  variante, de Roller y de Cortinas de confección: los otros cinco no tienen
+  margen.
+- **Damero: la proporción propia de cada foto.** Está permitido mezclar; el
+  damero no es una grilla rígida. Las 37 fotos publicadas son 19 verticales y
+  18 horizontales.
+- Donde la proporción es fija, contenedor con proporción y `object-fit: cover`.
+  Nunca deformar.
 - Siempre con `ancho` y `alto` para que no salte el contenido al cargar.
 - Carga diferida en todo menos en la primera imagen visible.
 - Sin filtros CSS sobre las fotos. Si una foto no sirve, se cambia la foto.
-- **Recorte alto antes que centrado** cuando haya que recortar: el piso es la zona
-  desordenada de casi todas.
+- **Recorte alto antes que centrado** cuando haya que recortar: el piso es la
+  zona desordenada de casi todas.
 
 ### Componentes
 
-Radios de esquina chicos, de 0 a 4 px. `rounded-2xl` en todo es una de las marcas
-más reconocibles de la plantilla genérica.
+Radios de esquina chicos: 2 px en campos y botones. `rounded-2xl` en todo es
+una de las marcas más reconocibles de la plantilla genérica. **Lo único redondo
+es el logo circular**, que es una imagen, y el anillo de foco del enlace que lo
+lleva, que sigue su borde.
 
-**Sin sombras.** La separación se logra con espacio y con un cambio de tono de
-fondo. Las tarjetas flotantes con sombra difusa son la otra marca reconocible.
+**Sin sombras.** La separación se logra con espacio, con la línea del damero o
+con un cambio de color de fondo. Las tarjetas flotantes con sombra difusa son la
+otra marca reconocible.
 
-**Lo que existe, desde la Fase 4.2.** La lista es corta a propósito: cada
-componente que se agrega es uno que hay que mantener coherente con todos los
-demás.
+**Lo que existe.** La lista es corta a propósito: cada componente que se agrega
+es uno que hay que mantener coherente con todos los demás.
 
-| Componente             | Archivo                                           | Variantes                                                  |
-| ---------------------- | ------------------------------------------------- | ---------------------------------------------------------- |
-| Botón                  | `components/ui/boton.tsx`                         | principal, secundario, enlace — tres                       |
-| Chip                   | `components/ui/chip.tsx`                          | una                                                        |
-| Campo                  | `components/ui/campo.tsx`                         | una, con tres controles: línea, párrafo y lista            |
-| Aviso                  | `components/ui/aviso.tsx`                         | error y nota                                               |
-| Estado vacío           | `components/ui/vacio.tsx`                         | una                                                        |
-| Columna de página      | `components/ui/contenedor.tsx`                    | una                                                        |
-| Foto                   | `components/foto.tsx`                             | cinco proporciones, tres recortes                          |
-| Galería                | `components/galeria.tsx`                          | tira que se desliza de costado                             |
-| Video mudo             | `components/video-mudo.tsx`                       | una: en bucle, en su lugar o en la galería                 |
-| Tarjeta de producto    | `components/tarjeta-producto.tsx`                 | una — solo Inicio                                          |
-| Tarjeta de proyecto    | `components/tarjeta-proyecto.tsx`                 | fila y tarjeta — dos                                       |
-| Listado de proyectos   | `components/listado-proyectos.tsx`                | una: el primero en fila, el resto en grilla                |
-| Formulario de contacto | `components/formulario-contacto.tsx`              | una: sin hidratar, escribiendo, enviando, enviada, fallida |
-| Medios de contacto     | `components/medios-de-contacto.tsx`               | número de WhatsApp, email, red y «Llamar» — cuatro         |
-| Símbolos de contacto   | `components/iconos-de-contacto.tsx`               | WhatsApp, Instagram y el sobre — tres, y ninguno más       |
-| Logo                   | `components/logo.tsx`                             | una                                                        |
-| Encabezado y pie       | `components/encabezado.tsx`, `components/pie.tsx` | una                                                        |
+| Componente              | Archivo                                                                        | Variantes                                                              |
+| ----------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| Botón                   | `components/ui/boton.tsx`                                                      | principal, secundario, enlace — tres                                   |
+| Chip                    | `components/ui/chip.tsx`                                                       | una                                                                    |
+| Campo                   | `components/ui/campo.tsx`                                                      | una, con tres controles: línea, párrafo y lista                        |
+| Aviso                   | `components/ui/aviso.tsx`                                                      | error y nota                                                           |
+| Estado vacío            | `components/ui/vacio.tsx`                                                      | una                                                                    |
+| Columna de página       | `components/ui/contenedor.tsx`                                                 | una                                                                    |
+| Foto                    | `components/foto.tsx`                                                          | cinco proporciones, tres recortes                                      |
+| Damero                  | `components/damero.tsx`, con la regla en `lib/damero.ts`                       | producto y proyecto, y sus piezas sueltas para los listados y Nosotros |
+| Video mudo              | `components/video-mudo.tsx`                                                    | una: en bucle, en su celda                                             |
+| Tarjeta de producto     | `components/tarjeta-producto.tsx`                                              | una: la portada con su bloque azul verdoso — solo Inicio               |
+| Tarjeta de proyecto     | `components/tarjeta-proyecto.tsx`                                              | fila y tarjeta — dos                                                   |
+| Listado de proyectos    | `components/listado-proyectos.tsx`                                             | una: el primero en fila, el resto en grilla                            |
+| Formulario de contacto  | `components/formulario-contacto.tsx`                                           | una: sin hidratar, escribiendo, enviando, enviada, fallida             |
+| Medios de contacto      | `components/medios-de-contacto.tsx`                                            | número de WhatsApp, email, red y «Llamar» — cuatro                     |
+| Símbolos de contacto    | `components/iconos-de-contacto.tsx`                                            | WhatsApp, Instagram y el sobre — tres, y ninguno más                   |
+| WhatsApp flotante       | `components/whatsapp.tsx`                                                      | una                                                                    |
+| Logos                   | `components/logo.tsx`                                                          | el grande de la apertura y el circular de la barra — dos               |
+| Encabezado, barra y pie | `components/encabezado.tsx`, `components/navegacion.tsx`, `components/pie.tsx` | una                                                                    |
 
 Botones: **uno principal sólido, uno secundario con línea, y enlaces de texto.
-Tres variantes, no siete.** El principal es negro, no amarillo — decisión 43.
+Tres variantes, no siete.** El principal es pizarra, no azul verdoso.
 
-**Los estados no usan color** — decisión 46. Un error va en negro, en negrita, con
-un filete de 3 px al costado y la palabra escrita; un campo inválido engorda su
-borde. La paleta son tres colores y son los del logo: un rojo sería un cuarto, y
-el amarillo no puede marcar un estado (1,06:1 contra el papel, contra los 3:1 que
-hacen falta).
+**Los estados no usan color** — decisión 46. Un rojo sería un color más,
+inventado, en una paleta que es la del boceto, y el azul verdoso no puede
+marcar un estado: 2,28:1 contra el fondo, contra los 3:1 que hacen falta. Lo
+que marca un estado son las palabras, el peso y el borde. **Y sin filetes al
+costado**, que son otra marca de sitio hecho con IA (regla 13).
 
 **El formulario de contacto es el único lugar con estados, y los usa así** —
 decisión 57:
 
-| Estado       | Cómo se ve                                                                                             |
-| ------------ | ------------------------------------------------------------------------------------------------------ |
-| sin hidratar | el botón **apagado** al 50 %: hasta que React toma el formulario, enviarlo pondría los datos en la URL |
-| inválido     | el error debajo de cada campo, negro y en negrita con filete de 3 px; el foco va al primero            |
-| enviando     | «Enviando…» con la rueda. El botón no se puede tocar y **no se apaga al 50 %**: quedaría en 3,12:1     |
-| enviada      | el formulario se reemplaza por la confirmación, con filete de 1 px, y recibe el foco                   |
-| fallida      | el aviso de error y WhatsApp como salida, con lo escrito ya puesto en el mensaje                       |
+| Estado       | Cómo se ve                                                                                                  |
+| ------------ | ----------------------------------------------------------------------------------------------------------- |
+| sin hidratar | el botón **apagado** al 50 %: hasta que React toma el formulario, enviarlo pondría los datos en la URL      |
+| inválido     | el error en negrita debajo de cada campo, que engorda su borde; el foco va al primero                       |
+| enviando     | «Enviando…» con la rueda. El botón no se puede tocar y **no se apaga al 50 %**, que lo dejaría ilegible     |
+| enviada      | el formulario se reemplaza por la confirmación, en un bloque azul verdoso, y la confirmación recibe el foco |
+| fallida      | el aviso en un recuadro blanco con borde de 2 px, y WhatsApp como salida, con lo escrito ya en el mensaje   |
 
 **Uno solo es principal en `/contacto`: el de WhatsApp.** El de enviar el
 formulario es el secundario, con filete: la jerarquía entre los dos canales la
 dice el propio dibujo. En el estado fallido aparece un segundo principal,
 «Mandarlo por WhatsApp», porque ahí es la única salida que queda.
 
-**El borde de un control es `--color-texto-suave`, no `--color-linea`.** La línea
-da 1,29:1 contra el papel: alcanza para un filete decorativo y no para el borde de
-un campo, que es lo único que dice dónde empieza y dónde termina. WCAG pide 3:1;
-el texto suave da 5,23:1.
+**El borde de un control es `--color-texto-suave`, no `--color-linea`.** La
+línea da 1,55:1 contra el blanco del campo: alcanza para un filete decorativo y
+no para el borde de un campo, que es lo único que dice dónde empieza y dónde
+termina. WCAG pide 3:1; el texto suave da 6,06:1.
 
 **El estado vacío se dice, no se tapa.** Un listado sin contenido —`/proyectos`
 hasta la Fase 4.3, y de nuevo si algún día todos quedan inactivos— lleva un
 bloque de superficie con el mismo ritmo vertical que una sección de verdad,
-alineado al margen de la columna, que explica por qué está
-vacío y ofrece a dónde seguir. Sin ícono y sin centrar: un bloque centrado con un
-ícono arriba es el estado vacío de plantilla que la regla 4 existe para evitar.
+alineado al margen de la columna, que explica por qué está vacío y ofrece a
+dónde seguir. Sin ícono y sin centrar: un bloque centrado con un ícono arriba es
+el estado vacío de plantilla que la regla 4 existe para evitar.
 
 ---
 
@@ -557,52 +607,64 @@ Prohibido, salvo justificación escrita en `docs/decisiones.md`:
 3. Radios mayores a 4 px
 4. Ícono decorativo al lado de cada título
 5. Grilla de tres columnas con ícono, título y párrafo («nuestros valores»)
-6. Azul o violeta como color de marca
+6. Azul saturado o violeta como color de marca o de interfaz
 7. Más de dos familias tipográficas
 8. `fade-in` o `slide-up` al hacer scroll en secciones enteras
 9. Parallax, marquesinas, contadores animados
 10. Texto sobre foto sin capa que garantice contraste
+11. Etiquetas chicas en mayúscula espaciada
+12. Listas numeradas con filetes —«01 · 02 · 03»— como recurso decorativo
+13. Un filete grueso al costado de un texto, para marcar un aviso o una cita
+
+**Las reglas 11 a 13 entraron con la decisión 66.** Son lo que la empresa vio
+en la dirección anterior —«se nota que lo hizo una IA»—, junto con el fondo
+crema y la serif de display. La mayúscula espaciada en grande, donde la pone el
+boceto, no es la regla 11.
+
+**La regla 6 se reescribió con la 66.** Decía «azul o violeta como color de
+marca», y la marca de la empresa es un azul verdoso. Lo que protegía es otra
+cosa: el azul saturado de las interfaces genéricas. El de la empresa es apagado
+y va solo de superficie.
+
+**La regla 3 tiene una excepción, que no es un radio de interfaz**: el logo
+circular, y el anillo de foco que lo sigue.
 
 **La regla 4 tiene una excepción, y es una sola**: los medios directos de
 contacto —WhatsApp, el email e Instagram— llevan su símbolo al lado del enlace,
 en `/contacto` y en el pie. No son adorno: dicen qué se abre al tocarlo. Van en
-el negro del texto, nunca en el verde de WhatsApp ni en el degradé de
-Instagram, y no se extienden a ningún otro dato; «Llamar» no lleva, porque la
+el color del texto que los rodea, nunca en el verde de WhatsApp ni en el degradé
+de Instagram, y no se extienden a ningún otro dato; «Llamar» no lleva, porque la
 palabra ya lo dice — decisión 65.
 
-La regla 10 se endurece con lo que muestra el archivo: **la capa tiene que ser opaca
-y del color de fondo**. Un velo translúcido o un gradiente sobre estas fotos no
-garantiza nada, porque la zona clara de cada cuadro cambia de lugar.
+La regla 10 se endurece con lo que muestra el archivo: **la capa tiene que ser
+opaca**. Un velo translúcido o un gradiente sobre estas fotos no garantiza nada,
+porque la zona clara de cada cuadro cambia de lugar.
 
 **La regla 7 ya no tiene excepciones**: la única era `/muestra`, que cargaba
 seis familias tipográficas a la vez para comparar las tres direcciones de la
 4.1. No era una página del sitio, y se borró el 29/09/2026 al cerrar la
-Fase 4.5 — decisión 41.
+Fase 4.5 — decisión 41. Desde la 4.7 el sitio usa una sola.
 
 ---
 
 ## Movimiento
 
-Escaso y con función: transiciones de estado (150–200 ms). La galería no se abre
-ni anima el cambio de foto: la tira la mueve el dedo (decisión 50). Nada que se
-dispare solo al hacer scroll.
+Escaso y con función: transiciones de estado (150–200 ms). Nada que se dispare
+solo al hacer scroll.
 
-**Los dos videos de variante** son 1280×720, once segundos, sin pista de audio.
-Se presentan en el bloque de la variante motorizada que documentan —que es lo
-único que una foto no puede mostrar, decisión 40—, con `muted`, `loop` y
-`playsinline`, sin controles y con `preload="none"`. Con
-`prefers-reduced-motion: reduce` no se reproducen: queda el cuadro fijo y un
-control para iniciarlo.
+**Los videos** —los dos de variante y los dos de proyecto— van en su celda del
+damero: mudos, en bucle, sin controles y con `preload="none"`. Arrancan cuando
+quedan a la vista y se pausan al salir, así que uno que está más abajo no se
+descarga hasta que alguien llega. Con `prefers-reduced-motion: reduce` no se
+reproducen: queda el cuadro fijo y un control para iniciarlo. Si la
+reproducción automática está bloqueada —el modo de bajo consumo de iOS—,
+aparece el mismo control.
 
 **Acá el movimiento ES el contenido y no un adorno**, y es la única excepción a
-«escaso y con función» de arriba. Cableados en la Fase 4.4 — decisión 48, que
-además anota qué muestra cada archivo, porque no es lo que dice su nombre.
-
-**Los videos de proyecto se comportan igual** — decisión 51: mudos, en bucle,
-sin botón, arrancando cuando quedan a la vista. Van intercalados en la galería,
-en el lugar que les da la carpeta, y uno que está más allá en la tira no se
-descarga hasta que alguien desliza hasta él. Sin la barra de controles nativa
-en ningún caso: se dibuja encima de la imagen.
+«escaso y con función»: el video de una variante muestra la cortina moviéndose
+sola, que es lo único que una foto no puede (decisión 40), y los de proyecto son
+recorridos de cámara (decisión 51). La decisión 48 anota qué muestra cada
+archivo, porque no es lo que dice su nombre.
 
 Respetar `prefers-reduced-motion` en todo lo demás también.
 
@@ -610,19 +672,18 @@ Respetar `prefers-reduced-motion` en todo lo demás también.
 
 ## Mobile-first
 
-Se diseña primero para 375 px de ancho, y recién después tablet y escritorio. No al
-revés.
+Se diseña primero para 375 px de ancho, y recién después tablet y escritorio. No
+al revés. **Y con razón**: se calcula que nueve de cada diez visitas van a
+llegar desde un teléfono.
 
 - Nada depende de `hover` para funcionar o entenderse
-- Zonas táctiles de 44 px como mínimo
-- La galería se recorre con el pulgar, gestos naturales — cumplido en la
-  decisión 50, con `scroll-snap` y sin JavaScript
-- WhatsApp siempre alcanzable sin buscarlo — desde la Fase 4.6 está en el pie
-  de todas las páginas, en el cierre de cada una, y además en la apertura de
-  Inicio, de Contacto y de cada producto y proyecto (decisión 61). Los dos
-  listados lo tienen al final y no arriba: en el catálogo, en un teléfono, eso
-  es casi al final de una página de 7.385 px (decisión 49). Queda anotado como
-  pendiente; el menú sí lleva a Contacto desde arriba
+- Zonas táctiles de 44 px como mínimo. El logo circular de la barra, que es más
+  chico, no baja de los 24 que pide WCAG
+- **La barra de enlaces, en una fila**, sin menú desplegable, también a 320
+- **WhatsApp siempre alcanzable sin buscarlo**: desde la Fase 4.7, el botón
+  flotante, en todas las páginas. Además está en la apertura de Inicio, de
+  Contacto y de cada producto y proyecto, y en el cierre de cada página
+  (decisión 61)
 - Se verifica en 320, 375, 768, 1024 y 1440
 
 ---
@@ -631,12 +692,13 @@ revés.
 
 Es parte de terminado, no un extra:
 
-- Contraste mínimo 4.5:1 en texto
-- Foco visible en todo lo navegable por teclado
+- Contraste mínimo 4.5:1 en texto, también sobre el azul verdoso y en el pie
+- Foco visible en todo lo navegable por teclado; en el pie, el anillo es blanco
 - Encabezados jerárquicos, un solo `h1` por página
-- Toda imagen con texto alternativo
-- La galería se recorre con el teclado: la tira toma el foco y las flechas la
-  mueven (decisión 50)
+- Toda imagen con texto alternativo. El logo circular, que es un enlace, dice
+  adónde lleva: «Espacio Cortinas, inicio»
+- El botón flotante va último al tabular: no se interpone entre el salto al
+  contenido y la página
 
 ---
 
@@ -645,26 +707,67 @@ Es parte de terminado, no un extra:
 ```
 Material fotográfico real                       ✓ Fase 4.1
         ↓
-Dirección visual (color, tipografía, ritmo)     ✓ Fase 4.1
+Dirección visual (color, tipografía, ritmo)     ✓ Fase 4.1, rehecha en la 4.7
         ↓
-Sistema y componentes base                      ✓ Fase 4.2
+Sistema y componentes base                      ✓ Fase 4.2, rehecho en la 4.7
         ↓
-Composición de cada página                      ✓ Fases 4.3 a 4.6
+Composición de cada página                      ✓ Fases 4.3 a 4.6, y 4.7
         ↓
-Implementación                                  ✓ Fases 4.3 a 4.6
+Implementación                                  ✓ Fases 4.3 a 4.7
         ↓
-Verificación en los cinco anchos                ✓ la última, decisión 65
+Verificación en los cinco anchos                ✓ la última, en la etapa 5 de la 4.7
 ```
 
-No se escriben componentes antes de haber fijado la dirección visual. Ese salto es
-exactamente lo que produce el resultado genérico que queremos evitar.
+No se escriben componentes antes de haber fijado la dirección visual. Ese salto
+es exactamente lo que produce el resultado genérico que queremos evitar. **La
+4.7 mostró el otro lado**: una dirección fijada con cuidado también puede salir
+genérica, si sus decisiones son las mismas que toma cualquier generador. De ahí
+las reglas 11 a 13.
 
 ---
 
-## Las dos que no se eligieron
+## Las direcciones descartadas
 
 Quedan acá porque la razón por la que se descartaron sigue valiendo, y porque
-volver sobre una de ellas sin leer esto sería repetir el análisis.
+volver sobre una de ellas sin leer esto sería repetir el análisis. **«Cal» fue
+la del sitio de la Fase 4.1 a la 4.6**; las otras dos se descartaron en la 4.1.
+
+### A · «Cal» — el papel · USADA HASTA LA 4.7, Y DESCARTADA POR LA EMPRESA
+
+**La tesis:** el papel hace el trabajo. Un fondo de cal, apagado y cálido,
+integra las fotos desparejas rodeándolas de aire en vez de enmarcándolas. La
+foto nunca toca el borde de la pantalla: entra en la misma columna que el texto,
+alineada al mismo margen, y la página se lee como una sola columna editorial.
+
+**Qué problema del material resolvía:** la disparidad de calidad. Una foto
+mediana rodeada de aire cálido se lee como una lámina; la misma foto a sangre se
+lee como un error.
+
+```
+Fondo         #F6F2EC   papel de cal
+Superficie    #EFE9E0   un paso, para separar sin bordes ni sombras
+Texto         #211F20   el negro del logo de entonces        14,69:1
+Texto suave   #6B645C   metadatos, pies y chips               5,23:1
+Acento        #211F20   el mismo negro
+Línea         #DED6CA
+Marca         #FFF100   el amarillo del logo de entonces, solo como superficie
+```
+
+**Tipografía:** Fraunces para títulos y Karla para texto. **Con el acento de
+«Regla»**: el negro del logo para enlaces y botón, y ningún color inventado —
+decisión 43.
+
+**Por qué se descartó:** la empresa lo miró terminado y lo rechazó en lo
+visual —«no tiene diseño, se nota que lo hizo una IA»—, y armó un boceto con sus
+colores. Tenía razón: el fondo crema, la serif de display, la lista numerada con
+filetes y las etiquetas chicas en mayúscula espaciada son hoy las marcas más
+repetidas de los sitios generados con IA, y el sitio no tenía un color propio.
+Lo que este documento anotaba como el riesgo —que «llevado al extremo blando
+puede terminar oliendo a spa»— era el problema. Decisión 66.
+
+**Lo que sobrevivió de «Cal»:** el análisis del material, la regla de no poner
+texto sobre una foto, el tope de píxeles, el ritmo vertical de 64 a 112, la
+escala tipográfica y los estados sin color.
 
 ### B · «Contraluz» — la sombra · DESCARTADA
 
@@ -748,6 +851,9 @@ px arriba de cada bloque, ninguno alrededor de la foto. Radio 0.
 **Video:** módulo de 2 unidades, horizontal, con su numeración como cualquier otro
 ítem de la galería.
 
+Lo que sigue es el análisis de la 4.1, con el logo de entonces, el del círculo
+amarillo.
+
 **Por qué se descartó B:** el producto es luz natural entrando a una casa, y un
 sitio oscuro trabaja en contra de ese mensaje. Además el logo es negro y sobre
 fondo oscuro desaparece, así que haría falta una versión invertida que hoy no
@@ -761,4 +867,5 @@ botón, sin ningún color inventado. Y su idea central sigue disponible para la
 Fase 4.3: el tamaño del módulo que le toca a cada foto puede salir de la tabla de
 calidad de este documento en vez del orden, que es la única forma estructural de
 curar un archivo desparejo. La 4.4 tomó el mecanismo pero no la tabla —decisión
-48—, y la 50 cambió el módulo por la tira: de esa idea queda el tope de píxeles.
+48—, y la 50 cambió el módulo por la tira: de esa idea queda el tope de píxeles,
+que con la decisión 66 vale también en el damero.

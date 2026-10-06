@@ -46,7 +46,7 @@ export function Vacio({
      * adentro caiga **en la misma vertical** que el título de la página. El
      * bloque se estira hasta el borde de la columna y su relleno lo devuelve al
      * margen; sin eso, el texto quedaría 48 px adentro y la página dejaría de
-     * leerse como una sola columna, que es la tesis de la dirección.
+     * leerse como una sola columna.
      *
      * Da por sentado que cuelga directo del contenedor de la página, que es de
      * donde toma el margen que compensa.
