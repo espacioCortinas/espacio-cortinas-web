@@ -478,6 +478,8 @@ c9c0a20  el estado, antes de la etapa 5
 51aeecc  etapa 5 — ajustes para que la empresa lo revise
 8854a79  lo hecho de la etapa 5 y lo que queda
 818753d    ajuste: la barra de enlaces igual en todas, con el logo circular
+7c9da6d  el ajuste de la barra, en el plan
+c6954f3  etapa 5 — la documentación, y la galería se borra
 ```
 
 **La empresa todavía no lo vio.** Quien desarrolla revisó cada etapa con
@@ -695,7 +697,7 @@ _A decidir con la empresa_:
   recortando el original con ffmpeg y volviendo a prepararlo: es un archivo
   nuevo, y el viejo queda en el historial —unos 0,5 MB más en git—.
 
-_Documentación, hecha el 06/10/2026_:
+_Documentación, hecha el 06/10/2026_ (`c6954f3`):
 
 - `docs/decisiones.md`: **la decisión 66**, que reemplaza a la 43, la 44 y la
   50 y matiza la 45, la 46, la 47, la 49, la 51 y la 52 —cada una lo dice
