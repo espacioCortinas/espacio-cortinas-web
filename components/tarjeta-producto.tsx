@@ -90,10 +90,14 @@ export function TarjetaProducto({
 
           `h3` fijo: cuelga del `<h2>` del sector de productos de Inicio, que
           es su único lugar.
+
+          `min-w-min`: el bloque es el 64 % de la tarjeta, pero nunca más
+          angosto que su palabra más larga y la flecha. Sin eso, a 320 y a 768
+          «CONFECCIÓN» no entraba y la flecha quedaba afuera del bloque.
         */}
         <div
           className={
-            "bg-marca relative -mt-10 flex w-[64%] items-end justify-between " +
+            "bg-marca relative -mt-10 flex w-[64%] min-w-min items-end justify-between " +
             "gap-3 px-5 py-4 md:-mt-12 md:px-6 md:py-5 " +
             (derecha ? "" : "ml-auto")
           }

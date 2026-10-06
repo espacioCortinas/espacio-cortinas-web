@@ -161,7 +161,9 @@ function CeldaDelDamero({
           <h3 className="text-titulo whitespace-pre-line">
             {celda.recuadro.titulo}
           </h3>
-          <p className="text-texto-suave mt-5 max-w-[32ch]">
+          {/* Equilibrado: centrado y de dos o tres renglones, sin equilibrar
+              dejaba una palabra sola abajo —«trabajo.», «amplitud.»—. */}
+          <p className="text-texto-suave mt-5 max-w-[32ch] text-balance">
             {celda.recuadro.texto}
           </p>
         </CeldaDeTexto>
@@ -192,20 +194,25 @@ function CeldaDelDamero({
       return (
         <CeldaDeTexto>
           <h3 className="text-titulo">Variantes</h3>
-          <p className="text-texto-suave mt-3 max-w-[32ch]">
+          <p className="text-texto-suave mt-3 max-w-[32ch] text-balance">
             Son opciones del mismo producto, no productos distintos. Se eligen
             al presupuestar.
           </p>
           {/*
-            Todas, también las que no tienen fotos, video ni descripción: siguen
-            siendo opciones que alguien tiene que poder leer antes de preguntar.
+            También las que no tienen fotos, video ni descripción: siguen
+            siendo opciones que alguien tiene que poder leer antes de preguntar
+            (`lib/damero.ts` dice cuáles entran).
+
+            Centradas como el resto de la celda, y separadas por filetes: así
+            una variante que es solo un nombre —el Motorizado de Toldos— se lee
+            como un renglón de la lista y no como un título sin texto abajo.
           */}
-          <ul className="mt-8 w-full max-w-[34ch] space-y-5 text-left">
+          <ul className="divide-linea border-linea mt-8 w-full max-w-[34ch] divide-y border-y">
             {celda.variantes.map((variante) => (
-              <li key={variante.nombre}>
+              <li key={variante.nombre} className="py-4">
                 <p className="text-acento font-semibold">{variante.nombre}</p>
                 {variante.descripcion && (
-                  <p className="text-texto-suave mt-1">
+                  <p className="text-texto-suave mt-1 text-balance">
                     {variante.descripcion}
                   </p>
                 )}

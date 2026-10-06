@@ -10,23 +10,28 @@ import type { ReactNode } from "react";
  * hacen falta 3:1.
  *
  * Lo que distingue un error de una confirmación es lo mismo que lo distinguía
- * antes de que el color existiera: **las palabras**, el peso y un filete más
- * grueso al costado. El color nunca podía ir solo de todas formas, porque una
- * de cada doce personas no distingue rojo de verde.
+ * antes de que el color existiera: **las palabras**, el peso y un borde más
+ * grueso. El color nunca podía ir solo de todas formas, porque una de cada doce
+ * personas no distingue rojo de verde.
+ *
+ * Es un recuadro blanco, como los campos del formulario al que responde. Hasta
+ * la Fase 4.7 era un filete al costado del texto, que es una de las marcas más
+ * repetidas de los sitios hechos con IA.
  *
  * `role="alert"` solo en los errores: es lo que interrumpe al lector de
  * pantalla para leerlo enseguida, y usarlo en todo hace que deje de
  * distinguirse. Una confirmación va con `role="status"`, que se anuncia cuando
  * termina la frase en curso.
  *
- * Contraste medido: el texto, `#2F2F2F`, sobre el fondo, **11,61:1**.
+ * Contraste medido: el texto, `#2F2F2F`, sobre el blanco del recuadro,
+ * **13,39:1**.
  */
 
 type Tono = "error" | "nota";
 
 const ESTILOS: Record<Tono, string> = {
-  error: "border-l-[3px] font-bold",
-  nota: "border-l",
+  error: "border-2 border-texto font-semibold",
+  nota: "border border-texto-suave",
 };
 
 export function Aviso({
@@ -41,7 +46,7 @@ export function Aviso({
   return (
     <p
       role={tono === "error" ? "alert" : "status"}
-      className={`border-texto text-texto max-w-lectura py-1 pl-3 text-cuerpo ${ESTILOS[tono]}`}
+      className={`bg-superficie text-texto max-w-lectura rounded-chico px-4 py-3 text-cuerpo ${ESTILOS[tono]}`}
     >
       {children}
     </p>

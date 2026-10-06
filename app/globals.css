@@ -221,6 +221,15 @@
   }
 
   /*
+    Los párrafos, sin una palabra sola en el último renglón. En una columna de
+    teléfono pasaba en casi todas las páginas, y es de lo primero que se ve
+    como descuido. El navegador que no lo conoce corta como siempre.
+  */
+  p {
+    text-wrap: pretty;
+  }
+
+  /*
     Foco visible en todo lo navegable por teclado, sin tener que acordarse en
     cada componente. Es parte de terminado, no un extra.
 

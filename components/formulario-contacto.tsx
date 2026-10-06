@@ -199,16 +199,26 @@ export function FormularioContacto({
 
   if (estado.tipo === "enviada") {
     return (
+      /*
+        En un bloque azul verdoso, como los cierres de cada página: es la
+        respuesta a lo que la página pedía. Hasta la Fase 4.7 era un filete al
+        costado, una de las marcas de los sitios hechos con IA.
+
+        Todo el texto en el color del texto: sobre el azul verdoso da 5,08:1,
+        y el gris suave, 2,30:1. El enlace de abajo hereda el color.
+      */
       <div
         ref={confirmacion}
         tabIndex={-1}
         role="status"
-        className="border-texto max-w-lectura border-l py-1 pl-4 focus-visible:outline-none"
+        className="bg-marca text-texto max-w-lectura px-6 py-8 focus-visible:outline-none md:px-8"
       >
-        <p className="font-titulo text-subtitulo">Recibimos tu mensaje.</p>
-        <p className="text-texto-suave mt-3">
-          Te respondemos a <span className="text-texto">{estado.email}</span>.
-          Si no te llega nada, revisá la carpeta de correo no deseado.
+        <p className="font-titulo text-subtitulo font-bold">
+          Recibimos tu mensaje.
+        </p>
+        <p className="mt-3">
+          Te respondemos a <span className="font-semibold">{estado.email}</span>
+          . Si no te llega nada, revisá la carpeta de correo no deseado.
         </p>
         <button
           type="button"

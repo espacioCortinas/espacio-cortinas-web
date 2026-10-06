@@ -5,14 +5,16 @@ import { Encabezado } from "@/components/encabezado";
 import { Pie } from "@/components/pie";
 import { clasesDeBoton } from "@/components/ui/boton";
 import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
+import { WhatsappFlotante } from "@/components/whatsapp";
 
 /**
  * Una dirección que no existe.
  *
  * **Vive en la raíz y no dentro de `(public)`** porque una URL que no coincide
  * con ninguna ruta no entra a ningún grupo, así que no puede heredar el layout
- * de las públicas. Por eso el encabezado y el pie son componentes sueltos: se
- * arman también acá, y quien cae en un 404 ve el sitio y no una página huérfana.
+ * de las públicas. Por eso el encabezado, el pie y el botón flotante de WhatsApp
+ * son componentes sueltos: se arman también acá, y quien cae en un 404 ve el
+ * sitio y no una página huérfana.
  *
  * El caso más probable de este sitio no es un error de tipeo: es **un enlace
  * viejo compartido por WhatsApp**, de cuando un producto tenía otro slug. De ahí
@@ -50,6 +52,7 @@ export default function NoEncontrada() {
         </div>
       </main>
       <Pie />
+      <WhatsappFlotante />
     </>
   );
 }

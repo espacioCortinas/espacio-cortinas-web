@@ -33,7 +33,11 @@ import { altAutomatico } from "@/lib/texto";
  *    nombre y su descripción, y sus fotos y videos quedan sueltos con el nombre
  *    de la variante arriba. Así no hay celdas grandes con una sola palabra
  *    adentro, y **ninguna variante se esconde**, aunque no tenga nada que
- *    mostrar (`contenido/tipos.ts`, `VarianteConMedios`).
+ *    mostrar (`contenido/tipos.ts`, `VarianteConMedios`). La que tiene fotos o
+ *    video y no tiene descripción no entra a la celda: ya está nombrada arriba
+ *    de sus medios, y en la celda era un nombre solo, sin nada abajo, al lado
+ *    de su propio video —el Motorizado de Roller—. Si no queda ninguna para
+ *    listar, no hay celda.
  * 4. **Lo suelto va de a dos**: primero los medios de esas variantes, después
  *    el resto de las fotos del producto. La celda de variantes se queda con el
  *    primero, que es de una de ellas.
@@ -52,7 +56,7 @@ import { altAutomatico } from "@/lib/texto";
  *                                    riel 2 | video          barral 1 | barral 2      2 | 3
  *     roller                         screen 1 | Screen       screen 2 | recuadro
  *                                    blackout 1 | Blackout   blackout 2 | recuadro
- *                                    video | variantes       1 | 2      3
+ *                                    video | 1      2 | 3
  */
 
 /** Una celda del damero. */
@@ -183,9 +187,15 @@ export function filasDeProducto(producto: ProductoConMedios): Fila[] {
   }
   sueltos.push(...fotosDelProducto);
 
-  if (juntas.length > 0) {
+  // A la celda van las que tienen algo que decir y las que no tienen nada que
+  // mostrar, que si no desaparecerían. Las otras ya están nombradas arriba de
+  // sus fotos o de su video.
+  const listadas = juntas.filter(
+    (v) => v.descripcion || (v.fotos.length === 0 && !v.video),
+  );
+  if (listadas.length > 0) {
     const primero = sueltos.shift();
-    const celda: Celda = { tipo: "variantes", variantes: juntas };
+    const celda: Celda = { tipo: "variantes", variantes: listadas };
     filas.push(primero ? [primero, celda] : [celda]);
   }
   filas.push(...deADos(sueltos));
