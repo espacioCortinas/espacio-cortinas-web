@@ -459,6 +459,33 @@ marca. La decisión nueva se escribe en la etapa 5, con el resultado a la vista.
   —regla 4 de `CLAUDE.md`— y las portadas 4:5 en los listados. Cambian el
   papel, las letras, el acento y la composición.
 
+### Estado, al 06/10/2026
+
+**Etapas 1 a 4 hechas, en la rama `rediseno`; falta la 5.** `main` sigue
+intacto: el sitio publicado es todavía el de antes.
+
+```
+14154e8  el plan
+724fdc0  etapa 1 — paleta, letra y logo
+1b5aa64  etapa 2 — Inicio
+d7f0247    ajuste: un solo logo en la primera pantalla de Inicio, e Instagram
+b451b0b    ajuste: el menú del teléfono vuelve a los enlaces a la vista
+7334e54  etapa 3 — producto y proyecto, el damero
+98103dc  etapa 4 — menú, listados, Contacto y Nosotros
+```
+
+**La empresa todavía no lo vio.** Quien desarrolla revisó cada etapa con
+capturas y pidió los dos ajustes de la etapa 2 y el menú en una fila de la 4.
+
+**Lo que se decidió en la conversación y no está en otro lado:**
+
+- La foto de la apertura del boceto —un local con lámparas colgantes— **no es
+  de la empresa** y no se usa.
+- El logo en círculo que el boceto pone en su Nosotros **no llegó**: la empresa
+  mandó solo el de círculos de línea. `/nosotros` va sin él.
+- Las fotos del boceto se revisaron antes de usarlo de referencia: la única
+  propia no trae GPS; las demás son de muestra de la plantilla de Wix.
+
 ### Etapas
 
 **1. Sistema: color, letra y logo — HECHA.** Cambia la cara de todas las
@@ -584,15 +611,54 @@ Cómo quedó:
   páginas responden 200, `/nosotros` está en el sitemap y una ruta que no
   existe da 404.
 
-**5. Cierre.**
+**5. Cierre — PENDIENTE.** Lo que falta, con todo lo que apareció en el
+camino y que no está escrito en otro lado:
 
-- Las doce imágenes para compartir, de nuevo, con el logo nuevo.
-- El favicon, que nunca hubo (decisión 45), a partir de los círculos del logo.
-- La documentación: `docs/diseno.md` con la dirección nueva —y «Cal» al final,
-  con las otras descartadas—, la decisión nueva en `docs/decisiones.md`,
-  `/nosotros` en `docs/producto.md` y los campos nuevos en
-  `docs/modelo-de-datos.md`.
-- Merge a `main`, con la aprobación de la empresa.
+- **Las imágenes para compartir, de nuevo**, con el logo nuevo: las doce más
+  una para `/nosotros`, que hoy usa la de Inicio.
+  - `scripts/preparar-compartir.mjs` tiene el crema viejo escrito a mano —
+    `const PAPEL = "#f6f2ec"`, la banda del logo— y hay que pasarlo a un color
+    de la paleta nueva antes de correrlo. El fondo `#EDEFF0` o el blanco del
+    encabezado: decidir mirando las dos.
+  - Sumar `"/nosotros"` a `contenido/compartir.ts`, con su foto.
+  - Correr `npm run compartir`. Regenera también
+    `contenido/imagenes-para-compartir.ts`, que todavía dice «Cortinas de tela
+    Riel» en un texto alternativo.
+  - Son archivos nuevos —el nombre lleva la huella de los bytes—, así que los
+    viejos se borran y quedan en el historial: unos 1,1 MB más en git.
+- **El favicon**, que nunca hubo (decisión 45), a partir de los círculos del
+  logo. **Preguntarle antes a la empresa**: la decisión 45 lo frenó porque un
+  recorte del logo es un dibujo nuevo que ella no autorizó, y eso sigue
+  valiendo con el logo nuevo.
+- **Borrar `components/galeria.tsx` si la empresa aprueba el damero**: desde la
+  etapa 3 no la usa ninguna página. Con ella se va la prop `caja` de
+  `components/video-mudo.tsx`, que solo la usaba la galería. Si no lo aprueba,
+  se vuelve a la galería.
+- **La documentación**:
+  - `docs/diseno.md`: la dirección nueva —la paleta, Raleway, el logo de
+    círculos, los bloques azul verdoso, el damero, el botón flotante, el menú
+    en una fila— y «Cal» al final, con las otras descartadas.
+  - `docs/decisiones.md`: la decisión 66, que reemplaza a la 43 y la 44, y deja
+    sin objeto la 45 si se hace el favicon. Lo que se decidió en el camino
+    está en las notas «Lo que salió distinto» y «Cómo quedó» de cada etapa.
+  - `docs/producto.md`: `/nosotros` en la estructura, «Nuestros trabajos», y
+    que los textos son de la empresa.
+  - `docs/modelo-de-datos.md`: los campos `lema` y `recuadro`, y
+    `contenido/nosotros.ts`.
+  - `docs/arquitectura.md`: `lib/damero.ts` y `components/damero.tsx`.
+  - Quedan comentarios en el código que llaman «papel» al fondo, de la
+    dirección anterior: `components/foto.tsx`, `components/galeria.tsx`,
+    `components/listado-proyectos.tsx`, `lib/fotos.ts`, `lib/metadata.ts`,
+    `components/datos-estructurados.tsx`.
+- **Opcional, a decidir**: el correo que manda el formulario
+  (`lib/correo.ts`) usa los colores viejos, pero solo lo lee la empresa; y el
+  error de los campos lleva un filete de 3 px al costado (decisión 46), que es
+  otra de las marcas de sitio hecho con IA.
+- **Una dirección de prueba de la rama**, para que la empresa lo vea en su
+  teléfono antes del merge: hoy solo se publica `main`. Se activa en el panel
+  de Cloudflare —builds de ramas que no son de producción, con dirección
+  propia—, y lo hace quien desarrolla. Pendiente de decidir.
+- **Merge a `main`**, con la aprobación de la empresa.
 
 **Terminado cuando:**
 
