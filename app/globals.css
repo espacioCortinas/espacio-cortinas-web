@@ -51,8 +51,10 @@
   */
   --color-fondo: #edeff0;
   /*
-    El blanco del encabezado del boceto. Es lo que se apoya sobre el fondo: el
-    encabezado, los campos del formulario, el lugar de una foto mientras carga.
+    El blanco del encabezado del boceto. Es lo que se apoya sobre el fondo: los
+    campos del formulario, el recuadro de un aviso, el lugar de una foto
+    mientras carga. El encabezado del sitio ya no lo usa: es la barra de los
+    enlaces sobre el fondo, igual en todas las páginas.
   */
   --color-superficie: #ffffff;
 

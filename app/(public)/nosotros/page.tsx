@@ -37,8 +37,8 @@ import { altAutomatico } from "@/lib/texto";
  * El damero es el de las páginas de producto, armado a mano con sus mismas
  * piezas (`components/damero.tsx`). Los textos están en `contenido/nosotros.ts`.
  *
- * **No lleva el logo en círculo** que el boceto ponía al final: ese archivo no
- * llegó, y el logo ya está arriba, en el encabezado.
+ * **No lleva el logo en círculo** que el boceto ponía al final: ya está arriba,
+ * en el encabezado, en el lugar del enlace «Inicio» (`components/navegacion.tsx`).
  */
 
 export const metadata: Metadata = metadataDePagina({

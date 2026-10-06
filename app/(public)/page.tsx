@@ -121,8 +121,8 @@ export default function Inicio() {
   const instagram = contacto.redes.find((red) => red.nombre === "Instagram");
 
   return (
-    // Arriba, poco aire: en Inicio el encabezado no lleva logo ni franja, y lo
-    // primero de la página es el bloque del logo (`components/encabezado.tsx`).
+    // Arriba, poco aire: en Inicio el encabezado no lleva logo, y lo primero de
+    // la página es el bloque del logo (`components/navegacion.tsx`).
     <main className={`${CLASES_CONTENEDOR} pt-2 pb-16 md:pt-8 md:pb-28`}>
       {/* 1 — APERTURA ------------------------------------------------ */}
       {/*
