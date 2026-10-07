@@ -483,10 +483,15 @@ c6954f3  etapa 5 — la documentación, y la galería se borra
 2e14539  etapa 5 — el ícono de la pestaña y el video sin franjas
 ```
 
-**La empresa todavía no lo vio.** Quien desarrolla revisó cada etapa con
-capturas y pidió los dos ajustes de la etapa 2, el menú en una fila de la 4 y
-la barra igual en todas las páginas de la 5. **Y decidió que el rediseño se
-queda aunque la empresa no lo apruebe**: con eso se escribió la documentación.
+Quien desarrolla revisó cada etapa con capturas y pidió los dos ajustes de la
+etapa 2, el menú en una fila de la 4 y la barra igual en todas las páginas de
+la 5. Decidió que el rediseño se quedaba aunque la empresa no lo aprobara, y
+con eso se escribió la documentación. **Se mergeó a `main` el 06/10/2026**
+(`1390c2d`) y **la empresa lo aprobó el 07/10/2026.**
+
+**Desde el 07/10, en la rama `compartir-y-fotos`:** la foto nueva de la
+apertura de Inicio y la banda de las imágenes para compartir, ya elegida pero
+todavía sin generar. Ver «Lo que queda», más abajo.
 
 **Lo que se decidió en la conversación y no está en otro lado:**
 
@@ -718,25 +723,60 @@ _Documentación, hecha el 06/10/2026_ (`c6954f3`):
   `contenido/compartir.ts` y `scripts/preparar-compartir.mjs`. Cambian cuando
   se rehagan.
 
+_Después de la aprobación, el 07/10/2026_, en la rama `compartir-y-fotos`:
+
+- **La foto de la apertura de Inicio es otra** (`dbc20b4`): la eligió la
+  empresa —dos rollers screen sobre un ventanal y una veneciana negra, en un
+  living— y llegó ya recortada a 4:5, de 1.728 × 2.160. Está en
+  `roller/screen/3`, porque el script solo publica fotos de un producto o de un
+  proyecto, así que **también entra en la página de Roller**, entre las fotos
+  sueltas: son cinco, y `roller/3` queda sola en la última fila. Se dejó así,
+  a pedido de quien desarrolla, porque las fotos de los productos se van a
+  cambiar. `venecianas-madera/2`, la apertura anterior, sigue en su galería.
+  Se preparó con `node scripts/preparar-fotos.mjs` y no con `npm run fotos`:
+  las otras 37 fotos dieron los mismos bytes.
+- **La banda de las imágenes para compartir quedó elegida: el fondo `#EDEFF0`
+  con el logo de línea.** Se probaron las cuatro combinaciones —ese gris o
+  blanco, el logo de línea a 340 px o el circular a 120— con Inicio, Roller y
+  Toldos, también dentro de una burbuja de chat simulada al tamaño de un
+  teléfono:
+  - **El logo de línea, porque se lee.** En el chat mide unos 85 px de ancho y
+    «espacio» se lee; el circular queda de unos 30, como un ícono de pestaña,
+    con las letras caladas ilegibles.
+  - **El gris y no el blanco.** En modo claro el blanco se funde con la
+    burbuja, que es blanca, y la foto parece cortada; en modo oscuro es una
+    franja que encandila. Y es el fondo del sitio: la única banda que admite
+    `docs/diseno.md` es una del color del fondo.
+  - Pesan casi lo mismo que las de hoy: 148, 96 y 77 kB las tres de prueba.
+
 _Lo que queda_:
 
-- **Las imágenes para compartir, de nuevo**, con el logo nuevo: las doce más
-  una para `/nosotros`, que hoy usa la de Inicio.
-  - `scripts/preparar-compartir.mjs` tiene el crema viejo escrito a mano —
-    `const PAPEL = "#f6f2ec"`, la banda del logo— y hay que pasarlo a un color
-    de la paleta nueva antes de correrlo. El fondo `#EDEFF0` o el blanco del
-    encabezado: decidir mirando las dos.
-  - Sumar `"/nosotros"` a `contenido/compartir.ts`, con su foto.
-  - La banda lleva el logo de línea, y `contenido/compartir.ts` lo justifica
-    con que es el del encabezado del sitio: desde el ajuste de la barra, el
-    encabezado lleva el circular. Decidir cuál de los dos va en la banda.
-  - Correr `npm run compartir`. Regenera también
+- **Las imágenes para compartir, de nuevo — después de las fotos de
+  producto.** Quien desarrolla decidió esperar a que las fotos de los
+  productos y las tres de Nosotros —que repiten fotos de otras páginas— sean
+  las definitivas: cada imagen para compartir cuya foto cambie suma unos
+  100 kB a git, y así se hacen una sola vez. Mientras tanto, **las publicadas
+  llevan el logo viejo**, el del círculo amarillo, sobre la crema: son del
+  28/09 y nunca se rehicieron. Cuando se hagan:
+  - en `scripts/preparar-compartir.mjs`, `PAPEL` pasa a `#EDEFF0` —el logo de
+    la banda ya es el de línea, porque `public/marca/logo.png` lo es—, y
+    `/nosotros` entra en `paginas()`, entre `/proyectos` y `/contacto`: sin
+    eso, el script rechaza su línea de `compartir.ts` porque «no es una página
+    del sitio»;
+  - sumar `"/nosotros"` a `contenido/compartir.ts`, con su foto, y revisar la
+    de Inicio: esa línea dice que usa «la foto que abre Inicio», y desde el
+    07/10 la apertura es `roller/screen/3`;
+  - corregir los comentarios que hablan de la «banda de papel»:
+    `lib/metadata.ts`, `contenido/compartir.ts` y el mismo script, y las
+    decisiones 63, 64 y 66;
+  - correr `npm run compartir` una vez. Regenera también
     `contenido/imagenes-para-compartir.ts`, que todavía dice «Cortinas de tela
-    Riel» en un texto alternativo.
-  - Son archivos nuevos —el nombre lleva la huella de los bytes—, así que los
-    viejos se borran y quedan en el historial: unos 1,1 MB más en git.
-  - **No correr `npm run marca` ni `npm run fotos`**: los dos terminan
-    corriendo también este script.
+    Riel» en un texto alternativo;
+  - son archivos nuevos —el nombre lleva la huella de los bytes—, así que los
+    viejos se borran y quedan en el historial: unos 1,2 MB más en git;
+  - **no correr `npm run marca` ni `npm run fotos` antes de cambiar
+    `PAPEL`**: los dos terminan corriendo también este script, y las
+    rehacen con la crema.
 - **Opcional**: el correo que manda el formulario (`lib/correo.ts`) usa los
   colores viejos y un filete al costado, pero solo lo lee la empresa.
 - **Merge a `main`**, con todo lo de arriba, a pedido de quien desarrolla. El

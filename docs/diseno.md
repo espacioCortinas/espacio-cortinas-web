@@ -250,6 +250,15 @@ gris carbón. Llegó en un PNG transparente de 1.695 px y
 azul verdoso de la apertura de Inicio —4,58:1 sobre ese color— y en la banda
 de las imágenes para compartir.
 
+**En las imágenes para compartir va el de línea, sobre el fondo `#EDEFF0`**
+—elegido el 07/10/2026; se generan cuando las fotos de los productos sean las
+definitivas, decisión 66—. Se probó el circular: al tamaño de una tarjeta de
+WhatsApp en un teléfono queda de unos 30 px y las letras caladas no se leen,
+mientras el de línea mide unos 85 y «espacio» se lee. **El circular rinde
+donde ya está**, chico y como marca: la barra y la pestaña. Y la banda va del
+color del fondo y no blanca: en un mensaje recibido el blanco se funde con la
+burbuja, y en modo oscuro encandila.
+
 **El circular** es un círculo gris carbón con el logo calado adentro y un aro
 fino alrededor. Lo calado deja ver el fondo, así que sobre el gris del sitio las
 letras quedan claras. Es el que el boceto pone en su Nosotros; llegó bajado del
