@@ -3153,6 +3153,11 @@ ninguna foto de un cliente adentro, pero todo lo que se publica se revisa.
 desde ahí lleva el logo, centrado en una banda de papel abajo. Los recortes, los
 pesos y los nombres de archivo de esta entrada son los de antes de la banda.
 
+**La foto de Inicio se eligió por ser «la que abre Inicio», y desde el
+07/10/2026 ya no lo es**: la apertura pasó a `roller/screen/3` (decisión 66).
+La línea de `contenido/compartir.ts` se revisa cuando se rehagan las imágenes
+con la banda nueva.
+
 **Fecha:** septiembre de 2026. **Reemplaza a la decisión 62** y vuelve a lo que
 pedía la decisión 1.
 
@@ -3327,6 +3332,14 @@ de clientes, aunque salgan de archivos que ya estaban limpios.
 ---
 
 ### 64. La imagen para compartir lleva el logo, centrado en una banda de papel abajo
+
+**Va a cambiar la banda, por la decisión 66**: con el rediseño, el papel de
+cal se fue del sitio. Se eligió el 07/10/2026 que la banda pase al fondo
+nuevo, `#EDEFF0`, con el logo de línea; las imágenes se rehacen cuando las
+fotos de los productos sean las definitivas. Hasta entonces, **las publicadas
+siguen siendo las de esta entrada**: crema y el logo viejo, el del círculo
+amarillo. La forma —la banda abajo, de 150 px, con el logo centrado— no
+cambia.
 
 **Fecha:** septiembre de 2026. **Matiza la decisión 63**, que la dejaba sin
 logo.
@@ -3527,8 +3540,9 @@ de las fotos y de la accesibilidad se queda.
 
 Se hizo en la rama `rediseno`, en cinco etapas con un commit cada una y
 capturas en cada paso. Lo que se previó en cada etapa, y lo que salió
-distinto, está en `docs/plan.md`, Fase 4.7. **Se queda aunque la empresa no
-termine de aprobarlo**: quien desarrolla lo decidió al cerrar la etapa 5.
+distinto, está en `docs/plan.md`, Fase 4.7. Quien desarrolla decidió al cerrar
+la etapa 5 que se quedaba aunque la empresa no lo aprobara; se publicó el
+06/10/2026 y **la empresa lo aprobó el 07/10/2026**.
 
 #### La paleta, medida del código del boceto
 
@@ -3666,12 +3680,28 @@ mega que se había estimado, porque ahora todo el cuadro es imagen—. Lo decidi
 quien desarrolla. El original con franjas quedó en `fotos-originales/respaldos/`,
 fuera de las carpetas que lee el script.
 
+#### La foto de la apertura de Inicio, elegida por la empresa
+
+**Desde el 07/10/2026 es `roller/screen/3`**: dos rollers screen sobre un
+ventanal y una veneciana negra, en un living. La eligió la empresa y llegó
+recortada a 4:5. Va en la carpeta de Screen porque el script solo publica
+fotos de un producto o de un proyecto, así que también se ve en la página de
+Roller; `venecianas-madera/2`, la anterior, sigue en su galería. Es la primera
+de las fotos que la empresa pidió cambiar: siguen las de los productos y las
+tres de Nosotros, que repiten fotos de otras páginas.
+
 #### Lo que queda pendiente
 
 - **Las imágenes para compartir siguen siendo las de «Cal»**: la banda es del
-  crema viejo y lleva el logo de línea (decisiones 63 y 64). Rehacerlas suma
-  unos 1,1 MB a git, y antes hay que decidir dos cosas: el color de la banda,
-  y si va el logo de línea o el circular.
+  crema viejo y lleva **el logo viejo**, el del círculo amarillo —son del
+  28/09 y no se rehicieron con el rediseño— (decisiones 63 y 64). **La banda
+  nueva quedó elegida el 07/10/2026: el fondo `#EDEFF0` con el logo de
+  línea.** El de línea porque en un chat, al tamaño de un teléfono, se lee, y
+  el circular queda de unos 30 px con las letras caladas ilegibles; el gris y
+  no el blanco porque el blanco se funde con la burbuja de un mensaje
+  recibido y encandila en modo oscuro. Rehacerlas suma unos 1,2 MB a git, así
+  que **se hacen cuando las fotos de los productos sean las definitivas**, una
+  sola vez. El paso a paso está en `docs/plan.md`, Fase 4.7, «Lo que queda».
 - **El correo que manda el formulario** (`lib/correo.ts`) sigue con los
   colores viejos. Solo lo lee la empresa.
 
@@ -3707,9 +3737,10 @@ sigue sin haber una versión clara para fondo oscuro: por eso el pie escribe el
 nombre en vez de poner el logo.
 
 **Lo que dejó pendiente el rediseño** — decisión 66: las imágenes para
-compartir siguen siendo las de «Cal», con la banda del crema viejo. Rehacerlas
-suma peso a git para siempre, así que se hace cuando se decida el color de la
-banda y el logo que lleva.
+compartir siguen siendo las de «Cal», con la banda del crema viejo y el logo
+del círculo amarillo. La banda nueva ya está elegida —`#EDEFF0` con el logo de
+línea—; rehacerlas suma peso a git para siempre, así que se hace una vez, con
+las fotos de los productos definitivas.
 
 **No hay ninguna foto 4:5 de repuesto.** Las siete que existen son exactamente
 las siete portadas, así que cualquier portada que haya que retirar obliga a
