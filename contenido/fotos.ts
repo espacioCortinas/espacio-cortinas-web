@@ -179,6 +179,13 @@ export const fotos: Record<string, Foto[]> = {
       ancho: 2560,
       alto: 3413,
     },
+    {
+      carpeta: "productos/roller/screen/3",
+      medidas: [480, 960, 1600, 1728],
+      formato: "webp",
+      ancho: 1728,
+      alto: 2160,
+    },
   ],
   "productos/toldos": [
     {

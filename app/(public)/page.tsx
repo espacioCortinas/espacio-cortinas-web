@@ -96,19 +96,18 @@ export default function Inicio() {
   const proyectos = proyectosDestacados(PROYECTOS_DESTACADOS_HOME);
 
   /*
-   * La foto de la apertura. Es `venecianas-madera/2`, una de las cuatro que
-   * `docs/diseno.md` califica como capaces de sostener un lugar grande
-   * —«arquitectura de verdad; bañera, lamas negras, río de fondo»—, y sus
-   * grises fríos y el negro de las lamas van con el azul verdoso del bloque.
+   * La foto de la apertura. Es `roller/screen/3`, la que eligió la empresa en
+   * octubre de 2026: dos rollers screen sobre un ventanal y una veneciana
+   * negra, en un living. Llegó ya recortada a 4:5 por quien desarrolla, así que
+   * el recorte de `proporcion` no le saca nada.
    *
-   * **No es `cortinas-tela/1`, que es la mejor del archivo**: esa es la portada
-   * de Cortinas de confección, que está en los destacados de acá abajo. La
-   * misma foto dos veces en la misma página se lee como un error.
+   * Vive en la carpeta de Screen porque el script solo publica fotos de un
+   * producto o de un proyecto, así que también se ve en la página de Roller.
+   * Hasta octubre era `venecianas-madera/2`, que sigue en su galería.
    *
-   * Va recortada a 4:5 —es 3:4— para que en el teléfono el lema entre en la
-   * primera pantalla. El recorte es alto, así que lo que se pierde es piso.
+   * Va en 4:5 para que en el teléfono el lema entre en la primera pantalla.
    */
-  const fotoApertura = fotoDe("productos", "venecianas-madera", 2);
+  const fotoApertura = fotoDe("productos", "roller/screen", 3);
 
   /*
    * El bloque de arquitectos y oficinas. Las cinco fotos de bandas verticales
@@ -155,7 +154,7 @@ export default function Inicio() {
           <div className="-mt-10 ml-10 md:col-span-6 md:col-start-7 md:row-span-2 md:row-start-1 md:mt-0 md:ml-0">
             <FotoImg
               foto={fotoApertura}
-              alt={altAutomatico("Venecianas de madera", 2)}
+              alt={altAutomatico("Roller Screen", 3)}
               proporcion="4/5"
               sizes={sizesConTope(fotoApertura, [
                 { desde: "1216px", ancho: "500px" },
