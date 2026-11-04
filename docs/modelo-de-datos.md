@@ -74,8 +74,8 @@ es una foto por página, y tiene su propio par de archivos, abajo.
 ## La imagen para compartir
 
 La que se ve al pegar el enlace de una página en WhatsApp: **una foto,
-distinta en cada página, con el logo centrado en una banda de papel abajo** —
-decisiones 63 y 64. Son dos archivos, uno a mano y uno generado:
+distinta en cada página, con el logo centrado en una banda abajo, del gris
+del fondo** — decisiones 63, 64 y 67. Son dos archivos, uno a mano y uno generado:
 
 `contenido/compartir.ts`, **a mano**: qué foto lleva cada página, por su ruta.
 
@@ -141,10 +141,10 @@ obligatorio: es lo primero que se lee en la página y en el catálogo.
 
 ### Recuadro
 
-| Campo    | Tipo     | Notas                                                                                      |
-| -------- | -------- | ------------------------------------------------------------------------------------------ |
-| `titulo` | `string` | en minúscula, como en el boceto: «manuales y automatizadas». Respeta los saltos de renglón |
-| `texto`  | `string` | dos o tres frases                                                                          |
+| Campo    | Tipo      | Notas                                                                                                                    |
+| -------- | --------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `titulo` | `string?` | en minúscula, como en el boceto: «translúcidas o blackout». Respeta los saltos de renglón; opcional desde la decisión 67 |
+| `texto`  | `string`  | dos o tres frases                                                                                                        |
 
 Los saltos de renglón del título se respetan porque el de las venecianas es una
 lista de medidas, una por renglón.
@@ -162,9 +162,14 @@ variante de `Toldos`, no una entrada más del catálogo — decisión 40.
 | `lema`        | `string?`   | solo las que tenían página propia en el boceto |
 | `recuadro`    | `Recuadro?` | igual                                          |
 
-**Una variante con `lema` o `recuadro` arma su propio 2×2 en el damero** de la
-página del producto: Screen y Blackout de Roller, que en el boceto tenían página
-propia. Las demás van juntas en una celda de texto — `lib/damero.ts`.
+**Cada variante con fotos tiene su bloque** en la página del producto: su
+nombre arriba, a todo el ancho, y su álbum con su descripción y las frases de
+su recuadro al lado. Las que no tienen fotos se nombran juntas en «Otras
+variantes», y los videos de todas van en «Manual o motorizado» — decisión 67,
+`lib/damero.ts`.
+
+**El título del recuadro es opcional** desde la 67: «manuales y
+automatizadas», el que más se repetía, pasó a ser la sección de los videos.
 
 **Sí pueden tener descripción, fotos y video**, contra lo que decía este
 documento hasta la Fase 4.4. La descripción llegó con la decisión 40 —existe
@@ -236,15 +241,18 @@ convención que `contenido/inicio.ts`.
 **`contenido/nosotros.ts`**, entero del boceto salvo el cierre: `titulo`,
 `bajada`, el `cierre` y `secciones` —propósito, visión y «Cuidamos los
 detalles»—, cada una con `titulo`, `texto` y `foto`. La foto se elige por
-`entidad`, `slug` y `posicion` en el manifiesto: es una foto del archivo, no una
-nueva.
+`entidad`, `slug` y `posicion` en el manifiesto. Desde la decisión 67 son
+tres fotos propias, con `entidad: "paginas"` y `slug: "nosotros"`.
 
 ## Fotos
 
 `contenido/fotos.ts` es un mapa a una lista de fotos. La clave es
 `<entidad>/<slug>` para la galería de un producto o un proyecto, y
 `<entidad>/<slug>/<clave de la variante>` para la de una variante — la clave de
-la variante cuelga de la del producto, así que no hace falta un mapa aparte:
+la variante cuelga de la del producto, así que no hace falta un mapa aparte.
+Desde la decisión 67 hay dos más: `productos/<slug>/wpp`, las apaisadas para el
+link de WhatsApp, que la página recibe como `fotosParaWhatsapp` y no van al
+álbum; y `paginas/<nombre>`, las de una página como Nosotros:
 
 ```ts
 "productos/bandas-verticales": [
@@ -341,13 +349,17 @@ trabajo hecho — decisión 25. `next.config.ts` lo apaga con
 
 ## Videos
 
-`contenido/videos.ts` es un mapa de clave a **un** video, y hay dos clases de
-clave:
+`contenido/videos.ts` es un mapa de clave a **un** video, y hay tres clases de
+clave. La variante los recibe como una lista, `videos`, en el orden de su
+carpeta — decisión 67:
 
 - `productos/<slug>/<clave de la variante>` — el video de una variante
   motorizada. Cuelga de la variante y no del producto: lo que documenta es la
   motorización, que es lo único que una foto no puede mostrar — decisión 40. Se
   reproduce en bucle.
+- `productos/<slug>/<clave de la variante>/<nombre>` — uno de los videos que
+  viven adentro de la carpeta de la variante, con su `posicion` en ella. Desde
+  la decisión 67 una variante puede tener varios.
 - `proyectos/<slug>/<nombre del archivo>` — un elemento de la galería de un
   proyecto, que no tiene variantes. Lleva `posicion` y va en bucle, como los de variante —
   decisión 51.

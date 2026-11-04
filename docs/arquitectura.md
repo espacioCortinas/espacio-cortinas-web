@@ -111,18 +111,23 @@ components/
 ├── foto.tsx                     el <img> con srcset, proporción y recorte
 ├── damero.tsx                   la grilla de 2×2 de producto y proyecto, y sus
 │                                piezas sueltas para los listados y Nosotros
-├── video-mudo.tsx               el video mudo, en bucle. "use client" (uno de cuatro)
+├── carrusel.tsx                 el álbum que se desliza, con su contador y sus
+│                                botones. "use client" (uno de siete)
+├── cierre-con-album.tsx         el cierre de producto sobre las fotos «wpp», que
+│                                pasan solas. "use client" (uno de siete)
+├── video-mudo.tsx               el video mudo, en bucle. "use client" (uno de siete)
 ├── tarjeta-producto.tsx         la portada con su bloque; el zigzag de Inicio
 ├── tarjeta-proyecto.tsx         el proyecto en fila o en tarjeta
 ├── listado-proyectos.tsx        el primero en fila y el resto en grilla
 ├── logo.tsx                     el logo grande de Inicio y el circular de la barra
 ├── encabezado.tsx               la barra de enlaces, igual en todas las páginas
 ├── navegacion.tsx               los cinco enlaces; fuera de Inicio, el primero es
-│                                el logo circular. "use client" (uno de cuatro)
-├── formulario-contacto.tsx      el formulario y sus estados. "use client" (uno de cuatro)
+│                                el logo circular. "use client" (uno de siete)
+├── formulario-contacto.tsx      el formulario y sus estados. "use client" (uno de siete)
 ├── pie.tsx
-├── whatsapp.tsx                 el enlace, con el mensaje según la página, y el
-│                                botón flotante
+├── whatsapp.tsx                 el botón, con el logo y el mensaje según la página
+├── whatsapp-flotante.tsx        el círculo, que se esconde hacia el botón de la
+│                                página. "use client" (uno de siete)
 ├── medios-de-contacto.tsx       número, email, red y «Llamar», con su símbolo
 ├── iconos-de-contacto.tsx       los logos de WhatsApp e Instagram, y el sobre
 ├── datos-estructurados.tsx      JSON-LD del negocio local
@@ -295,7 +300,7 @@ al servir.
 las decisiones 63 y 64. Qué foto lleva cada página se escribe a mano en
 `contenido/compartir.ts`, por la carpeta de la foto. El script la recorta a
 1200 × 480 desde la medida más grande publicada, sin agrandar nunca, le pone
-debajo una banda de papel de 150 px con el logo centrado, y la guarda como JPEG
+debajo una banda de 150 px, del gris del fondo, con el logo centrado, y la guarda como JPEG
 de 1200 × 630 con la huella de sus bytes en el nombre. Centrado, el logo entra
 entero aunque WhatsApp recorte desde el centro. Una imagen distinta es siempre
 una dirección nueva, que es lo único que hace que WhatsApp la vuelva a pedir.
