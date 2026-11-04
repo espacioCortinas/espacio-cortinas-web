@@ -101,5 +101,5 @@ export const fotosParaCompartir: Record<string, FotoParaCompartir> = {
    * hasta noviembre de 2026 y hoy es de su variante Riel. Contacto no muestra
    * ninguna foto, así que la tarjeta tiene que decir «cortinas» sola.
    */
-  "/contacto": { foto: "productos/cortinas-tela/riel/3" },
+  "/contacto": { foto: "productos/cortinas-tela/riel/2" },
 };

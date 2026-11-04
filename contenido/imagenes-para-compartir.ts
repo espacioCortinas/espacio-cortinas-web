@@ -90,7 +90,7 @@ export const imagenesParaCompartir: Record<string, ImagenParaCompartir> = {
     ruta: "/compartir/contacto.649fcdfa.jpg",
     ancho: 1200,
     alto: 630,
-    alt: "Cortinas de confección Riel — foto 3",
-    foto: "productos/cortinas-tela/riel/3",
+    alt: "Cortinas de confección Riel — foto 2",
+    foto: "productos/cortinas-tela/riel/2",
   },
 };
