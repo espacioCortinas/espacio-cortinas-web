@@ -28,6 +28,17 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
 
+  // Las dos venecianas pasaron a ser un producto con variantes (decisión 67).
+  // Sus direcciones viejas circulan en mensajes de WhatsApp y no se pueden
+  // romper (decisión 10): redirigen, para siempre, a la nueva.
+  async redirects() {
+    return ["venecianas-madera", "venecianas-pvc"].map((viejo) => ({
+      source: `/productos/${viejo}`,
+      destination: "/productos/venecianas",
+      permanent: true,
+    }));
+  },
+
   // Sin `headers()`. El bloque que había era el bypass de caché de `/admin`, y
   // se fue con el panel: ya no hay ninguna respuesta autenticada que una caché
   // compartida pueda servirle a otra persona (decisión 36).

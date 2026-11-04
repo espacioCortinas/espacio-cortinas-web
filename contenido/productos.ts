@@ -8,7 +8,7 @@ import type { Producto } from "./tipos";
  * tope de `PRODUCTOS_DESTACADOS_HOME` (decisión 9). Para reordenar, se mueve
  * el bloque.
  *
- * **Los cuatro destacados son Roller, Cortinas de confección, Venecianas de PVC
+ * **Los cuatro destacados son Roller, Cortinas de confección, Venecianas
  * y Toldos**, y el criterio no es fotográfico: son los que más se venden en el
  * día a día, según la empresa. Es el dato que el sitio no puede deducir solo y
  * la única razón válida para elegir cuáles anticipar en Inicio — decisión 47.
@@ -32,8 +32,9 @@ import type { Producto } from "./tipos";
  *   acá son variantes. Cada una se quedó con su lema, su descripción y su
  *   recuadro. El lema del producto, «filtrar u oscurecer», junta los dos; la
  *   descripción del producto es la que la empresa había escrito antes.
- * - **Venecianas de madera y de PVC**: el boceto tiene una sola página, y su
- *   texto va en las dos, como ya pasaba con el anterior (decisión 49).
+ * - **Venecianas**: el boceto tiene una sola página. Hasta noviembre de 2026
+ *   eran dos productos —madera y PVC— con ese mismo texto; desde la decisión
+ *   67 son uno, con las dos como variantes.
  * - **Cortinas de confección**: el boceto no habla de riel ni de barral, y la
  *   descripción anterior sí. Esa parte se repartió en las variantes, sin
  *   reescribirla, como cuando un producto absorbió a otro (decisión 40).
@@ -132,6 +133,7 @@ export const productos: Producto[] = [
       },
       {
         nombre: "Blackout",
+        clave: "blackout",
         descripcion:
           "Las telas pueden ser en blackout o translúcidas, y hay mucha variedad de colores y modelos.",
       },
@@ -140,8 +142,13 @@ export const productos: Producto[] = [
     destacado: true,
   },
   {
-    slug: "venecianas-madera",
-    nombre: "Venecianas de madera",
+    // Hasta noviembre de 2026 eran dos productos, `venecianas-madera` y
+    // `venecianas-pvc`, con el mismo texto. La empresa pidió juntarlos en uno
+    // con variantes (decisión 67). Las dos direcciones viejas redirigen acá
+    // desde `next.config.ts`: los enlaces que ya circulan siguen andando
+    // (decisión 10).
+    slug: "venecianas",
+    nombre: "Venecianas",
     lema: "estilo",
     descripcion:
       "Las cortinas venecianas modulan la luz. En sus varias versiones —aluminio, PVC y madera— se transforman en un objeto decorativo. Muy funcionales y prácticas, proporcionan la solución ideal para cada necesidad.",
@@ -150,22 +157,13 @@ export const productos: Producto[] = [
         "venecianas:\n25 mm aluminio\n50 mm aluminio\n50 mm PVC\n50 mm madera",
       texto: "Funcionales y decorativas.",
     },
-    variantes: [],
-    activo: true,
-    destacado: false,
-  },
-  {
-    slug: "venecianas-pvc",
-    nombre: "Venecianas de PVC",
-    lema: "estilo",
-    descripcion:
-      "Las cortinas venecianas modulan la luz. En sus varias versiones —aluminio, PVC y madera— se transforman en un objeto decorativo. Muy funcionales y prácticas, proporcionan la solución ideal para cada necesidad.",
-    recuadro: {
-      titulo:
-        "venecianas:\n25 mm aluminio\n50 mm aluminio\n50 mm PVC\n50 mm madera",
-      texto: "Funcionales y decorativas.",
-    },
-    variantes: [],
+    // Aluminio todavía no tiene fotos: se nombra igual, en la celda de
+    // variantes, y cuando lleguen las fotos se le pone la clave.
+    variantes: [
+      { nombre: "PVC", clave: "pvc" },
+      { nombre: "Madera", clave: "madera" },
+      { nombre: "Aluminio" },
+    ],
     activo: true,
     destacado: true,
   },
@@ -183,8 +181,18 @@ export const productos: Producto[] = [
     variantes: [
       {
         nombre: "De brazos",
+        clave: "de-brazos",
         descripcion:
           "Los brazos permiten que el toldo se extienda para el uso y retraerse cuando no se necesita.",
+      },
+      {
+        // NUESTRO, provisorio: la empresa pidió la variante con sus fotos y
+        // todavía no mandó el texto. Con los datos de la descripción del
+        // producto, que ya los nombra.
+        nombre: "Verticales",
+        clave: "verticales",
+        descripcion:
+          "Los toldos verticales bajan frente a ventanas, galerías y balcones. Protegen del sol directo y dan privacidad sin quitar la vista al exterior.",
       },
       { nombre: "Motorizado" },
     ],

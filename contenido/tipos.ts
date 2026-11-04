@@ -252,14 +252,18 @@ export type ConFotos<T> = T & { fotos: Foto[] };
  * Una variante con sus medios ya resueltos.
  *
  * Los dos campos pueden venir vacíos y eso es lo normal, no un caso de borde:
- * de las nueve variantes del catálogo, cuatro tienen fotos, dos tienen video y
- * tres no tienen nada. Una variante sin medios sigue siendo una opción que el
- * visitante tiene que poder leer, así que se dibuja igual — con su nombre y,
- * si la tiene, su descripción.
+ * una variante sin medios sigue siendo una opción que el visitante tiene que
+ * poder leer, así que se dibuja igual — con su nombre y, si la tiene, su
+ * descripción.
+ *
+ * **Los videos son una lista** desde la decisión 67: las variantes con álbum
+ * traen varios —recorridos, la cortina subiendo—, en el orden de su carpeta.
+ * Los de antes, uno por variante motorizada y al lado de la carpeta
+ * (`motorizado.mp4`), siguen valiendo: son una lista de uno.
  */
 export type VarianteConMedios = Variante & {
   fotos: Foto[];
-  video: Video | null;
+  videos: Video[];
 };
 
 /**

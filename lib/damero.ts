@@ -167,7 +167,13 @@ function filasDeColeccion(
   ];
 }
 
-/** Las celdas de los medios de una variante, en orden: fotos y después video. */
+/**
+ * Las celdas de los medios de una variante, en orden: fotos y después videos.
+ *
+ * Las fotos y los videos se cuentan por separado —«foto 3», «video 1»—, como
+ * en los proyectos: un lector de pantalla que oye «foto 7» esperando la
+ * séptima foto y recibe un video pierde la cuenta.
+ */
 function mediosDeVariante(
   producto: ProductoConMedios,
   variante: VarianteConMedios,
@@ -181,31 +187,25 @@ function mediosDeVariante(
     nombre: altAutomatico(nombre, i + 1),
     pie,
   }));
-  const video: CeldaDeMedio[] = variante.video
-    ? [
-        {
-          tipo: "medio",
-          medio: variante.video,
-          // El video de una variante muestra siempre lo mismo: la cortina
-          // moviéndose sola, que es lo que una foto no puede (decisión 40).
-          nombre: `${nombre}: la cortina abriéndose y cerrándose sola`,
-          pie,
-        },
-      ]
-    : [];
-  return [...fotos, ...video];
+  const videos: CeldaDeMedio[] = variante.videos.map((video, i) => ({
+    tipo: "medio",
+    medio: video,
+    nombre: `${nombre} — video ${i + 1}`,
+    pie,
+  }));
+  return [...fotos, ...videos];
 }
 
 export function filasDeProducto(producto: ProductoConMedios): Fila[] {
   const tieneMedios = (v: VarianteConMedios) =>
-    v.fotos.length > 0 || v.video !== null;
+    v.fotos.length > 0 || v.videos.length > 0;
   const tieneTexto = (v: VarianteConMedios) =>
     Boolean(v.descripcion || v.lema || v.recuadro);
 
   // 3 — Con bloque propio: las que tienen fotos, y las de solo video que
   // tienen algo que decir.
   const conBloque = producto.variantes.filter(
-    (v) => v.fotos.length > 0 || (v.video !== null && tieneTexto(v)),
+    (v) => v.fotos.length > 0 || (v.videos.length > 0 && tieneTexto(v)),
   );
   // 4 — Las de solo video sin texto, que van al álbum de otra.
   const sueltas = producto.variantes.filter(

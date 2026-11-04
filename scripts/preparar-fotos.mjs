@@ -139,6 +139,14 @@ const FORMATO_CARTEL = "webp";
 /** Lo que se reconoce como video en una carpeta de originales. */
 const EXTENSIONES_VIDEO = new Set([".mp4", ".mov", ".m4v"]);
 
+/**
+ * La carpeta de las fotos para el link de WhatsApp, dentro de la de un
+ * producto: `productos/roller/wpp/`. Se publican como las demás, sin recortar,
+ * pero bajo su propia clave —`productos/roller/wpp`— y no van al álbum
+ * (decisión 67).
+ */
+const CARPETA_WPP = "wpp";
+
 let avisos = 0;
 const aviso = (t) => {
   console.warn(`  ! ${t}`);
@@ -784,7 +792,10 @@ async function main() {
   let cuantas = 0;
   let cuantosVideos = 0;
 
-  for (const entidad of ["productos", "proyectos"]) {
+  // `paginas` son las fotos de una página que no es ni un producto ni un
+  // proyecto —las tres de Nosotros, decisión 67—: sin variantes, sin video y
+  // sin portada que recortar.
+  for (const entidad of ["productos", "proyectos", "paginas"]) {
     const raizEntidad = join(ORIGINALES, entidad);
     if (!existsSync(raizEntidad)) continue;
 
@@ -839,9 +850,14 @@ async function main() {
         carpetaSlug,
         archivos,
         `${entidad}/${slug}`,
-        true,
+        entidad !== "paginas",
       );
       cuantas += fotos.length;
+
+      if (entidad === "paginas") {
+        if (fotos.length > 0) manifiesto[`${entidad}/${slug}`] = fotos;
+        continue;
+      }
 
       if (fotos.length === 0) {
         aviso(`${slug} quedó sin ninguna foto propia.`);
@@ -881,29 +897,84 @@ async function main() {
           continue;
         }
 
-        if (declaradas && !declaradas.has(clave)) {
+        // `wpp/` no es una variante: son las fotos apaisadas que la empresa
+        // eligió para el link de WhatsApp, que van en el cierre de la página y
+        // no en el álbum (decisión 67). Ninguna variante puede llamarse así.
+        const esWpp = clave === CARPETA_WPP;
+
+        if (!esWpp && declaradas && !declaradas.has(clave)) {
           aviso(
             `${slug}: hay fotos en la carpeta "${clave}/" y ninguna variante de ` +
               `contenido/productos.ts la reclama con esa clave. No se van a ver.`,
           );
         }
 
-        const archivosVariante = readdirSync(join(carpetaSlug, clave))
-          .filter((f) => EXTENSIONES.has(extname(f).toLowerCase()))
-          .sort((a, b) => a.localeCompare(b, "es", { numeric: true }));
-
-        if (archivosVariante.length === 0) continue;
-
-        const deLaVariante = await prepararGaleria(
-          join(carpetaSlug, clave),
-          archivosVariante,
-          `${entidad}/${slug}/${clave}`,
-          false,
+        const enLaCarpeta = readdirSync(join(carpetaSlug, clave)).sort((a, b) =>
+          a.localeCompare(b, "es", { numeric: true }),
         );
-        cuantas += deLaVariante.length;
+        const archivosVariante = enLaCarpeta.filter((f) =>
+          EXTENSIONES.has(extname(f).toLowerCase()),
+        );
+        // Los videos de la variante, adentro de su carpeta y en el orden de
+        // la carpeta, contando fotos y videos juntos, como en un proyecto
+        // (decisión 67). El de antes, al lado de la carpeta con el nombre de
+        // la clave, sigue valiendo: es el que se procesa más abajo.
+        const videosVariante = esWpp
+          ? []
+          : enLaCarpeta.filter((f) =>
+              EXTENSIONES_VIDEO.has(extname(f).toLowerCase()),
+            );
 
-        if (deLaVariante.length > 0) {
-          manifiesto[`${entidad}/${slug}/${clave}`] = deLaVariante;
+        if (archivosVariante.length > 0) {
+          const deLaVariante = await prepararGaleria(
+            join(carpetaSlug, clave),
+            archivosVariante,
+            `${entidad}/${slug}/${clave}`,
+            false,
+          );
+          cuantas += deLaVariante.length;
+
+          if (deLaVariante.length > 0) {
+            manifiesto[`${entidad}/${slug}/${clave}`] = deLaVariante;
+          }
+        }
+
+        for (const archivoVideo of videosVariante) {
+          const nombre = basename(archivoVideo, extname(archivoVideo));
+          // Va a una dirección: nada de espacios ni mayúsculas que la rompan.
+          if (!/^[a-z0-9-]+$/.test(nombre)) {
+            noPublicados += 1;
+            aviso(
+              `${archivoVideo}: NO SE PUBLICA\n` +
+                `      causa    el nombre va a la dirección del video y tiene ` +
+                `espacios, mayúsculas o símbolos.\n` +
+                `      qué hacer Renombralo con minúsculas, números y guiones: video-1.mp4.`,
+            );
+            continue;
+          }
+          const clavePublicada = `${entidad}/${slug}/${clave}/${nombre}`;
+          try {
+            const datos = await prepararVideo(
+              join(carpetaSlug, clave, archivoVideo),
+              `${slug}/${clave}/${nombre}`,
+            );
+            datos.posicion = enLaCarpeta.indexOf(archivoVideo) + 1;
+            manifiestoVideos[clavePublicada] = datos;
+            cuantosVideos += 1;
+            console.log(
+              `  ${clavePublicada.padEnd(34)} ${datos.ancho}×${datos.alto}  ` +
+                `${datos.duracion} s  + cartel`,
+            );
+          } catch (fallo) {
+            noPublicados += 1;
+            aviso(
+              `${archivoVideo}: NO SE PUBLICA\n` +
+                `      causa    ${fallo instanceof Error ? fallo.message : fallo}` +
+                (fallo instanceof OriginalInutilizable
+                  ? `\n      qué hacer ${fallo.salida.join("\n                ")}`
+                  : ""),
+            );
+          }
         }
       }
 
@@ -1017,7 +1088,9 @@ async function main() {
     ` * Dos clases de clave, y en las dos el orden del arreglo es el de la galería.\n` +
     ` * \`<entidad>/<slug>\`: las fotos de un producto o de un proyecto, y la primera\n` +
     ` * es la portada. \`productos/<slug>/<clave de la variante>\`: las de una\n` +
-    ` * variante, que no tiene portada — decisión 48.\n` +
+    ` * variante, que no tiene portada — decisión 48. Y dos más de la decisión\n` +
+    ` * 67: \`productos/<slug>/wpp\`, las apaisadas para el link de WhatsApp, que\n` +
+    ` * no van al álbum; y \`paginas/<nombre>\`, las de una página como Nosotros.\n` +
     ` */\n` +
     `export const fotos: Record<string, Foto[]> = {\n` +
     (cuerpo ? `${cuerpo}\n` : "") +
@@ -1041,8 +1114,10 @@ async function main() {
     ` * ARCHIVO GENERADO — no editar a mano.\n` +
     ` *\n` +
     ` * Lo escribe \`scripts/preparar-fotos.mjs\` y se pisa entero en cada corrida.\n` +
-    ` * Dos clases de clave. \`productos/<slug>/<clave de la variante>\`: el video\n` +
+    ` * Tres clases de clave. \`productos/<slug>/<clave de la variante>\`: el video\n` +
     ` * documenta una variante motorizada — decisión 40.\n` +
+    ` * \`productos/<slug>/<clave de la variante>/<nombre>\`: uno de los videos del\n` +
+    ` * álbum de la variante, y \`posicion\` es su lugar en la carpeta — decisión 67.\n` +
     ` * \`proyectos/<slug>/<nombre del archivo>\`: es un elemento de la galería del\n` +
     ` * proyecto, y \`posicion\` dice en qué lugar va entre las fotos — decisión 51.\n` +
     ` *\n` +

@@ -171,21 +171,33 @@ export default async function Producto({ params }: Props) {
             <CierreConAlbum
               etiqueta={`Fotos de ${producto.nombre}`}
               proporcion={fotosWpp[0].ancho / fotosWpp[0].alto}
-              ancho={Math.min(...fotosWpp.map(topeDeAncho))}
+              // El álbum mide lo que permite su foto más grande, y cada una se
+              // frena en su propio tope, centrada: una «wpp» chica no achica
+              // a las demás, y tampoco se estira (`CLAUDE.md`, regla 4).
+              ancho={Math.max(...fotosWpp.map(topeDeAncho))}
               fotos={fotosWpp.map((foto, i) => (
-                <FotoImg
+                <div
                   key={foto.carpeta}
-                  foto={foto}
-                  alt={altAutomatico(
-                    `${producto.nombre}, vista apaisada`,
-                    i + 1,
-                  )}
-                  sizes={sizesConTope(foto, [
-                    { desde: "768px", ancho: "min(100vw - 6rem, 70rem)" },
-                    { ancho: "100vw" },
-                  ])}
-                  className="block h-full w-full object-contain"
-                />
+                  className="flex h-full items-center justify-center"
+                >
+                  <div
+                    className="w-full"
+                    style={{ maxWidth: `${topeDeAncho(foto)}px` }}
+                  >
+                    <FotoImg
+                      foto={foto}
+                      alt={altAutomatico(
+                        `${producto.nombre}, vista apaisada`,
+                        i + 1,
+                      )}
+                      sizes={sizesConTope(foto, [
+                        { desde: "768px", ancho: "min(100vw - 6rem, 70rem)" },
+                        { ancho: "100vw" },
+                      ])}
+                      className="block h-auto w-full"
+                    />
+                  </div>
+                </div>
               ))}
             >
               {consulta}

@@ -66,7 +66,7 @@ export function CierreConAlbum({
   etiqueta: string;
   /** Ancho sobre alto de la caja: el de la primera foto. */
   proporcion: number;
-  /** El tope del álbum en píxeles de CSS: el de la foto más chica. */
+  /** El tope del álbum en píxeles de CSS: el de la foto más grande. */
   ancho: number;
   /** Una foto por hijo, ya armada. */
   fotos: ReactNode;
