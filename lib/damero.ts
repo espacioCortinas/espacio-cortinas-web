@@ -33,14 +33,20 @@ import { altAutomatico } from "@/lib/texto";
  *
  * # La regla, con lo que hay en el catálogo
  *
- * 1. **El producto**: sus fotos, con la portada primera, y los videos de las
- *    variantes que no tienen texto propio —el Motorizado de Roller, el Riel
- *    motorizado—, con el nombre de la variante abajo. Lo acompañan el
- *    recuadro del producto y la celda de las variantes que no tienen nada que
- *    mostrar.
- * 2. **Cada variante con fotos, o con video y algo que decir**, arma su propio
+ * 1. **La portada, sola**: una foto, sin carrusel, con el recuadro del
+ *    producto al lado si lo tiene. Es lo primero que se ve del producto, y
+ *    la empresa la elige a propósito —la «1» de su carpeta—.
+ * 2. **El resto de las fotos del producto**, si quedan, en un álbum. Pasa en
+ *    los productos sin variantes —Bandas verticales, Compacta Blackout—; en
+ *    los que tienen, cada foto es de una variante y la carpeta del producto
+ *    guarda solo la portada.
+ * 3. **Cada variante con fotos, o con video y algo que decir**, arma su propio
  *    bloque: su nombre, lema y descripción, y su recuadro si lo tiene.
- * 3. **Las variantes que no tienen nada que mostrar** van juntas en una celda
+ * 4. **Los videos de una variante sin texto** —el Motorizado de Roller, el
+ *    Riel motorizado— van al final del álbum de la primera variante con
+ *    bloque, con su nombre abajo: solos serían una celda con un nombre y nada
+ *    más al lado de su video.
+ * 5. **Las variantes que no tienen nada que mostrar** van juntas en una celda
  *    de texto, con su nombre y su descripción: **ninguna se esconde**
  *    (`contenido/tipos.ts`, `VarianteConMedios`).
  *
@@ -50,13 +56,17 @@ import { altAutomatico } from "@/lib/texto";
  *
  * # Lo que da hoy
  *
- *     compacta-blackout, venecianas  1–3 | recuadro
- *     bandas-verticales              1–5 | recuadro
- *     toldos                         1–2 | recuadro      3 | variantes
- *     cortinas-tela                  1–2 | recuadro      3 + video riel motorizado | variantes
- *                                    riel 1–2 | Riel      barral 1–2 | Barral
- *     roller                         1–3 + video motorizado (sola)
- *                                    screen 1–2 | Screen  screen 3 | recuadro
+ * Con las fotos de antes del paso 2, que todavía tienen fotos de producto
+ * fuera de la portada:
+ *
+ *     compacta-blackout, venecianas  1 | recuadro      2–3 (sola)
+ *     bandas-verticales              1 | recuadro      2–5 (sola)
+ *     toldos                         1 | recuadro      2–3 | variantes
+ *     cortinas-tela                  1 | recuadro      2–3 | variantes
+ *                                    riel 1–2 + video riel motorizado | Riel
+ *                                    barral 1–2 | Barral
+ *     roller                         1 (sola)         2–3 (sola)
+ *                                    screen 1–2 | Screen  screen 3 + video motorizado | recuadro
  *                                    blackout 1 | Blackout  blackout 2 | recuadro
  *
  * Los proyectos no cambian: su galería sigue de a dos, foto por foto
@@ -192,29 +202,24 @@ export function filasDeProducto(producto: ProductoConMedios): Fila[] {
   const tieneTexto = (v: VarianteConMedios) =>
     Boolean(v.descripcion || v.lema || v.recuadro);
 
-  // 2 — Con bloque propio: las que tienen fotos, y las de solo video que
-  // tienen algo que decir. Una de solo video sin texto sería una celda con un
-  // nombre solo al lado de su video —el Motorizado de Roller—, así que su
-  // video va a la colección del producto, con el nombre abajo.
+  // 3 — Con bloque propio: las que tienen fotos, y las de solo video que
+  // tienen algo que decir.
   const conBloque = producto.variantes.filter(
     (v) => v.fotos.length > 0 || (v.video !== null && tieneTexto(v)),
   );
+  // 4 — Las de solo video sin texto, que van al álbum de otra.
   const sueltas = producto.variantes.filter(
     (v) => !conBloque.includes(v) && tieneMedios(v),
   );
-  // 3 — Las que no tienen nada que mostrar, para que se puedan leer.
+  const videosSueltos = sueltas.flatMap((v) =>
+    mediosDeVariante(producto, v, true),
+  );
+  // 5 — Las que no tienen nada que mostrar, para que se puedan leer.
   const listadas = producto.variantes.filter((v) => !tieneMedios(v));
 
-  // 1 — El producto.
-  const mediosDelProducto: CeldaDeMedio[] = [
-    ...producto.fotos.map((foto: Foto, i): CeldaDeMedio => ({
-      tipo: "medio",
-      medio: foto,
-      nombre: altAutomatico(producto.nombre, i + 1),
-    })),
-    ...sueltas.flatMap((v) => mediosDeVariante(producto, v, true)),
-  ];
-  const textosDelProducto: CeldaDeTexto[] = [
+  // Los textos del producto, en orden: el recuadro va con la portada, y la
+  // celda de variantes con lo que quede.
+  const textos: CeldaDeTexto[] = [
     ...(producto.recuadro
       ? [{ tipo: "recuadro" as const, recuadro: producto.recuadro }]
       : []),
@@ -223,16 +228,40 @@ export function filasDeProducto(producto: ProductoConMedios): Fila[] {
       : []),
   ];
 
-  const filas: Fila["celdas"][] = [
-    ...filasDeColeccion(
-      `Fotos de ${producto.nombre}`,
-      mediosDelProducto,
-      textosDelProducto,
-    ),
-  ];
+  const filas: Fila["celdas"][] = [];
+  const fotoDelProducto = (foto: Foto, i: number): CeldaDeMedio => ({
+    tipo: "medio",
+    medio: foto,
+    nombre: altAutomatico(producto.nombre, i + 1),
+  });
+  const [portada, ...resto] = producto.fotos;
 
-  for (const variante of conBloque) {
-    const textos: CeldaDeTexto[] = variante.recuadro
+  // 1 — La portada, sola, con el primer texto si lo hay.
+  if (portada) {
+    const texto = textos.shift();
+    const celda = fotoDelProducto(portada, 0);
+    filas.push(texto ? [celda, texto] : [celda]);
+  }
+
+  // 2 — El resto de las fotos del producto, en un álbum. Si no hay variante
+  // que reciba los videos sueltos, van acá.
+  const mediosDelResto = [
+    ...resto.map((foto, i) => fotoDelProducto(foto, i + 1)),
+    ...(conBloque.length === 0 ? videosSueltos : []),
+  ];
+  if (mediosDelResto.length > 0) {
+    filas.push(
+      ...filasDeColeccion(
+        `Más fotos de ${producto.nombre}`,
+        mediosDelResto,
+        textos.splice(0, 1),
+      ),
+    );
+  }
+
+  // 3 y 4 — Un bloque por variante; la primera recibe los videos sueltos.
+  conBloque.forEach((variante, i) => {
+    const suyos: CeldaDeTexto[] = variante.recuadro
       ? [
           { tipo: "variante", variante },
           { tipo: "recuadro", recuadro: variante.recuadro },
@@ -241,11 +270,17 @@ export function filasDeProducto(producto: ProductoConMedios): Fila[] {
     filas.push(
       ...filasDeColeccion(
         `Fotos de ${producto.nombre} ${variante.nombre}`,
-        mediosDeVariante(producto, variante, false),
-        textos,
+        [
+          ...mediosDeVariante(producto, variante, false),
+          ...(i === 0 ? videosSueltos : []),
+        ],
+        suyos,
       ),
     );
-  }
+  });
+
+  // 5 — Lo que quede sin foto al lado: la celda de variantes, sola, al final.
+  for (const texto of textos) filas.push([texto]);
 
   return alternar(filas);
 }
