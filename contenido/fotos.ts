@@ -7,23 +7,25 @@ import type { Foto } from "./tipos";
  * Dos clases de clave, y en las dos el orden del arreglo es el de la galería.
  * `<entidad>/<slug>`: las fotos de un producto o de un proyecto, y la primera
  * es la portada. `productos/<slug>/<clave de la variante>`: las de una
- * variante, que no tiene portada — decisión 48.
+ * variante, que no tiene portada — decisión 48. Y dos más de la decisión
+ * 67: `productos/<slug>/wpp`, las apaisadas para el link de WhatsApp, que
+ * no van al álbum; y `paginas/<nombre>`, las de una página como Nosotros.
  */
 export const fotos: Record<string, Foto[]> = {
   "productos/bandas-verticales": [
     {
       carpeta: "productos/bandas-verticales/1",
-      medidas: [480, 960, 1600, 2560],
+      medidas: [480, 960, 1600, 2420],
       formato: "webp",
-      ancho: 2560,
-      alto: 3200,
+      ancho: 2420,
+      alto: 3024,
     },
     {
       carpeta: "productos/bandas-verticales/2",
       medidas: [480, 960, 1600, 2560],
       formato: "webp",
       ancho: 2560,
-      alto: 1920,
+      alto: 3200,
     },
     {
       carpeta: "productos/bandas-verticales/3",
@@ -45,6 +47,29 @@ export const fotos: Record<string, Foto[]> = {
       formato: "webp",
       ancho: 2560,
       alto: 1920,
+    },
+    {
+      carpeta: "productos/bandas-verticales/6",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1920,
+    },
+    {
+      carpeta: "productos/bandas-verticales/7",
+      medidas: [480, 960],
+      formato: "webp",
+      ancho: 960,
+      alto: 1200,
+    },
+  ],
+  "productos/bandas-verticales/wpp": [
+    {
+      carpeta: "productos/bandas-verticales/wpp/1",
+      medidas: [480, 960, 1383],
+      formato: "webp",
+      ancho: 1383,
+      alto: 691,
     },
   ],
   "productos/compacta-blackout": [
@@ -73,24 +98,10 @@ export const fotos: Record<string, Foto[]> = {
   "productos/cortinas-tela": [
     {
       carpeta: "productos/cortinas-tela/1",
-      medidas: [480, 960, 1600, 2338],
+      medidas: [480, 960, 1600, 2004],
       formato: "webp",
-      ancho: 2338,
-      alto: 2922,
-    },
-    {
-      carpeta: "productos/cortinas-tela/2",
-      medidas: [480, 960, 1600, 2560],
-      formato: "webp",
-      ancho: 2560,
-      alto: 3413,
-    },
-    {
-      carpeta: "productos/cortinas-tela/3",
-      medidas: [480, 960, 1600, 2560],
-      formato: "webp",
-      ancho: 2560,
-      alto: 1920,
+      ancho: 2004,
+      alto: 2504,
     },
   ],
   "productos/cortinas-tela/barral": [
@@ -109,6 +120,43 @@ export const fotos: Record<string, Foto[]> = {
       alto: 822,
     },
   ],
+  "productos/cortinas-tela/blackout": [
+    {
+      carpeta: "productos/cortinas-tela/blackout/1",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3200,
+    },
+    {
+      carpeta: "productos/cortinas-tela/blackout/2",
+      medidas: [480, 960, 1600, 2138],
+      formato: "webp",
+      ancho: 2138,
+      alto: 2672,
+    },
+    {
+      carpeta: "productos/cortinas-tela/blackout/3",
+      medidas: [480, 960, 1600, 1686],
+      formato: "webp",
+      ancho: 1686,
+      alto: 2108,
+    },
+    {
+      carpeta: "productos/cortinas-tela/blackout/4",
+      medidas: [480, 960, 1600, 2462],
+      formato: "webp",
+      ancho: 2462,
+      alto: 3078,
+    },
+    {
+      carpeta: "productos/cortinas-tela/blackout/5",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3200,
+    },
+  ],
   "productos/cortinas-tela/riel": [
     {
       carpeta: "productos/cortinas-tela/riel/1",
@@ -124,28 +172,93 @@ export const fotos: Record<string, Foto[]> = {
       ancho: 2560,
       alto: 2047,
     },
-  ],
-  "productos/roller": [
     {
-      carpeta: "productos/roller/1",
-      medidas: [480, 960, 1600, 2418],
+      carpeta: "productos/cortinas-tela/riel/3",
+      medidas: [480, 960, 1600, 2338],
       formato: "webp",
-      ancho: 2418,
-      alto: 3024,
+      ancho: 2338,
+      alto: 2922,
     },
     {
-      carpeta: "productos/roller/2",
-      medidas: [480, 960, 1600, 2560],
-      formato: "webp",
-      ancho: 2560,
-      alto: 2047,
-    },
-    {
-      carpeta: "productos/roller/3",
+      carpeta: "productos/cortinas-tela/riel/4",
       medidas: [480, 960, 1600, 2560],
       formato: "webp",
       ancho: 2560,
       alto: 3413,
+    },
+    {
+      carpeta: "productos/cortinas-tela/riel/5",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1920,
+    },
+    {
+      carpeta: "productos/cortinas-tela/riel/6",
+      medidas: [480, 960, 1600, 2338],
+      formato: "webp",
+      ancho: 2338,
+      alto: 2922,
+    },
+    {
+      carpeta: "productos/cortinas-tela/riel/7",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3201,
+    },
+    {
+      carpeta: "productos/cortinas-tela/riel/8",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3200,
+    },
+  ],
+  "productos/cortinas-tela/wpp": [
+    {
+      carpeta: "productos/cortinas-tela/wpp/1",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1279,
+    },
+    {
+      carpeta: "productos/cortinas-tela/wpp/2",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1280,
+    },
+    {
+      carpeta: "productos/cortinas-tela/wpp/3",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1280,
+    },
+    {
+      carpeta: "productos/cortinas-tela/wpp/4",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1280,
+    },
+    {
+      carpeta: "productos/cortinas-tela/wpp/5",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1280,
+    },
+  ],
+  "productos/roller": [
+    {
+      carpeta: "productos/roller/1",
+      medidas: [480, 960, 1600, 2240],
+      formato: "webp",
+      ancho: 2240,
+      alto: 2800,
     },
   ],
   "productos/roller/blackout": [
@@ -162,6 +275,13 @@ export const fotos: Record<string, Foto[]> = {
       formato: "webp",
       ancho: 2560,
       alto: 2048,
+    },
+    {
+      carpeta: "productos/roller/blackout/3",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3200,
     },
   ],
   "productos/roller/screen": [
@@ -186,74 +306,233 @@ export const fotos: Record<string, Foto[]> = {
       ancho: 1728,
       alto: 2160,
     },
-  ],
-  "productos/toldos": [
     {
-      carpeta: "productos/toldos/1",
+      carpeta: "productos/roller/screen/4",
       medidas: [480, 960, 1600, 2418],
       formato: "webp",
       ancho: 2418,
       alto: 3024,
     },
     {
-      carpeta: "productos/toldos/2",
+      carpeta: "productos/roller/screen/5",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 2047,
+    },
+    {
+      carpeta: "productos/roller/screen/6",
       medidas: [480, 960, 1600, 2560],
       formato: "webp",
       ancho: 2560,
       alto: 3413,
     },
     {
-      carpeta: "productos/toldos/3",
-      medidas: [480, 960, 1600],
-      formato: "webp",
-      ancho: 1600,
-      alto: 900,
-    },
-  ],
-  "productos/venecianas-madera": [
-    {
-      carpeta: "productos/venecianas-madera/1",
+      carpeta: "productos/roller/screen/7",
       medidas: [480, 960, 1600, 2560],
       formato: "webp",
       ancho: 2560,
       alto: 3200,
     },
     {
-      carpeta: "productos/venecianas-madera/2",
+      carpeta: "productos/roller/screen/8",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3200,
+    },
+  ],
+  "productos/roller/wpp": [
+    {
+      carpeta: "productos/roller/wpp/1",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1280,
+    },
+  ],
+  "productos/toldos": [
+    {
+      carpeta: "productos/toldos/1",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3200,
+    },
+  ],
+  "productos/toldos/de-brazos": [
+    {
+      carpeta: "productos/toldos/de-brazos/1",
+      medidas: [480, 960, 1600, 2418],
+      formato: "webp",
+      ancho: 2418,
+      alto: 3024,
+    },
+    {
+      carpeta: "productos/toldos/de-brazos/2",
       medidas: [480, 960, 1600, 2560],
       formato: "webp",
       ancho: 2560,
       alto: 3413,
     },
     {
-      carpeta: "productos/venecianas-madera/3",
+      carpeta: "productos/toldos/de-brazos/3",
+      medidas: [480, 960, 1600],
+      formato: "webp",
+      ancho: 1600,
+      alto: 900,
+    },
+    {
+      carpeta: "productos/toldos/de-brazos/4",
+      medidas: [480, 720],
+      formato: "webp",
+      ancho: 720,
+      alto: 900,
+    },
+    {
+      carpeta: "productos/toldos/de-brazos/5",
+      medidas: [480, 960, 1600, 2220],
+      formato: "webp",
+      ancho: 2220,
+      alto: 2774,
+    },
+  ],
+  "productos/toldos/verticales": [
+    {
+      carpeta: "productos/toldos/verticales/1",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3200,
+    },
+    {
+      carpeta: "productos/toldos/verticales/2",
+      medidas: [480, 960, 1083],
+      formato: "webp",
+      ancho: 1083,
+      alto: 1353,
+    },
+    {
+      carpeta: "productos/toldos/verticales/3",
+      medidas: [480, 960, 1600, 2418],
+      formato: "webp",
+      ancho: 2418,
+      alto: 3024,
+    },
+  ],
+  "productos/toldos/wpp": [
+    {
+      carpeta: "productos/toldos/wpp/1",
+      medidas: [480, 960, 1280],
+      formato: "webp",
+      ancho: 1280,
+      alto: 640,
+    },
+    {
+      carpeta: "productos/toldos/wpp/2",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1281,
+    },
+    {
+      carpeta: "productos/toldos/wpp/3",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1280,
+    },
+    {
+      carpeta: "productos/toldos/wpp/4",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1281,
+    },
+  ],
+  "productos/venecianas": [
+    {
+      carpeta: "productos/venecianas/1",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3200,
+    },
+  ],
+  "productos/venecianas/madera": [
+    {
+      carpeta: "productos/venecianas/madera/1",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3200,
+    },
+    {
+      carpeta: "productos/venecianas/madera/2",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3413,
+    },
+    {
+      carpeta: "productos/venecianas/madera/3",
       medidas: [480, 960, 1600, 2560],
       formato: "webp",
       ancho: 2560,
       alto: 3413,
     },
   ],
-  "productos/venecianas-pvc": [
+  "productos/venecianas/pvc": [
     {
-      carpeta: "productos/venecianas-pvc/1",
+      carpeta: "productos/venecianas/pvc/1",
       medidas: [480, 960, 1600, 2560],
       formato: "webp",
       ancho: 2560,
       alto: 3199,
     },
     {
-      carpeta: "productos/venecianas-pvc/2",
+      carpeta: "productos/venecianas/pvc/2",
       medidas: [480, 960, 1600, 2560],
       formato: "webp",
       ancho: 2560,
       alto: 1920,
     },
     {
-      carpeta: "productos/venecianas-pvc/3",
+      carpeta: "productos/venecianas/pvc/3",
       medidas: [480, 960, 1600, 2560],
       formato: "webp",
       ancho: 2560,
       alto: 1920,
+    },
+    {
+      carpeta: "productos/venecianas/pvc/4",
+      medidas: [480, 960, 1200],
+      formato: "webp",
+      ancho: 1200,
+      alto: 1500,
+    },
+    {
+      carpeta: "productos/venecianas/pvc/5",
+      medidas: [480, 960],
+      formato: "webp",
+      ancho: 960,
+      alto: 1200,
+    },
+    {
+      carpeta: "productos/venecianas/pvc/6",
+      medidas: [480, 960, 1600, 2110],
+      formato: "webp",
+      ancho: 2110,
+      alto: 2636,
+    },
+  ],
+  "productos/venecianas/wpp": [
+    {
+      carpeta: "productos/venecianas/wpp/1",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 1280,
     },
   ],
   "proyectos/cowork-nordelta": [
@@ -298,6 +577,29 @@ export const fotos: Record<string, Foto[]> = {
       formato: "webp",
       ancho: 2560,
       alto: 3200,
+    },
+  ],
+  "paginas/nosotros": [
+    {
+      carpeta: "paginas/nosotros/1",
+      medidas: [480, 960, 1200],
+      formato: "webp",
+      ancho: 1200,
+      alto: 1500,
+    },
+    {
+      carpeta: "paginas/nosotros/2",
+      medidas: [480, 960, 1600, 2560],
+      formato: "webp",
+      ancho: 2560,
+      alto: 3200,
+    },
+    {
+      carpeta: "paginas/nosotros/3",
+      medidas: [480, 960, 1600, 2220],
+      formato: "webp",
+      ancho: 2220,
+      alto: 2776,
     },
   ],
 };
