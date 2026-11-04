@@ -52,10 +52,22 @@ function unirVariantes(producto: Producto): ProductoConMedios["variantes"] {
       ? `productos/${producto.slug}/${variante.clave}`
       : null;
 
+    // El video de antes, al lado de la carpeta (`motorizado.mp4`), y los que
+    // viven adentro de la carpeta de la variante, en su orden (decisión 67).
+    const suyos = clave
+      ? [
+          ...(videos[clave] ? [videos[clave]] : []),
+          ...Object.entries(videos)
+            .filter(([k]) => k.startsWith(`${clave}/`))
+            .map(([, video]) => video)
+            .sort((a, b) => (a.posicion ?? 0) - (b.posicion ?? 0)),
+        ]
+      : [];
+
     return {
       ...variante,
       fotos: (clave && fotos[clave]) || [],
-      video: (clave && videos[clave]) || null,
+      videos: suyos,
     };
   });
 }
@@ -65,6 +77,9 @@ export const todosLosProductos = (): ProductoConMedios[] =>
   unir("productos", productos).map((producto) => ({
     ...producto,
     variantes: unirVariantes(producto),
+    // Bajo su propia clave, que no es la de ninguna variante: las «wpp» no
+    // son parte del álbum (decisión 67).
+    fotosParaWhatsapp: fotos[`productos/${producto.slug}/wpp`] ?? [],
   }));
 
 /**
@@ -145,7 +160,7 @@ export const proyectosDestacados = (tope: number): ProyectoConMedios[] =>
  * peor, un hueco con una imagen que no carga.
  */
 export const fotoDe = (
-  entidad: "productos" | "proyectos",
+  entidad: "productos" | "proyectos" | "paginas",
   slug: string,
   posicion: number,
 ) => fotos[`${entidad}/${slug}`]?.[posicion - 1] ?? null;

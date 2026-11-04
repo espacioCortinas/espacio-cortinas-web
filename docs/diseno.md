@@ -465,8 +465,10 @@ páginas**: fuera de Inicio, el enlace «Inicio» es el logo circular. No se peg
 arriba al hacer scroll.
 
 **El botón flotante de WhatsApp.** Abajo a la derecha, en todas las páginas:
-«Chateá con nosotros», azul verdoso con el texto oscuro, como el del boceto. El
-pie deja aire abajo para que no tape su último enlace.
+un círculo azul verdoso con el logo oscuro. Fue «Chateá con nosotros», como el
+del boceto, hasta la decisión 67. Se esconde, volando hacia él, mientras un
+botón de WhatsApp de la página está a la vista. El pie deja aire abajo para
+que no tape su último enlace.
 
 **El pie**, en el teal oscuro con el texto blanco: el nombre escrito, los
 medios directos de contacto con su símbolo y los enlaces. El anillo de foco
@@ -479,6 +481,12 @@ pasa a blanco, porque el pizarra ahí da 1,66:1.
   archivo aguanta: en el teléfono sobra con cualquiera —375 × 3 = 1.125 px—, y
   ninguna portada tiene píxeles para un sangrado entero en escritorio (punto 2
   del análisis).
+- **En producto, una foto grande por vez, que se desliza** — decisión 67. La
+  portada abre la página, y cada variante tiene un álbum con su nombre arriba
+  y un contador debajo: «Screen · 3 / 8». Todas las diapositivas de un álbum
+  tienen la misma caja, la de la foto más alta, con tope en 4:5: nada se
+  recorta y la página no salta al pasar de una a otra. Los proyectos siguen
+  de a dos.
 - **Sin texto encima, nunca.** Los bloques se montan sobre el borde de una
   foto, opacos, y no tapan lo que la foto muestra.
 - **Sin borde y sin sombra.** Lo que separa es el aire o la línea del damero.
@@ -524,8 +532,8 @@ siguen valiendo con el boceto.
   variante, de Roller y de Cortinas de confección: los otros cinco no tienen
   margen.
 - **Damero: la proporción propia de cada foto.** Está permitido mezclar; el
-  damero no es una grilla rígida. Las 37 fotos publicadas son 19 verticales y
-  18 horizontales.
+  damero no es una grilla rígida. Desde la decisión 67 las fotos nuevas
+  llegan casi todas en 4:5, y las apaisadas —las «wpp»— van al cierre.
 - Donde la proporción es fija, contenedor con proporción y `object-fit: cover`.
   Nunca deformar.
 - Siempre con `ancho` y `alto` para que no salte el contenido al cargar.
@@ -539,7 +547,8 @@ siguen valiendo con el boceto.
 Radios de esquina chicos: 2 px en campos y botones. `rounded-2xl` en todo es
 una de las marcas más reconocibles de la plantilla genérica. **Lo único redondo
 es el logo circular**, que es una imagen, y el anillo de foco del enlace que lo
-lleva, que sigue su borde.
+lleva, que sigue su borde; y, desde la decisión 67, el botón flotante de
+WhatsApp, que es un círculo con el logo.
 
 **Sin sombras.** La separación se logra con espacio, con la línea del damero o
 con un cambio de color de fondo. Las tarjetas flotantes con sombra difusa son la
@@ -558,14 +567,16 @@ es uno que hay que mantener coherente con todos los demás.
 | Columna de página       | `components/ui/contenedor.tsx`                                                 | una                                                                    |
 | Foto                    | `components/foto.tsx`                                                          | cinco proporciones, tres recortes                                      |
 | Damero                  | `components/damero.tsx`, con la regla en `lib/damero.ts`                       | producto y proyecto, y sus piezas sueltas para los listados y Nosotros |
-| Video mudo              | `components/video-mudo.tsx`                                                    | una: en bucle, en su celda                                             |
+| Álbum                   | `components/carrusel.tsx`                                                      | una: se desliza, con el contador y dos botones debajo                  |
+| Cierre con álbum        | `components/cierre-con-album.tsx`                                              | una: las fotos «wpp» pasando solas, con el bloque de consulta encima   |
+| Video mudo              | `components/video-mudo.tsx`                                                    | una: en bucle, en su celda o en un álbum                               |
 | Tarjeta de producto     | `components/tarjeta-producto.tsx`                                              | una: la portada con su bloque azul verdoso — solo Inicio               |
 | Tarjeta de proyecto     | `components/tarjeta-proyecto.tsx`                                              | fila y tarjeta — dos                                                   |
 | Listado de proyectos    | `components/listado-proyectos.tsx`                                             | una: el primero en fila, el resto en grilla                            |
 | Formulario de contacto  | `components/formulario-contacto.tsx`                                           | una: sin hidratar, escribiendo, enviando, enviada, fallida             |
 | Medios de contacto      | `components/medios-de-contacto.tsx`                                            | número de WhatsApp, email, red y «Llamar» — cuatro                     |
 | Símbolos de contacto    | `components/iconos-de-contacto.tsx`                                            | WhatsApp, Instagram y el sobre — tres, y ninguno más                   |
-| WhatsApp flotante       | `components/whatsapp.tsx`                                                      | una                                                                    |
+| WhatsApp flotante       | `components/whatsapp-flotante.tsx`                                             | una: el círculo, que se esconde hacia el botón de la página            |
 | Logos                   | `components/logo.tsx`                                                          | el grande de la apertura y el circular de la barra — dos               |
 | Encabezado, barra y pie | `components/encabezado.tsx`, `components/navegacion.tsx`, `components/pie.tsx` | una                                                                    |
 
@@ -636,12 +647,15 @@ marca», y la marca de la empresa es un azul verdoso. Lo que protegía es otra
 cosa: el azul saturado de las interfaces genéricas. El de la empresa es apagado
 y va solo de superficie.
 
-**La regla 3 tiene una excepción, que no es un radio de interfaz**: el logo
-circular, y el anillo de foco que lo sigue.
+**La regla 3 tiene dos excepciones**: el logo circular, y el anillo de foco que
+lo sigue, que no son un radio de interfaz; y el botón flotante de WhatsApp,
+un círculo con el logo, que tapa menos foto que un rectángulo con texto —
+decisión 67—.
 
 **La regla 4 tiene una excepción, y es una sola**: los medios directos de
 contacto —WhatsApp, el email e Instagram— llevan su símbolo al lado del enlace,
-en `/contacto` y en el pie. No son adorno: dicen qué se abre al tocarlo. Van en
+en `/contacto` y en el pie, y el logo de WhatsApp va también en el botón
+«Consultar por WhatsApp» y en el flotante (decisión 67). No son adorno: dicen qué se abre al tocarlo. Van en
 el color del texto que los rodea, nunca en el verde de WhatsApp ni en el degradé
 de Instagram, y no se extienden a ningún otro dato; «Llamar» no lleva, porque la
 palabra ya lo dice — decisión 65.
@@ -676,6 +690,25 @@ sola, que es lo único que una foto no puede (decisión 40), y los de proyecto s
 recorridos de cámara (decisión 51). La decisión 48 anota qué muestra cada
 archivo, porque no es lo que dice su nombre.
 
+**Lo que se mueve desde la decisión 67**, y por qué:
+
+- **El álbum de un producto se mueve cuando alguien lo mueve**: con el dedo,
+  el trackpad, las flechas o sus botones. No pasa solo. Con movimiento
+  reducido, los botones saltan de foto sin deslizar.
+- **El álbum del cierre, el de las fotos «wpp», pasa solo cada 3 segundos**,
+  con un fundido. Es la única excepción a «nada se mueve solo», y lleva las
+  tres cosas que la hacen aceptable: se frena fuera de pantalla, no pasa con
+  movimiento reducido y tiene «Pausar las fotos» (WCAG 2.2.2).
+- **El círculo de WhatsApp vuela hasta el logo del botón** cuando un
+  «Consultar por WhatsApp» queda a la vista: en curva, achicándose hasta el
+  tamaño de ese logo, y se desvanece al llegar, en 450 ms; el logo del botón
+  lo recibe con un pulso. Reaparece con un rebote corto cuando el botón sale
+  de pantalla. Dice adónde fue, y evita dos WhatsApp en la misma pantalla.
+  Solo vuela si alguien movió la página; con movimiento reducido solo se
+  desvanece.
+- **El logo del botón gira apenas** al pasar el mouse, enfocarlo o tocarlo:
+  150 ms, una transición de estado.
+
 Respetar `prefers-reduced-motion` en todo lo demás también.
 
 ---
@@ -690,10 +723,14 @@ llegar desde un teléfono.
 - Zonas táctiles de 44 px como mínimo. El logo circular de la barra, que es más
   chico, no baja de los 24 que pide WCAG
 - **La barra de enlaces, en una fila**, sin menú desplegable, también a 320
+- **El álbum de un producto se recorre con el pulgar**: una foto grande por
+  vez, que se desliza, y el álbum entero ocupa lo mismo que una foto. La regla
+  era de la decisión 50, se perdió con la 66 y volvió con la 67
 - **WhatsApp siempre alcanzable sin buscarlo**: desde la Fase 4.7, el botón
-  flotante, en todas las páginas. Además está en la apertura de Inicio, de
-  Contacto y de cada producto y proyecto, y en el cierre de cada página
-  (decisión 61)
+  flotante, en todas las páginas —un círculo con el logo desde la decisión
+  67—, que se esconde mientras un botón de WhatsApp de la página está a la
+  vista. Además está en la apertura de Inicio, de Contacto y de cada producto
+  y proyecto, y en el cierre de cada página (decisión 61)
 - Se verifica en 320, 375, 768, 1024 y 1440
 
 ---

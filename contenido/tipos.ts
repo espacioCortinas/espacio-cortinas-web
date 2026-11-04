@@ -143,18 +143,20 @@ export type Video = {
 
 /**
  * El recuadro de las páginas de producto del boceto de la empresa — Fase 4.7:
- * un título corto y una o dos frases, que van en una celda del damero, al
- * lado de una foto.
+ * un título corto y una o dos frases. El del producto va en la apertura,
+ * debajo de la descripción; el de una variante, debajo de la suya.
  *
- *     manuales y automatizadas
- *     Los géneros brindan calidez a los ambientes. Generan buena acústica…
+ *     translúcidas o blackout
+ *     La luz justa para cada momento del día. Orden y amplitud…
  *
- * El título va en minúscula, como en el boceto. **Puede tener saltos de
- * renglón** —`\n`— y se respetan: el de las venecianas es una lista de medidas,
- * una por renglón.
+ * **El título es opcional** desde la decisión 67: el que más se repetía en el
+ * boceto, «manuales y automatizadas», pasó a ser la sección de los videos de
+ * cada página —«Manual o motorizado»—, y esos recuadros quedaron con sus
+ * frases solas. El título va en minúscula, como en el boceto, y **puede tener
+ * saltos de renglón** —`\n`—: el de las venecianas es una lista de medidas.
  */
 export type Recuadro = {
-  titulo: string;
+  titulo?: string;
   texto: string;
 };
 
@@ -252,14 +254,18 @@ export type ConFotos<T> = T & { fotos: Foto[] };
  * Una variante con sus medios ya resueltos.
  *
  * Los dos campos pueden venir vacíos y eso es lo normal, no un caso de borde:
- * de las nueve variantes del catálogo, cuatro tienen fotos, dos tienen video y
- * tres no tienen nada. Una variante sin medios sigue siendo una opción que el
- * visitante tiene que poder leer, así que se dibuja igual — con su nombre y,
- * si la tiene, su descripción.
+ * una variante sin medios sigue siendo una opción que el visitante tiene que
+ * poder leer, así que se dibuja igual — con su nombre y, si la tiene, su
+ * descripción.
+ *
+ * **Los videos son una lista** desde la decisión 67: las variantes con álbum
+ * traen varios —recorridos, la cortina subiendo—, en el orden de su carpeta.
+ * Los de antes, uno por variante motorizada y al lado de la carpeta
+ * (`motorizado.mp4`), siguen valiendo: son una lista de uno.
  */
 export type VarianteConMedios = Variante & {
   fotos: Foto[];
-  video: Video | null;
+  videos: Video[];
 };
 
 /**
@@ -278,6 +284,14 @@ export type VarianteConMedios = Variante & {
  */
 export type ProductoConMedios = ConFotos<Omit<Producto, "variantes">> & {
   variantes: VarianteConMedios[];
+
+  /**
+   * Las fotos apaisadas que la empresa eligió para el link de WhatsApp —las
+   * «wpp» de la carpeta—: **no van en el álbum**, sino en el cierre de la
+   * página, al lado del botón, pasando solas (decisión 67). Las del producto
+   * y las de sus variantes, juntas. Vacío hasta que el script las publique.
+   */
+  fotosParaWhatsapp: Foto[];
 };
 
 /**

@@ -2348,6 +2348,10 @@ en una grilla de 2×2— y no en una tira. `components/galeria.tsx` se borró al
 cerrar la etapa 5; el código está en el historial. Lo de abajo sigue valiendo
 como análisis de cómo se recorre una galería con el pulgar.
 
+**Y volvió en parte con la decisión 67**: en producto, la celda de foto del
+damero es un álbum que se desliza, con el mismo `scroll-snap` de acá, más un
+contador y dos botones. Es de a una foto por vez y no asoma la siguiente.
+
 **Fecha:** septiembre de 2026, Fase 4.4. **Reemplaza la grilla de dos módulos de
 la decisión 48**, que valía para una galería apilada.
 
@@ -3153,10 +3157,10 @@ ninguna foto de un cliente adentro, pero todo lo que se publica se revisa.
 desde ahí lleva el logo, centrado en una banda de papel abajo. Los recortes, los
 pesos y los nombres de archivo de esta entrada son los de antes de la banda.
 
-**La foto de Inicio se eligió por ser «la que abre Inicio», y desde el
-07/10/2026 ya no lo es**: la apertura pasó a `roller/screen/3` (decisión 66).
-La línea de `contenido/compartir.ts` se revisa cuando se rehagan las imágenes
-con la banda nueva.
+**Desde la decisión 67, la de cada producto es su foto «wpp» de número más
+bajo**: las apaisadas que la empresa eligió para esto. La de Inicio volvió a
+ser la que abre Inicio, `roller/screen/3`, y `/nosotros` tiene la suya. La
+tabla de abajo es la de septiembre de 2026.
 
 **Fecha:** septiembre de 2026. **Reemplaza a la decisión 62** y vuelve a lo que
 pedía la decisión 1.
@@ -3333,13 +3337,12 @@ de clientes, aunque salgan de archivos que ya estaban limpios.
 
 ### 64. La imagen para compartir lleva el logo, centrado en una banda de papel abajo
 
-**Va a cambiar la banda, por la decisión 66**: con el rediseño, el papel de
-cal se fue del sitio. Se eligió el 07/10/2026 que la banda pase al fondo
-nuevo, `#EDEFF0`, con el logo de línea; las imágenes se rehacen cuando las
-fotos de los productos sean las definitivas. Hasta entonces, **las publicadas
-siguen siendo las de esta entrada**: crema y el logo viejo, el del círculo
-amarillo. La forma —la banda abajo, de 150 px, con el logo centrado— no
-cambia.
+**La banda cambió con la decisión 67**: desde noviembre de 2026 es del fondo
+del sitio, `#EDEFF0`, con el logo de línea, como se eligió el 07/10/2026. Las
+doce se rehicieron una sola vez, con las fotos de los productos ya
+definitivas. La forma —la banda abajo, de 150 px, con el logo centrado— no
+cambió. Lo de abajo describe la banda crema y el logo viejo, del círculo
+amarillo.
 
 **Fecha:** septiembre de 2026. **Matiza la decisión 63**, que la dejaba sin
 logo.
@@ -3431,6 +3434,10 @@ Twitter dan 200, `og:image` distinta, `image/jpeg` y 1200 × 630.
 
 ### 65. El número se escribe completo, los medios directos llevan su símbolo, y llamar es para los profesionales
 
+**Matizada por la decisión 67**: el botón «Consultar por WhatsApp» también
+lleva el logo de WhatsApp, por la misma razón —dice qué se abre al tocarlo—,
+y el botón flotante es un círculo con el logo.
+
 **Fecha:** septiembre de 2026, después de la Fase 4.6. **Abre una excepción a
 la regla 4 de `docs/diseno.md`.**
 
@@ -3512,6 +3519,11 @@ en `#211F20`, 14,69:1 sobre el papel; y la ficha JSON-LD sigue diciendo
 ---
 
 ### 66. La dirección visual es la del boceto de la empresa, y «Cal» se va
+
+**Matizada por la decisión 67**: en producto, la portada abre la página, la
+celda de foto del damero es un álbum que se desliza —uno por variante, con su
+nombre arriba—, los videos van juntos en «Manual o motorizado» y el flotante
+es un círculo. Las imágenes para compartir ya tienen la banda nueva.
 
 **Fecha:** octubre de 2026, Fase 4.7. **Reemplaza a las decisiones 43, 44 y
 50**, y matiza la 45, la 46, la 47, la 49, la 51 y la 52: cada una lo dice
@@ -3692,11 +3704,11 @@ tres de Nosotros, que repiten fotos de otras páginas.
 
 #### Lo que queda pendiente
 
-- **Las imágenes para compartir siguen siendo las de «Cal»**: la banda es del
-  crema viejo y lleva **el logo viejo**, el del círculo amarillo —son del
-  28/09 y no se rehicieron con el rediseño— (decisiones 63 y 64). **La banda
-  nueva quedó elegida el 07/10/2026: el fondo `#EDEFF0` con el logo de
-  línea.** El de línea porque en un chat, al tamaño de un teléfono, se lee, y
+- ~~**Las imágenes para compartir siguen siendo las de «Cal»**~~ — **rehechas
+  en la decisión 67.** La banda es del crema viejo y lleva **el logo viejo**,
+  el del círculo amarillo —son del 28/09 y no se rehicieron con el
+  rediseño— (decisiones 63 y 64). **La banda nueva quedó elegida el
+  07/10/2026: el fondo `#EDEFF0` con el logo de línea.** El de línea porque en un chat, al tamaño de un teléfono, se lee, y
   el circular queda de unos 30 px con las letras caladas ilegibles; el gris y
   no el blanco porque el blanco se funde con la burbuja de un mensaje
   recibido y encandila en modo oscuro. Rehacerlas suma unos 1,2 MB a git, así
@@ -3711,6 +3723,174 @@ texto por debajo de 4,5:1, también sobre el azul verdoso y en el pie, medido
 con un control automático de cada texto contra su fondo real; el menú en una
 fila en todos los anchos; `npm run build`, `tsc`, eslint y prettier limpios;
 `npm run preview` con todas las rutas en 200 y una inexistente en 404; y
+`npm run fotos:revisar` en verde.
+
+---
+
+### 67. La página de producto: la portada arriba, un álbum que se desliza por variante, y los videos en «Manual o motorizado»
+
+**Fecha:** octubre y noviembre de 2026, Fase 4.7, rama `galeria-y-fotos`.
+**Matiza la decisión 66** —el damero se queda, pero su celda de foto pasa a
+ser un álbum que se desliza— y **vuelve sobre la 50**, que había resuelto el
+teléfono con una tira y la 66 había reemplazado. Matiza también la 63 y la 64
+—qué foto lleva cada imagen para compartir— y la 65 —el logo de WhatsApp en
+el botón—.
+
+**El planteo.** Con el damero de la 66, en el teléfono cada foto era una
+celda a lo ancho de la pantalla, una debajo de la otra: Roller medía 6.825 px
+a 375, y cada foto nueva lo alargaba unos 470 más. Era el problema que la 50
+había resuelto con la tira, y que volvió cuando la 66 cambió la tira por el
+damero del boceto: el boceto no tenía versión de teléfono, y al reemplazarla
+se borró de `docs/diseno.md` la regla «la galería se recorre con el pulgar».
+Además la empresa mandó fotos nuevas —39 fotos, 9 videos—, que se suman a
+las que había.
+
+#### Cómo se eligió
+
+Primero se probaron tres formas con el material real, solo en el teléfono, y
+se midió Roller con cada una: **una tira** (5.145 px), **las verticales de a
+dos** (6.776 px: las sueltas de Roller alternan orientación y no se
+emparejaban) y **una escalonada** al 80 % del ancho (6.428 px). Después quien
+desarrolla miró sitios donde la foto es lo principal —Dezeen, Flickr, Airbnb,
+ArchDaily, Hunter Douglas— y eligió **la foto grande que se desliza**, la de
+Airbnb o un posteo de Instagram. A partir de ahí la página se ajustó en tres
+vueltas, con capturas, hasta el esquema de abajo.
+
+#### El esquema, igual en todos los productos
+
+```
+APERTURA     lema y nombre · portada · descripción (y recuadro) · botón
+VARIANTE     ── su nombre, a todo el ancho ──
+             [ su álbum, solo fotos ] | su descripción y las frases de su recuadro
+…            una por cada variante con fotos
+             otras variantes: las que no tienen fotos, nombradas
+MOTORIZADO   ── Manual o motorizado ──
+             [ todos los videos del producto ] | cómo se accionan
+CIERRE       álbum de las fotos «wpp», que pasa solo, con el bloque de consulta encima
+```
+
+- **La portada abre la página**, al lado del nombre y del botón: en la 66
+  era la primera celda del damero y quedaba lejos de las dos cosas que la
+  presentan. En el teléfono el orden es título, portada, descripción y botón:
+  la primera pantalla muestra el nombre y la foto juntos.
+- **Un álbum por variante, entero, con su nombre arriba.** Se probó partir el
+  álbum en dos —la mitad al lado del primer texto, el resto al lado del
+  segundo— y se descartó: no se sabía de qué variante era cada pedazo. El
+  contador lo repite: «Screen · 3 / 8».
+- **Todos los videos van juntos**, en «Manual o motorizado»: los nueve
+  nuevos son de sistemas motorizados, como los dos de antes. Con eso, la
+  variante que solo tenía video —el Motorizado de Roller, el Riel motorizado—
+  queda dicha ahí y no se nombra de nuevo. El texto de la sección es nuestro:
+  «Todas se pueden accionar a mano, con cadena o manija, o con motor: a
+  control remoto, desde una tecla o desde el celular».
+- **«Automatizado» pasa a «motorizado»**, a pedido de la empresa. El título
+  «manuales y automatizadas», que el boceto ponía en casi todos los
+  recuadros, se fue: ese tema es la sección de los videos, y los recuadros
+  quedaron con sus frases. `Recuadro.titulo` es opcional.
+- **Un producto sin variantes con fotos** —Bandas verticales, Compacta
+  Blackout— tiene un solo álbum, y su recuadro va al lado del álbum y no en la
+  apertura: son las páginas con menos texto (`recuadroEnLaApertura()`).
+
+Qué va en cada celda lo decide `lib/damero.ts`; el álbum es
+`components/carrusel.tsx`.
+
+#### El álbum
+
+- **El deslizamiento lo hace el navegador**, con `scroll-snap`, como la tira
+  de la 50: el dedo, el trackpad o las flechas del teclado. **Lo que agrega
+  el JavaScript** es el contador y dos botones ‹ › para quien usa mouse,
+  siempre a la vista y debajo de la foto, nunca encima. El contador no se
+  puede hacer con CSS en todos los navegadores: `::scroll-marker` existe en
+  Chrome y no en Safari.
+- **No pasa solo.**
+- **Nada se recorta.** La caja es la misma para todas las diapositivas, así la
+  página no salta al pasar de una a otra, y sale de la foto más alta, con
+  tope en 4:5. Un álbum de videos que mezcla apaisados y verticales va en una
+  caja cuadrada: con la del más alto, los apaisados quedaban con media caja
+  de aire.
+- **Ninguna foto pasa de su tope** (regla 4 de `CLAUDE.md`).
+- Roller pasó de 6.825 a unos 5.400 px en el teléfono, con más fotos que
+  antes.
+
+#### El cierre: las fotos «wpp»
+
+La empresa marca con «wpp» en el nombre las apaisadas que quiere en el link de
+WhatsApp. **Van en un álbum chico que pasa solo cada 3 segundos**, con el
+bloque «Consultanos por…» montado sobre su borde de abajo, como el del logo en
+la apertura de Inicio: opaco, sin texto sobre la foto. Es la única cosa del
+sitio que se mueve sin que nadie la mueva, y por eso se frena fuera de
+pantalla y con la pestaña oculta, no pasa con movimiento reducido, y tiene un
+botón «Pausar las fotos», que WCAG (2.2.2) pide para lo que se mueve solo más
+de cinco segundos. El álbum mide lo que permite su foto más grande y cada una
+se frena en su propio tope (`components/cierre-con-album.tsx`).
+
+**La imagen para compartir de cada producto es su «wpp» de número más bajo**
+—decisión 63—. Las doce se rehicieron una sola vez con la banda elegida el
+07/10/2026: `#EDEFF0` y el logo de línea, en vez de la crema y el logo viejo
+(decisión 64). Pesan 1.056 kB las doce, y `/nosotros` tiene la suya.
+
+#### WhatsApp: el logo en el botón, y el círculo que vuela hacia él
+
+- **«Consultar por WhatsApp» lleva el logo**, en el color del texto del botón.
+  Extiende la excepción de la decisión 65: dice qué se abre al tocarlo. Al
+  pasar el mouse, enfocarlo o tocarlo, el logo gira apenas, 150 ms.
+- **El flotante pasa a ser un círculo con el logo**, en el azul verdoso: tapa
+  menos foto. Es la segunda excepción a «nada redondo» (regla 3), después del
+  logo circular.
+- **Cuando un botón de WhatsApp queda a la vista, el círculo vuela hasta el
+  logo de ese botón y se posa encima**: viaja en una curva suave, se achica
+  hasta que su logo mide lo mismo que el del botón y recién en el último tramo
+  se desvanece, en 450 ms; al llegar, el logo del botón hace un pulso chico,
+  como si lo recibiera. Cuando el botón sale de pantalla, el círculo reaparece
+  en su lugar con un rebote corto, en 250 ms. La primera versión iba en línea
+  recta hacia el centro del botón y se desvanecía a mitad de camino: se veía
+  arrastrada, y quien desarrolla pidió algo más prolijo. Es animación con
+  función (regla 12): no hay dos WhatsApp en la misma pantalla, y dice adónde
+  fue. **Solo vuela si alguien movió la página**; con movimiento reducido solo
+  se desvanece. Escondido es `inert`. Está en
+  `components/whatsapp-flotante.tsx`, con la API de animaciones del
+  navegador.
+
+#### El contenido que cambió con las fotos
+
+- **Las fotos nuevas se suman a las que había.** La «1» de cada carpeta
+  reemplaza la portada, y la portada vieja pasa al álbum. Las fotos de
+  producto que no eran la portada pasaron a su variante, a pedido de la
+  empresa: las de Roller a Screen, las de Cortinas de confección a Riel, las
+  de Toldos a De brazos. Son los mismos bytes con otra ruta: git las ve como
+  renombres y no suman peso.
+- **Venecianas de madera y de PVC son un solo producto**, «Venecianas», con
+  PVC, Madera y Aluminio, que todavía no tiene fotos. Las dos direcciones
+  viejas redirigen, permanentes, a `/productos/venecianas` (`next.config.ts`),
+  porque circulan en mensajes (decisión 10).
+- **Toldos suma la variante Verticales**, con un texto provisorio nuestro.
+- **Nosotros tiene tres fotos propias**: antes repetía fotos de otras páginas.
+- **Una variante puede tener varios videos**, dentro de su carpeta
+  (`VarianteConMedios.videos`). Tres de Roller traían una toma apaisada
+  metida en un cuadro vertical, con el 68 % del cuadro en negro: se
+  recortaron antes de publicar, como el de Riel motorizado en la 66.
+- **Se revisaron una por una antes de publicar** (decisión 42). Una de Roller
+  Screen tiene portarretratos en un estante y no se publicó: quedó en
+  `fotos-originales/pendientes/`. Después se sacaron dos repetidas: la
+  portada nueva de Cortinas era la misma foto que `riel/1`, y De brazos tenía
+  la misma toma dos veces.
+- **Lo nuevo suma unos 52 MB a git**: unos 13 son videos y el resto, unas 45
+  fotos en cuatro medidas. Con eso, la decisión abierta sobre dónde viven las
+  fotos se vuelve más urgente.
+
+#### Lo que queda pendiente
+
+- La foto de Roller Screen con portarretratos, si la empresa la quiere
+  retocada.
+- Las descripciones de PVC y Madera, y el texto de Toldos Verticales.
+
+**Verificado** con `npm run preview`: las catorce páginas en 200, una que no
+existe en 404 y las venecianas viejas en 308; las páginas de producto,
+Inicio, Nosotros, Contacto y el proyecto en 320, 375, 768, 1024 y 1440 sin
+scroll horizontal ni errores de JavaScript; el álbum, el contador y los
+botones; el álbum del cierre y su pausa, también con movimiento reducido; el
+círculo, en tres páginas y con movimiento reducido; cada imagen para
+compartir con el user-agent de WhatsApp, 1200 × 630, JPEG base; y
 `npm run fotos:revisar` en verde.
 
 ---
@@ -3736,11 +3916,15 @@ sitio usa, que llega a 1.200. Un vector seguiría sirviendo para imprenta, y
 sigue sin haber una versión clara para fondo oscuro: por eso el pie escribe el
 nombre en vez de poner el logo.
 
-**Lo que dejó pendiente el rediseño** — decisión 66: las imágenes para
-compartir siguen siendo las de «Cal», con la banda del crema viejo y el logo
-del círculo amarillo. La banda nueva ya está elegida —`#EDEFF0` con el logo de
-línea—; rehacerlas suma peso a git para siempre, así que se hace una vez, con
-las fotos de los productos definitivas.
+~~**Lo que dejó pendiente el rediseño**~~ — resuelto en la decisión 67: las
+imágenes para compartir se rehicieron con la banda `#EDEFF0` y el logo de
+línea.
+
+**Pendiente de la empresa, desde la decisión 67:** una foto de Roller Screen
+con portarretratos en un estante, que no se publicó
+(`fotos-originales/pendientes/`); las descripciones de las variantes PVC y
+Madera de Venecianas, que hoy tienen el nombre solo; y el texto de Toldos
+Verticales, que es provisorio y nuestro.
 
 **No hay ninguna foto 4:5 de repuesto.** Las siete que existen son exactamente
 las siete portadas, así que cualquier portada que haya que retirar obliga a
@@ -3750,7 +3934,8 @@ cuatro 4:5, dos de Roller y dos de Cortinas de confección. Los otros cinco
 productos siguen sin repuesto.
 
 **Dónde viven las fotos cuando se cargue el archivo histórico.** Unas 300 fotos
-por cuatro medidas son del orden de 240 MB, y git guarda todas las versiones de
+por cuatro medidas son del orden de 240 MB —las de la decisión 67, unas 45
+fotos y 9 videos, sumaron 52 MB—, y git guarda todas las versiones de
 cada archivo que se reemplace. Las opciones son git a secas, `git-lfs`, o
 dejarlas fuera del repositorio y subirlas en el despliegue. No bloquea nada
 hasta que haya que cargar el archivo — decisión 36.
@@ -3773,7 +3958,7 @@ de Empresa de Google, que es donde ese dato importa de verdad (Fase 5).
 reemplazado en la 4.6 por una sola imagen para todo el sitio —el logo centrado
 sobre el papel, decisión 62— y reemplazado otra vez por la decisión 63: **cada
 página tiene la suya, una foto**, en `public/compartir/`, con el logo en una
-banda de papel abajo desde la 64. Ya no hay imagen de reserva como archivo
+banda abajo desde la 64, del gris del fondo desde la 67. Ya no hay imagen de reserva como archivo
 aparte: una página sin la suya usa la de Inicio.
 
 Cuando aparezca una decisión no contemplada durante la implementación: preguntar,

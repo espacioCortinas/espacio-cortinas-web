@@ -90,10 +90,10 @@ export function metadataDePagina({
 
   /*
    * La imagen que se ve al compartir el enlace: **una foto de cortina,
-   * distinta en cada página, con el logo en una banda de papel abajo** —
-   * decisiones 63 y 64. Es lo que motivó elegir Next y no un SPA (decisión 1):
-   * el negocio se difunde reenviando mensajes, y una foto de cortina se abre y
-   * un logo solo no.
+   * distinta en cada página, con el logo en una banda abajo, del gris del
+   * fondo del sitio** — decisiones 63, 64 y 66. Es lo que motivó elegir Next
+   * y no un SPA (decisión 1): el negocio se difunde reenviando mensajes, y
+   * una foto de cortina se abre y un logo solo no.
    *
    * Es apaisada, 1200 × 630, que es lo que hace que WhatsApp la muestre grande
    * y no como miniatura al costado del texto. **Y el logo va centrado.**

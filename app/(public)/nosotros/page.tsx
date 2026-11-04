@@ -49,13 +49,16 @@ export const metadata: Metadata = metadataDePagina({
 
 /**
  * El texto alternativo de la foto de una sección: el nombre del producto o el
- * título del proyecto, y la posición, como en el resto del sitio.
+ * título del proyecto, y la posición, como en el resto del sitio. Las fotos
+ * propias de la página son trabajos de la empresa.
  */
 function altDe({ entidad, slug, posicion }: SeccionDeNosotros["foto"]) {
   const nombre =
     entidad === "productos"
       ? productoPorSlug(slug)?.nombre
-      : proyectoPorSlug(slug)?.titulo;
+      : entidad === "proyectos"
+        ? proyectoPorSlug(slug)?.titulo
+        : "Un trabajo de Espacio Cortinas";
   return altAutomatico(nombre ?? "Espacio Cortinas", posicion);
 }
 

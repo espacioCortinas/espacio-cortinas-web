@@ -1,10 +1,12 @@
 import type { CSSProperties, ReactNode } from "react";
 
+import { Carrusel } from "@/components/carrusel";
 import { FotoImg } from "@/components/foto";
 import { VideoMudo } from "@/components/video-mudo";
 import type { Foto } from "@/contenido/tipos";
-import type { Celda, CeldaDeMedio, Fila } from "@/lib/damero";
+import type { Celda, CeldaDeColeccion, CeldaDeMedio, Fila } from "@/lib/damero";
 import { esVideo, sizesConTope, topeDeAncho } from "@/lib/fotos";
+import { leyendaDeVideo } from "@/lib/texto";
 
 /**
  * El damero de las páginas de producto y de proyecto: la grilla de 2×2 con
@@ -49,13 +51,23 @@ import { esVideo, sizesConTope, topeDeAncho } from "@/lib/fotos";
 
 const LINEA = "border-acento";
 
-export function Damero({ filas }: { filas: Fila[] }) {
+export function Damero({
+  filas,
+  prioridad = true,
+}: {
+  filas: Fila[];
+  /**
+   * Si la primera foto va con prioridad. No en producto, donde la que abre la
+   * página es la portada, en la apertura (decisión 67).
+   */
+  prioridad?: boolean;
+}) {
   return (
     <MarcoDelDamero>
       {filas.map((fila, i) => (
         // La primera foto del damero está en la primera pantalla en casi todos
         // los anchos: va con prioridad, como iba antes la portada.
-        <FilaDelDamero key={i} fila={fila} prioridad={i === 0} />
+        <FilaDelDamero key={i} fila={fila} prioridad={prioridad && i === 0} />
       ))}
     </MarcoDelDamero>
   );
@@ -127,7 +139,10 @@ function FilaDelDamero({
   // Dos medios en una fila no se invierten: no hay texto que alternar, y
   // cambiarlos de lado solo desordenaría la numeración de las fotos.
   const invertida =
-    fila.invertida && segunda !== undefined && segunda.tipo !== "medio";
+    fila.invertida &&
+    segunda !== undefined &&
+    segunda.tipo !== "medio" &&
+    segunda.tipo !== "coleccion";
 
   return (
     <FilaConLineas
@@ -153,39 +168,46 @@ function CeldaDelDamero({
     case "medio":
       return <CeldaConMedio celda={celda} sola={sola} prioridad={prioridad} />;
 
-    case "recuadro":
+    case "coleccion":
       return (
-        <CeldaDeTexto>
-          {/* En minúscula y con sus saltos de renglón, como en el boceto: el
-              de las venecianas es una lista de medidas, una por renglón. */}
-          <h3 className="text-titulo whitespace-pre-line">
-            {celda.recuadro.titulo}
-          </h3>
-          {/* Equilibrado: centrado y de dos o tres renglones, sin equilibrar
-              dejaba una palabra sola abajo —«trabajo.», «amplitud.»—. */}
-          <p className="text-texto-suave mt-5 max-w-[32ch] text-balance">
-            {celda.recuadro.texto}
-          </p>
-        </CeldaDeTexto>
+        <CeldaConColeccion celda={celda} sola={sola} prioridad={prioridad} />
       );
 
-    case "variante":
+    case "encabezado":
+      // La franja con el nombre, arriba de su álbum y a todo el ancho: es lo
+      // que dice de qué variante es cada álbum, también en el teléfono.
+      return (
+        <hgroup className="px-5 py-8 text-center md:py-10">
+          {celda.lema && (
+            <p className="text-texto-suave text-subtitulo">{celda.lema}</p>
+          )}
+          <h3 className="mt-1 text-titulo">{celda.nombre}</h3>
+        </hgroup>
+      );
+
+    case "texto":
       return (
         <CeldaDeTexto>
-          <hgroup>
-            {celda.variante.lema && (
-              <p className="text-texto-suave text-subtitulo">
-                {celda.variante.lema}
-              </p>
-            )}
-            <h3 className="mt-1 text-titulo">{celda.variante.nombre}</h3>
-          </hgroup>
-          {celda.variante.descripcion && (
+          {celda.descripcion && (
             // El párrafo va alineado a la izquierda aunque la celda esté
             // centrada: son tres o cuatro renglones, y centrados se leen peor.
-            <p className="mt-6 max-w-[40ch] text-left">
-              {celda.variante.descripcion}
-            </p>
+            <p className="max-w-[40ch] text-left">{celda.descripcion}</p>
+          )}
+          {celda.recuadro && (
+            <div className={celda.descripcion ? "mt-8" : ""}>
+              {/* En minúscula y con sus saltos de renglón, como en el boceto:
+                  el de las venecianas es una lista de medidas. */}
+              {celda.recuadro.titulo && (
+                <p className="text-acento font-semibold whitespace-pre-line">
+                  {celda.recuadro.titulo}
+                </p>
+              )}
+              {/* Equilibrado: sin equilibrar dejaba una palabra sola abajo
+                  —«trabajo.», «amplitud.»—. */}
+              <p className="text-texto-suave mt-2 max-w-[32ch] text-balance">
+                {celda.recuadro.texto}
+              </p>
+            </div>
           )}
         </CeldaDeTexto>
       );
@@ -193,7 +215,9 @@ function CeldaDelDamero({
     case "variantes":
       return (
         <CeldaDeTexto>
-          <h3 className="text-titulo">Variantes</h3>
+          <h3 className="text-titulo">
+            {celda.otras ? "Otras variantes" : "Variantes"}
+          </h3>
           <p className="text-texto-suave mt-3 max-w-[32ch] text-balance">
             Son opciones del mismo producto, no productos distintos. Se eligen
             al presupuestar.
@@ -257,7 +281,7 @@ function CeldaConMedio({
       <div className="flex h-full flex-col items-center justify-center px-5 py-8 md:p-10">
         {etiqueta}
         {/*
-          `VideoMudo` trae su tope y su pie con la duración. Su `<figure>` va
+          `VideoMudo` trae su tope y su leyenda con la duración. Su `<figure>` va
           a lo ancho de esta caja —hasta el tope— y centrada: como hijo de una
           caja flexible tomaría el ancho del video, que antes de cargar es el
           de cualquier video sin datos, 300 px, y la fila saltaría al cargar.
@@ -277,6 +301,130 @@ function CeldaConMedio({
       sola={sola}
       prioridad={prioridad}
     />
+  );
+}
+
+/**
+ * Una colección en su celda: un carrusel con una diapositiva por foto o video
+ * — decisión 67.
+ *
+ * **La caja es la misma para todas las diapositivas**, para que la página no
+ * salte al pasar de una a otra, y sale de la foto más alta de la colección,
+ * con tope en 4:5: la proporción de las portadas. Un álbum de videos que
+ * mezcla orientaciones va en una caja cuadrada. Ninguna se recorta: la que
+ * es más baja que la caja queda centrada, con el gris del fondo arriba y
+ * abajo; la más angosta, con el gris a los costados, como un video vertical.
+ *
+ * En el teléfono la caja va a lo ancho de la pantalla; en escritorio, en su
+ * media celda con 40 px de aire y sin pasar de 44 rem de alto, como cada foto
+ * antes del carrusel. Y ninguna foto pasa de su tope (`CLAUDE.md`, regla 4).
+ */
+function CeldaConColeccion({
+  celda,
+  sola,
+  prioridad,
+}: {
+  celda: CeldaDeColeccion;
+  sola: boolean;
+  prioridad: boolean;
+}) {
+  const { medios, nombre, corto } = celda;
+  const proporciones = medios.map(({ medio }) => medio.ancho / medio.alto);
+  // Un álbum de videos que mezcla apaisados y verticales va en una caja
+  // cuadrada: con la del más alto, los apaisados —que son casi todos— quedaban
+  // con media caja de aire arriba y abajo. Las fotos de un álbum son casi
+  // todas verticales y siguen con la regla de siempre.
+  const mezclaVideos =
+    medios.every(({ medio }) => esVideo(medio)) &&
+    proporciones.some((p) => p > 1) &&
+    proporciones.some((p) => p < 1);
+  const caja = mezclaVideos ? 1 : Math.max(Math.min(...proporciones), 4 / 5);
+  // Si alguna lleva pie, todas reservan su lugar: así los botones de abajo no
+  // cambian de altura al pasar de una foto a un video.
+  const conPie = medios.some(({ medio, pie }) => pie || esVideo(medio));
+
+  return (
+    <div className="flex h-full flex-col items-center justify-center md:p-10">
+      <div
+        className="w-full md:w-[min(100%,calc(44rem*var(--caja)))]"
+        style={{ "--caja": caja } as CSSProperties}
+      >
+        <Carrusel etiqueta={nombre} corto={corto}>
+          {medios.map((medio, i) => (
+            <Diapositiva
+              key={i}
+              celda={medio}
+              caja={caja}
+              sola={sola}
+              conPie={conPie}
+              prioridad={prioridad && i === 0}
+            />
+          ))}
+        </Carrusel>
+      </div>
+    </div>
+  );
+}
+
+function Diapositiva({
+  celda,
+  caja,
+  sola,
+  conPie,
+  prioridad,
+}: {
+  celda: CeldaDeMedio;
+  caja: number;
+  sola: boolean;
+  conPie: boolean;
+  prioridad: boolean;
+}) {
+  const { medio, nombre, pie } = celda;
+  // Qué parte del ancho de la caja ocupa: entera si es tan ancha como ella o
+  // más, menos si es más angosta. El alto queda en la proporción del medio.
+  const fraccion = Math.min(1, medio.ancho / medio.alto / caja);
+  const ancho = `${(fraccion * 100).toFixed(3)}%`;
+  const caja44 = `${(44 * caja).toFixed(3)}rem`;
+
+  return (
+    <div>
+      <div
+        className="flex items-center justify-center"
+        style={{ aspectRatio: caja }}
+      >
+        <div style={{ width: ancho, maxWidth: `${topeDeAncho(medio)}px` }}>
+          {esVideo(medio) ? (
+            <VideoMudo video={medio} etiqueta={nombre} conPie={false} />
+          ) : (
+            <FotoImg
+              foto={medio}
+              alt={nombre}
+              sizes={sizesConTope(medio, [
+                {
+                  desde: "768px",
+                  ancho: sola
+                    ? `calc(min(100vw - 5rem, ${caja44}) * ${fraccion.toFixed(3)})`
+                    : `calc(min(50vw - 5rem, ${caja44}) * ${fraccion.toFixed(3)})`,
+                },
+                { ancho: `calc(100vw * ${fraccion.toFixed(3)})` },
+              ])}
+              prioridad={prioridad}
+              className="block h-auto w-full"
+            />
+          )}
+        </div>
+      </div>
+      {conPie && (
+        <div className="min-h-11 px-5 pt-2 text-center md:px-0">
+          {pie && <p className="text-acento font-semibold">{pie}</p>}
+          {esVideo(medio) && (
+            <p className="text-texto-suave text-meta">
+              {leyendaDeVideo(medio)}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 

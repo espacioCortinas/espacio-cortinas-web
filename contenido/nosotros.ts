@@ -22,8 +22,12 @@
 export type SeccionDeNosotros = {
   titulo: string;
   texto: string;
-  /** La foto que la acompaña: la carpeta del producto o proyecto, y la posición. */
-  foto: { entidad: "productos" | "proyectos"; slug: string; posicion: number };
+  /** La foto que la acompaña: su carpeta en el manifiesto, y la posición. */
+  foto: {
+    entidad: "productos" | "proyectos" | "paginas";
+    slug: string;
+    posicion: number;
+  };
 };
 
 export const nosotros = {
@@ -36,9 +40,9 @@ export const nosotros = {
     "regulación de la luz natural, con tecnología en cada detalle.",
 
   /**
-   * DEL BOCETO, las tres. Las fotos son nuestras: la mejor del archivo para lo
-   * que dice qué hacen y cómo; un detalle de producto para la calidad; y el
-   * primer trabajo de oficina para el asesoramiento a profesionales.
+   * DEL BOCETO, las tres. Las fotos son las tres que eligió la empresa para
+   * esta página, en noviembre de 2026, sin un orden pedido: antes repetían
+   * fotos de otras páginas (decisión 67).
    */
   secciones: [
     {
@@ -49,7 +53,7 @@ export const nosotros = {
         "resultados. Siempre a disposición del cliente, estudiamos cada " +
         "solución. Brindamos asesoramiento para particulares y " +
         "profesionales. Servicio de posventa.",
-      foto: { entidad: "productos", slug: "cortinas-tela", posicion: 1 },
+      foto: { entidad: "paginas", slug: "nosotros", posicion: 1 },
     },
     {
       titulo: "Visión",
@@ -57,14 +61,14 @@ export const nosotros = {
         "Preservando la calidad de nuestros productos, garantizamos como " +
         "resultado un producto confiable y duradero. Incorporamos tecnología " +
         "y confort en nuestros productos.",
-      foto: { entidad: "productos", slug: "compacta-blackout", posicion: 1 },
+      foto: { entidad: "paginas", slug: "nosotros", posicion: 2 },
     },
     {
       titulo: "Cuidamos los detalles",
       texto:
         "Contamos con un servicio de asesoramiento a domicilio, acompañando a " +
         "profesionales en sus proyectos y a clientes particulares.",
-      foto: { entidad: "proyectos", slug: "cowork-nordelta", posicion: 2 },
+      foto: { entidad: "paginas", slug: "nosotros", posicion: 3 },
     },
   ] as SeccionDeNosotros[],
 

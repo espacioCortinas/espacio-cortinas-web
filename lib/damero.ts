@@ -1,122 +1,114 @@
 import type {
-  Foto,
   Medio,
   ProductoConMedios,
   ProyectoConMedios,
   Recuadro,
   VarianteConMedios,
 } from "@/contenido/tipos";
+import { manualOMotorizado } from "@/contenido/productos";
 import { esVideo } from "@/lib/fotos";
 import { altAutomatico } from "@/lib/texto";
 
 /**
  * El damero de las páginas de producto y de proyecto — Fase 4.7.
  *
- * Es la grilla de 2×2 del boceto de la empresa: celdas de foto y de texto
+ * Es la grilla del boceto de la empresa: celdas de foto y de texto
  * alternadas, con líneas finas, de borde a borde. **Acá se decide qué va en
  * cada celda; `components/damero.tsx` solo lo dibuja.** Separado porque la
  * regla no es trivial y así se lee entera, sin JSX en el medio.
  *
- * # La regla, con lo que hay en el catálogo
+ * # En producto, el mismo esquema para todos — decisión 67
  *
- * El boceto tiene una página por producto con la misma forma: la portada al
- * lado del recuadro, y abajo dos fotos más. El catálogo no es tan parejo —hay
- * productos con variantes, con video, con cinco fotos—, así que la regla es:
+ * La portada no va acá: abre la página, en la apertura, con el título, la
+ * descripción y el botón. Debajo, siempre en este orden:
  *
- * 1. **La portada, con el recuadro del producto**, si lo tiene. Es la primera
- *    fila del boceto.
- * 2. **Cada variante con texto propio** —lema o recuadro: Screen y Blackout de
- *    Roller, que en el boceto tenían página propia— **arma su propio 2×2**: su
- *    primera foto con su nombre, lema y descripción; su segunda foto con su
- *    recuadro.
- * 3. **Las demás variantes van todas juntas en una celda de texto**, con su
- *    nombre y su descripción, y sus fotos y videos quedan sueltos con el nombre
- *    de la variante arriba. Así no hay celdas grandes con una sola palabra
- *    adentro, y **ninguna variante se esconde**, aunque no tenga nada que
- *    mostrar (`contenido/tipos.ts`, `VarianteConMedios`). La que tiene fotos o
- *    video y no tiene descripción no entra a la celda: ya está nombrada arriba
- *    de sus medios, y en la celda era un nombre solo, sin nada abajo, al lado
- *    de su propio video —el Motorizado de Roller—. Si no queda ninguna para
- *    listar, no hay celda.
- * 4. **Lo suelto va de a dos**: primero los medios de esas variantes, después
- *    el resto de las fotos del producto. La celda de variantes se queda con el
- *    primero, que es de una de ellas.
+ *     ── Screen ─────────────────────────────  el nombre, a todo el ancho
+ *     [ álbum de Screen ] | descripción y frases   uno por variante con fotos
+ *     ── Blackout ───────────────────────────
+ *     descripción y frases | [ álbum de Blackout ]
+ *     otras variantes: las que no tienen fotos, nombradas
+ *     ── Manual o motorizado ────────────────
+ *     [ todos los videos ] | cómo se accionan      solo si hay videos
  *
- * **Las filas alternan el lado**: en la primera el medio va a la izquierda, en
- * la segunda a la derecha, y así. Es lo que hace que se lea como un damero y no
- * como una lista con fotos al costado. En el teléfono, con una sola columna, el
- * medio va siempre arriba de su texto.
+ * - **El nombre de la variante va arriba de su álbum**, en su propia franja:
+ *   en el teléfono, con el texto al costado de la foto, no se sabía de qué
+ *   variante era cada álbum. Y el contador lo repite: «Screen · 3 / 8».
+ * - **Un álbum por variante, entero**, con sus fotos y nada más.
+ * - **Los videos van todos juntos** en «Manual o motorizado»: todos muestran
+ *   una cortina motorizada moviéndose sola, que es lo que una foto no puede
+ *   (decisión 40). Las variantes que solo tenían video —el Motorizado de
+ *   Roller, el Riel motorizado— quedan dichas ahí, con su nombre debajo de
+ *   su video, y no se nombran de nuevo.
+ * - **Un producto sin variantes con fotos** —Bandas verticales, Compacta
+ *   Blackout— tiene un solo álbum, con el resto de sus fotos y sin franja: su
+ *   nombre ya está arriba, en la apertura.
  *
- * # Lo que da hoy
+ * **Las filas de álbum y texto alternan el lado** en escritorio; en el
+ * teléfono, el álbum va siempre arriba de su texto.
  *
- *     compacta-blackout, venecianas  portada | recuadro      2 | 3
- *     bandas-verticales              portada | recuadro      2 | 3      4 | 5
- *     toldos                         portada | recuadro      2 | variantes      3
- *     cortinas-tela                  portada | recuadro      riel 1 | variantes
- *                                    riel 2 | video          barral 1 | barral 2      2 | 3
- *     roller                         screen 1 | Screen       screen 2 | recuadro
- *                                    blackout 1 | Blackout   blackout 2 | recuadro
- *                                    video | 1      2 | 3
+ * Los proyectos no cambian: su galería sigue de a dos, foto por foto
+ * (decisión 51).
  */
+
+/** Una foto o un video, con su nombre accesible y lo que va debajo. */
+export type CeldaDeMedio = {
+  tipo: "medio";
+  medio: Medio;
+  /** El texto alternativo de una foto, o el nombre accesible de un video. */
+  nombre: string;
+  /** El nombre de la variante, debajo de un video en «Manual o motorizado». */
+  pie?: string;
+};
 
 /** Una celda del damero. */
 export type Celda =
+  | CeldaDeMedio
   | {
-      tipo: "medio";
-      medio: Medio;
-      /** El texto alternativo de una foto, o el nombre accesible de un video. */
+      tipo: "coleccion";
+      /** Para un lector de pantalla: «Fotos de Roller Screen». */
       nombre: string;
-      /** El nombre de la variante, cuando el medio es de una. */
-      pie?: string;
+      /** Lo que acompaña al contador: «Screen · 3 / 8». */
+      corto?: string;
+      medios: CeldaDeMedio[];
     }
-  | { tipo: "recuadro"; recuadro: Recuadro }
-  | { tipo: "variante"; variante: VarianteConMedios }
-  | { tipo: "variantes"; variantes: VarianteConMedios[] };
+  | {
+      /** La franja con el nombre, a todo el ancho, arriba de un álbum. */
+      tipo: "encabezado";
+      lema?: string;
+      nombre: string;
+    }
+  | {
+      /** La descripción de una variante y las frases de su recuadro. */
+      tipo: "texto";
+      descripcion?: string;
+      recuadro?: Recuadro;
+    }
+  | { tipo: "variantes"; variantes: VarianteConMedios[]; otras: boolean };
 
-export type CeldaDeMedio = Extract<Celda, { tipo: "medio" }>;
+export type CeldaDeColeccion = Extract<Celda, { tipo: "coleccion" }>;
+type CeldaVisual = CeldaDeMedio | CeldaDeColeccion;
 
 /**
- * Una fila: un medio y su texto, dos medios, o una celda sola que ocupa todo el
- * ancho. **El medio va siempre primero**, que es como queda en el teléfono;
- * `invertida` lo pasa a la derecha en escritorio.
+ * Una fila: lo visual y su texto, dos medios, o una celda sola que ocupa todo
+ * el ancho. **Lo visual va siempre primero**, que es como queda en el
+ * teléfono; `invertida` lo pasa a la derecha en escritorio.
  */
 export type Fila = {
-  celdas: [Celda] | [CeldaDeMedio, Celda];
+  celdas: [Celda] | [CeldaVisual, Celda];
   invertida: boolean;
 };
 
-/** Las celdas de los medios de una variante, en orden: fotos y después video. */
-function mediosDeVariante(
-  producto: ProductoConMedios,
-  variante: VarianteConMedios,
-  conPie: boolean,
-): CeldaDeMedio[] {
-  const nombre = `${producto.nombre} ${variante.nombre}`;
-  const pie = conPie ? variante.nombre : undefined;
-  const fotos: CeldaDeMedio[] = variante.fotos.map((foto, i) => ({
-    tipo: "medio",
-    medio: foto,
-    nombre: altAutomatico(nombre, i + 1),
-    pie,
-  }));
-  const video: CeldaDeMedio[] = variante.video
-    ? [
-        {
-          tipo: "medio",
-          medio: variante.video,
-          // El video de una variante muestra siempre lo mismo: la cortina
-          // moviéndose sola, que es lo que una foto no puede (decisión 40).
-          nombre: `${nombre}: la cortina abriéndose y cerrándose sola`,
-          pie,
-        },
-      ]
-    : [];
-  return [...fotos, ...video];
-}
-
-/** Las filas, numeradas para alternar el lado. */
+/**
+ * Las filas, numeradas para alternar el lado. **Cuentan solo las de dos
+ * celdas**: una franja de nombre o una celda sola no tiene lado, y si contara
+ * todos los álbumes caerían del mismo.
+ */
 function alternar(filas: Fila["celdas"][]): Fila[] {
-  return filas.map((celdas, i) => ({ celdas, invertida: i % 2 === 1 }));
+  let dobles = 0;
+  return filas.map((celdas) => ({
+    celdas,
+    invertida: celdas.length === 2 && dobles++ % 2 === 1,
+  }));
 }
 
 /** Lo suelto, de a dos. El último, si queda solo, ocupa la fila entera. */
@@ -129,76 +121,123 @@ function deADos(sueltos: CeldaDeMedio[]): Fila["celdas"][] {
   return filas;
 }
 
+/** Un álbum y su texto, en una fila; sin texto, el álbum solo. */
+function filaDeAlbum(
+  album: CeldaDeColeccion,
+  texto?: Extract<Celda, { tipo: "texto" }>,
+): Fila["celdas"] {
+  return texto ? [album, texto] : [album];
+}
+
+/**
+ * Dónde va el recuadro del producto. **En la apertura**, debajo de la
+ * descripción, cuando el producto tiene variantes con fotos: sus álbumes ya
+ * llevan su propio texto. **Con el álbum** cuando no tiene —Bandas
+ * verticales, Compacta Blackout—: son las páginas con menos texto, y así el
+ * álbum no queda solo (decisión 67).
+ */
+export function recuadroEnLaApertura(producto: ProductoConMedios): boolean {
+  const conFotos = producto.variantes.some((v) => v.fotos.length > 0);
+  return conFotos || producto.fotos.length <= 1;
+}
+
 export function filasDeProducto(producto: ProductoConMedios): Fila[] {
   const filas: Fila["celdas"][] = [];
 
-  const fotoDelProducto = (foto: Foto, posicion: number): CeldaDeMedio => ({
+  const conFotos = producto.variantes.filter((v) => v.fotos.length > 0);
+  // Las que no tienen nada que mostrar se nombran, para que se puedan leer.
+  // Las que solo tienen video ya quedan dichas en «Manual o motorizado».
+  const sinNada = producto.variantes.filter(
+    (v) => v.fotos.length === 0 && v.videos.length === 0,
+  );
+
+  // El resto de las fotos del producto: la portada va en la apertura.
+  const resto = producto.fotos.slice(1).map((foto, i): CeldaDeMedio => ({
     tipo: "medio",
     medio: foto,
-    nombre: altAutomatico(producto.nombre, posicion),
-  });
-
-  const [portada, ...resto] = producto.fotos;
-  const fotosDelProducto = resto.map((foto, i) => fotoDelProducto(foto, i + 2));
-
-  // 1 — La portada con el recuadro. Sin recuadro, la portada va con el resto.
-  if (portada && producto.recuadro) {
-    filas.push([
-      fotoDelProducto(portada, 1),
-      { tipo: "recuadro", recuadro: producto.recuadro },
-    ]);
-  } else if (portada) {
-    fotosDelProducto.unshift(fotoDelProducto(portada, 1));
-  }
-
-  // 2 — Las variantes con texto propio y algo que mostrar: su propio 2×2.
-  const conTextoPropio = (v: VarianteConMedios) =>
-    Boolean(v.lema || v.recuadro);
-  const propias = producto.variantes.filter(
-    (v) => conTextoPropio(v) && (v.fotos.length > 0 || v.video),
-  );
-  const juntas = producto.variantes.filter((v) => !propias.includes(v));
-
-  const sueltos: CeldaDeMedio[] = [];
-
-  for (const variante of propias) {
-    const [primero, segundo, ...demas] = mediosDeVariante(
-      producto,
-      variante,
-      false,
-    );
-    filas.push([primero, { tipo: "variante", variante }]);
-    if (variante.recuadro) {
-      filas.push(
-        segundo
-          ? [segundo, { tipo: "recuadro", recuadro: variante.recuadro }]
-          : [{ tipo: "recuadro", recuadro: variante.recuadro }],
-      );
-    } else if (segundo) {
-      sueltos.push(segundo);
+    nombre: altAutomatico(producto.nombre, i + 2),
+  }));
+  if (resto.length > 0) {
+    // Con variantes, estas fotos necesitan su franja para no confundirse con
+    // las de la primera variante; sin variantes, el nombre está arriba.
+    if (conFotos.length > 0) {
+      filas.push([{ tipo: "encabezado", nombre: "Más fotos" }]);
     }
-    sueltos.push(...demas);
+    filas.push(
+      filaDeAlbum(
+        {
+          tipo: "coleccion",
+          nombre: `Fotos de ${producto.nombre}`,
+          medios: resto,
+        },
+        // El recuadro de un producto sin variantes acompaña a su álbum: son
+        // las páginas con menos texto, y así el álbum no queda solo.
+        producto.recuadro && !recuadroEnLaApertura(producto)
+          ? { tipo: "texto", recuadro: producto.recuadro }
+          : undefined,
+      ),
+    );
   }
 
-  // 3 y 4 — Las demás variantes juntas, con el primer medio de ellas; después,
-  // lo suelto de a dos.
-  for (const variante of juntas) {
-    sueltos.push(...mediosDeVariante(producto, variante, true));
+  // Un bloque por variante con fotos.
+  for (const variante of conFotos) {
+    const nombre = `${producto.nombre} ${variante.nombre}`;
+    filas.push([
+      { tipo: "encabezado", lema: variante.lema, nombre: variante.nombre },
+    ]);
+    const tieneTexto = variante.descripcion || variante.recuadro;
+    filas.push(
+      filaDeAlbum(
+        {
+          tipo: "coleccion",
+          nombre: `Fotos de ${nombre}`,
+          corto: variante.nombre,
+          medios: variante.fotos.map((foto, i) => ({
+            tipo: "medio",
+            medio: foto,
+            nombre: altAutomatico(nombre, i + 1),
+          })),
+        },
+        tieneTexto
+          ? {
+              tipo: "texto",
+              descripcion: variante.descripcion,
+              recuadro: variante.recuadro,
+            }
+          : undefined,
+      ),
+    );
   }
-  sueltos.push(...fotosDelProducto);
 
-  // A la celda van las que tienen algo que decir y las que no tienen nada que
-  // mostrar, que si no desaparecerían. Las otras ya están nombradas arriba de
-  // sus fotos o de su video.
-  const listadas = juntas.filter(
-    (v) => v.descripcion || (v.fotos.length === 0 && !v.video),
+  if (sinNada.length > 0) {
+    filas.push([
+      { tipo: "variantes", variantes: sinNada, otras: conFotos.length > 0 },
+    ]);
+  }
+
+  // Todos los videos, juntos, con el nombre de su variante debajo.
+  const videos: CeldaDeMedio[] = producto.variantes.flatMap((variante) =>
+    variante.videos.map((video, i) => ({
+      tipo: "medio" as const,
+      medio: video,
+      nombre: `${producto.nombre} ${variante.nombre} — video ${i + 1}`,
+      pie: variante.nombre,
+    })),
   );
-  if (listadas.length > 0) {
-    const primero = sueltos.shift();
-    const celda: Celda = { tipo: "variantes", variantes: listadas };
-    filas.push(primero ? [primero, celda] : [celda]);
+  if (videos.length > 0) {
+    filas.push([{ tipo: "encabezado", nombre: manualOMotorizado.titulo }]);
+    filas.push(
+      filaDeAlbum(
+        {
+          tipo: "coleccion",
+          nombre: `Videos de ${producto.nombre}`,
+          corto: "Video",
+          medios: videos,
+        },
+        { tipo: "texto", descripcion: manualOMotorizado.texto },
+      ),
+    );
   }
-  filas.push(...deADos(sueltos));
 
   return alternar(filas);
 }
@@ -208,9 +247,9 @@ export function filasDeProducto(producto: ProductoConMedios): Fila[] {
  * carpeta, con los videos en su lugar (decisión 51). Los proyectos no tienen
  * variantes ni recuadro, y el texto va arriba, en la apertura.
  *
- * **Las fotos y los videos se cuentan por separado** —«foto 3», «video 1»—,
- * como en la galería: un lector de pantalla que oye «foto 7» esperando la
- * séptima foto y recibe un video pierde la cuenta.
+ * **Las fotos y los videos se cuentan por separado** —«foto 3», «video 1»—:
+ * un lector de pantalla que oye «foto 7» esperando la séptima foto y recibe un
+ * video pierde la cuenta.
  */
 export function filasDeProyecto(proyecto: ProyectoConMedios): Fila[] {
   let fotos = 0;

@@ -103,18 +103,20 @@ export default function Inicio() {
    *
    * Vive en la carpeta de Screen porque el script solo publica fotos de un
    * producto o de un proyecto, así que también se ve en la página de Roller.
-   * Hasta octubre era `venecianas-madera/2`, que sigue en su galería.
+   * Hasta octubre era `venecianas-madera/2`, que desde noviembre es
+   * `venecianas/madera/2` y sigue en su galería.
    *
    * Va en 4:5 para que en el teléfono el lema entre en la primera pantalla.
    */
   const fotoApertura = fotoDe("productos", "roller/screen", 3);
 
   /*
-   * El bloque de arquitectos y oficinas. Las cinco fotos de bandas verticales
-   * son oficinas reales, y esta es horizontal, que es lo que entra bien al
-   * lado de un texto.
+   * El bloque de arquitectos y oficinas. Las fotos de bandas verticales son
+   * oficinas reales, y esta es horizontal, que es lo que entra bien al lado
+   * de un texto. Es la misma de siempre: era la 2 hasta noviembre de 2026,
+   * cuando entró la portada nueva y la vieja pasó al álbum (decisión 67).
    */
-  const fotoProfesionales = fotoDe("productos", "bandas-verticales", 2);
+  const fotoProfesionales = fotoDe("productos", "bandas-verticales", 3);
 
   /* La red que el boceto pone en la apertura. Si algún día se va, no se dibuja. */
   const instagram = contacto.redes.find((red) => red.nombre === "Instagram");

@@ -113,7 +113,9 @@ La distinción tiene que quedar clara para el visitante:
 - Lema: una o dos palabras en minúscula, arriba del nombre — «filtrar u
   oscurecer»
 - Descripción breve
-- Recuadro: un título y dos o tres frases — «manuales y automatizadas»
+- Recuadro: dos o tres frases, y a veces un título —«translúcidas o
+  blackout»—. Desde la decisión 67, lo de manual o motorizado es una sección
+  propia, con los videos
 - Variantes (ej. Cortinas de confección → riel, riel motorizado, barral; Toldos
   → de brazos, motorizado)
 - Fotos, con una de portada

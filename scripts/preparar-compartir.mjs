@@ -26,23 +26,23 @@
  *     │   la foto, recortada: 1200 × 480       │
  *     │                                        │
  *     ├────────────────────────────────────────┤
- *     │           ● espacio  (papel)           │  la banda: 1200 × 150
+ *     │           ● espacio  (fondo)           │  la banda: 1200 × 150
  *     └────────────────────────────────────────┘
  *
- * **Una foto recortada y achicada, y abajo una banda de papel con el logo,
- * centrado.** Nada más: ni texto, ni nada sobre la foto. Lo que WhatsApp
+ * **Una foto recortada y achicada, y abajo una banda del color del fondo del
+ * sitio con el logo, centrado.** Nada más: ni texto, ni nada sobre la foto. Lo que WhatsApp
  * cortaba mal en la decisión 59 eran elementos contra los bordes; WhatsApp
  * recorta desde el centro, así que lo que va centrado sobrevive, hasta en la
  * miniatura cuadrada. Y la banda tapa el piso, que es la peor parte de casi
  * todas las fotos. Es la única forma de poner algo sobre una foto que admite
- * `docs/diseno.md`: una banda opaca, del color del papel.
+ * `docs/diseno.md`: una banda opaca, del color del fondo.
  *
  * **Parte del archivo más grande publicado de esa foto**, el que dice
  * `medidas` en el manifiesto, y **nunca agranda**: si el recorte mide menos de
  * 1200 × 480, esa foto no sirve y el script se niega. No lee
  * `fotos-originales/`, que no se versiona: así cualquiera que clone el
  * repositorio rehace los mismos bytes. El logo tampoco se agranda: el archivo
- * mide 504 px de ancho y en la banda va a 340.
+ * mide más de 1.200 px de ancho y en la banda va a 340.
  *
  * **JPEG, y no WebP**: el soporte de WebP en los que arman las vistas previas
  * es desparejo. Y JPEG **base, no progresivo**, por la misma razón.
@@ -116,11 +116,16 @@ const LOGO_ANCHO = 340;
 const FOTO_ALTO = ALTO - BANDA_ALTO;
 
 /**
- * El papel de cal de `app/globals.css` (`--color-fondo`). Copiado a propósito,
- * por la misma razón que `SESGO`: lo publicado cambia solo cuando alguien lo
- * decide acá.
+ * El fondo del sitio, `--color-fondo` de `app/globals.css`: el gris del boceto
+ * de la empresa —decisión 66—. Hasta noviembre de 2026 era `#f6f2ec`, el papel
+ * de cal de la dirección anterior. Se eligió mirando la banda dentro de una
+ * burbuja de chat: el blanco se funde con la burbuja y encandila en modo
+ * oscuro (`docs/plan.md`, Fase 4.7).
+ *
+ * Copiado a propósito, por la misma razón que `SESGO`: lo publicado cambia
+ * solo cuando alguien lo decide acá.
  */
-const PAPEL = "#f6f2ec";
+const FONDO = "#edeff0";
 
 /**
  * Por dónde pasa el corte, como el `object-position` del sitio: la misma
@@ -140,7 +145,7 @@ const SESGO = { alto: 0.15, centro: 0.5, bajo: 0.85 };
  * de una veneciana contra el pasto pesan más del doble que un screen liso. Así
  * las de menos textura salen a 85 —con 150 kB de techo no hay nada que
  * ahorrar— y las de mucha bajan lo justo, que es donde menos se nota porque la
- * textura misma lo esconde. La banda del logo es papel liso y casi no pesa.
+ * textura misma lo esconde. La banda del logo es lisa y casi no pesa.
  *
  * 150 kB es el techo que se buscó a propósito: es lo que se descarga en un
  * teléfono cada vez que la tarjeta aparece en un chat.
@@ -190,7 +195,11 @@ function paginas() {
     ...productos.map((producto) => ({
       ruta: `/productos/${producto.slug}`,
       prefijo: `productos/${producto.slug}/`,
+      // Primero las «wpp»: son las apaisadas que la empresa eligió para esto
+      // (decisión 67), así que la regla, si una página no tiene línea, las
+      // toma antes que cualquier otra.
       galeria: [
+        ...galeriaDe(`productos/${producto.slug}/wpp`),
         ...galeriaDe(`productos/${producto.slug}`),
         ...producto.variantes.flatMap((variante) =>
           variante.clave
@@ -205,6 +214,11 @@ function paginas() {
       prefijo: `proyectos/${proyecto.slug}/`,
       galeria: galeriaDe(`proyectos/${proyecto.slug}`),
     })),
+    {
+      ruta: "/nosotros",
+      prefijo: "paginas/nosotros/",
+      galeria: galeriaDe("paginas/nosotros"),
+    },
     { ruta: "/contacto", galeria: null },
   ];
 }
@@ -232,12 +246,17 @@ function indiceDeFotos() {
         ? producto?.variantes.find((v) => v.clave === claveVariante)
         : undefined;
       if (producto) {
+        // Las «wpp» se llaman como en el cierre de la página que las muestra.
         nombre = variante
           ? `${producto.nombre} ${variante.nombre}`
-          : producto.nombre;
+          : claveVariante === "wpp"
+            ? `${producto.nombre}, vista apaisada`
+            : producto.nombre;
       }
     } else if (entidad === "proyectos") {
       nombre = proyectos.find((p) => p.slug === slug)?.titulo ?? slug;
+    } else if (entidad === "paginas") {
+      nombre = "Un trabajo de Espacio Cortinas";
     }
 
     lista.forEach((foto, i) => {
@@ -348,9 +367,9 @@ async function armar(foto, enfoque, logo) {
     .png()
     .toBuffer();
 
-  // La tarjeta: papel entero, la foto arriba y el logo centrado en la banda.
+  // La tarjeta: fondo entero, la foto arriba y el logo centrado en la banda.
   const tarjeta = await sharp({
-    create: { width: ANCHO, height: ALTO, channels: 3, background: PAPEL },
+    create: { width: ANCHO, height: ALTO, channels: 3, background: FONDO },
   })
     .composite([
       { input: recortada, left: 0, top: 0 },
@@ -363,10 +382,10 @@ async function armar(foto, enfoque, logo) {
     .png()
     .toBuffer();
 
-  // El logo trae transparencia: se aplana contra el papel antes de codificar,
+  // El logo trae transparencia: se aplana contra el fondo antes de codificar,
   // que un JPEG no tiene canal alfa.
   const { data, info } = await sharp(tarjeta)
-    .flatten({ background: PAPEL })
+    .flatten({ background: FONDO })
     .removeAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
@@ -405,9 +424,8 @@ async function main() {
   const lista = paginas();
   const indice = indiceDeFotos();
 
-  // El logo, una sola vez para las doce. Es el mismo archivo del encabezado,
-  // sin fondo; se achica y nunca se agranda: sin el vector que se le sigue
-  // pidiendo a la empresa, 504 px es todo lo que hay (decisión 44).
+  // El logo, una sola vez para todas. Es el de círculos de línea, sin fondo
+  // (decisión 66); se achica y nunca se agranda.
   const metaLogo = await sharp(LOGO).metadata();
   if (metaLogo.width < LOGO_ANCHO) {
     throw new Error(

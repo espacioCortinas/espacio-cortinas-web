@@ -124,7 +124,7 @@ const APP = join(RAIZ, "app");
 
 /**
  * El fondo del sitio, `--color-fondo` de `app/globals.css`. Copiado a
- * propósito, como el papel de `preparar-compartir.mjs`: si el token cambia, los
+ * propósito, como el `FONDO` de `preparar-compartir.mjs`: si el token cambia, los
  * íconos publicados no cambian solos, y está bien que no lo hagan.
  */
 const FONDO_DEL_SITIO = "#edeff0";

@@ -25,6 +25,7 @@ export function EnlaceWhatsapp({
   variante?: "principal" | "secundario" | "enlace";
   children?: React.ReactNode;
 }) {
+  const esBoton = variante !== "enlace";
   return (
     <BotonEnlace
       href={enlaceWhatsapp(contexto)}
@@ -33,46 +34,24 @@ export function EnlaceWhatsapp({
       // se escribe igual: es una línea y cubre a los que no.
       target="_blank"
       rel="noopener noreferrer"
+      // Lo busca el círculo flotante, que se esconde mientras alguno de estos
+      // está en pantalla (`components/whatsapp-flotante.tsx`).
+      data-boton-whatsapp={esBoton ? "" : undefined}
+      className="group"
     >
+      {/*
+        El logo dice qué se abre al tocarlo, como en los medios de contacto
+        (decisión 65), en el color del texto del botón y nunca en el verde de
+        WhatsApp. Al pasar el mouse, al enfocarlo o al tocarlo, gira apenas:
+        150 ms, la duración de los cambios de estado del sitio, y nada con
+        movimiento reducido (decisión 67).
+      */}
+      {esBoton && (
+        <LogoWhatsapp className="size-5 transition-transform duration-150 group-hover:-rotate-12 group-focus-visible:-rotate-12 group-active:-rotate-12 motion-reduce:transition-none" />
+      )}
       {children}
     </BotonEnlace>
   );
 }
 
-/**
- * WhatsApp siempre a mano: abajo a la derecha, en todas las páginas públicas.
- *
- * **Es el «¡Chateá con nosotros!» del boceto de la empresa** — Fase 4.7 —, con
- * su color y su texto: el azul verdoso de la marca con el texto oscuro encima,
- * 5,08:1. El boceto lo traía de la plantilla de Wix como «Chatea», de tú; acá
- * va de vos, como el resto del sitio.
- *
- * **Resuelve lo que la decisión 49 dejó pendiente.** En el catálogo, desde un
- * teléfono, el WhatsApp del cierre quedaba al final de una página de más de
- * 7.000 px. Ahora está a un toque desde cualquier punto de cualquier página, y
- * en el teléfono queda donde llega el pulgar.
- *
- * **Lleva el mensaje general.** Es el mismo en todas las páginas y es un
- * componente de servidor: el que nombra el producto o el proyecto sigue siendo
- * el botón principal de cada página, que es donde se decide escribir.
- *
- * Sin sombra, aunque flote: la regla 2 de `docs/diseno.md` las prohíbe, y el
- * boceto tampoco la tiene. Lo separa del contenido su color.
- *
- * `z-20` deja arriba al menú desplegado del teléfono, que es `z-30`.
- */
-export function WhatsappFlotante() {
-  return (
-    <a
-      href={enlaceWhatsapp({ tipo: "general" })}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="bg-marca text-texto fixed right-4 bottom-4 z-20 inline-flex min-h-12 items-center gap-2 rounded-boton px-4 text-menu font-semibold md:right-6 md:bottom-6"
-    >
-      <LogoWhatsapp />
-      <span>
-        Chateá con nosotros<span className="sr-only"> por WhatsApp</span>
-      </span>
-    </a>
-  );
-}
+export { WhatsappFlotante } from "@/components/whatsapp-flotante";

@@ -103,6 +103,55 @@ fotos no se ven en ningún lado — no se rompe nada, simplemente no aparecen.
 Acá **ninguna es portada**, así que no hace falta que la primera sea vertical y
 ninguna se recorta.
 
+**Los videos de una variante van adentro de su carpeta**, con las fotos —
+decisión 67—, y pueden ser varios. **El nombre va a la dirección del video**,
+así que se escribe en minúscula, con números y guiones: `video-1.mp4`,
+`video-2.mov`. Uno con espacios o mayúsculas —`roller scr video1.mp4`— no se
+publica, y el script lo dice. En la página, todos los videos del producto van
+juntos en «Manual o motorizado», con el nombre de su variante debajo. El
+`motorizado.mp4` de antes, al lado de la carpeta, sigue valiendo.
+
+**Antes de ponerlo, mirá que no traiga franjas negras.** Algunos videos llegan
+como una toma apaisada metida en un cuadro vertical. Se recorta antes, con
+ffmpeg, a un intermedio casi sin pérdida —`-vf crop=…` y `-crf 12`—; el script
+después lo convierte como a cualquiera. Para ver si las trae:
+
+```bash
+ffmpeg -i video.mp4 -vf cropdetect=24:2:0 -frames:v 120 -f null - 2>&1 | grep crop=
+```
+
+### Las fotos para el link de WhatsApp: la carpeta `wpp`
+
+La empresa marca con «wpp» las apaisadas que quiere en el link. Van en una
+carpeta `wpp/` dentro de la del producto —`productos/roller/wpp/1.HEIC`—, y no
+en la de una variante. **No van al álbum**: se ven al final de la página,
+pasando solas, con el botón de consulta encima. La de número más bajo es la
+imagen para compartir del producto, si `contenido/compartir.ts` no dice otra.
+Conviene que tengan 1.200 px de ancho o más, y que sean 2:1 o más apaisadas.
+
+### Las fotos de una página: `paginas/`
+
+Las de una página que no es un producto ni un proyecto —las tres de
+Nosotros— van en `fotos-originales/paginas/nosotros/`, numeradas. La página
+las elige por su número en `contenido/nosotros.ts`.
+
+### Una tanda de fotos nuevas que se suma a las que hay
+
+Es lo que se hizo en noviembre de 2026 (decisión 67):
+
+- **Se numeran después de las que ya hay**, así se suman y no pisan nada.
+- **La «1» nueva pasa a ser la «1»** —la portada—, y la portada vieja va al
+  final del álbum de su variante.
+- **Mover una foto publicada a otra carpeta no suma peso**: son los mismos
+  bytes, y git la ve como renombrada. Pero el script no borra lo viejo: las
+  carpetas que quedan en `public/fotos/` sin estar en `contenido/fotos.ts` se
+  borran a mano.
+- **Lo que apunta a una foto por su número** hay que revisarlo: la apertura de
+  Inicio y el sector de arquitectos (`app/(public)/page.tsx`),
+  `contenido/nosotros.ts` y `contenido/compartir.ts`.
+- **Lo que no se publica todavía** va fuera de `productos/` y `proyectos/`:
+  `fotos-originales/pendientes/` o `fotos-originales/descartadas/`.
+
 ---
 
 ## 2. Prepararlas
@@ -132,8 +181,10 @@ Y para cada video —el de una variante, o uno de la galería de un proyecto—:
 
 Y al terminar, **la imagen para compartir de cada página** —la que se ve al
 pegar el enlace en WhatsApp—: la foto que dice `contenido/compartir.ts` para
-esa página, con el logo en una banda de papel abajo, en 1200 × 630 —
-decisiones 63 y 64. Si no cambió ninguna foto elegida, no cambia ningún
+esa página, con el logo en una banda abajo, del gris del fondo del sitio, en
+1200 × 630 — decisiones 63, 64 y 67. **Si solo cambiaste fotos que no son de
+ninguna imagen para compartir, corré `node scripts/preparar-fotos.mjs`**, que
+hace lo mismo sin rehacerlas. Si no cambió ninguna foto elegida, no cambia ningún
 archivo. Suelto es `npm run compartir`.
 
 Sale algo así:

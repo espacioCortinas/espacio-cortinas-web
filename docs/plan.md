@@ -489,9 +489,11 @@ la 5. Decidió que el rediseño se quedaba aunque la empresa no lo aprobara, y
 con eso se escribió la documentación. **Se mergeó a `main` el 06/10/2026**
 (`1390c2d`) y **la empresa lo aprobó el 07/10/2026.**
 
-**Desde el 07/10, en la rama `compartir-y-fotos`:** la foto nueva de la
-apertura de Inicio y la banda de las imágenes para compartir, ya elegida pero
-todavía sin generar. Ver «Lo que queda», más abajo.
+**El 07/10, en la rama `compartir-y-fotos`**, mergeada a `main` el mismo día
+(`05661dc`): la foto nueva de la apertura de Inicio y la banda de las
+imágenes para compartir, elegida. **Desde el 08/10, en la rama
+`galeria-y-fotos`:** el álbum de producto, las fotos nuevas y las imágenes
+para compartir — decisión 67. Ver más abajo, después de la etapa 5.
 
 **Lo que se decidió en la conversación y no está en otro lado:**
 
@@ -749,38 +751,56 @@ _Después de la aprobación, el 07/10/2026_, en la rama `compartir-y-fotos`:
     `docs/diseno.md` es una del color del fondo.
   - Pesan casi lo mismo que las de hoy: 148, 96 y 77 kB las tres de prueba.
 
+_Desde el 08/10/2026, en la rama `galeria-y-fotos`_ —decisión 67—: cómo se
+ven las fotos en la página de producto, las fotos nuevas de la empresa y las
+imágenes para compartir.
+
+```
+4f8deb1  paso 1 — el álbum en un carrusel, y el cierre con las fotos «wpp»
+756ac3b    ajuste: la portada sola arriba
+f1014c0  paso 2 — el código: varios videos por variante, wpp/, paginas/,
+                    las venecianas juntas
+0a8b860  paso 2 — las fotos nuevas, sus videos y las tres de Nosotros
+78ac315  paso 3 — las imágenes para compartir, con la banda nueva
+a39ff5b    ajuste: el mismo esquema en todos los productos
+90be577    ajuste: dos fotos repetidas, afuera
+027e703    ajuste: el recuadro de Bandas y Compacta, con su álbum
+d5c0f9d    ajuste: el botón de WhatsApp con el logo, y el círculo flotante
+```
+
+- **Cómo se eligió el álbum.** Se probaron tres formas con el material real
+  —una tira, las verticales de a dos, una escalonada— y se midió Roller con
+  cada una. Quien desarrolla miró sitios donde la foto es lo principal y
+  eligió la foto grande que se desliza. Después la página se ajustó tres veces
+  con capturas, hasta el esquema de la decisión 67: la portada en la
+  apertura, un álbum por variante con su nombre arriba, «Otras variantes»,
+  «Manual o motorizado» con todos los videos y el cierre con las «wpp».
+- **Las fotos nuevas** llegaron recortadas, en una carpeta aparte: 39 fotos,
+  9 videos y las tres de Nosotros. Se sumaron a las que había; la «1» de cada
+  carpeta reemplazó la portada. Las de producto que no eran la portada
+  pasaron a su variante. Se revisaron una por una: una de Roller Screen con
+  portarretratos quedó sin publicar, y después se sacaron dos repetidas. Tres
+  videos traían franjas negras y se recortaron. Suman unos 52 MB a git.
+- **Venecianas de madera y de PVC son un producto**, con las dos como
+  variantes y Aluminio sin fotos; las direcciones viejas redirigen.
+  **Toldos suma Verticales.**
+- **Las imágenes para compartir** se rehicieron una sola vez, con `#EDEFF0` y
+  el logo de línea: la de cada producto es su «wpp» de número más bajo, Inicio
+  lleva la foto de su apertura y `/nosotros` tiene la suya. 1.056 kB las doce.
+- **«Automatizado» pasó a «motorizado»** en todo el sitio.
+
 _Lo que queda_:
 
-- **Las imágenes para compartir, de nuevo — después de las fotos de
-  producto.** Quien desarrolla decidió esperar a que las fotos de los
-  productos y las tres de Nosotros —que repiten fotos de otras páginas— sean
-  las definitivas: cada imagen para compartir cuya foto cambie suma unos
-  100 kB a git, y así se hacen una sola vez. Mientras tanto, **las publicadas
-  llevan el logo viejo**, el del círculo amarillo, sobre la crema: son del
-  28/09 y nunca se rehicieron. Cuando se hagan:
-  - en `scripts/preparar-compartir.mjs`, `PAPEL` pasa a `#EDEFF0` —el logo de
-    la banda ya es el de línea, porque `public/marca/logo.png` lo es—, y
-    `/nosotros` entra en `paginas()`, entre `/proyectos` y `/contacto`: sin
-    eso, el script rechaza su línea de `compartir.ts` porque «no es una página
-    del sitio»;
-  - sumar `"/nosotros"` a `contenido/compartir.ts`, con su foto, y revisar la
-    de Inicio: esa línea dice que usa «la foto que abre Inicio», y desde el
-    07/10 la apertura es `roller/screen/3`;
-  - corregir los comentarios que hablan de la «banda de papel»:
-    `lib/metadata.ts`, `contenido/compartir.ts` y el mismo script, y las
-    decisiones 63, 64 y 66;
-  - correr `npm run compartir` una vez. Regenera también
-    `contenido/imagenes-para-compartir.ts`, que todavía dice «Cortinas de tela
-    Riel» en un texto alternativo;
-  - son archivos nuevos —el nombre lleva la huella de los bytes—, así que los
-    viejos se borran y quedan en el historial: unos 1,2 MB más en git;
-  - **no correr `npm run marca` ni `npm run fotos` antes de cambiar
-    `PAPEL`**: los dos terminan corriendo también este script, y las
-    rehacen con la crema.
+- **De la empresa**: qué hacer con la foto de Roller Screen con
+  portarretratos (`fotos-originales/pendientes/`); las descripciones de PVC y
+  Madera; y el texto de Toldos Verticales, que hoy es nuestro y provisorio.
 - **Opcional**: el correo que manda el formulario (`lib/correo.ts`) usa los
   colores viejos y un filete al costado, pero solo lo lee la empresa.
-- **Merge a `main`**, con todo lo de arriba, a pedido de quien desarrolla. El
-  push a `main` publica.
+- **Merge a `main`** de `galeria-y-fotos`, a pedido de quien desarrolla. El
+  push a `main` publica. Después, para ver las tarjetas nuevas en WhatsApp sin
+  la vista previa guardada: pegar el enlace con un parámetro inventado
+  —`?v=2`— o pedir que se vuelva a extraer en el depurador de enlaces de
+  Facebook.
 
 **Terminado cuando:**
 
@@ -817,6 +837,11 @@ o borrar, y el repositorio es la fuente de verdad.
   3. «Nuestros productos son la respuesta más inteligente a este desafío.
      Controlar estos elementos sin perjudicarlos mejora nuestra calidad de
      vida, creándonos un hábitat ideal.»
+
+**Desde la decisión 67, el título «manuales y automatizadas» de los recuadros
+no se usa**: ese tema pasó a ser la sección «Manual o motorizado» de cada
+página, y la empresa pidió «motorizado» y no «automatizado». Las frases de
+los recuadros siguen.
 
 **Productos.** Cada página del boceto trae un lema, una descripción y un
 recuadro con un título y dos o tres frases. Así se reparten entre los siete
