@@ -129,6 +129,18 @@ function filaDeAlbum(
   return texto ? [album, texto] : [album];
 }
 
+/**
+ * Dónde va el recuadro del producto. **En la apertura**, debajo de la
+ * descripción, cuando el producto tiene variantes con fotos: sus álbumes ya
+ * llevan su propio texto. **Con el álbum** cuando no tiene —Bandas
+ * verticales, Compacta Blackout—: son las páginas con menos texto, y así el
+ * álbum no queda solo (decisión 67).
+ */
+export function recuadroEnLaApertura(producto: ProductoConMedios): boolean {
+  const conFotos = producto.variantes.some((v) => v.fotos.length > 0);
+  return conFotos || producto.fotos.length <= 1;
+}
+
 export function filasDeProducto(producto: ProductoConMedios): Fila[] {
   const filas: Fila["celdas"][] = [];
 
@@ -152,11 +164,18 @@ export function filasDeProducto(producto: ProductoConMedios): Fila[] {
       filas.push([{ tipo: "encabezado", nombre: "Más fotos" }]);
     }
     filas.push(
-      filaDeAlbum({
-        tipo: "coleccion",
-        nombre: `Fotos de ${producto.nombre}`,
-        medios: resto,
-      }),
+      filaDeAlbum(
+        {
+          tipo: "coleccion",
+          nombre: `Fotos de ${producto.nombre}`,
+          medios: resto,
+        },
+        // El recuadro de un producto sin variantes acompaña a su álbum: son
+        // las páginas con menos texto, y así el álbum no queda solo.
+        producto.recuadro && !recuadroEnLaApertura(producto)
+          ? { tipo: "texto", recuadro: producto.recuadro }
+          : undefined,
+      ),
     );
   }
 

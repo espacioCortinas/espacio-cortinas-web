@@ -9,7 +9,7 @@ import { EnlaceWhatsapp } from "@/components/whatsapp";
 import { clasesDeBoton } from "@/components/ui/boton";
 import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
 import { productoPorSlug, productosPublicados } from "@/contenido";
-import { filasDeProducto } from "@/lib/damero";
+import { filasDeProducto, recuadroEnLaApertura } from "@/lib/damero";
 import { sizesConTope, topeDeAncho } from "@/lib/fotos";
 import { metadataDePagina } from "@/lib/metadata";
 import { altAutomatico } from "@/lib/texto";
@@ -174,7 +174,7 @@ export default async function Producto({ params }: Props) {
             <p className="max-w-lectura text-subtitulo">
               {producto.descripcion}
             </p>
-            {producto.recuadro && (
+            {producto.recuadro && recuadroEnLaApertura(producto) && (
               <div className="mt-6">
                 {/* En minúscula y con sus saltos de renglón, como en el boceto:
                     el de las venecianas es una lista de medidas. */}
