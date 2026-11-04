@@ -4,9 +4,9 @@ import type { FotoParaCompartir } from "./tipos";
  * La foto que lleva cada página cuando alguien pega su enlace en WhatsApp.
  *
  * **Es una foto de la página, y abajo el logo** — decisiones 63 y 64. La foto
- * va arriba, a todo el ancho; el logo, centrado en una banda de papel de 150
- * px, igual que en el encabezado del sitio. Nada más: ni texto ni nada encima
- * de la foto.
+ * va arriba, a todo el ancho; el logo de línea, centrado en una banda de 150
+ * px del color del fondo del sitio —`#EDEFF0`, decisión 66—. Nada más: ni
+ * texto ni nada encima de la foto.
  *
  * WhatsApp recorta desde el centro cuando la imagen no coincide con su
  * recuadro. Lo que se cortaba mal en la decisión 59 era un logo contra un
@@ -19,6 +19,9 @@ import type { FotoParaCompartir } from "./tipos";
  *
  * # Cómo se elige
  *
+ * 0. **En un producto, la «wpp» de número más bajo**: desde noviembre de 2026
+ *    la empresa elige las apaisadas para esto, y las marca con «wpp» en el
+ *    nombre (decisión 67). Las publica `productos/<slug>/wpp`.
  * 1. **Una apaisada de la galería de la página.** Su lugar en la tarjeta es
  *    1200 × 480, o sea 2,5:1: una 4:3 conserva el 53 % del alto, una 3:2 el
  *    60 %.
@@ -28,9 +31,9 @@ import type { FotoParaCompartir } from "./tipos";
  * 3. **Recorte alto**, el mismo del sitio (`50% 15%`), salvo que la línea diga
  *    otra cosa.
  *
- * **Y después se mira.** Las doce de abajo se miraron una por una, con una
- * sola pregunta: ¿se entiende que es una foto de una cortina? Donde la regla
- * daba una que no, al lado está escrito qué pasaba.
+ * **Y después se mira.** Las de abajo se miraron una por una, con una sola
+ * pregunta: ¿se entiende que es una foto de una cortina? Donde la regla daba
+ * una que no, al lado está escrito qué pasaba.
  *
  * # Una página que no está acá
  *
@@ -38,7 +41,7 @@ import type { FotoParaCompartir } from "./tipos";
  * script le aplica la regla —la primera apaisada de su galería, o la portada—
  * y lo avisa con un `!` para que alguien la mire y la anote acá. Inicio, los
  * listados y Contacto no tienen galería propia, así que esos cuatro tienen que
- * estar siempre.
+ * estar siempre. Nosotros sí tiene: sus tres fotos.
  *
  * # Para cambiar una
  *
@@ -48,12 +51,11 @@ import type { FotoParaCompartir } from "./tipos";
  */
 export const fotosParaCompartir: Record<string, FotoParaCompartir> = {
   /*
-   * La foto que abre Inicio, así quien toca el enlace llega a la misma imagen
-   * que vio en el chat. Al centro y no alto: con el recorte alto es todo
-   * cielorraso de hormigón; al centro, las lamas llenan el cuadro con el río
-   * detrás.
+   * La foto que abre Inicio desde el 07/10/2026, así quien toca el enlace
+   * llega a la misma imagen que vio en el chat: dos rollers screen sobre un
+   * ventanal, en un living. Al centro: arriba es todo cielorraso.
    */
-  "/": { foto: "productos/venecianas-madera/2", enfoque: "centro" },
+  "/": { foto: "productos/roller/screen/3", enfoque: "centro" },
 
   /*
    * Un roller screen y una veneciana en el mismo cuadro: el catálogo es más de
@@ -61,57 +63,20 @@ export const fotosParaCompartir: Record<string, FotoParaCompartir> = {
    */
   "/productos": { foto: "productos/roller/screen/1", enfoque: "centro" },
 
-  /*
-   * La primera apaisada de su galería, `roller/2`, no se lee como un roller:
-   * los screen a media altura parecen vidrio polarizado, la protagonista es la
-   * lámpara, y en el medio queda la ropa tendida del patio, que
-   * `docs/diseno.md` ya pide no mostrar grande (decisión 42). La de su
-   * variante Blackout es un roller blanco a media altura entre dos voiles.
-   * Tiene un nombre bordado en un almohadón, abajo a la izquierda, que la
-   * banda del logo deja afuera.
-   */
-  "/productos/roller": { foto: "productos/roller/blackout/2" },
+  /* Las «wpp» que eligió la empresa, la de número más bajo (decisión 67). */
+  "/productos/roller": { foto: "productos/roller/wpp/1" },
+  "/productos/cortinas-tela": { foto: "productos/cortinas-tela/wpp/1" },
+  "/productos/venecianas": { foto: "productos/venecianas/wpp/1" },
+  "/productos/toldos": { foto: "productos/toldos/wpp/1" },
+  "/productos/bandas-verticales": { foto: "productos/bandas-verticales/wpp/1" },
 
   /*
-   * Tiene dos apaisadas. En la primera, `compacta-blackout/2`, el recorte alto
-   * se llena de techo de madera y ventilador, y el roller queda chico en una
-   * esquina. En esta, las dos ventanas con el roller a media altura son el
-   * cuadro entero.
+   * Sin fotos nuevas, sigue la de antes. Tiene dos apaisadas. En la primera,
+   * `compacta-blackout/2`, el recorte alto se llena de techo de madera y
+   * ventilador, y el roller queda chico en una esquina. En esta, las dos
+   * ventanas con el roller a media altura son el cuadro entero.
    */
   "/productos/compacta-blackout": { foto: "productos/compacta-blackout/3" },
-
-  /*
-   * La primera apaisada, `cortinas-tela/3`, se lee bien, pero contra el borde
-   * izquierdo tiene el pelo y el hombro de una persona, cortados por el
-   * cuadro. No se la reconoce; igual, ninguna tarjeta lleva ni un pedazo de
-   * alguien. Esta es la apaisada de su variante Riel: voile blanco, balcón y
-   * río, sin nadie.
-   */
-  "/productos/cortinas-tela": { foto: "productos/cortinas-tela/riel/2" },
-
-  /*
-   * La regla: no tiene ninguna apaisada, así que va la portada recortada alta.
-   * Acá funciona: las lamas llenan el cuadro de borde a borde.
-   */
-  "/productos/venecianas-madera": { foto: "productos/venecianas-madera/1" },
-
-  /*
-   * Tiene dos apaisadas. La primera, `venecianas-pvc/2`, se entiende, pero es
-   * la obra en curso: una caja de herramientas y trapos en el piso, y un
-   * colchón embalado. Esta es la misma veneciana en una casa habitada.
-   */
-  "/productos/venecianas-pvc": { foto: "productos/venecianas-pvc/3" },
-
-  /*
-   * Su única apaisada, `toldos/3`, tiene una persona justo en el centro del
-   * cuadro, y `docs/diseno.md` pide no mostrarla grande (decisión 42). Así
-   * que va la portada, y al centro: con el recorte alto el brazo del toldo
-   * queda cortado; al centro entra el toldo entero contra el cielo.
-   */
-  "/productos/toldos": { foto: "productos/toldos/1", enfoque: "centro" },
-
-  /* La regla, sin tocar: la primera apaisada. Bandas negras en una oficina. */
-  "/productos/bandas-verticales": { foto: "productos/bandas-verticales/2" },
 
   /*
    * El piso de oficinas curvo con todos los rollers: la escala de un proyecto
@@ -127,10 +92,14 @@ export const fotosParaCompartir: Record<string, FotoParaCompartir> = {
    */
   "/proyectos/cowork-nordelta": { foto: "proyectos/cowork-nordelta/3" },
 
+  /* La primera de sus tres fotos, la que abre la página. */
+  "/nosotros": { foto: "paginas/nosotros/1", enfoque: "centro" },
+
   /*
    * La mejor foto del archivo según `docs/diseno.md` —«luz, caída, sombras en
-   * el piso, ambiente vacío»— para la página que importa. Contacto no muestra
+   * el piso, ambiente vacío»—, que fue la portada de Cortinas de confección
+   * hasta noviembre de 2026 y hoy es de su variante Riel. Contacto no muestra
    * ninguna foto, así que la tarjeta tiene que decir «cortinas» sola.
    */
-  "/contacto": { foto: "productos/cortinas-tela/1" },
+  "/contacto": { foto: "productos/cortinas-tela/riel/3" },
 };
