@@ -699,10 +699,13 @@ archivo, porque no es lo que dice su nombre.
   con un fundido. Es la única excepción a «nada se mueve solo», y lleva las
   tres cosas que la hacen aceptable: se frena fuera de pantalla, no pasa con
   movimiento reducido y tiene «Pausar las fotos» (WCAG 2.2.2).
-- **El círculo de WhatsApp viaja hacia el botón** cuando un «Consultar por
-  WhatsApp» queda a la vista, y se desvanece en 300 ms; reaparece cuando el
-  botón sale de pantalla. Dice adónde fue, y evita dos WhatsApp en la misma
-  pantalla. Con movimiento reducido solo se desvanece.
+- **El círculo de WhatsApp vuela hasta el logo del botón** cuando un
+  «Consultar por WhatsApp» queda a la vista: en curva, achicándose hasta el
+  tamaño de ese logo, y se desvanece al llegar, en 450 ms; el logo del botón
+  lo recibe con un pulso. Reaparece con un rebote corto cuando el botón sale
+  de pantalla. Dice adónde fue, y evita dos WhatsApp en la misma pantalla.
+  Solo vuela si alguien movió la página; con movimiento reducido solo se
+  desvanece.
 - **El logo del botón gira apenas** al pasar el mouse, enfocarlo o tocarlo:
   150 ms, una transición de estado.
 

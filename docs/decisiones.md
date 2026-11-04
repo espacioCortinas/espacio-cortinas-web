@@ -3837,12 +3837,19 @@ se frena en su propio tope (`components/cierre-con-album.tsx`).
 - **El flotante pasa a ser un círculo con el logo**, en el azul verdoso: tapa
   menos foto. Es la segunda excepción a «nada redondo» (regla 3), después del
   logo circular.
-- **Cuando un botón de WhatsApp queda a la vista, el círculo viaja hacia él,
-  achicándose, y se desvanece**, en 300 ms; cuando el botón sale de pantalla,
-  reaparece en su lugar. Es animación con función (regla 12): no hay dos
-  WhatsApp en la misma pantalla, y dice adónde fue. Con movimiento reducido
-  solo se desvanece. Escondido es `inert`. Lo pidió quien desarrolla, y está
-  en `components/whatsapp-flotante.tsx`.
+- **Cuando un botón de WhatsApp queda a la vista, el círculo vuela hasta el
+  logo de ese botón y se posa encima**: viaja en una curva suave, se achica
+  hasta que su logo mide lo mismo que el del botón y recién en el último tramo
+  se desvanece, en 450 ms; al llegar, el logo del botón hace un pulso chico,
+  como si lo recibiera. Cuando el botón sale de pantalla, el círculo reaparece
+  en su lugar con un rebote corto, en 250 ms. La primera versión iba en línea
+  recta hacia el centro del botón y se desvanecía a mitad de camino: se veía
+  arrastrada, y quien desarrolla pidió algo más prolijo. Es animación con
+  función (regla 12): no hay dos WhatsApp en la misma pantalla, y dice adónde
+  fue. **Solo vuela si alguien movió la página**; con movimiento reducido solo
+  se desvanece. Escondido es `inert`. Está en
+  `components/whatsapp-flotante.tsx`, con la API de animaciones del
+  navegador.
 
 #### El contenido que cambió con las fotos
 
