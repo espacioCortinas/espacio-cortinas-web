@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Boton } from "@/components/ui/boton";
 import type { Video } from "@/contenido/tipos";
 import { rutaDePosterDeVideo, rutaDeVideo, topeDeAncho } from "@/lib/fotos";
+import { leyendaDeVideo } from "@/lib/texto";
 
 /**
  * Un video corto y sin sonido. Se llamaba `VideoVariante` y se generalizó en
@@ -90,8 +91,15 @@ function useMenosMovimiento(): boolean {
 export function VideoMudo({
   video,
   etiqueta,
+  conPie = true,
 }: {
   video: Video;
+  /**
+   * Si lleva debajo «Video de 11 segundos, en bucle y sin sonido». En el
+   * carrusel no: ahí la diapositiva tiene su propio pie, que lo dice junto con
+   * el nombre de la variante (`components/damero.tsx`).
+   */
+  conPie?: boolean;
   /**
    * El nombre accesible del video, entero: «Roller Motorizado: la cortina
    * abriéndose y cerrándose sola», «Cowork en Nordelta — video 1». Lo arma
@@ -224,13 +232,16 @@ export function VideoMudo({
     <figure className="m-0" style={{ maxWidth: `${tope}px` }}>
       {elemento}
 
-      <figcaption className="text-texto-suave mt-3 text-meta">
-        {/*
-          Un video sin controles no da ninguna forma de saber cuánto dura ni que
-          no hay audio que encender. Se dice, y el número sale del manifiesto.
-        */}
-        Video de {video.duracion} segundos, en bucle y sin sonido.
-      </figcaption>
+      {conPie && (
+        <figcaption className="text-texto-suave mt-3 text-meta">
+          {/*
+            Un video sin controles no da ninguna forma de saber cuánto dura ni
+            que no hay audio que encender. Se dice, y el número sale del
+            manifiesto.
+          */}
+          {leyendaDeVideo(video)}
+        </figcaption>
+      )}
 
       {aMano && (
         <p className="mt-4">

@@ -51,6 +51,15 @@ export function altAutomatico(nombreDeLaEntidad: string, posicion: number) {
 }
 
 /**
+ * Lo que va al lado de un video que arranca solo y no tiene controles: no hay
+ * otra forma de saber cuánto dura ni que no hay audio que encender. El número
+ * sale del manifiesto.
+ */
+export function leyendaDeVideo(video: { duracion: number }): string {
+  return `Video de ${video.duracion} segundos, en bucle y sin sonido.`;
+}
+
+/**
  * Recorta un texto para mostrarlo en un listado, sin cortar una palabra por la
  * mitad ni dejar un espacio antes de los puntos suspensivos.
  */

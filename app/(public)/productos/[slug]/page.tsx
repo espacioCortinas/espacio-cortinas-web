@@ -2,13 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { CierreConAlbum } from "@/components/cierre-con-album";
 import { Damero } from "@/components/damero";
+import { FotoImg } from "@/components/foto";
 import { EnlaceWhatsapp } from "@/components/whatsapp";
 import { clasesDeBoton } from "@/components/ui/boton";
 import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
 import { productoPorSlug, productosPublicados } from "@/contenido";
 import { filasDeProducto } from "@/lib/damero";
+import { sizesConTope, topeDeAncho } from "@/lib/fotos";
 import { metadataDePagina } from "@/lib/metadata";
+import { altAutomatico } from "@/lib/texto";
 
 /**
  * Un producto del catálogo.
@@ -16,9 +20,10 @@ import { metadataDePagina } from "@/lib/metadata";
  * # Los sectores
  *
  *     1  APERTURA   el lema, el nombre, la descripción y una acción, centrados
- *     2  DAMERO     la portada, el recuadro, las variantes y las fotos, de
- *                   borde a borde
- *     3  CIERRE     una sola acción, en un bloque azul verdoso
+ *     2  DAMERO     un bloque por colección —el producto y cada variante con
+ *                   fotos—, con el álbum en un carrusel, de borde a borde
+ *     3  CIERRE     una sola acción, en un bloque azul verdoso; con fotos
+ *                   «wpp», montado sobre un álbum que pasa solo (decisión 67)
  *
  * **Es la página de producto del boceto de la empresa** — Fase 4.7: arriba una
  * frase corta en minúscula —«calidez», «vivir el aire libre»—, el nombre
@@ -84,6 +89,32 @@ export default async function Producto({ params }: Props) {
 
   const filas = filasDeProducto(producto);
   const contexto = { tipo: "producto" as const, nombre: producto.nombre };
+  const fotosWpp = producto.fotosParaWhatsapp;
+
+  const consulta = (
+    <>
+      {/*
+        El nombre va tal cual está escrito y no en minúsculas: «Venecianas de
+        PVC» en minúsculas da «venecianas de pvc», y una sigla en minúsculas
+        se lee como un error de tipeo. La frase está armada para que el nombre
+        entre con su mayúscula sin sonar raro.
+      */}
+      <h2 id="cierre" className="text-texto text-titulo">
+        Consultanos por {producto.nombre}
+      </h2>
+      <p className="max-w-lectura mt-4">
+        Escribinos con las medidas aproximadas de la ventana, o sin ellas y
+        vamos a medir. Trabajamos en toda Buenos Aires, con colocación propia.
+      </p>
+
+      <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
+        <EnlaceWhatsapp contexto={contexto} />
+        <Link href="/contacto" className={clasesDeBoton("enlace")}>
+          Otras formas de contacto
+        </Link>
+      </div>
+    </>
+  );
 
   return (
     // Sin columna: el damero va de borde a borde, y la apertura y el cierre
@@ -133,33 +164,46 @@ export default async function Producto({ params }: Props) {
         {/* 3 — CIERRE ------------------------------------------------ */}
         <div className={`${CLASES_CONTENEDOR} mt-16 md:mt-28`}>
           {/*
-            El azul verdoso de los bloques, con todo lo de adentro en el color
-            del texto: sobre este color la pizarra de los títulos da 3,08:1, y
-            el texto, 5,08. El botón principal sigue siendo la pizarra sólida.
+            Con fotos «wpp», el bloque se monta sobre un álbum que pasa solo
+            (decisión 67); sin ellas, es el bloque solo, como antes.
           */}
-          <section className="bg-marca text-texto -mx-5 px-5 py-12 md:-mx-12 md:px-12 md:py-20">
-            {/*
-              El nombre va tal cual está escrito y no en minúsculas: «Venecianas
-              de PVC» en minúsculas da «venecianas de pvc», y una sigla en
-              minúsculas se lee como un error de tipeo. La frase está armada
-              para que el nombre entre con su mayúscula sin sonar raro.
-            */}
-            <h2 className="text-texto text-titulo">
-              Consultanos por {producto.nombre}
-            </h2>
-            <p className="max-w-lectura mt-4">
-              Escribinos con las medidas aproximadas de la ventana, o sin ellas
-              y vamos a medir. Trabajamos en toda Buenos Aires, con colocación
-              propia.
-            </p>
-
-            <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
-              <EnlaceWhatsapp contexto={contexto} />
-              <Link href="/contacto" className={clasesDeBoton("enlace")}>
-                Otras formas de contacto
-              </Link>
-            </div>
-          </section>
+          {fotosWpp.length > 0 ? (
+            <CierreConAlbum
+              etiqueta={`Fotos de ${producto.nombre}`}
+              proporcion={fotosWpp[0].ancho / fotosWpp[0].alto}
+              ancho={Math.min(...fotosWpp.map(topeDeAncho))}
+              fotos={fotosWpp.map((foto, i) => (
+                <FotoImg
+                  key={foto.carpeta}
+                  foto={foto}
+                  alt={altAutomatico(
+                    `${producto.nombre}, vista apaisada`,
+                    i + 1,
+                  )}
+                  sizes={sizesConTope(foto, [
+                    { desde: "768px", ancho: "min(100vw - 6rem, 70rem)" },
+                    { ancho: "100vw" },
+                  ])}
+                  className="block h-full w-full object-contain"
+                />
+              ))}
+            >
+              {consulta}
+            </CierreConAlbum>
+          ) : (
+            /*
+              El azul verdoso de los bloques, con todo lo de adentro en el
+              color del texto: sobre este color la pizarra de los títulos da
+              3,08:1, y el texto, 5,08. El botón principal sigue siendo la
+              pizarra sólida.
+            */
+            <section
+              aria-labelledby="cierre"
+              className="bg-marca text-texto -mx-5 px-5 py-12 md:-mx-12 md:px-12 md:py-20"
+            >
+              {consulta}
+            </section>
+          )}
         </div>
       </article>
     </main>

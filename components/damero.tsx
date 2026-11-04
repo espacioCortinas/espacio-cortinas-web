@@ -1,10 +1,12 @@
 import type { CSSProperties, ReactNode } from "react";
 
+import { Carrusel } from "@/components/carrusel";
 import { FotoImg } from "@/components/foto";
 import { VideoMudo } from "@/components/video-mudo";
 import type { Foto } from "@/contenido/tipos";
-import type { Celda, CeldaDeMedio, Fila } from "@/lib/damero";
+import type { Celda, CeldaDeColeccion, CeldaDeMedio, Fila } from "@/lib/damero";
 import { esVideo, sizesConTope, topeDeAncho } from "@/lib/fotos";
+import { leyendaDeVideo } from "@/lib/texto";
 
 /**
  * El damero de las páginas de producto y de proyecto: la grilla de 2×2 con
@@ -127,7 +129,10 @@ function FilaDelDamero({
   // Dos medios en una fila no se invierten: no hay texto que alternar, y
   // cambiarlos de lado solo desordenaría la numeración de las fotos.
   const invertida =
-    fila.invertida && segunda !== undefined && segunda.tipo !== "medio";
+    fila.invertida &&
+    segunda !== undefined &&
+    segunda.tipo !== "medio" &&
+    segunda.tipo !== "coleccion";
 
   return (
     <FilaConLineas
@@ -152,6 +157,11 @@ function CeldaDelDamero({
   switch (celda.tipo) {
     case "medio":
       return <CeldaConMedio celda={celda} sola={sola} prioridad={prioridad} />;
+
+    case "coleccion":
+      return (
+        <CeldaConColeccion celda={celda} sola={sola} prioridad={prioridad} />
+      );
 
     case "recuadro":
       return (
@@ -257,7 +267,7 @@ function CeldaConMedio({
       <div className="flex h-full flex-col items-center justify-center px-5 py-8 md:p-10">
         {etiqueta}
         {/*
-          `VideoMudo` trae su tope y su pie con la duración. Su `<figure>` va
+          `VideoMudo` trae su tope y su leyenda con la duración. Su `<figure>` va
           a lo ancho de esta caja —hasta el tope— y centrada: como hijo de una
           caja flexible tomaría el ancho del video, que antes de cargar es el
           de cualquier video sin datos, 300 px, y la fila saltaría al cargar.
@@ -277,6 +287,123 @@ function CeldaConMedio({
       sola={sola}
       prioridad={prioridad}
     />
+  );
+}
+
+/**
+ * Una colección en su celda: un carrusel con una diapositiva por foto o video
+ * — decisión 67.
+ *
+ * **La caja es la misma para todas las diapositivas**, para que la página no
+ * salte al pasar de una a otra, y sale de la foto más alta de la colección,
+ * con tope en 4:5: la proporción de las portadas. Ninguna se recorta: la que
+ * es más baja que la caja queda centrada, con el gris del fondo arriba y
+ * abajo; la más angosta, con el gris a los costados, como un video vertical.
+ *
+ * En el teléfono la caja va a lo ancho de la pantalla; en escritorio, en su
+ * media celda con 40 px de aire y sin pasar de 44 rem de alto, como cada foto
+ * antes del carrusel. Y ninguna foto pasa de su tope (`CLAUDE.md`, regla 4).
+ */
+function CeldaConColeccion({
+  celda,
+  sola,
+  prioridad,
+}: {
+  celda: CeldaDeColeccion;
+  sola: boolean;
+  prioridad: boolean;
+}) {
+  const { medios, nombre } = celda;
+  const caja = Math.max(
+    Math.min(...medios.map(({ medio }) => medio.ancho / medio.alto)),
+    4 / 5,
+  );
+  // Si alguna lleva pie, todas reservan su lugar: así los botones de abajo no
+  // cambian de altura al pasar de una foto a un video.
+  const conPie = medios.some(({ medio, pie }) => pie || esVideo(medio));
+
+  return (
+    <div className="flex h-full flex-col items-center justify-center md:p-10">
+      <div
+        className="w-full md:w-[min(100%,calc(44rem*var(--caja)))]"
+        style={{ "--caja": caja } as CSSProperties}
+      >
+        <Carrusel etiqueta={nombre}>
+          {medios.map((medio, i) => (
+            <Diapositiva
+              key={i}
+              celda={medio}
+              caja={caja}
+              sola={sola}
+              conPie={conPie}
+              prioridad={prioridad && i === 0}
+            />
+          ))}
+        </Carrusel>
+      </div>
+    </div>
+  );
+}
+
+function Diapositiva({
+  celda,
+  caja,
+  sola,
+  conPie,
+  prioridad,
+}: {
+  celda: CeldaDeMedio;
+  caja: number;
+  sola: boolean;
+  conPie: boolean;
+  prioridad: boolean;
+}) {
+  const { medio, nombre, pie } = celda;
+  // Qué parte del ancho de la caja ocupa: entera si es tan ancha como ella o
+  // más, menos si es más angosta. El alto queda en la proporción del medio.
+  const fraccion = Math.min(1, medio.ancho / medio.alto / caja);
+  const ancho = `${(fraccion * 100).toFixed(3)}%`;
+  const caja44 = `${(44 * caja).toFixed(3)}rem`;
+
+  return (
+    <div>
+      <div
+        className="flex items-center justify-center"
+        style={{ aspectRatio: caja }}
+      >
+        <div style={{ width: ancho, maxWidth: `${topeDeAncho(medio)}px` }}>
+          {esVideo(medio) ? (
+            <VideoMudo video={medio} etiqueta={nombre} conPie={false} />
+          ) : (
+            <FotoImg
+              foto={medio}
+              alt={nombre}
+              sizes={sizesConTope(medio, [
+                {
+                  desde: "768px",
+                  ancho: sola
+                    ? `calc(min(100vw - 5rem, ${caja44}) * ${fraccion.toFixed(3)})`
+                    : `calc(min(50vw - 5rem, ${caja44}) * ${fraccion.toFixed(3)})`,
+                },
+                { ancho: `calc(100vw * ${fraccion.toFixed(3)})` },
+              ])}
+              prioridad={prioridad}
+              className="block h-auto w-full"
+            />
+          )}
+        </div>
+      </div>
+      {conPie && (
+        <div className="min-h-11 px-5 pt-2 text-center md:px-0">
+          {pie && <p className="text-acento font-semibold">{pie}</p>}
+          {esVideo(medio) && (
+            <p className="text-texto-suave text-meta">
+              {leyendaDeVideo(medio)}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 

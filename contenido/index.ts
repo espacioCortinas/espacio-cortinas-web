@@ -65,6 +65,9 @@ export const todosLosProductos = (): ProductoConMedios[] =>
   unir("productos", productos).map((producto) => ({
     ...producto,
     variantes: unirVariantes(producto),
+    // Bajo su propia clave, que no es la de ninguna variante: las «wpp» no
+    // son parte del álbum (decisión 67).
+    fotosParaWhatsapp: fotos[`productos/${producto.slug}/wpp`] ?? [],
   }));
 
 /**

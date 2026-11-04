@@ -278,6 +278,14 @@ export type VarianteConMedios = Variante & {
  */
 export type ProductoConMedios = ConFotos<Omit<Producto, "variantes">> & {
   variantes: VarianteConMedios[];
+
+  /**
+   * Las fotos apaisadas que la empresa eligió para el link de WhatsApp —las
+   * «wpp» de la carpeta—: **no van en el álbum**, sino en el cierre de la
+   * página, al lado del botón, pasando solas (decisión 67). Las del producto
+   * y las de sus variantes, juntas. Vacío hasta que el script las publique.
+   */
+  fotosParaWhatsapp: Foto[];
 };
 
 /**
