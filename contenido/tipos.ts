@@ -143,18 +143,20 @@ export type Video = {
 
 /**
  * El recuadro de las páginas de producto del boceto de la empresa — Fase 4.7:
- * un título corto y una o dos frases, que van en una celda del damero, al
- * lado de una foto.
+ * un título corto y una o dos frases. El del producto va en la apertura,
+ * debajo de la descripción; el de una variante, debajo de la suya.
  *
- *     manuales y automatizadas
- *     Los géneros brindan calidez a los ambientes. Generan buena acústica…
+ *     translúcidas o blackout
+ *     La luz justa para cada momento del día. Orden y amplitud…
  *
- * El título va en minúscula, como en el boceto. **Puede tener saltos de
- * renglón** —`\n`— y se respetan: el de las venecianas es una lista de medidas,
- * una por renglón.
+ * **El título es opcional** desde la decisión 67: el que más se repetía en el
+ * boceto, «manuales y automatizadas», pasó a ser la sección de los videos de
+ * cada página —«Manual o motorizado»—, y esos recuadros quedaron con sus
+ * frases solas. El título va en minúscula, como en el boceto, y **puede tener
+ * saltos de renglón** —`\n`—: el de las venecianas es una lista de medidas.
  */
 export type Recuadro = {
-  titulo: string;
+  titulo?: string;
   texto: string;
 };
 

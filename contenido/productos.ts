@@ -46,6 +46,21 @@ import type { Producto } from "./tipos";
  * y se unen por el slug. Lo generado y lo escrito a mano no comparten archivo,
  * para que regenerar las fotos no pueda pisar los textos.
  */
+/**
+ * La sección de los videos en cada página de producto — decisión 67.
+ *
+ * El boceto de la empresa ponía «manuales y automatizadas» como título del
+ * recuadro de casi todos los productos. Desde noviembre de 2026 eso es una
+ * sola sección por página, con todos los videos de cortinas motorizadas, y
+ * dice «motorizado» y no «automatizado», a pedido de la empresa. El texto es
+ * nuestro, con el agregado del celular que pidió quien desarrolla.
+ */
+export const manualOMotorizado = {
+  titulo: "Manual o motorizado",
+  texto:
+    "Todas se pueden accionar a mano, con cadena o manija, o con motor: a control remoto, desde una tecla o desde el celular.",
+} as const;
+
 export const productos: Producto[] = [
   {
     slug: "roller",
@@ -61,7 +76,6 @@ export const productos: Producto[] = [
         descripcion:
           "Los tejidos microperforados permiten ver hacia el exterior, contribuyendo a mejorar el confort visual de quien vive o trabaja en ambientes interiores. Difunden la luz y garantizan la privacidad en los ambientes. El sistema más eficaz para filtrar la luz y reducir el calor. Disponible en distintos factores de apertura adaptables a cada necesidad.",
         recuadro: {
-          titulo: "manuales y automatizadas",
           texto:
             "Disfrutar los espacios de interior. Una luz para relajarse. Una luz para la creatividad.",
         },
@@ -73,7 +87,6 @@ export const productos: Producto[] = [
         descripcion:
           "Las cortinas roller blackout permiten generar oscuridad en los ambientes. El blackout es un tejido que puede ser sintético o entelado, totalmente opaco a la luz, combinando practicidad y estética. Complementados con perfilería de aluminio, garantizan un sistema totalmente impermeable a la luz.",
         recuadro: {
-          titulo: "manuales y automatizadas",
           texto:
             "Modulando la luz con las cortinas, cada espacio adquiere un significado diferente. La luz define la relación entre el ambiente y los que lo habitan.",
         },
@@ -93,7 +106,6 @@ export const productos: Producto[] = [
     descripcion:
       "Las cortinas compactas blackout logran la oscuridad más completa en los ambientes. La tela se enrolla dentro de un cajón y corre por guías laterales que impiden el paso de la luz por los costados. Manuales o motorizadas, son la solución ideal para dormitorios y espacios de descanso, dentro de las medidas que permite el sistema.",
     recuadro: {
-      titulo: "manuales y automatizadas",
       texto:
         "Oscuridad completa, a cualquier hora del día. Un ambiente pensado para descansar.",
     },
@@ -111,7 +123,6 @@ export const productos: Producto[] = [
     descripcion:
       "Combinar la calidez de las telas nos permite dar a cada ambiente un sello particular. Combinando distintas texturas, las cortinas de confección cubren grandes superficies cumpliendo todas las funciones: filtran la luz, dan intimidad y oscurecen. Amplían los ambientes y pueden combinar muy bien en cualquier espacio.",
     recuadro: {
-      titulo: "manuales y automatizadas",
       texto:
         "Los géneros brindan calidez a los ambientes. Generan buena acústica y amplitud.",
     },
@@ -174,7 +185,6 @@ export const productos: Producto[] = [
     descripcion:
       "Los toldos son sistemas de protección solar de uso externo. De brazos extensibles, verticales o punto recto, estos sistemas permiten disfrutar de los espacios abiertos. La variedad de lonas, tejidos y mecanismos los convierte en el complemento ideal a la hora de proteger viviendas y comercios. La estética en sus formas acompaña siempre fachadas y contrafrentes.",
     recuadro: {
-      titulo: "manuales y automatizados",
       texto:
         "Los toldos detienen el impacto directo del sol. Permiten que podamos disfrutar de los espacios abiertos.",
     },

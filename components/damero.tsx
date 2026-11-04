@@ -51,13 +51,23 @@ import { leyendaDeVideo } from "@/lib/texto";
 
 const LINEA = "border-acento";
 
-export function Damero({ filas }: { filas: Fila[] }) {
+export function Damero({
+  filas,
+  prioridad = true,
+}: {
+  filas: Fila[];
+  /**
+   * Si la primera foto va con prioridad. No en producto, donde la que abre la
+   * página es la portada, en la apertura (decisión 67).
+   */
+  prioridad?: boolean;
+}) {
   return (
     <MarcoDelDamero>
       {filas.map((fila, i) => (
         // La primera foto del damero está en la primera pantalla en casi todos
         // los anchos: va con prioridad, como iba antes la portada.
-        <FilaDelDamero key={i} fila={fila} prioridad={i === 0} />
+        <FilaDelDamero key={i} fila={fila} prioridad={prioridad && i === 0} />
       ))}
     </MarcoDelDamero>
   );
@@ -163,39 +173,41 @@ function CeldaDelDamero({
         <CeldaConColeccion celda={celda} sola={sola} prioridad={prioridad} />
       );
 
-    case "recuadro":
+    case "encabezado":
+      // La franja con el nombre, arriba de su álbum y a todo el ancho: es lo
+      // que dice de qué variante es cada álbum, también en el teléfono.
       return (
-        <CeldaDeTexto>
-          {/* En minúscula y con sus saltos de renglón, como en el boceto: el
-              de las venecianas es una lista de medidas, una por renglón. */}
-          <h3 className="text-titulo whitespace-pre-line">
-            {celda.recuadro.titulo}
-          </h3>
-          {/* Equilibrado: centrado y de dos o tres renglones, sin equilibrar
-              dejaba una palabra sola abajo —«trabajo.», «amplitud.»—. */}
-          <p className="text-texto-suave mt-5 max-w-[32ch] text-balance">
-            {celda.recuadro.texto}
-          </p>
-        </CeldaDeTexto>
+        <hgroup className="px-5 py-8 text-center md:py-10">
+          {celda.lema && (
+            <p className="text-texto-suave text-subtitulo">{celda.lema}</p>
+          )}
+          <h3 className="mt-1 text-titulo">{celda.nombre}</h3>
+        </hgroup>
       );
 
-    case "variante":
+    case "texto":
       return (
         <CeldaDeTexto>
-          <hgroup>
-            {celda.variante.lema && (
-              <p className="text-texto-suave text-subtitulo">
-                {celda.variante.lema}
-              </p>
-            )}
-            <h3 className="mt-1 text-titulo">{celda.variante.nombre}</h3>
-          </hgroup>
-          {celda.variante.descripcion && (
+          {celda.descripcion && (
             // El párrafo va alineado a la izquierda aunque la celda esté
             // centrada: son tres o cuatro renglones, y centrados se leen peor.
-            <p className="mt-6 max-w-[40ch] text-left">
-              {celda.variante.descripcion}
-            </p>
+            <p className="max-w-[40ch] text-left">{celda.descripcion}</p>
+          )}
+          {celda.recuadro && (
+            <div className={celda.descripcion ? "mt-8" : ""}>
+              {/* En minúscula y con sus saltos de renglón, como en el boceto:
+                  el de las venecianas es una lista de medidas. */}
+              {celda.recuadro.titulo && (
+                <p className="text-acento font-semibold whitespace-pre-line">
+                  {celda.recuadro.titulo}
+                </p>
+              )}
+              {/* Equilibrado: sin equilibrar dejaba una palabra sola abajo
+                  —«trabajo.», «amplitud.»—. */}
+              <p className="text-texto-suave mt-2 max-w-[32ch] text-balance">
+                {celda.recuadro.texto}
+              </p>
+            </div>
           )}
         </CeldaDeTexto>
       );
@@ -203,7 +215,9 @@ function CeldaDelDamero({
     case "variantes":
       return (
         <CeldaDeTexto>
-          <h3 className="text-titulo">Variantes</h3>
+          <h3 className="text-titulo">
+            {celda.otras ? "Otras variantes" : "Variantes"}
+          </h3>
           <p className="text-texto-suave mt-3 max-w-[32ch] text-balance">
             Son opciones del mismo producto, no productos distintos. Se eligen
             al presupuestar.
@@ -296,7 +310,8 @@ function CeldaConMedio({
  *
  * **La caja es la misma para todas las diapositivas**, para que la página no
  * salte al pasar de una a otra, y sale de la foto más alta de la colección,
- * con tope en 4:5: la proporción de las portadas. Ninguna se recorta: la que
+ * con tope en 4:5: la proporción de las portadas. Un álbum de videos que
+ * mezcla orientaciones va en una caja cuadrada. Ninguna se recorta: la que
  * es más baja que la caja queda centrada, con el gris del fondo arriba y
  * abajo; la más angosta, con el gris a los costados, como un video vertical.
  *
@@ -313,11 +328,17 @@ function CeldaConColeccion({
   sola: boolean;
   prioridad: boolean;
 }) {
-  const { medios, nombre } = celda;
-  const caja = Math.max(
-    Math.min(...medios.map(({ medio }) => medio.ancho / medio.alto)),
-    4 / 5,
-  );
+  const { medios, nombre, corto } = celda;
+  const proporciones = medios.map(({ medio }) => medio.ancho / medio.alto);
+  // Un álbum de videos que mezcla apaisados y verticales va en una caja
+  // cuadrada: con la del más alto, los apaisados —que son casi todos— quedaban
+  // con media caja de aire arriba y abajo. Las fotos de un álbum son casi
+  // todas verticales y siguen con la regla de siempre.
+  const mezclaVideos =
+    medios.every(({ medio }) => esVideo(medio)) &&
+    proporciones.some((p) => p > 1) &&
+    proporciones.some((p) => p < 1);
+  const caja = mezclaVideos ? 1 : Math.max(Math.min(...proporciones), 4 / 5);
   // Si alguna lleva pie, todas reservan su lugar: así los botones de abajo no
   // cambian de altura al pasar de una foto a un video.
   const conPie = medios.some(({ medio, pie }) => pie || esVideo(medio));
@@ -328,7 +349,7 @@ function CeldaConColeccion({
         className="w-full md:w-[min(100%,calc(44rem*var(--caja)))]"
         style={{ "--caja": caja } as CSSProperties}
       >
-        <Carrusel etiqueta={nombre}>
+        <Carrusel etiqueta={nombre} corto={corto}>
           {medios.map((medio, i) => (
             <Diapositiva
               key={i}

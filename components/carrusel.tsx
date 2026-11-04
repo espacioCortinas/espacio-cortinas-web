@@ -37,10 +37,16 @@ import { Boton } from "@/components/ui/boton";
  */
 export function Carrusel({
   etiqueta,
+  corto,
   children,
 }: {
   /** El nombre del grupo para un lector de pantalla: «Fotos de Roller Screen». */
   etiqueta: string;
+  /**
+   * Lo que va delante del contador: «Screen · 3 / 8». Dice de qué variante es
+   * el álbum también cuando su nombre quedó arriba, fuera de la pantalla.
+   */
+  corto?: string;
   /** Una diapositiva por hijo, ya armada. */
   children: ReactNode;
 }) {
@@ -116,7 +122,10 @@ export function Carrusel({
         </Boton>
         {/* Las cifras de línea del sistema hacen que «10 / 12» no baile al
             pasar de una a otra. */}
-        <p className="text-texto-suave min-w-[4.5rem] text-center tabular-nums">
+        <p className="text-texto-suave min-w-[4.5rem] text-center whitespace-nowrap tabular-nums">
+          {corto && (
+            <span className="text-acento font-semibold">{corto} · </span>
+          )}
           {actual + 1} / {total}
         </p>
         <Boton
