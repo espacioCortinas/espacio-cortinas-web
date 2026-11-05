@@ -68,24 +68,6 @@ export const videos: Record<string, Video> = {
     duracion: 11,
     posicion: 5,
   },
-  "productos/roller/screen/video-1": {
-    archivo: "roller/screen/video-1",
-    formato: "mp4",
-    formatoPoster: "webp",
-    ancho: 1080,
-    alto: 608,
-    duracion: 15,
-    posicion: 9,
-  },
-  "productos/roller/screen/video-2": {
-    archivo: "roller/screen/video-2",
-    formato: "mp4",
-    formatoPoster: "webp",
-    ancho: 1080,
-    alto: 608,
-    duracion: 12,
-    posicion: 10,
-  },
   "productos/roller/screen/video-3": {
     archivo: "roller/screen/video-3",
     formato: "mp4",
@@ -93,7 +75,7 @@ export const videos: Record<string, Video> = {
     ancho: 1280,
     alto: 720,
     duracion: 12,
-    posicion: 11,
+    posicion: 9,
   },
   "productos/roller/screen/video-4": {
     archivo: "roller/screen/video-4",
@@ -102,7 +84,7 @@ export const videos: Record<string, Video> = {
     ancho: 1280,
     alto: 720,
     duracion: 23,
-    posicion: 12,
+    posicion: 10,
   },
   "productos/roller/motorizado": {
     archivo: "roller/motorizado",
