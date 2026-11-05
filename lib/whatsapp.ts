@@ -8,9 +8,10 @@ import { entornoPublico } from "@/lib/entorno";
  * necesita saber que la consulta vino del sitio y sobre qué, sin preguntarlo.
  * Ver docs/producto.md.
  *
- *     Desde /productos/venecianas-pvc
- *     → «Hola, vi en su página web el producto Venecianas de PVC y quisiera
- *        consultar...»
+ *     Desde /productos/roller
+ *     → «Hola, vi en su página web el producto Roller:
+ *        https://espaciocortinas.com.ar/productos/roller
+ *        Quisiera consultar...»
  *
  *     Desde /proyectos/casa-en-nordelta
  *     → «Hola, vi en su página web el proyecto Casa en Nordelta y quisiera
@@ -22,7 +23,13 @@ import { entornoPublico } from "@/lib/entorno";
  */
 
 export type ContextoWhatsapp =
-  | { tipo: "producto"; nombre: string }
+  /**
+   * `url` es la dirección absoluta de la página del producto, la canónica:
+   * la arma la página con `urlAbsoluta()` y no este módulo, porque
+   * `lib/metadata.ts` trae el contenido con él y esto se usa también en el
+   * navegador (decisión 68).
+   */
+  | { tipo: "producto"; nombre: string; url: string }
   | { tipo: "proyecto"; titulo: string }
   | { tipo: "general" }
   /**
@@ -52,7 +59,19 @@ export function mensajeWhatsapp(contexto: ContextoWhatsapp): string {
       // hasta entonces el enlace no se dibujaba. Con la palabra adelante, el
       // artículo es siempre el de «producto» y el nombre entra tal cual, con
       // su mayúscula, igual que en el mensaje de proyecto de abajo.
-      return `${inicio} el producto ${contexto.nombre.trim()} ${cierre}`;
+      //
+      // **Lleva la dirección de la página**, para que WhatsApp arme la
+      // tarjeta con su imagen para compartir: sin un link en el texto no hay
+      // vista previa (decisión 68). Va en el medio, en un renglón propio, y
+      // no al final: el cursor queda después de «consultar...», donde la
+      // persona sigue escribiendo, y lo que escriba no se pega al link. Si se
+      // pegara —«…/rollerCuánto sale?»— la dirección dejaría de existir y no
+      // habría tarjeta.
+      return (
+        `${inicio} el producto ${contexto.nombre.trim()}:\n` +
+        `${contexto.url}\n` +
+        "Quisiera consultar..."
+      );
     case "proyecto":
       // «el proyecto X» y no «el X»: sin la palabra, el nombre de un trabajo
       // —«Casa en Nordelta»— se lee como si fuera un producto del catálogo, y

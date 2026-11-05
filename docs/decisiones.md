@@ -3895,6 +3895,62 @@ compartir con el user-agent de WhatsApp, 1200 × 630, JPEG base; y
 
 ---
 
+### 68. El mensaje de WhatsApp de producto lleva la dirección de la página, en el medio
+
+**Fecha:** noviembre de 2026. **Matiza la decisión 61**: el mensaje de
+producto sigue diciendo «el producto X», pero ya no es una sola frase.
+
+**El planteo.** El botón «Consultar por WhatsApp» de cada producto abría el
+chat con «Hola, vi en su página web el producto Roller y quisiera
+consultar...», sin link. Sin un link en el texto WhatsApp no arma vista previa,
+y la tarjeta ya existía: es la imagen para compartir de cada página (decisiones
+63, 64 y 67). Quien atiende recibía el nombre del producto, pero no la foto.
+
+**El mensaje:**
+
+    Hola, vi en su página web el producto Roller:
+    https://espaciocortinas.com.ar/productos/roller
+    Quisiera consultar...
+
+Se evaluaron tres lugares para el link. WhatsApp dibuja la tarjeta arriba de
+la burbuja, esté donde esté el link, así que lo que cambia es cómo se lee el
+texto y dónde queda el cursor:
+
+| Opción          | A favor                                   | En contra                                                  |
+| --------------- | ----------------------------------------- | ---------------------------------------------------------- |
+| Al final        | la frase de antes, entera                 | el cursor queda pegado al link: lo que se escriba lo rompe |
+| **En el medio** | el cursor queda después de «consultar...» | la frase se parte en tres renglones                        |
+| Primero         | la frase entera y el cursor bien          | un mensaje que empieza con una dirección se lee automático |
+
+**Al final no**, aunque era lo más corto: los puntos suspensivos invitan a
+seguir escribiendo, y si alguien escribe sin pasar de renglón el texto se pega
+al link —`…/productos/rollerCuánto sale?`—. Esa dirección no existe: no hay
+tarjeta y quien atiende recibe un link roto.
+
+**Solo productos.** Lo pidió quien desarrolla: el mensaje de proyecto, el
+general y el del formulario que falló quedan como estaban. Si alguna vez se
+quiere también en proyectos, es sumar `url` a ese contexto en
+`lib/whatsapp.ts` y pasarla desde `app/(public)/proyectos/[slug]/page.tsx`.
+
+**La dirección la arma la página, no `lib/whatsapp.ts`.** Sale de
+`urlAbsoluta()`, la misma base que la canónica y el `og:url`, así que el link
+es exactamente la dirección canónica y no pasa por ninguna redirección antes de
+que WhatsApp lea la imagen. Pero `lib/metadata.ts` importa
+`contenido/imagenes-para-compartir`, y `lib/whatsapp.ts` lo usa también el
+formulario de contacto en el navegador: importarla ahí metería ese contenido
+en lo que descarga el navegador. Por eso viaja en el contexto,
+`{ tipo: "producto"; nombre; url }`, y TypeScript no deja armar uno sin ella.
+
+**Lo que cuesta:** el mensaje es más largo, y la persona puede sacar la
+tarjeta con la cruz antes de mandarlo. En local la dirección es la de
+`NEXT_PUBLIC_SITE_URL` —`localhost`—, así que la tarjeta solo se ve en
+producción.
+
+**En el código:** `mensajeWhatsapp()` en `lib/whatsapp.ts` y el contexto en
+`app/(public)/productos/[slug]/page.tsx`.
+
+---
+
 ## Decisiones abiertas
 
 ~~**Los videos no responden a pedidos por rango, y Safari puede no

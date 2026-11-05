@@ -195,8 +195,10 @@ cada corrección de texto pasan por quien desarrolla.
 WhatsApp es el canal principal. El mensaje se arma según de dónde salió el clic:
 
 ```
-Desde /productos/venecianas-pvc
-→ "Hola, vi en su página web el producto Venecianas de PVC y quisiera consultar..."
+Desde /productos/roller
+→ "Hola, vi en su página web el producto Roller:
+   https://espaciocortinas.com.ar/productos/roller
+   Quisiera consultar..."
 
 Desde /proyectos/cowork-nordelta
 → "Hola, vi en su página web el proyecto Cowork en Nordelta y quisiera consultar..."
@@ -207,7 +209,8 @@ Desde cualquier otra página
 
 Eso permite saber que la consulta vino del sitio y sobre qué. **«El producto
 X» y no «el X»**: con los nombres del catálogo, «el X» salía «el Venecianas de
-PVC» — decisión 61.
+PVC» — decisión 61. **El de producto lleva la dirección de la página**, para
+que el chat muestre la tarjeta con su foto; el de proyecto no — decisión 68.
 
 Hay además un formulario que envía a `ventas@espaciocortinas.com.ar`, para
 quien prefiere escribir con tiempo. Cinco campos —nombre, email, teléfono, qué

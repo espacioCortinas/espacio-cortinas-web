@@ -11,7 +11,7 @@ import { CLASES_CONTENEDOR } from "@/components/ui/contenedor";
 import { productoPorSlug, productosPublicados } from "@/contenido";
 import { filasDeProducto, recuadroEnLaApertura } from "@/lib/damero";
 import { sizesConTope, topeDeAncho } from "@/lib/fotos";
-import { metadataDePagina } from "@/lib/metadata";
+import { metadataDePagina, urlAbsoluta } from "@/lib/metadata";
 import { altAutomatico } from "@/lib/texto";
 
 /**
@@ -88,7 +88,14 @@ export default async function Producto({ params }: Props) {
 
   const filas = filasDeProducto(producto);
   const portada = producto.fotos[0] ?? null;
-  const contexto = { tipo: "producto" as const, nombre: producto.nombre };
+  // La dirección es la canónica de esta página, la misma que arma
+  // `metadataDePagina` arriba: el mensaje de WhatsApp la lleva para que el
+  // chat muestre la tarjeta con la foto (decisión 68).
+  const contexto = {
+    tipo: "producto" as const,
+    nombre: producto.nombre,
+    url: urlAbsoluta(`/productos/${producto.slug}`),
+  };
   const fotosWpp = producto.fotosParaWhatsapp;
 
   const consulta = (
