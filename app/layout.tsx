@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import { entornoPublico } from "@/lib/entorno";
 import { DESCRIPCION_SITIO } from "@/lib/metadata";
@@ -23,6 +23,23 @@ export const metadata: Metadata = {
     template: "%s · Espacio Cortinas",
   },
   description: DESCRIPCION_SITIO,
+};
+
+/**
+ * `viewport-fit=cover` es lo que hace que Safari del iPhone informe, en
+ * `env(safe-area-inset-*)`, cuánto de la pantalla le tapan sus barras. Sin
+ * esto esas medidas valen siempre cero, y en iOS 26 la barra de abajo —que
+ * flota sobre la página— escondía el círculo de WhatsApp, que está fijo contra
+ * ese borde. Lo que va pegado a un borde suma esa medida; en los demás
+ * navegadores vale cero y nada se mueve.
+ *
+ * Ancho y escala se repiten porque son los que Next pone solo, y al exportar
+ * `viewport` conviene no depender de que los siga mezclando.
+ */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function LayoutRaiz({

@@ -200,6 +200,14 @@
     line-height: var(--text-cuerpo--line-height);
     font-variant-numeric: lining-nums;
     -webkit-font-smoothing: antialiased;
+    /*
+      Con `viewport-fit=cover` (app/layout.tsx) la página llega hasta los
+      bordes físicos del iPhone. Acostado, la isla y las esquinas tapan los
+      costados: estos márgenes los dejan libres. Parado, y en cualquier otro
+      aparato, valen cero.
+    */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 
   /*

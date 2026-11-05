@@ -205,7 +205,10 @@ export function WhatsappFlotante() {
   return (
     <div
       ref={ancla}
-      className="pointer-events-none fixed right-4 bottom-4 z-20 size-14 md:right-6 md:bottom-6"
+      // A su distancia del borde se suma lo que tapan las barras del
+      // navegador: en Safari de iOS 26 la de abajo flota sobre la página y
+      // escondía el círculo. En los demás navegadores esa medida vale cero.
+      className="pointer-events-none fixed right-[calc(1rem+env(safe-area-inset-right))] bottom-[calc(1rem+env(safe-area-inset-bottom))] z-20 size-14 md:right-[calc(1.5rem+env(safe-area-inset-right))] md:bottom-[calc(1.5rem+env(safe-area-inset-bottom))]"
     >
       <div ref={movX}>
         <div ref={movY}>
