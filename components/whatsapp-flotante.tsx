@@ -206,9 +206,18 @@ export function WhatsappFlotante() {
     <div
       ref={ancla}
       // A su distancia del borde se suma lo que tapan las barras del
-      // navegador: en Safari de iOS 26 la de abajo flota sobre la página y
-      // escondía el círculo. En los demás navegadores esa medida vale cero.
-      className="pointer-events-none fixed right-[calc(1rem+env(safe-area-inset-right))] bottom-[calc(1rem+env(safe-area-inset-bottom))] z-20 size-14 md:right-[calc(1.5rem+env(safe-area-inset-right))] md:bottom-[calc(1.5rem+env(safe-area-inset-bottom))]"
+      // navegador (`env(safe-area-inset-*)`); en los demás navegadores esa
+      // medida vale cero.
+      //
+      // **En el iPhone eso no alcanza.** Safari de iOS 26 desvanece hacia el
+      // color de fondo una franja de unos 90 pt al pie de la pantalla, aunque
+      // su barra esté escondida, y esa franja no la informa: el círculo
+      // quedaba adentro y no se veía (captura del 05/11/2026, iOS 26.6.1,
+      // pestañas arriba). `-webkit-touch-callout` solo existe en el WebKit de
+      // iOS —Safari y también Chrome de iPhone—, así que la regla no toca
+      // Android ni escritorio; y solo en anchos de teléfono, porque el iPad
+      // no tiene barra abajo.
+      className="pointer-events-none fixed right-[calc(1rem+env(safe-area-inset-right))] bottom-[calc(1rem+env(safe-area-inset-bottom))] z-20 size-14 max-md:supports-[-webkit-touch-callout:none]:bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:right-[calc(1.5rem+env(safe-area-inset-right))] md:bottom-[calc(1.5rem+env(safe-area-inset-bottom))]"
     >
       <div ref={movX}>
         <div ref={movY}>
